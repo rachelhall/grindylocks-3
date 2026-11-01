@@ -32,7 +32,10 @@ export const queryClient = new QueryClient({
 
 /** How long each kind of data can be shown before it's checked again. */
 export const fresh = {
-  /** Parks, obstacles, hours, metro areas: edited rarely, by a few people. */
+  /**
+   * Parks, obstacles, hours, metro areas and park photos: edited rarely, by a
+   * few people. Park photo URLs are signed for an hour, well past this.
+   */
   parks: 10 * MINUTE,
   /** Search results for the same text. */
   search: 5 * MINUTE,
@@ -50,6 +53,10 @@ export const fresh = {
 /** Query keys, in one place so invalidation can't miss a spelling. */
 export const keys = {
   park: (slug: string) => ['park', slug] as const,
+  /** A park's gallery. Shared by everyone, so no user ID. */
+  parkPhotos: (parkId: string) => ['park-photos', parkId] as const,
+  /** Your role at a park (badge, Add photos button). */
+  parkRole: (userId: string, parkId: string) => ['park-role', userId, parkId] as const,
   parksInBounds: (b: { north: number; south: number; east: number; west: number }) =>
     // Rounded to about 100 m so small pans reuse the same entry.
     ['parks', 'bounds', ...[b.north, b.south, b.east, b.west].map((n) => Math.round(n * 1000) / 1000)] as const,

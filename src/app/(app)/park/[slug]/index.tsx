@@ -1,11 +1,14 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
+import { StatusBar } from 'expo-status-bar';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
+import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';
 import { BookmarkIcon, DisciplineChips, IconButton, openDirections, StatusChip } from '@/components/parks';
-import { BackButton, Button, Icon } from '@/components/ui';
+import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import {
   dayRanges,
@@ -17,15 +20,19 @@ import {
   sunTime,
   weekdayName,
 } from '@/lib/hours';
+import { pickFromLibrary, type PickedMedia } from '@/lib/media';
+import { MAX_PARK_PHOTOS, useParkPhotos, useParkRole } from '@/lib/park-photos';
 import { type Discipline, type ParkDetail, pickDescription, usePark, useSavedParks } from '@/lib/parks';
-import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
+import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
 
 type HoursLine = { key: string; season: string | null; days: string; time: string; disciplines: Discipline[]; note: string | null };
 
 /**
- * The park page, per the Park mockup: what's there, when it's open, who can
- * skate, and its obstacles. Regulars and the posts grid come with posts
- * (M4); park photos, info reports and obstacle feeds come later in v1.
+ * The park page, per the Park page mockups: a header with the park's name
+ * (on its first photo, photocopied, or on ink), then what's there, when it's
+ * open, who can skate, and its obstacles. People with a role at the park
+ * add photos from here. Regulars and the posts grid come with posts (M4);
+ * info reports and obstacle feeds come later in v1.
  */
 export default function ParkScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -37,6 +44,14 @@ export default function ParkScreen() {
   // shows straight away. `null` means no park has this slug.
   const { data: park, isError, refetch } = usePark(slug);
   const failed = isError && park === undefined;
+  const { data: photos = [] } = useParkPhotos(park?.id);
+  const { role, canContribute } = useParkRole(session?.user.id, park?.id);
+  const { sheet, show: showActions } = useActionSheet();
+  const [picked, setPicked] = useState<PickedMedia[]>([]);
+  const insets = useSafeAreaInsets();
+  const scheme = useColorSchemeName();
+  // Light status bar text over the dark header; the theme's once it scrolls away.
+  const [pastHeader, setPastHeader] = useState(false);
 
   const locale = i18n.language;
   const place = useMemo(
@@ -150,21 +165,59 @@ export default function ParkScreen() {
     { label: t('park.hours'), value: todayHours(park, hours, t('park.hoursUnknown')) },
   ];
 
+  const remaining = MAX_PARK_PHOTOS - photos.length;
+  const openGallery = () => router.push({ pathname: '/park/[slug]/photos', params: { slug: park.slug } });
+
+  const addPhotos = async () => {
+    if (remaining <= 0) {
+      Alert.alert(t('parkPhotos.full', { max: MAX_PARK_PHOTOS }));
+      return;
+    }
+    try {
+      const { picked: chosen, rejected } = await pickFromLibrary(remaining, { photosOnly: true });
+      if (rejected.length > 0) Alert.alert(t('parkPhotos.unsupported'));
+      if (chosen.length > 0) setPicked(chosen.slice(0, remaining));
+    } catch {
+      Alert.alert(t('errors.generic'));
+    }
+  };
+
+  const more = () =>
+    showActions({
+      title: park.display_name,
+      actions: [
+        ...(photos.length > 0 ? [{ label: t('parkPhotos.see'), onPress: openGallery }] : []),
+        ...(canContribute && remaining > 0 ? [{ label: t('parkPhotos.addPark'), onPress: () => void addPhotos() }] : []),
+        { label: t('park.directions'), onPress: () => openDirections(park) },
+      ],
+    });
+
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
-      <View style={styles.topBar}>
-        <BackButton />
-      </View>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.block}>
-          <Text variant="label" color="textSecondary">
-            {[park.metro?.name ?? park.city, t(`park.type.${park.park_type}`)].join(' · ')}
-          </Text>
-          <Text variant="display" accessibilityRole="header">
-            {park.display_name}
-          </Text>
+    <View style={[styles.screen, { backgroundColor: c.surface }]}>
+      <StatusBar style={pastHeader ? (scheme === 'dark' ? 'light' : 'dark') : 'light'} />
+      <ScrollView
+        // The header runs up under the status bar.
+        contentInsetAdjustmentBehavior="never"
+        contentContainerStyle={[styles.content, { paddingBottom: space[12] + insets.bottom }]}
+        scrollEventThrottle={32}
+        onScroll={(e) => {
+          const past = e.nativeEvent.contentOffset.y > HEADER_HEIGHT - insets.top;
+          if (past !== pastHeader) setPastHeader(past);
+        }}
+      >
+        <ParkHeader
+          name={park.display_name}
+          tape={[park.metro?.name ?? park.city, t(`park.type.${park.park_type}`)].join(' · ')}
+          photoUrl={photos[0]?.url ?? null}
+          onBack={() => router.back()}
+          onMore={more}
+          onOpenGallery={photos.length > 0 ? openGallery : undefined}
+          onAddPhotos={canContribute ? () => void addPhotos() : undefined}
+        />
+
+        <View style={[styles.block, styles.intro]}>
           {subtitle ? (
-            <Text variant="body" color="textSecondary">
+            <Text variant="bodySm" color="textSecondary">
               {subtitle}
             </Text>
           ) : null}
@@ -177,9 +230,22 @@ export default function ParkScreen() {
                   {t('park.verified', { date: dateFmt.format(new Date(park.verified_at)) })}
                 </Text>
               </View>
-            ) : null}
+            ) : (
+              <View style={[styles.chip, { borderColor: c.statusSoon }]}>
+                <Text variant="label" color="statusSoon">
+                  {t('park.notVerified')}
+                </Text>
+              </View>
+            )}
+            {role ? <RoleBadge role={role} /> : null}
           </View>
         </View>
+
+        {canContribute && photos.length === 0 ? (
+          <View style={styles.block}>
+            <NoPhotosCard onAdd={() => void addPhotos()} />
+          </View>
+        ) : null}
 
         <View style={[styles.block, styles.actions]}>
           <Pressable
@@ -333,7 +399,21 @@ export default function ParkScreen() {
           </Text>
         </View>
       </ScrollView>
-    </SafeAreaView>
+      {/* Keeps the status bar readable once the header has scrolled under it. */}
+      {pastHeader ? (
+        <View pointerEvents="none" style={[styles.statusStrip, { height: insets.top, backgroundColor: c.surface }]} />
+      ) : null}
+      {sheet}
+      {profile?.username ? (
+        <AddParkPhotosSheet
+          parkId={park.id}
+          parkName={park.display_name}
+          username={profile.username}
+          photos={picked}
+          onClose={() => setPicked([])}
+        />
+      ) : null}
+    </View>
   );
 }
 
@@ -351,7 +431,10 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
   loading: { marginTop: space[12] },
   topBar: { paddingHorizontal: space[4], paddingVertical: space[2] },
-  content: { paddingBottom: space[12], gap: space[6] },
+  content: { gap: space[6] },
+  intro: { marginTop: -space[2] },
+  chip: { borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: 2 },
+  statusStrip: { position: 'absolute', top: 0, left: 0, right: 0 },
   block: { paddingHorizontal: space[4], gap: space[2] },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2], alignItems: 'center', marginTop: space[1] },
   verified: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: 2 },

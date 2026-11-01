@@ -5,7 +5,9 @@
     "retry": "Try again",
     "continue": "Continue",
     "back": "Back",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "auth": {
     "welcome": {
@@ -239,7 +241,8 @@
     "osmCredit": "Location © OpenStreetMap contributors",
     "disciplineYours": "{{discipline}}, you ride this",
     "missing": "This park isn't available.",
-    "fees": "Fees"
+    "fees": "Fees",
+    "more": "More"
   },
   "disciplines": {
     "inline": "Inline",
@@ -416,5 +419,57 @@
     "codeCurrent": "One more step: we also sent a code to your current address, {{email}}. Enter it below.",
     "doneTitle": "Email changed",
     "doneBody": "You'll sign in with {{email}} from now on."
+  },
+  "parkPhotos": {
+    "open": "Open photos of {{park}}",
+    "add": "Add photos",
+    "addPark": "Add park photos",
+    "see": "See park photos",
+    "full": "This park already has {{max}} photos. Remove one to add another.",
+    "unsupported": "Some of those couldn't be added. Park photos can be JPEG, PNG or HEIC.",
+    "noneYet": "This park has no photos yet",
+    "count": "{{count}} / {{max}}",
+    "tipWide": "Two or three wide, landscape shots of the whole park work best.",
+    "tipPeople": "Leave people out, or keep them too small to recognise. Riding shots go in posts.",
+    "tipRights": "Only add photos you took or have permission to use.",
+    "role": {
+      "owner": "You're the owner",
+      "city_admin": "You're a city admin",
+      "park_admin": "You're a park admin",
+      "park_contributor": "You're a contributor"
+    },
+    "photographer": "Photographer",
+    "photographerHint": "Shown as \"Photo by …\" in the gallery.",
+    "source": "Where they're from",
+    "sourceOwn": "My own photos",
+    "sourcePermission": "Permission from {{park}}",
+    "sourceWikimedia": "Wikimedia Commons",
+    "sourceOther": "Somewhere else",
+    "sourceOtherLabel": "Source",
+    "license": "License",
+    "licenseHint": "\"own\" for your photos, \"permission\" when the park said yes, or the license name, like CC BY-SA 4.0.",
+    "upload_one": "Add photo",
+    "upload_other": "Add {{count}} photos",
+    "uploading": "Uploading {{current}} of {{count}}…",
+    "failed": "That didn't upload. Check your connection and try again.",
+    "partFailed": "{{done}} of {{count}} added. The rest didn't upload; try again.",
+    "galleryCount": "Park photos · {{current}} / {{total}}",
+    "galleryEmpty": "No park photos yet.",
+    "photoBy": "Photo by {{name}}",
+    "added": "Added {{date}}",
+    "alt": "Photo of {{park}}",
+    "photoOf": "Photo {{current}} of {{total}}",
+    "thumb": "Photo {{n}}",
+    "thumbShowing": "Photo {{n}}, showing",
+    "swipeHint": "Swipe for more. Skating shots live in posts;",
+    "seePosts": "see posts from {{park}}",
+    "makeHeader": "Make this the header photo",
+    "moveEarlier": "Move earlier",
+    "moveLater": "Move later",
+    "remove": "Remove photo",
+    "removeTitle": "Remove this photo?",
+    "removeBody": "It comes out of the gallery for everyone.",
+    "removeFailed": "Couldn't remove the photo. Try again.",
+    "reorderFailed": "Couldn't move the photo. Try again."
   }
 }

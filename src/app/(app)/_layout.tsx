@@ -3,12 +3,12 @@ import { useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth';
 import { uploads } from '@/lib/uploads';
-import { useColors } from '@/theme';
+import { brand, useColors } from '@/theme';
 
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
- * (new post, notifications, a post, a park, a profile, edit profile and
- * settings). Starts the upload queue for this member, so
+ * (new post, notifications, a post, a park and its photos, a profile, edit
+ * profile and settings). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
  */
 export default function AppLayout() {
@@ -28,7 +28,11 @@ export default function AppLayout() {
       <Stack.Screen name="new-post" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="post/[id]" />
-      <Stack.Screen name="park/[slug]" />
+      <Stack.Screen name="park/[slug]/index" />
+      <Stack.Screen
+        name="park/[slug]/photos"
+        options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: brand.ink } }}
+      />
       <Stack.Screen name="profile/[username]" />
       <Stack.Screen name="edit-profile" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="say-hi" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />

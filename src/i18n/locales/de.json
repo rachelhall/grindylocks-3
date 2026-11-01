@@ -5,7 +5,9 @@
     "retry": "Erneut versuchen",
     "continue": "Weiter",
     "back": "Zurück",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   },
   "auth": {
     "welcome": {
@@ -239,7 +241,8 @@
     "osmCredit": "Standort © OpenStreetMap-Mitwirkende",
     "disciplineYours": "{{discipline}}, fährst du",
     "missing": "Dieser Skatepark ist nicht verfügbar.",
-    "fees": "Preise"
+    "fees": "Preise",
+    "more": "Mehr"
   },
   "disciplines": {
     "inline": "Inline",
@@ -416,5 +419,57 @@
     "codeCurrent": "Noch ein Schritt: Wir haben auch einen Code an deine aktuelle Adresse {{email}} geschickt. Gib ihn unten ein.",
     "doneTitle": "E-Mail geändert",
     "doneBody": "Ab jetzt meldest du dich mit {{email}} an."
+  },
+  "parkPhotos": {
+    "open": "Fotos von {{park}} öffnen",
+    "add": "Fotos hinzufügen",
+    "addPark": "Parkfotos hinzufügen",
+    "see": "Parkfotos ansehen",
+    "full": "Dieser Park hat schon {{max}} Fotos. Entferne eins, um ein neues hinzuzufügen.",
+    "unsupported": "Einige davon konnten nicht hinzugefügt werden. Parkfotos können JPEG, PNG oder HEIC sein.",
+    "noneYet": "Dieser Park hat noch keine Fotos",
+    "count": "{{count}} / {{max}}",
+    "tipWide": "Zwei oder drei weite Querformat-Aufnahmen vom ganzen Park funktionieren am besten.",
+    "tipPeople": "Lass Leute weg oder so klein, dass man sie nicht erkennt. Fahrfotos gehören in Posts.",
+    "tipRights": "Füge nur Fotos hinzu, die du selbst gemacht hast oder verwenden darfst.",
+    "role": {
+      "owner": "Du verwaltest Grindylocks",
+      "city_admin": "Du bist Stadt-Admin",
+      "park_admin": "Du bist Park-Admin",
+      "park_contributor": "Du arbeitest hier mit"
+    },
+    "photographer": "Fotograf*in",
+    "photographerHint": "Erscheint in der Galerie als „Foto von …“.",
+    "source": "Woher sie kommen",
+    "sourceOwn": "Meine eigenen Fotos",
+    "sourcePermission": "Erlaubnis von {{park}}",
+    "sourceWikimedia": "Wikimedia Commons",
+    "sourceOther": "Woanders her",
+    "sourceOtherLabel": "Quelle",
+    "license": "Lizenz",
+    "licenseHint": "„own“ für deine Fotos, „permission“, wenn der Park zugestimmt hat, oder der Name der Lizenz, z. B. CC BY-SA 4.0.",
+    "upload_one": "Foto hinzufügen",
+    "upload_other": "{{count}} Fotos hinzufügen",
+    "uploading": "Lädt {{current}} von {{count}} hoch …",
+    "failed": "Das wurde nicht hochgeladen. Prüf deine Verbindung und versuch es noch mal.",
+    "partFailed": "{{done}} von {{count}} hinzugefügt. Der Rest wurde nicht hochgeladen; versuch es noch mal.",
+    "galleryCount": "Parkfotos · {{current}} / {{total}}",
+    "galleryEmpty": "Noch keine Parkfotos.",
+    "photoBy": "Foto von {{name}}",
+    "added": "Hinzugefügt {{date}}",
+    "alt": "Foto von {{park}}",
+    "photoOf": "Foto {{current}} von {{total}}",
+    "thumb": "Foto {{n}}",
+    "thumbShowing": "Foto {{n}}, wird angezeigt",
+    "swipeHint": "Wisch für mehr. Fahrfotos findest du in Posts;",
+    "seePosts": "Posts aus {{park}} ansehen",
+    "makeHeader": "Als Titelfoto verwenden",
+    "moveEarlier": "Nach vorne",
+    "moveLater": "Nach hinten",
+    "remove": "Foto entfernen",
+    "removeTitle": "Dieses Foto entfernen?",
+    "removeBody": "Es verschwindet für alle aus der Galerie.",
+    "removeFailed": "Das Foto konnte nicht entfernt werden. Versuch es noch mal.",
+    "reorderFailed": "Das Foto konnte nicht verschoben werden. Versuch es noch mal."
   }
 }

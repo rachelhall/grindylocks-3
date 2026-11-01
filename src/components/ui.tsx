@@ -2,11 +2,14 @@ import { SymbolView, type SymbolViewProps } from 'expo-symbols';
 import bold from 'expo-symbols/androidWeights/bold';
 import semiBold from 'expo-symbols/androidWeights/semiBold';
 import { router } from 'expo-router';
-import type { ReactNode } from 'react';
+import { type ReactNode, useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
+  ActionSheetIOS,
   ActivityIndicator,
   type KeyboardTypeOptions,
+  Modal,
+  Platform,
   Pressable,
   StyleSheet,
   TextInput,
@@ -53,6 +56,9 @@ const icons = {
   settings: { ios: 'gearshape', android: 'settings' },
   external: { ios: 'arrow.up.right.square', android: 'open_in_new' },
   camera: { ios: 'camera', android: 'add_a_photo' },
+  more: { ios: 'ellipsis', android: 'more_horiz' },
+  addPhoto: { ios: 'photo.badge.plus', android: 'add_a_photo' },
+  landscape: { ios: 'mountain.2', android: 'landscape' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
@@ -200,6 +206,75 @@ export function StepHeader({ step, total, canGoBack }: { step: number; total: nu
       </View>
     </View>
   );
+}
+
+/* Action sheets ------------------------------------------------------------ */
+
+export type SheetAction = { label: string; onPress: () => void; destructive?: boolean };
+type SheetRequest = { title?: string; actions: SheetAction[] };
+
+/**
+ * A short list of actions for a More button: the native action sheet on
+ * iOS, a plain bottom sheet on Android (alerts there fit only three
+ * buttons). Render `sheet` once in the screen and call `show`.
+ */
+export function useActionSheet(): { sheet: ReactNode; show: (request: SheetRequest) => void } {
+  const { t } = useTranslation();
+  const c = useColors();
+  const [request, setRequest] = useState<SheetRequest | null>(null);
+
+  const show = useCallback(
+    ({ title, actions }: SheetRequest) => {
+      if (actions.length === 0) return;
+      if (Platform.OS === 'ios') {
+        const destructive = actions.findIndex((a) => a.destructive);
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            title,
+            options: [...actions.map((a) => a.label), t('common.cancel')],
+            cancelButtonIndex: actions.length,
+            destructiveButtonIndex: destructive === -1 ? undefined : destructive,
+          },
+          (i) => actions[i]?.onPress(),
+        );
+      } else {
+        setRequest({ title, actions });
+      }
+    },
+    [t],
+  );
+
+  const close = () => setRequest(null);
+  const sheet = (
+    <Modal visible={request !== null} transparent animationType="fade" onRequestClose={close} statusBarTranslucent>
+      <Pressable accessibilityLabel={t('common.cancel')} style={styles.sheetScrim} onPress={close} />
+      <View style={[styles.sheet, { backgroundColor: c.surface, borderColor: c.border }]}>
+        {request?.title ? (
+          <Text variant="label" color="textSecondary" style={styles.sheetTitle}>
+            {request.title}
+          </Text>
+        ) : null}
+        {request?.actions.map((a) => (
+          <Pressable
+            key={a.label}
+            accessibilityRole="button"
+            onPress={() => {
+              close();
+              a.onPress();
+            }}
+            style={({ pressed }) => [styles.sheetRow, { borderTopColor: c.borderSubtle }, pressed && styles.buttonPressed]}
+          >
+            <Text variant="headline" color={a.destructive ? 'statusClosed' : 'text'}>
+              {a.label}
+            </Text>
+          </Pressable>
+        ))}
+        <Button label={t('common.cancel')} variant="secondary" onPress={close} style={styles.sheetCancel} />
+      </View>
+    </Modal>
+  );
+
+  return { sheet, show };
 }
 
 /* Inputs ----------------------------------------------------------------- */
@@ -470,6 +545,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space[3],
   },
+  sheetScrim: { flex: 1, backgroundColor: 'rgba(17,17,17,0.5)' },
+  sheet: { borderTopWidth: stroke.rule, paddingHorizontal: space[4], paddingTop: space[3], paddingBottom: space[6] },
+  sheetTitle: { paddingVertical: space[2] },
+  sheetRow: { minHeight: 56, justifyContent: 'center', borderTopWidth: stroke.hairline },
+  sheetCancel: { marginTop: space[3] },
   toggle: { width: 50, height: 30, borderWidth: stroke.rule, padding: 1, justifyContent: 'center' },
   knob: { width: 22, height: 22 },
 });
