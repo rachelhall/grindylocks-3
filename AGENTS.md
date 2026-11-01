@@ -29,6 +29,13 @@ Run lint and typecheck before declaring any task done.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
+## Branches and pull requests
+
+- **One branch per feature, off an up-to-date `main`**, named `claude/<feature>` (e.g. `claude/navigation`). Don't build on another unmerged feature branch.
+- **Every change reaches `main` through a pull request.** Open it as a draft, with what changed, how it was checked (typecheck, lint, translation check, iOS export bundle) and what's left to apply or test (migrations, a new EAS build, things to try in the simulator).
+- **Rachel reviews, tests and merges.** A PR is marked ready once its migrations are applied and it's been tried in the simulator. Merge with a merge commit, not squash, so the feature's commits stay separate. Delete the branch after merging.
+- Before pushing, fetch `main` and rebase the branch on it if `main` has moved.
+
 ## Data fetching (TanStack Query)
 
 Server data is cached with **TanStack Query** (`@tanstack/react-query`); the client and its React Native wiring live in `src/lib/query.ts`.
