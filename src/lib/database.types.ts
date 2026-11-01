@@ -913,6 +913,8 @@ export type Database = {
           id: string
           metro_area_id: string
           park_id: string | null
+          published_at: string | null
+          slide_count: number
           status: Database["public"]["Enums"]["post_status"]
         }
         Insert: {
@@ -924,6 +926,8 @@ export type Database = {
           id?: string
           metro_area_id: string
           park_id?: string | null
+          published_at?: string | null
+          slide_count?: number
           status?: Database["public"]["Enums"]["post_status"]
         }
         Update: {
@@ -935,6 +939,8 @@ export type Database = {
           id?: string
           metro_area_id?: string
           park_id?: string | null
+          published_at?: string | null
+          slide_count?: number
           status?: Database["public"]["Enums"]["post_status"]
         }
         Relationships: [

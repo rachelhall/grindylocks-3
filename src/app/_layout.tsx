@@ -55,7 +55,7 @@ function RootLayout() {
  * Three route groups, one open at a time:
  * - (auth): signed out — welcome and email sign-in
  * - (onboarding): signed in, profile not finished
- * - index (the app): signed in and onboarded
+ * - (app): signed in and onboarded
  * When the session or profile changes, Expo Router moves to the first
  * screen that's open.
  */
@@ -83,7 +83,7 @@ function RootNavigator() {
           <Stack.Screen name="(onboarding)" />
         </Stack.Protected>
         <Stack.Protected guard={signedIn && onboarded}>
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(app)" />
         </Stack.Protected>
       </Stack>
     </>

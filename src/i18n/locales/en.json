@@ -106,5 +106,53 @@
   "errors": {
     "generic": "Something went wrong.",
     "network": "Couldn't reach Grindylocks. Check your connection and try again."
+  },
+  "post": {
+    "newTitle": "New post",
+    "cancel": "Cancel",
+    "addMedia": "Add photos and clips",
+    "addMore": "Add more photos and clips",
+    "selected": "{{count}} of {{max}} selected",
+    "limits": "Photos and clips up to 60 s each",
+    "mix": "{{clips}} clips · {{photos}} photos",
+    "remove": "Remove item {{number}}",
+    "rejectedTooLong_one": "{{count}} clip is over 60 seconds. Trim it in your Photos app first.",
+    "rejectedTooLong_other": "{{count}} clips are over 60 seconds. Trim them in your Photos app first.",
+    "rejectedTooBig_one": "{{count}} clip is too big to upload (over 200 MB). Export it at 1080p and try again.",
+    "rejectedTooBig_other": "{{count}} clips are too big to upload (over 200 MB). Export them at 1080p and try again.",
+    "rejectedUnsupported_one": "{{count}} file isn't a photo or clip Grindylocks can use (JPEG, PNG, HEIC, MOV or MP4).",
+    "rejectedUnsupported_other": "{{count}} files aren't photos or clips Grindylocks can use (JPEG, PNG, HEIC, MOV or MP4).",
+    "captionLabel": "Caption",
+    "captionPlaceholder": "What went down?",
+    "backgroundNote": "Uploads keep going in the background, even on bad signal.",
+    "preparing": "Getting your photos and clips ready…",
+    "postIt": "Post it"
+  },
+  "uploads": {
+    "uploading": "Uploading {{done}} of {{total}}",
+    "processing": "Finishing up",
+    "failed": "Upload stopped",
+    "errorTooLong": "A clip is over 60 seconds, so it was turned down.",
+    "errorVideoNotConfigured": "Clip uploads aren't switched on yet.",
+    "errorRejected": "The upload didn't go through. Try again, or delete the post.",
+    "discard": "Delete post",
+    "discardTitle": "Delete this post?",
+    "discardBody": "It hasn't been posted yet. This removes it and its uploads."
+  },
+  "myPosts": {
+    "title": "Your posts",
+    "empty": "Nothing posted yet.",
+    "noCaption": "No caption",
+    "posted_one": "Posted {{date}} · {{count}} slide",
+    "posted_other": "Posted {{date}} · {{count}} slides",
+    "notPosted": "Not posted yet: still uploading"
+  },
+  "viewer": {
+    "title": "Post",
+    "notReady": "Still uploading",
+    "missing": "This post isn't available.",
+    "videoUnavailable": "Clips can't play yet: video playback isn't set up.",
+    "posted": "Posted {{date}}",
+    "notPosted": "Not posted yet: still uploading"
   }
 }

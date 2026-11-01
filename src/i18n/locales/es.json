@@ -106,5 +106,53 @@
   "errors": {
     "generic": "Algo ha fallado.",
     "network": "No se pudo conectar con Grindylocks. Revisa tu conexión y vuelve a intentarlo."
+  },
+  "post": {
+    "newTitle": "Nueva publicación",
+    "cancel": "Cancelar",
+    "addMedia": "Añadir fotos y clips",
+    "addMore": "Añadir más fotos y clips",
+    "selected": "{{count}} de {{max}} seleccionados",
+    "limits": "Fotos y clips de hasta 60 s cada uno",
+    "mix": "{{clips}} clips · {{photos}} fotos",
+    "remove": "Quitar el elemento {{number}}",
+    "rejectedTooLong_one": "{{count}} clip dura más de 60 segundos. Recórtalo antes en tu app de Fotos.",
+    "rejectedTooLong_other": "{{count}} clips duran más de 60 segundos. Recórtalos antes en tu app de Fotos.",
+    "rejectedTooBig_one": "{{count}} clip es demasiado grande para subirlo (más de 200 MB). Expórtalo en 1080p y vuelve a intentarlo.",
+    "rejectedTooBig_other": "{{count}} clips son demasiado grandes para subirlos (más de 200 MB). Expórtalos en 1080p y vuelve a intentarlo.",
+    "rejectedUnsupported_one": "{{count}} archivo no es una foto o clip que Grindylocks pueda usar (JPEG, PNG, HEIC, MOV o MP4).",
+    "rejectedUnsupported_other": "{{count}} archivos no son fotos o clips que Grindylocks pueda usar (JPEG, PNG, HEIC, MOV o MP4).",
+    "captionLabel": "Descripción",
+    "captionPlaceholder": "¿Qué pasó?",
+    "backgroundNote": "Las subidas siguen en segundo plano, incluso con mala señal.",
+    "preparing": "Preparando tus fotos y clips…",
+    "postIt": "Publicar"
+  },
+  "uploads": {
+    "uploading": "Subiendo {{done}} de {{total}}",
+    "processing": "Terminando",
+    "failed": "Subida detenida",
+    "errorTooLong": "Un clip dura más de 60 segundos, así que no se aceptó.",
+    "errorVideoNotConfigured": "La subida de clips aún no está activada.",
+    "errorRejected": "La subida no se completó. Vuelve a intentarlo o borra la publicación.",
+    "discard": "Borrar publicación",
+    "discardTitle": "¿Borrar esta publicación?",
+    "discardBody": "Aún no se ha publicado. Esto la elimina junto con sus subidas."
+  },
+  "myPosts": {
+    "title": "Tus publicaciones",
+    "empty": "Aún no has publicado nada.",
+    "noCaption": "Sin descripción",
+    "posted_one": "Publicado el {{date}} · {{count}} diapositiva",
+    "posted_other": "Publicado el {{date}} · {{count}} diapositivas",
+    "notPosted": "Aún sin publicar: se está subiendo"
+  },
+  "viewer": {
+    "title": "Publicación",
+    "notReady": "Aún se está subiendo",
+    "missing": "Esta publicación no está disponible.",
+    "videoUnavailable": "Los clips aún no se pueden reproducir: falta configurar la reproducción de vídeo.",
+    "posted": "Publicado el {{date}}",
+    "notPosted": "Aún sin publicar: se está subiendo"
   }
 }

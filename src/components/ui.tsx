@@ -23,6 +23,13 @@ const icons = {
   check: { ios: 'checkmark', android: 'check' },
   search: { ios: 'magnifyingglass', android: 'search' },
   close: { ios: 'xmark', android: 'close' },
+  add: { ios: 'plus', android: 'add' },
+  play: { ios: 'play.fill', android: 'play_arrow' },
+  retry: { ios: 'arrow.clockwise', android: 'refresh' },
+  trash: { ios: 'trash', android: 'delete' },
+  sync: { ios: 'arrow.triangle.2.circlepath', android: 'sync' },
+  photo: { ios: 'photo', android: 'image' },
+  video: { ios: 'video', android: 'videocam' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

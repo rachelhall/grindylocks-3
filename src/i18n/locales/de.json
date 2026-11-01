@@ -106,5 +106,53 @@
   "errors": {
     "generic": "Etwas ist schiefgelaufen.",
     "network": "Grindylocks ist nicht erreichbar. Prüf deine Verbindung und versuch es noch mal."
+  },
+  "post": {
+    "newTitle": "Neuer Post",
+    "cancel": "Abbrechen",
+    "addMedia": "Fotos und Clips hinzufügen",
+    "addMore": "Weitere Fotos und Clips hinzufügen",
+    "selected": "{{count}} von {{max}} ausgewählt",
+    "limits": "Fotos und Clips mit bis zu 60 s",
+    "mix": "{{clips}} Clips · {{photos}} Fotos",
+    "remove": "Element {{number}} entfernen",
+    "rejectedTooLong_one": "{{count}} Clip ist länger als 60 Sekunden. Kürze ihn zuerst in deiner Fotos-App.",
+    "rejectedTooLong_other": "{{count}} Clips sind länger als 60 Sekunden. Kürze sie zuerst in deiner Fotos-App.",
+    "rejectedTooBig_one": "{{count}} Clip ist zu groß zum Hochladen (über 200 MB). Exportiere ihn in 1080p und versuch es noch mal.",
+    "rejectedTooBig_other": "{{count}} Clips sind zu groß zum Hochladen (über 200 MB). Exportiere sie in 1080p und versuch es noch mal.",
+    "rejectedUnsupported_one": "{{count}} Datei ist kein Foto oder Clip, den Grindylocks nutzen kann (JPEG, PNG, HEIC, MOV oder MP4).",
+    "rejectedUnsupported_other": "{{count}} Dateien sind keine Fotos oder Clips, die Grindylocks nutzen kann (JPEG, PNG, HEIC, MOV oder MP4).",
+    "captionLabel": "Bildunterschrift",
+    "captionPlaceholder": "Was ist passiert?",
+    "backgroundNote": "Uploads laufen im Hintergrund weiter, auch bei schlechtem Empfang.",
+    "preparing": "Deine Fotos und Clips werden vorbereitet …",
+    "postIt": "Posten"
+  },
+  "uploads": {
+    "uploading": "Lädt {{done}} von {{total}} hoch",
+    "processing": "Wird fertiggestellt",
+    "failed": "Upload angehalten",
+    "errorTooLong": "Ein Clip ist länger als 60 Sekunden und wurde deshalb abgelehnt.",
+    "errorVideoNotConfigured": "Clip-Uploads sind noch nicht eingeschaltet.",
+    "errorRejected": "Der Upload hat nicht geklappt. Versuch es noch mal oder lösch den Post.",
+    "discard": "Post löschen",
+    "discardTitle": "Diesen Post löschen?",
+    "discardBody": "Er ist noch nicht gepostet. Er wird samt Uploads entfernt."
+  },
+  "myPosts": {
+    "title": "Deine Posts",
+    "empty": "Noch nichts gepostet.",
+    "noCaption": "Keine Bildunterschrift",
+    "posted_one": "Gepostet am {{date}} · {{count}} Slide",
+    "posted_other": "Gepostet am {{date}} · {{count}} Slides",
+    "notPosted": "Noch nicht gepostet: lädt noch hoch"
+  },
+  "viewer": {
+    "title": "Post",
+    "notReady": "Lädt noch hoch",
+    "missing": "Dieser Post ist nicht verfügbar.",
+    "videoUnavailable": "Clips können noch nicht abgespielt werden: Die Videowiedergabe ist nicht eingerichtet.",
+    "posted": "Gepostet am {{date}}",
+    "notPosted": "Noch nicht gepostet: lädt noch hoch"
   }
 }

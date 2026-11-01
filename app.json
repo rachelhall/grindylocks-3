@@ -49,11 +49,31 @@
           "project": "grindylocks-app",
           "url": "https://sentry.io/"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Grindylocks opens your photo library so you can pick photos and clips to post.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "locales": {
+      "es": "./locales/es.json",
+      "da": "./locales/da.json",
+      "de": "./locales/de.json"
     }
   }
 }
