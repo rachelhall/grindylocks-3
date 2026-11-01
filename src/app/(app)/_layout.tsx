@@ -27,8 +27,10 @@ export default function AppLayout() {
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="new-post" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="notifications" />
-      <Stack.Screen name="post/[id]" />
+      <Stack.Screen name="post/[id]/index" />
+      <Stack.Screen name="post/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="park/[slug]/index" />
+      <Stack.Screen name="park/[slug]/obstacle/[id]" />
       <Stack.Screen
         name="park/[slug]/photos"
         options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: brand.ink } }}

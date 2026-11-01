@@ -24,6 +24,8 @@ import { useSyncExternalStore } from 'react';
 
 import { env } from './env';
 import { deleteLocalFile, type MediaKind, type PreparedMedia } from './media';
+import { hasTags, setSlideTags, type SlideTags } from './posts';
+import { Sentry } from './sentry';
 import { supabase } from './supabase';
 import { uuid } from './uuid';
 
@@ -55,6 +57,13 @@ export type SlideJob = {
   processingSince?: number;
   /** 0–1, while uploading in this app session. Not saved. */
   progress?: number;
+  /**
+   * Tags picked in the posting flow. They're saved once the slide row exists:
+   * right away for photos, and once the upload service has made the row for
+   * clips. Saving tags never holds up the upload.
+   */
+  tags?: SlideTags;
+  tagsSaved?: boolean;
 };
 
 export type PostJob = {
@@ -62,6 +71,7 @@ export type PostJob = {
   postId: string;
   createdAt: string;
   caption: string;
+  parkId?: string | null;
   slides: SlideJob[];
 };
 
@@ -106,6 +116,21 @@ function updateSlide(postId: string, position: number, patch: Partial<SlideJob>)
 
 function findSlide(postId: string, position: number): SlideJob | undefined {
   return snapshot.posts.find((p) => p.postId === postId)?.slides.find((s) => s.position === position);
+}
+
+/**
+ * Saves a slide's tags once its row exists. Best effort: a failure is logged
+ * and tried again on the next pass, and never stops the upload.
+ */
+async function saveTagsIfNeeded(postId: string, position: number) {
+  const slide = findSlide(postId, position);
+  if (!slide || !slide.slideId || slide.tagsSaved || !slide.tags || !hasTags(slide.tags)) return;
+  try {
+    await setSlideTags(slide.slideId, slide.tags);
+    updateSlide(postId, position, { tagsSaved: true });
+  } catch (err) {
+    Sentry.captureException(err);
+  }
 }
 
 /** Posts drop out of the queue once every slide is done. */
@@ -348,6 +373,8 @@ async function run() {
           });
         }
       }
+      // Clips get their row from the upload service, so their tags go on now.
+      await saveTagsIfNeeded(p.postId, s.position);
       pruneFinished();
     }
   } finally {
@@ -487,7 +514,9 @@ export async function createPost(input: {
   userId: string;
   metroAreaId: string;
   caption: string;
-  media: (PreparedMedia & { slideId: string })[];
+  /** The park for every slide, if one was picked. */
+  parkId?: string | null;
+  media: (PreparedMedia & { slideId: string; tags?: SlideTags })[];
 }): Promise<string> {
   const postId = uuid();
   const caption = input.caption.trim() || null;
@@ -495,7 +524,9 @@ export async function createPost(input: {
   const { error: postError } = await supabase.from('posts').insert({
     id: postId,
     author_id: input.userId,
+    // The database replaces this with the park's metro area when there's a park.
     metro_area_id: input.metroAreaId,
+    park_id: input.parkId ?? null,
     caption,
     slide_count: input.media.length,
   });
@@ -522,11 +553,25 @@ export async function createPost(input: {
     }
   }
 
+  // Photo rows exist now, so their tags can go on straight away.
+  const photoTagsSaved = new Set<number>();
+  for (const [position, m] of input.media.entries()) {
+    if (m.kind !== 'photo' || !m.tags || !hasTags(m.tags)) continue;
+    try {
+      await setSlideTags(m.slideId, m.tags);
+      photoTagsSaved.add(position);
+    } catch (err) {
+      // Tried again by the queue; never blocks posting.
+      Sentry.captureException(err);
+    }
+  }
+
   uploads.enqueue({
     userId: input.userId,
     postId,
     createdAt: new Date().toISOString(),
     caption: caption ?? '',
+    parkId: input.parkId ?? null,
     slides: input.media.map((m, position) => ({
       position,
       kind: m.kind,
@@ -539,6 +584,8 @@ export async function createPost(input: {
       state: 'waiting',
       attempts: 0,
       nextAttemptAt: 0,
+      tags: m.tags,
+      tagsSaved: photoTagsSaved.has(position),
     })),
   });
   return postId;

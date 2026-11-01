@@ -1,146 +1,181 @@
-import { useQuery } from '@tanstack/react-query';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FeedHeader } from '@/components/feed';
 import { UploadCard } from '@/components/media';
+import { PostCard } from '@/components/post-card';
+import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { fresh, keys } from '@/lib/query';
-import { supabase } from '@/lib/supabase';
-import { uploads, useUploads } from '@/lib/uploads';
-import { space, stroke, Text, useColors } from '@/theme';
+import { useMetro } from '@/lib/parks';
+import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
+import { keys } from '@/lib/query';
+import { type PostJob, uploads, useUploads } from '@/lib/uploads';
+import { fontFamily, space, stroke, Text, useColors } from '@/theme';
 
-async function fetchMyPosts(userId: string) {
-  const { data, error } = await supabase
-    .from('posts')
-    .select('id, caption, created_at, published_at, slide_count')
-    .eq('author_id', userId)
-    .neq('status', 'deleted')
-    .order('created_at', { ascending: false })
-    .limit(20);
-  if (error) throw error;
-  return data ?? [];
-}
+type Item =
+  | { kind: 'upload'; job: PostJob }
+  | { kind: 'label'; text: string }
+  | { kind: 'post'; post: Post; section: 'following' | 'nearby' }
+  | { kind: 'caughtUp' }
+  | { kind: 'empty' };
 
-type MyPost = {
-  id: string;
-  caption: string | null;
-  created_at: string;
-  published_at: string | null;
-  slide_count: number;
-};
+const SIDE = space[4];
 
 /**
- * Home tab. The top row has New post and the notifications bell (Nov 1).
- * The feed is M4; until then this is where the upload path is tested: start
- * a post, watch it upload, open your own posts.
+ * Home (M4a, Feed-Home mockup): posts by people you follow (and yours),
+ * newest first; once those run out, "You're caught up" and posts from your
+ * home metro area by people you don't follow yet. Chronological, nothing
+ * ranked. Uploads still in progress sit at the top.
  */
 export default function Home() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const c = useColors();
-  const { session } = useAuth();
-  const queued = useUploads();
+  const qc = useQueryClient();
+  const { width } = useWindowDimensions();
+  const { session, profile } = useAuth();
   const userId = session?.user.id;
+  const metroId = profile?.home_metro_area_id ?? null;
+  const metro = useMetro(metroId);
+  const queued = useUploads();
 
-  const { data, refetch } = useQuery({
-    queryKey: keys.myPosts(userId ?? ''),
-    queryFn: () => fetchMyPosts(userId!),
-    enabled: Boolean(userId),
-    staleTime: fresh.mine,
-  });
-  const posts: MyPost[] = data ?? [];
-  const load = useCallback(() => void refetch(), [refetch]);
+  const following = useFollowingFeed(userId);
+  const followingDone = following.isSuccess && !following.hasNextPage;
+  const nearby = useNearbyFeed(userId, metroId, followingDone);
+  const [refreshing, setRefreshing] = useState(false);
 
-  // Shows the cached list straight away, then checks for changes, whenever
-  // the tab comes back into view (skipping the first time, which the query
-  // already loads).
-  const focusedOnce = useRef(false);
-  useFocusEffect(
-    useCallback(() => {
-      if (focusedOnce.current) load();
-      focusedOnce.current = true;
-    }, [load]),
-  );
-
-  // Refresh the list when a post joins or leaves the upload queue.
+  // A post that finished uploading shows up in the feed.
   const queuedIds = queued.map((q) => q.postId).join(',');
   const lastQueued = useRef(queuedIds);
   useEffect(() => {
     if (lastQueued.current === queuedIds) return;
     lastQueued.current = queuedIds;
-    load();
-  }, [queuedIds, load]);
+    if (userId) void qc.invalidateQueries({ queryKey: keys.feedFollowing(userId) });
+  }, [queuedIds, qc, userId]);
+
+  const items = useMemo<Item[]>(() => {
+    const out: Item[] = queued.map((job) => ({ kind: 'upload', job }));
+    const mine = following.data?.pages.flat() ?? [];
+    const near = nearby.data?.pages.flat() ?? [];
+    if (mine.length) {
+      out.push({ kind: 'label', text: t('home.followingLabel') });
+      for (const post of mine) out.push({ kind: 'post', post, section: 'following' });
+    }
+    if (followingDone) {
+      if (mine.length) out.push({ kind: 'caughtUp' });
+      if (near.length) {
+        out.push({ kind: 'label', text: t('home.nearLabel', { metro: metro.data?.name ?? '' }) });
+        for (const post of near) out.push({ kind: 'post', post, section: 'nearby' });
+      } else if (!mine.length && nearby.isSuccess && !nearby.hasNextPage) {
+        out.push({ kind: 'empty' });
+      }
+    }
+    return out;
+  }, [queued, following.data, nearby.data, followingDone, nearby.isSuccess, nearby.hasNextPage, metro.data, t]);
+
+  function loadMore() {
+    if (following.hasNextPage) {
+      if (!following.isFetchingNextPage) void following.fetchNextPage();
+    } else if (followingDone && nearby.hasNextPage && !nearby.isFetchingNextPage) {
+      void nearby.fetchNextPage();
+    }
+  }
+
+  async function refresh() {
+    setRefreshing(true);
+    await Promise.all([following.refetch(), followingDone ? nearby.refetch() : null]);
+    setRefreshing(false);
+  }
 
   function confirmDiscard(postId: string) {
     Alert.alert(t('uploads.discardTitle'), t('uploads.discardBody'), [
       { text: t('post.cancel'), style: 'cancel' },
-      {
-        text: t('uploads.discard'),
-        style: 'destructive',
-        onPress: () => void uploads.discard(postId).then(load),
-      },
+      { text: t('uploads.discard'), style: 'destructive', onPress: () => void uploads.discard(postId) },
     ]);
   }
 
-  const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' });
+  const loading =
+    following.isLoading || (followingDone && nearby.isLoading) || following.isFetchingNextPage || nearby.isFetchingNextPage;
+  const failed = following.isError || nearby.isError;
+  const cardWidth = width - SIDE * 2;
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
-      {/* TODO(M4): pass hasUnread once notifications exist. */}
+      {/* TODO(M4b): pass hasUnread once notifications exist. */}
       <FeedHeader title={t('home.title')} />
-      <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="body" color="textSecondary">
-          {t('home.feedSoon')}
-        </Text>
-
-        {queued.map((job) => (
-          <UploadCard key={job.postId} job={job} onDiscard={() => confirmDiscard(job.postId)} />
-        ))}
-
-        <View style={styles.section}>
-          <Text variant="title">{t('myPosts.title')}</Text>
-          {posts.length === 0 ? (
-            <Text variant="body" color="textSecondary">
-              {t('myPosts.empty')}
-            </Text>
-          ) : (
-            posts.map((p) => (
-              <Pressable
-                key={p.id}
-                accessibilityRole="button"
-                onPress={() => router.push({ pathname: '/post/[id]', params: { id: p.id } })}
-                style={({ pressed }) => [
-                  styles.row,
-                  { backgroundColor: c.surfaceRaised, borderColor: c.borderSubtle },
-                  pressed && { opacity: 0.75 },
-                ]}
-              >
-                <Text variant="headline" numberOfLines={1}>
-                  {p.caption || t('myPosts.noCaption')}
+      <FlatList
+        data={items}
+        keyExtractor={(item, i) =>
+          item.kind === 'post'
+            ? `${item.section}-${item.post.id}`
+            : item.kind === 'upload'
+              ? `upload-${item.job.postId}`
+              : `${item.kind}-${i}`
+        }
+        contentContainerStyle={styles.content}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.6}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor={c.text} />}
+        renderItem={({ item }) => {
+          switch (item.kind) {
+            case 'upload':
+              return <UploadCard job={item.job} onDiscard={() => confirmDiscard(item.job.postId)} />;
+            case 'label':
+              return (
+                <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.label}>
+                  {item.text}
                 </Text>
-                <Text variant="label" color={p.published_at ? 'textSecondary' : 'statusSeasonal'}>
-                  {p.published_at
-                    ? t('myPosts.posted', {
-                        date: dateFormat.format(new Date(p.published_at)),
-                        count: p.slide_count,
-                      })
-                    : t('myPosts.notPosted')}
-                </Text>
-              </Pressable>
-            ))
-          )}
-        </View>
-      </ScrollView>
+              );
+            case 'post':
+              return <PostCard post={item.post} width={cardWidth} />;
+            case 'caughtUp':
+              return (
+                <View style={[styles.caughtUp, { borderTopColor: c.text }]}>
+                  <Icon name="check" color={c.text} size={18} />
+                  <Text variant="bodySm" style={styles.caughtUpText}>
+                    {t('home.caughtUp')}
+                  </Text>
+                </View>
+              );
+            case 'empty':
+              return (
+                <View style={[styles.empty, { borderColor: c.textSecondary }]}>
+                  <Text variant="headline">{t('home.emptyTitle')}</Text>
+                  <Text variant="bodySm" color="textSecondary">
+                    {t('home.emptyBody')}
+                  </Text>
+                  <Button label={t('home.emptyPost')} onPress={() => router.push('/new-post')} />
+                  <Button label={t('home.emptyFind')} variant="secondary" onPress={() => router.push('/search')} />
+                </View>
+              );
+          }
+        }}
+        ListFooterComponent={
+          failed ? (
+            <View style={styles.footer}>
+              <Text variant="bodySm" color="statusClosed">
+                {t('home.loadError')}
+              </Text>
+              <Button label={t('common.retry')} variant="secondary" onPress={refresh} />
+            </View>
+          ) : loading ? (
+            <ActivityIndicator style={styles.footer} color={c.text} />
+          ) : null
+        }
+      />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  content: { padding: space[4], gap: space[6] },
-  section: { gap: space[3] },
-  row: { borderWidth: stroke.hairline, padding: space[3], gap: space[1] },
+  content: { paddingHorizontal: SIDE, paddingTop: space[3], paddingBottom: space[12], gap: space[3] },
+  label: { paddingTop: space[2] },
+  caughtUp: { flexDirection: 'row', alignItems: 'center', gap: 6, borderTopWidth: stroke.rule, paddingTop: space[3], marginTop: space[3] },
+  caughtUpText: { fontFamily: fontFamily.sansSemiBold },
+  empty: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4], gap: space[3] },
+  footer: { paddingVertical: space[6], gap: space[3] },
 });

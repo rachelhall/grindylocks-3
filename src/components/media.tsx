@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 
 import { Button, Icon } from '@/components/ui';
 import { carouselHeight, formatDuration, videoPlaybackUrl } from '@/lib/media';
@@ -78,7 +78,7 @@ function Slide({ slide, width, height }: { slide: ViewSlide; width: number; heig
         </View>
       )}
       {slide.kind === 'video' && slide.durationS ? (
-        <MediaTag label={formatDuration(slide.durationS)} style={styles.tagBottomLeft} />
+        <MediaTag label={formatDuration(slide.durationS)} style={styles.tagBottomRight} />
       ) : null}
     </View>
   );
@@ -89,17 +89,39 @@ function Slide({ slide, width, height }: { slide: ViewSlide; width: number; heig
  * fixed height taken from the tallest slide, so the post doesn't jump while
  * swiping.
  */
-export function Carousel({ slides, width }: { slides: ViewSlide[]; width: number }) {
+export function Carousel({
+  slides,
+  width,
+  overlay,
+  onIndexChange,
+}: {
+  slides: ViewSlide[];
+  width: number;
+  /** Tags drawn over the slide that's showing (its obstacle, its people). */
+  overlay?: (index: number) => ReactNode;
+  onIndexChange?: (index: number) => void;
+}) {
   const [index, setIndex] = useState(0);
   const height = carouselHeight(width, slides);
-  if (slides.length === 1) return <Slide slide={slides[0]} width={width} height={height} />;
+  if (slides.length === 1) {
+    return (
+      <View>
+        <Slide slide={slides[0]} width={width} height={height} />
+        {overlay?.(0)}
+      </View>
+    );
+  }
   return (
     <View>
       <ScrollView
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={(e) => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+        onMomentumScrollEnd={(e) => {
+          const next = Math.round(e.nativeEvent.contentOffset.x / width);
+          setIndex(next);
+          onIndexChange?.(next);
+        }}
         style={{ width, height }}
       >
         {slides.map((s) => (
@@ -107,6 +129,7 @@ export function Carousel({ slides, width }: { slides: ViewSlide[]; width: number
         ))}
       </ScrollView>
       <MediaTag label={`${index + 1} / ${slides.length}`} style={styles.tagTopRight} />
+      {overlay?.(index)}
     </View>
   );
 }
@@ -240,6 +263,7 @@ const styles = StyleSheet.create({
   center: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center', gap: space[2], padding: space[4] },
   tag: { position: 'absolute', backgroundColor: brand.ink, paddingHorizontal: 5, paddingVertical: 2 },
   tagBottomLeft: { left: 6, bottom: 6 },
+  tagBottomRight: { right: 8, bottom: 8 },
   tagTopRight: { right: 8, top: 8 },
   card: { borderWidth: stroke.rule, padding: space[4], gap: space[3] },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
