@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,6 +9,7 @@ import { Button, StepHeader } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { ONBOARDING_STEPS, useOnboarding } from '@/lib/onboarding';
 import { Sentry } from '@/lib/sentry';
+import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { space, Text, useColors } from '@/theme';
 
@@ -20,21 +22,25 @@ export default function RegularsStep() {
   const c = useColors();
   const { session, profile, refreshProfile } = useAuth();
   const { announce, announceAsked } = useOnboarding();
-  const [parkName, setParkName] = useState<string | null>(null);
   const [saving, setSaving] = useState<'show' | 'hide' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const homeParkId = profile?.home_park_id ?? null;
 
-  useEffect(() => {
-    if (!homeParkId) return;
-    supabase
-      .from('parks')
-      .select('display_name')
-      .eq('id', homeParkId)
-      .maybeSingle()
-      .then(({ data }) => setParkName(data?.display_name ?? null));
-  }, [homeParkId]);
+  const { data: parkName = null } = useQuery({
+    queryKey: keys.parkName(homeParkId ?? ''),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('parks')
+        .select('display_name')
+        .eq('id', homeParkId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data?.display_name ?? null;
+    },
+    enabled: Boolean(homeParkId),
+    staleTime: fresh.parks,
+  });
 
   async function finish(hide: boolean) {
     if (!session || !profile?.home_metro_area_id) return;

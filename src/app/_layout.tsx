@@ -2,6 +2,7 @@ import '@/i18n';
 
 import { Archivo_400Regular, Archivo_600SemiBold } from '@expo-google-fonts/archivo';
 import { ArchivoBlack_400Regular } from '@expo-google-fonts/archivo-black';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -12,10 +13,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { queryClient, startQueryClient } from '@/lib/query';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { colors, space, Text, useColorSchemeName } from '@/theme';
 
 initSentry();
+startQueryClient();
 SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {
@@ -43,11 +46,13 @@ function RootLayout() {
   };
 
   return (
-    <ThemeProvider value={navTheme}>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={navTheme}>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
@@ -55,7 +60,7 @@ function RootLayout() {
  * Three route groups, one open at a time:
  * - (auth): signed out — welcome and email sign-in
  * - (onboarding): signed in, profile not finished
- * - index (the app): signed in and onboarded
+ * - (app): signed in and onboarded
  * When the session or profile changes, Expo Router moves to the first
  * screen that's open.
  */
@@ -83,7 +88,7 @@ function RootNavigator() {
           <Stack.Screen name="(onboarding)" />
         </Stack.Protected>
         <Stack.Protected guard={signedIn && onboarded}>
-          <Stack.Screen name="index" />
+          <Stack.Screen name="(app)" />
         </Stack.Protected>
       </Stack>
     </>

@@ -19,4 +19,9 @@ export const env = {
   ),
   /** Optional: Sentry stays off until a DSN is set. */
   sentryDsn: process.env.EXPO_PUBLIC_SENTRY_DSN || undefined,
+  /**
+   * Optional: the Cloudflare Stream customer code (the part after
+   * "customer-" in Stream's playback URLs). Clips don't play until it's set.
+   */
+  streamCustomerCode: process.env.EXPO_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE || undefined,
 };

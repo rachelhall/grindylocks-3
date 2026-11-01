@@ -99,12 +99,195 @@
     }
   },
   "home": {
-    "title": "Parques",
-    "comingSoon": "El directorio de parques llega en M2.",
-    "signedInAs": "Sesión iniciada como @{{username}}"
+    "title": "Inicio",
+    "signedInAs": "Sesión iniciada como @{{username}}",
+    "feedSoon": "Tu feed llegará pronto. Por ahora, aquí están tus publicaciones."
   },
   "errors": {
     "generic": "Algo ha fallado.",
     "network": "No se pudo conectar con Grindylocks. Revisa tu conexión y vuelve a intentarlo."
+  },
+  "post": {
+    "newTitle": "Nueva publicación",
+    "cancel": "Cancelar",
+    "addMedia": "Añadir fotos y clips",
+    "addMore": "Añadir más fotos y clips",
+    "selected": "{{count}} de {{max}} seleccionados",
+    "limits": "Fotos y clips de hasta 60 s cada uno",
+    "mix": "{{clips}} clips · {{photos}} fotos",
+    "remove": "Quitar el elemento {{number}}",
+    "rejectedTooLong_one": "{{count}} clip dura más de 60 segundos. Recórtalo antes en tu app de Fotos.",
+    "rejectedTooLong_other": "{{count}} clips duran más de 60 segundos. Recórtalos antes en tu app de Fotos.",
+    "rejectedTooBig_one": "{{count}} clip es demasiado grande para subirlo (más de 200 MB). Expórtalo en 1080p y vuelve a intentarlo.",
+    "rejectedTooBig_other": "{{count}} clips son demasiado grandes para subirlos (más de 200 MB). Expórtalos en 1080p y vuelve a intentarlo.",
+    "rejectedUnsupported_one": "{{count}} archivo no es una foto o clip que Grindylocks pueda usar (JPEG, PNG, HEIC, MOV o MP4).",
+    "rejectedUnsupported_other": "{{count}} archivos no son fotos o clips que Grindylocks pueda usar (JPEG, PNG, HEIC, MOV o MP4).",
+    "captionLabel": "Descripción",
+    "captionPlaceholder": "¿Qué pasó?",
+    "backgroundNote": "Las subidas siguen en segundo plano, incluso con mala señal.",
+    "preparing": "Preparando tus fotos y clips…",
+    "postIt": "Publicar"
+  },
+  "uploads": {
+    "uploading": "Subiendo {{done}} de {{total}}",
+    "processing": "Terminando",
+    "failed": "Subida detenida",
+    "errorTooLong": "Un clip dura más de 60 segundos, así que no se aceptó.",
+    "errorVideoNotConfigured": "La subida de clips aún no está activada.",
+    "errorRejected": "La subida no se completó. Vuelve a intentarlo o borra la publicación.",
+    "discard": "Borrar publicación",
+    "discardTitle": "¿Borrar esta publicación?",
+    "discardBody": "Aún no se ha publicado. Esto la elimina junto con sus subidas."
+  },
+  "myPosts": {
+    "title": "Tus publicaciones",
+    "empty": "Aún no has publicado nada.",
+    "noCaption": "Sin descripción",
+    "posted_one": "Publicado el {{date}} · {{count}} diapositiva",
+    "posted_other": "Publicado el {{date}} · {{count}} diapositivas",
+    "notPosted": "Aún sin publicar: se está subiendo"
+  },
+  "viewer": {
+    "title": "Publicación",
+    "notReady": "Aún se está subiendo",
+    "missing": "Esta publicación no está disponible.",
+    "videoUnavailable": "Los clips aún no se pueden reproducir: falta configurar la reproducción de vídeo.",
+    "posted": "Publicado el {{date}}",
+    "notPosted": "Aún sin publicar: se está subiendo"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "map": "Mapa",
+    "newPost": "Nueva publicación",
+    "notifications": "Notificaciones",
+    "you": "Tú"
+  },
+  "map": {
+    "search": "Busca una ciudad o un skatepark",
+    "locate": "Centrar en mi ubicación",
+    "viewPark": "Ver skatepark",
+    "directions": "Cómo llegar",
+    "noParksHere": "Aún no hay skateparks en esta parte del mapa.",
+    "pinSelected": "{{park}}, seleccionado",
+    "loadError": "No se pudieron cargar los skateparks. Revisa tu conexión."
+  },
+  "search": {
+    "back": "Volver al mapa",
+    "clear": "Borrar búsqueda",
+    "hint": "Busca por ciudad, nombre del skatepark o como lo llaman los locales.",
+    "cities": "Ciudades",
+    "parks": "Skateparks",
+    "noResults": "Aún no hay nada que coincida con “{{q}}”.",
+    "alsoKnownAs": "También conocido como {{name}}",
+    "parkCount_one": "{{count}} skatepark",
+    "parkCount_other": "{{count}} skateparks",
+    "indoorCount": "{{count}} cubiertos",
+    "view": "Vista",
+    "list": "Lista",
+    "map": "Mapa"
+  },
+  "park": {
+    "openUntil": "Abierto · hasta las {{time}}",
+    "opensAt": "Cerrado · abre a las {{time}}",
+    "closedNow": "Cerrado ahora",
+    "closedToday": "Cerrado hoy",
+    "openHoursUnknown": "Abierto · horario no disponible",
+    "status": {
+      "open": "Abierto",
+      "temporarily_closed": "Cerrado temporalmente",
+      "seasonal_closure": "Cerrado por temporada",
+      "coming_soon": "Próximamente"
+    },
+    "type": {
+      "skatepark": "Skatepark",
+      "pump_track": "Pump track",
+      "diy": "DIY"
+    },
+    "setting": {
+      "indoor": "Interior",
+      "outdoor": "Exterior",
+      "covered_outdoor": "Cubierto"
+    },
+    "paid": "De pago",
+    "free": "Gratis",
+    "lit": "Con luz",
+    "verified": "Verificado el {{date}}",
+    "lastVerified": "Última verificación: {{date}}",
+    "notVerified": "Aún sin verificar",
+    "save": "Quiero patinar aquí",
+    "saved": "Guardado",
+    "saveLabel": "Guardar {{park}} en quiero patinar aquí",
+    "savedLabel": "{{park}} está guardado en quiero patinar aquí. Toca para quitarlo.",
+    "directions": "Cómo llegar",
+    "hours": "Horario",
+    "lights": "Luces",
+    "surface": "Superficie",
+    "entry": "Entrada",
+    "whoCanSkate": "Quién puede patinar",
+    "helmet": "Aquí el casco es obligatorio.",
+    "litYes": "Iluminado de noche",
+    "litNo": "Sin luces",
+    "unknown": "No se sabe",
+    "daily": "Todos los días",
+    "hoursUnknown": "Horario no disponible",
+    "sunrise": "amanecer",
+    "sunset": "atardecer",
+    "timeRange": "{{start}}–{{end}}",
+    "season": "{{start}} – {{end}}",
+    "today": "Hoy",
+    "obstacles": "Obstáculos",
+    "noObstacles": "Aún no hay obstáculos.",
+    "osmCredit": "Ubicación © colaboradores de OpenStreetMap",
+    "disciplineYours": "{{discipline}}, lo practicas tú",
+    "missing": "Este skatepark no está disponible.",
+    "fees": "Precios"
+  },
+  "disciplines": {
+    "inline": "Inline",
+    "quad": "Quad",
+    "skateboard": "Skateboard",
+    "bmx": "BMX",
+    "scooter": "Patinete"
+  },
+  "obstacleTypes": {
+    "rail": "Rail",
+    "ledge": "Ledge",
+    "hubba": "Hubba",
+    "manual_pad": "Manual pad",
+    "stairs": "Escaleras",
+    "gap": "Gap",
+    "bank": "Bank",
+    "pyramid": "Pirámide",
+    "fun_box": "Fun box",
+    "box": "Cajón",
+    "hip": "Hip",
+    "quarter_pipe": "Quarter pipe",
+    "kicker": "Kicker",
+    "mini_ramp": "Mini ramp",
+    "half_pipe": "Half pipe",
+    "vert_ramp": "Vert ramp",
+    "spine": "Spine",
+    "bump": "Bump",
+    "volcano": "Volcán",
+    "bowl": "Bowl",
+    "pool": "Pool",
+    "snake_run": "Snake run",
+    "ditch": "Zanja",
+    "full_pipe": "Full pipe",
+    "pump_track": "Pump track",
+    "pole_jam": "Pole jam",
+    "rainbow_bench": "Banco arcoíris",
+    "other": "Otro",
+    "street_plaza": "Plaza street"
+  },
+  "notifications": {
+    "title": "Notificaciones",
+    "empty": "Nada por ahora. Aquí verás comentarios, etiquetas e invitaciones."
+  },
+  "you": {
+    "title": "Tú",
+    "credits": "Créditos",
+    "osm": "Ubicaciones de skateparks © colaboradores de OpenStreetMap",
+    "osmLink": "openstreetmap.org/copyright"
   }
 }

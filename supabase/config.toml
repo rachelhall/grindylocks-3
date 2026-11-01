@@ -1,0 +1,13 @@
+# Only the settings this repo relies on. The project itself is managed in the
+# Supabase dashboard (project ref ytfdgacofenkehnbbhsc).
+project_id = "ytfdgacofenkehnbbhsc"
+
+[functions.stream-upload]
+verify_jwt = true
+
+[functions.stream-status]
+verify_jwt = true
+
+# Called by Cloudflare Stream; it checks the Webhook-Signature header instead.
+[functions.stream-webhook]
+verify_jwt = false

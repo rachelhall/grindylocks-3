@@ -49,11 +49,46 @@
           "project": "grindylocks-app",
           "url": "https://sentry.io/"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Grindylocks opens your photo library so you can pick photos and clips to post.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsBackgroundPlayback": false,
+          "supportsPictureInPicture": false
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Grindylocks uses your location to show skateparks near you. It isn't saved or shared.",
+          "isAndroidBackgroundLocationEnabled": false,
+          "isIosBackgroundLocationEnabled": false
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "locales": {
+      "es": "./locales/es.json",
+      "da": "./locales/da.json",
+      "de": "./locales/de.json"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9ea6f270-dd81-486d-ac14-1f0b7e45672a"
+      }
+    },
+    "owner": "rachelhall"
   }
 }

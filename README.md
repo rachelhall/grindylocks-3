@@ -39,18 +39,33 @@ npm run check:i18n   # es, da and de have exactly the keys en has
 npx expo-doctor
 ```
 
+## Maps and video
+
+- **iOS** maps use Apple Maps; nothing to set up.
+- **Android** maps need a Google Maps key: set `GOOGLE_MAPS_ANDROID_API_KEY` as an EAS environment variable (read by `app.config.ts`), then make a new development build.
+- **Clips** upload to Cloudflare Stream through the Edge Functions in `supabase/functions` (see `supabase/README.md` for their secrets). To play them, set `EXPO_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE` in `.env`.
+
 ## Layout
 
 ```
 src/
   app/            Expo Router screens (every file is a route)
+    (auth)/       welcome and email sign-in
+    (onboarding)/ age, username, city, regulars notice
+    (app)/        the signed-in app: (tabs)/ (home, map + search, notifications, you),
+                  new-post, post/[id], park/[slug]
   i18n/           i18next setup; locales/en.json is the source of truth
   lib/
+    media.ts      picking, compressing and showing photos and clips
+    uploads.ts    the persisted background upload queue; createPost()
+    parks.ts      park directory data; hours.ts is open-now and sunrise/sunset
     supabase.ts   Supabase client, session encrypted with a SecureStore key
     database.types.ts  generated; refresh with `npm run db:types` after migrations
     env.ts        public EXPO_PUBLIC_ config
     sentry.ts     crash reporting (off until EXPO_PUBLIC_SENTRY_DSN is set)
   theme/          design system tokens and the <Text> component
+locales/          translated iOS permission prompts (es, da, de)
+supabase/         migrations from Nov 1 on, and Edge Functions
 ```
 
 ## Conventions

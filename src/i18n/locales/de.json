@@ -99,12 +99,195 @@
     }
   },
   "home": {
-    "title": "Parks",
-    "comingSoon": "Das Park-Verzeichnis kommt in M2.",
-    "signedInAs": "Angemeldet als @{{username}}"
+    "title": "Start",
+    "signedInAs": "Angemeldet als @{{username}}",
+    "feedSoon": "Dein Feed kommt bald. Bis dahin findest du hier deine eigenen Posts."
   },
   "errors": {
     "generic": "Etwas ist schiefgelaufen.",
     "network": "Grindylocks ist nicht erreichbar. Prüf deine Verbindung und versuch es noch mal."
+  },
+  "post": {
+    "newTitle": "Neuer Post",
+    "cancel": "Abbrechen",
+    "addMedia": "Fotos und Clips hinzufügen",
+    "addMore": "Weitere Fotos und Clips hinzufügen",
+    "selected": "{{count}} von {{max}} ausgewählt",
+    "limits": "Fotos und Clips mit bis zu 60 s",
+    "mix": "{{clips}} Clips · {{photos}} Fotos",
+    "remove": "Element {{number}} entfernen",
+    "rejectedTooLong_one": "{{count}} Clip ist länger als 60 Sekunden. Kürze ihn zuerst in deiner Fotos-App.",
+    "rejectedTooLong_other": "{{count}} Clips sind länger als 60 Sekunden. Kürze sie zuerst in deiner Fotos-App.",
+    "rejectedTooBig_one": "{{count}} Clip ist zu groß zum Hochladen (über 200 MB). Exportiere ihn in 1080p und versuch es noch mal.",
+    "rejectedTooBig_other": "{{count}} Clips sind zu groß zum Hochladen (über 200 MB). Exportiere sie in 1080p und versuch es noch mal.",
+    "rejectedUnsupported_one": "{{count}} Datei ist kein Foto oder Clip, den Grindylocks nutzen kann (JPEG, PNG, HEIC, MOV oder MP4).",
+    "rejectedUnsupported_other": "{{count}} Dateien sind keine Fotos oder Clips, die Grindylocks nutzen kann (JPEG, PNG, HEIC, MOV oder MP4).",
+    "captionLabel": "Bildunterschrift",
+    "captionPlaceholder": "Was ist passiert?",
+    "backgroundNote": "Uploads laufen im Hintergrund weiter, auch bei schlechtem Empfang.",
+    "preparing": "Deine Fotos und Clips werden vorbereitet …",
+    "postIt": "Posten"
+  },
+  "uploads": {
+    "uploading": "Lädt {{done}} von {{total}} hoch",
+    "processing": "Wird fertiggestellt",
+    "failed": "Upload angehalten",
+    "errorTooLong": "Ein Clip ist länger als 60 Sekunden und wurde deshalb abgelehnt.",
+    "errorVideoNotConfigured": "Clip-Uploads sind noch nicht eingeschaltet.",
+    "errorRejected": "Der Upload hat nicht geklappt. Versuch es noch mal oder lösch den Post.",
+    "discard": "Post löschen",
+    "discardTitle": "Diesen Post löschen?",
+    "discardBody": "Er ist noch nicht gepostet. Er wird samt Uploads entfernt."
+  },
+  "myPosts": {
+    "title": "Deine Posts",
+    "empty": "Noch nichts gepostet.",
+    "noCaption": "Keine Bildunterschrift",
+    "posted_one": "Gepostet am {{date}} · {{count}} Slide",
+    "posted_other": "Gepostet am {{date}} · {{count}} Slides",
+    "notPosted": "Noch nicht gepostet: lädt noch hoch"
+  },
+  "viewer": {
+    "title": "Post",
+    "notReady": "Lädt noch hoch",
+    "missing": "Dieser Post ist nicht verfügbar.",
+    "videoUnavailable": "Clips können noch nicht abgespielt werden: Die Videowiedergabe ist nicht eingerichtet.",
+    "posted": "Gepostet am {{date}}",
+    "notPosted": "Noch nicht gepostet: lädt noch hoch"
+  },
+  "tabs": {
+    "home": "Start",
+    "map": "Karte",
+    "newPost": "Neuer Post",
+    "notifications": "Mitteilungen",
+    "you": "Du"
+  },
+  "map": {
+    "search": "Stadt oder Skatepark suchen",
+    "locate": "Auf meinen Standort zentrieren",
+    "viewPark": "Skatepark ansehen",
+    "directions": "Route",
+    "noParksHere": "In diesem Kartenausschnitt gibt es noch keine Skateparks.",
+    "pinSelected": "{{park}}, ausgewählt",
+    "loadError": "Skateparks konnten nicht geladen werden. Prüf deine Verbindung."
+  },
+  "search": {
+    "back": "Zurück zur Karte",
+    "clear": "Suche löschen",
+    "hint": "Such nach Stadt, Parkname oder dem Namen, den Locals benutzen.",
+    "cities": "Städte",
+    "parks": "Skateparks",
+    "noResults": "Noch nichts passt zu „{{q}}“.",
+    "alsoKnownAs": "Auch bekannt als {{name}}",
+    "parkCount_one": "{{count}} Skatepark",
+    "parkCount_other": "{{count}} Skateparks",
+    "indoorCount": "{{count}} indoor",
+    "view": "Ansicht",
+    "list": "Liste",
+    "map": "Karte"
+  },
+  "park": {
+    "openUntil": "Geöffnet · bis {{time}}",
+    "opensAt": "Geschlossen · öffnet {{time}}",
+    "closedNow": "Gerade geschlossen",
+    "closedToday": "Heute geschlossen",
+    "openHoursUnknown": "Geöffnet · Zeiten unbekannt",
+    "status": {
+      "open": "Geöffnet",
+      "temporarily_closed": "Vorübergehend geschlossen",
+      "seasonal_closure": "Saisonpause",
+      "coming_soon": "Bald geöffnet"
+    },
+    "type": {
+      "skatepark": "Skatepark",
+      "pump_track": "Pumptrack",
+      "diy": "DIY"
+    },
+    "setting": {
+      "indoor": "Indoor",
+      "outdoor": "Outdoor",
+      "covered_outdoor": "Überdacht"
+    },
+    "paid": "Kostenpflichtig",
+    "free": "Kostenlos",
+    "lit": "Beleuchtet",
+    "verified": "Geprüft am {{date}}",
+    "lastVerified": "Zuletzt geprüft am {{date}}",
+    "notVerified": "Noch nicht geprüft",
+    "save": "Will ich skaten",
+    "saved": "Gespeichert",
+    "saveLabel": "{{park}} unter „Will ich skaten“ speichern",
+    "savedLabel": "{{park}} ist unter „Will ich skaten“ gespeichert. Tippen zum Entfernen.",
+    "directions": "Route",
+    "hours": "Öffnungszeiten",
+    "lights": "Licht",
+    "surface": "Untergrund",
+    "entry": "Eintritt",
+    "whoCanSkate": "Wer darf skaten",
+    "helmet": "Hier ist ein Helm Pflicht.",
+    "litYes": "Abends beleuchtet",
+    "litNo": "Kein Licht",
+    "unknown": "Unbekannt",
+    "daily": "Täglich",
+    "hoursUnknown": "Öffnungszeiten unbekannt",
+    "sunrise": "Sonnenaufgang",
+    "sunset": "Sonnenuntergang",
+    "timeRange": "{{start}}–{{end}}",
+    "season": "{{start}} – {{end}}",
+    "today": "Heute",
+    "obstacles": "Obstacles",
+    "noObstacles": "Noch keine Obstacles eingetragen.",
+    "osmCredit": "Standort © OpenStreetMap-Mitwirkende",
+    "disciplineYours": "{{discipline}}, fährst du",
+    "missing": "Dieser Skatepark ist nicht verfügbar.",
+    "fees": "Preise"
+  },
+  "disciplines": {
+    "inline": "Inline",
+    "quad": "Quad",
+    "skateboard": "Skateboard",
+    "bmx": "BMX",
+    "scooter": "Scooter"
+  },
+  "obstacleTypes": {
+    "rail": "Rail",
+    "ledge": "Ledge",
+    "hubba": "Hubba",
+    "manual_pad": "Manual pad",
+    "stairs": "Treppe",
+    "gap": "Gap",
+    "bank": "Bank",
+    "pyramid": "Pyramide",
+    "fun_box": "Fun box",
+    "box": "Box",
+    "hip": "Hip",
+    "quarter_pipe": "Quarter pipe",
+    "kicker": "Kicker",
+    "mini_ramp": "Mini ramp",
+    "half_pipe": "Half pipe",
+    "vert_ramp": "Vert ramp",
+    "spine": "Spine",
+    "bump": "Bump",
+    "volcano": "Vulkan",
+    "bowl": "Bowl",
+    "pool": "Pool",
+    "snake_run": "Snake run",
+    "ditch": "Graben",
+    "full_pipe": "Full pipe",
+    "pump_track": "Pump track",
+    "pole_jam": "Pole jam",
+    "rainbow_bench": "Regenbogenbank",
+    "other": "Sonstiges",
+    "street_plaza": "Street-Bereich"
+  },
+  "notifications": {
+    "title": "Mitteilungen",
+    "empty": "Noch nichts. Kommentare, Markierungen und Einladungen erscheinen hier."
+  },
+  "you": {
+    "title": "Du",
+    "credits": "Quellen",
+    "osm": "Skatepark-Standorte © OpenStreetMap-Mitwirkende",
+    "osmLink": "openstreetmap.org/copyright"
   }
 }

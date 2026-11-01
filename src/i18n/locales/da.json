@@ -99,12 +99,195 @@
     }
   },
   "home": {
-    "title": "Parker",
-    "comingSoon": "Parkoversigten kommer i M2.",
-    "signedInAs": "Logget ind som @{{username}}"
+    "title": "Hjem",
+    "signedInAs": "Logget ind som @{{username}}",
+    "feedSoon": "Dit feed er på vej. Indtil da er her dine egne opslag."
   },
   "errors": {
     "generic": "Noget gik galt.",
     "network": "Kunne ikke få forbindelse til Grindylocks. Tjek din forbindelse, og prøv igen."
+  },
+  "post": {
+    "newTitle": "Nyt opslag",
+    "cancel": "Annuller",
+    "addMedia": "Tilføj billeder og klip",
+    "addMore": "Tilføj flere billeder og klip",
+    "selected": "{{count}} af {{max}} valgt",
+    "limits": "Billeder og klip på op til 60 sek. hver",
+    "mix": "{{clips}} klip · {{photos}} billeder",
+    "remove": "Fjern nr. {{number}}",
+    "rejectedTooLong_one": "{{count}} klip er længere end 60 sekunder. Klip det til i din Fotos-app først.",
+    "rejectedTooLong_other": "{{count}} klip er længere end 60 sekunder. Klip dem til i din Fotos-app først.",
+    "rejectedTooBig_one": "{{count}} klip er for stort til at uploade (over 200 MB). Eksportér det i 1080p, og prøv igen.",
+    "rejectedTooBig_other": "{{count}} klip er for store til at uploade (over 200 MB). Eksportér dem i 1080p, og prøv igen.",
+    "rejectedUnsupported_one": "{{count}} fil er ikke et billede eller klip, Grindylocks kan bruge (JPEG, PNG, HEIC, MOV eller MP4).",
+    "rejectedUnsupported_other": "{{count}} filer er ikke billeder eller klip, Grindylocks kan bruge (JPEG, PNG, HEIC, MOV eller MP4).",
+    "captionLabel": "Tekst",
+    "captionPlaceholder": "Hvad skete der?",
+    "backgroundNote": "Uploads fortsætter i baggrunden, også med dårligt signal.",
+    "preparing": "Gør dine billeder og klip klar …",
+    "postIt": "Del det"
+  },
+  "uploads": {
+    "uploading": "Uploader {{done}} af {{total}}",
+    "processing": "Gør det færdigt",
+    "failed": "Upload stoppet",
+    "errorTooLong": "Et klip er længere end 60 sekunder, så det blev afvist.",
+    "errorVideoNotConfigured": "Upload af klip er ikke slået til endnu.",
+    "errorRejected": "Uploaden gik ikke igennem. Prøv igen, eller slet opslaget.",
+    "discard": "Slet opslag",
+    "discardTitle": "Slet dette opslag?",
+    "discardBody": "Det er ikke delt endnu. Det bliver fjernet sammen med dets uploads."
+  },
+  "myPosts": {
+    "title": "Dine opslag",
+    "empty": "Intet delt endnu.",
+    "noCaption": "Ingen tekst",
+    "posted_one": "Delt {{date}} · {{count}} slide",
+    "posted_other": "Delt {{date}} · {{count}} slides",
+    "notPosted": "Ikke delt endnu: uploader stadig"
+  },
+  "viewer": {
+    "title": "Opslag",
+    "notReady": "Uploader stadig",
+    "missing": "Dette opslag er ikke tilgængeligt.",
+    "videoUnavailable": "Klip kan ikke afspilles endnu: videoafspilning er ikke sat op.",
+    "posted": "Delt {{date}}",
+    "notPosted": "Ikke delt endnu: uploader stadig"
+  },
+  "tabs": {
+    "home": "Hjem",
+    "map": "Kort",
+    "newPost": "Nyt opslag",
+    "notifications": "Notifikationer",
+    "you": "Dig"
+  },
+  "map": {
+    "search": "Søg efter en by eller et skatepark",
+    "locate": "Centrér på min placering",
+    "viewPark": "Se skatepark",
+    "directions": "Rutevejledning",
+    "noParksHere": "Ingen skateparks på denne del af kortet endnu.",
+    "pinSelected": "{{park}}, valgt",
+    "loadError": "Kunne ikke hente skateparks. Tjek din forbindelse."
+  },
+  "search": {
+    "back": "Tilbage til kortet",
+    "clear": "Ryd søgning",
+    "hint": "Søg efter by, parkens navn eller det, de lokale kalder den.",
+    "cities": "Byer",
+    "parks": "Skateparks",
+    "noResults": "Intet matcher “{{q}}” endnu.",
+    "alsoKnownAs": "Også kendt som {{name}}",
+    "parkCount_one": "{{count}} skatepark",
+    "parkCount_other": "{{count}} skateparks",
+    "indoorCount": "{{count}} indendørs",
+    "view": "Visning",
+    "list": "Liste",
+    "map": "Kort"
+  },
+  "park": {
+    "openUntil": "Åben · til {{time}}",
+    "opensAt": "Lukket · åbner {{time}}",
+    "closedNow": "Lukket nu",
+    "closedToday": "Lukket i dag",
+    "openHoursUnknown": "Åben · åbningstider ikke oplyst",
+    "status": {
+      "open": "Åben",
+      "temporarily_closed": "Midlertidigt lukket",
+      "seasonal_closure": "Lukket for sæsonen",
+      "coming_soon": "Kommer snart"
+    },
+    "type": {
+      "skatepark": "Skatepark",
+      "pump_track": "Pumptrack",
+      "diy": "DIY"
+    },
+    "setting": {
+      "indoor": "Indendørs",
+      "outdoor": "Udendørs",
+      "covered_outdoor": "Overdækket"
+    },
+    "paid": "Betaling",
+    "free": "Gratis",
+    "lit": "Lys",
+    "verified": "Bekræftet {{date}}",
+    "lastVerified": "Sidst bekræftet {{date}}",
+    "notVerified": "Ikke bekræftet endnu",
+    "save": "Vil skate her",
+    "saved": "Gemt",
+    "saveLabel": "Gem {{park}} under vil skate her",
+    "savedLabel": "{{park}} er gemt under vil skate her. Tryk for at fjerne den.",
+    "directions": "Rutevejledning",
+    "hours": "Åbningstider",
+    "lights": "Lys",
+    "surface": "Underlag",
+    "entry": "Adgang",
+    "whoCanSkate": "Hvem må skate",
+    "helmet": "Hjelm er påkrævet her.",
+    "litYes": "Oplyst om aftenen",
+    "litNo": "Intet lys",
+    "unknown": "Ukendt",
+    "daily": "Alle dage",
+    "hoursUnknown": "Åbningstider ikke oplyst",
+    "sunrise": "solopgang",
+    "sunset": "solnedgang",
+    "timeRange": "{{start}}–{{end}}",
+    "season": "{{start}} – {{end}}",
+    "today": "I dag",
+    "obstacles": "Obstacles",
+    "noObstacles": "Ingen obstacles oplyst endnu.",
+    "osmCredit": "Placering © OpenStreetMap-bidragydere",
+    "disciplineYours": "{{discipline}}, det kører du",
+    "missing": "Dette skatepark er ikke tilgængeligt.",
+    "fees": "Priser"
+  },
+  "disciplines": {
+    "inline": "Inline",
+    "quad": "Quad",
+    "skateboard": "Skateboard",
+    "bmx": "BMX",
+    "scooter": "Løbehjul"
+  },
+  "obstacleTypes": {
+    "rail": "Rail",
+    "ledge": "Ledge",
+    "hubba": "Hubba",
+    "manual_pad": "Manual pad",
+    "stairs": "Trapper",
+    "gap": "Gap",
+    "bank": "Bank",
+    "pyramid": "Pyramide",
+    "fun_box": "Fun box",
+    "box": "Kasse",
+    "hip": "Hip",
+    "quarter_pipe": "Quarter pipe",
+    "kicker": "Kicker",
+    "mini_ramp": "Mini ramp",
+    "half_pipe": "Half pipe",
+    "vert_ramp": "Vert ramp",
+    "spine": "Spine",
+    "bump": "Bump",
+    "volcano": "Vulkan",
+    "bowl": "Bowl",
+    "pool": "Pool",
+    "snake_run": "Snake run",
+    "ditch": "Grøft",
+    "full_pipe": "Full pipe",
+    "pump_track": "Pump track",
+    "pole_jam": "Pole jam",
+    "rainbow_bench": "Regnbuebænk",
+    "other": "Andet",
+    "street_plaza": "Streetområde"
+  },
+  "notifications": {
+    "title": "Notifikationer",
+    "empty": "Intet endnu. Kommentarer, tags og invitationer dukker op her."
+  },
+  "you": {
+    "title": "Dig",
+    "credits": "Kreditering",
+    "osm": "Skateparkernes placering © OpenStreetMap-bidragydere",
+    "osmLink": "openstreetmap.org/copyright"
   }
 }
