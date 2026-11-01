@@ -81,3 +81,19 @@ dashboard (they have no invite). To add a tester, make an invite in the app
 Codes are claimed by the first email that signs up with them. If someone
 starts with one email and never finishes, the code stays tied to that email:
 cancel the link in the app (the invite comes back) and make a new one.
+
+## Posting and feeds (migration `posting_feeds`)
+
+Adds slide tag checks, `set_slide_tags()`, `remove_my_filmer_credit()`, the
+feed functions (`feed_following`, `feed_nearby`, `obstacle_posts`,
+`tagged_posts`, `filmed_posts`), `park_regulars_list()`, and a trigger that
+takes a post's metro area from its park. Additive only.
+
+1. Run `tests/posting_feeds_check.sql` in the SQL editor first. It applies the
+   migration and runs the checks inside one transaction, then ends with an
+   error that carries the results (`RESULTS [...]`), so nothing is kept. Every
+   row should say `"ok": true`.
+2. Apply the migration.
+3. Regenerate the database types (`npm run db:types`) and put back the three
+   `| null`s on `search_people` (see the main README). The app calls the new
+   functions with loose types until then, so it builds either way.

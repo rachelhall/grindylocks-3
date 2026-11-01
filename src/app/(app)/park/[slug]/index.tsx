@@ -7,6 +7,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
 import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';
+import { ParkPosts, ParkRegulars } from '@/components/park-social';
 import { BookmarkIcon, DisciplineChips, IconButton, openDirections, StatusChip } from '@/components/parks';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -31,8 +32,8 @@ type HoursLine = { key: string; season: string | null; days: string; time: strin
  * The park page, per the Park page mockups: a header with the park's name
  * (on its first photo, photocopied, or on ink), then what's there, when it's
  * open, who can skate, and its obstacles. People with a role at the park
- * add photos from here. Regulars and the posts grid come with posts (M4);
- * info reports and obstacle feeds come later in v1.
+ * add photos from here. Then its regulars and latest posts (M4a). Each
+ * obstacle opens its own feed. Info reports come with M5.
  */
 export default function ParkScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -362,26 +363,46 @@ export default function ParkScreen() {
             </Text>
           ) : (
             <View style={styles.obstacles}>
-              {park.obstacles.map((o) => (
-                <View key={o.id} style={[styles.obstacle, { backgroundColor: c.surfaceRaised }]}>
-                  <View style={styles.flex}>
-                    <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
-                      {o.name}
-                    </Text>
-                    {o.notes ? (
-                      <Text variant="bodySm" color="textSecondary" numberOfLines={2}>
-                        {o.notes}
+              {park.obstacles.map((o) => {
+                // Street plaza placeholders aren't real obstacles, so they have no feed.
+                const tappable = o.general_type !== 'street_plaza';
+                return (
+                  <Pressable
+                    key={o.id}
+                    accessibilityRole={tappable ? 'button' : undefined}
+                    disabled={!tappable}
+                    onPress={() =>
+                      router.push({ pathname: '/park/[slug]/obstacle/[id]', params: { slug: park.slug, id: o.id } })
+                    }
+                    style={({ pressed }) => [
+                      styles.obstacle,
+                      { backgroundColor: c.surfaceRaised },
+                      pressed && styles.pressed,
+                    ]}
+                  >
+                    <View style={styles.flex}>
+                      <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
+                        {o.name}
                       </Text>
-                    ) : null}
-                  </View>
-                  <Text variant="label" color="textSecondary">
-                    {t(`obstacleTypes.${o.general_type}`)}
-                  </Text>
-                </View>
-              ))}
+                      {o.notes ? (
+                        <Text variant="bodySm" color="textSecondary" numberOfLines={2}>
+                          {o.notes}
+                        </Text>
+                      ) : null}
+                    </View>
+                    <Text variant="label" color="textSecondary">
+                      {t(`obstacleTypes.${o.general_type}`)}
+                    </Text>
+                    {tappable ? <Icon name="chevron" color={c.textSecondary} size={16} /> : null}
+                  </Pressable>
+                );
+              })}
             </View>
           )}
         </View>
+
+        <ParkRegulars parkId={park.id} />
+        <ParkPosts park={park} />
 
         <View style={[styles.block, styles.footer]}>
           <Text variant="bodySm" color="textSecondary">

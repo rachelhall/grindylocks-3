@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,7 +9,7 @@ import { type PickedPark, ParkButton, ParkPickerModal, SlideTagEditor, TagSectio
 import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { videoThumbnailUrl } from '@/lib/media';
-import { hasTags, type SlideTags, tagsOf, useEditPost, usePost } from '@/lib/posts';
+import { hasTags, type Post, type SlideTags, tagsOf, useEditPost, usePost } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
@@ -28,40 +28,57 @@ export default function EditPost() {
   const c = useColors();
   const { session } = useAuth();
   const { data: post, isLoading } = usePost(id);
+  const mine = post && session && post.authorId === session.user.id;
+
+  if (post && mine) return <EditForm post={post} />;
+  return (
+    <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
+      <View style={styles.header}>
+        <Button label={t('common.cancel')} variant="tertiary" onPress={() => router.back()} style={styles.headerButton} />
+        <Text variant="title" accessibilityRole="header">
+          {t('editPost.title')}
+        </Text>
+        <View style={styles.headerButton} />
+      </View>
+      {isLoading ? (
+        <ActivityIndicator style={styles.loading} color={c.text} />
+      ) : (
+        <Text variant="body" color="textSecondary" style={styles.missing}>
+          {t('viewer.missing')}
+        </Text>
+      )}
+    </SafeAreaView>
+  );
+}
+
+/** Starts from the post as it is; nothing is saved until Save. */
+function EditForm({ post }: { post: Post }) {
+  const { t } = useTranslation();
+  const c = useColors();
   const save = useEditPost(post);
 
-  const [ready, setReady] = useState(false);
-  const [caption, setCaption] = useState('');
-  const [park, setPark] = useState<PickedPark | null>(null);
-  const [tags, setTags] = useState<Record<string, SlideTags>>({});
-  const [names, setNames] = useState<Record<string, string>>({});
-  const [index, setIndex] = useState(0);
-  const [parkOpen, setParkOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  // Start from the post as it is, once.
-  useEffect(() => {
-    if (!post || ready) return;
-    setCaption(post.caption ?? '');
-    setPark(post.park ? { id: post.park.id, name: post.park.name } : null);
-    setTags(Object.fromEntries(post.slides.map((s) => [s.id, tagsOf(s)])));
+  const [caption, setCaption] = useState(post.caption ?? '');
+  const [park, setPark] = useState<PickedPark | null>(post.park ? { id: post.park.id, name: post.park.name } : null);
+  const [tags, setTags] = useState<Record<string, SlideTags>>(() =>
+    Object.fromEntries(post.slides.map((s) => [s.id, tagsOf(s)])),
+  );
+  const [names, setNames] = useState<Record<string, string>>(() => {
     const known: Record<string, string> = {};
     for (const s of post.slides) {
       if (s.filmer?.username) known[s.filmer.id] = s.filmer.username;
       for (const p of s.people) if (p.username) known[p.id] = p.username;
     }
-    setNames(known);
-    setReady(true);
-  }, [post, ready]);
+    return known;
+  });
+  const [index, setIndex] = useState(0);
+  const [parkOpen, setParkOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const notMine = post && session && post.authorId !== session.user.id;
-  const slide = post?.slides[Math.min(index, (post?.slides.length ?? 1) - 1)];
+  const slide = post.slides[Math.min(index, post.slides.length - 1)];
 
   function pickPark(next: PickedPark | null) {
     if (next?.id !== park?.id) {
-      setTags((prev) =>
-        Object.fromEntries(Object.entries(prev).map(([k, v]) => [k, { ...v, obstacleId: null }])),
-      );
+      setTags((prev) => Object.fromEntries(Object.entries(prev).map(([k, v]) => [k, { ...v, obstacleId: null }])));
     }
     setPark(next);
   }
@@ -84,100 +101,86 @@ export default function EditPost() {
         <Text variant="title" accessibilityRole="header">
           {t('editPost.title')}
         </Text>
-        <Button
-          label={t('editPost.save')}
-          onPress={submit}
-          loading={save.isPending}
-          disabled={!ready || Boolean(notMine)}
-          style={styles.headerButton}
-        />
+        <Button label={t('editPost.save')} onPress={submit} loading={save.isPending} style={styles.headerButton} />
       </View>
 
-      {isLoading || (!ready && post) ? (
-        <ActivityIndicator style={styles.loading} color={c.text} />
-      ) : !post || notMine ? (
-        <Text variant="body" color="textSecondary" style={styles.missing}>
-          {t('viewer.missing')}
-        </Text>
-      ) : (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-          {error ? (
-            <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
-              {error}
-            </Text>
-          ) : null}
-          <View style={styles.field}>
-            <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
-              {t('post.captionLabel')}
-            </Text>
-            <TextInput
-              accessibilityLabel={t('post.captionLabel')}
-              value={caption}
-              onChangeText={setCaption}
-              placeholder={t('post.captionPlaceholder')}
-              placeholderTextColor={c.textMuted}
-              selectionColor={c.accent}
-              cursorColor={c.text}
-              multiline
-              maxLength={CAPTION_MAX}
-              style={[styles.caption, { color: c.text, backgroundColor: c.surfaceRaised, borderColor: c.border }]}
-            />
-          </View>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        {error ? (
+          <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
+            {error}
+          </Text>
+        ) : null}
+        <View style={styles.field}>
+          <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
+            {t('post.captionLabel')}
+          </Text>
+          <TextInput
+            accessibilityLabel={t('post.captionLabel')}
+            value={caption}
+            onChangeText={setCaption}
+            placeholder={t('post.captionPlaceholder')}
+            placeholderTextColor={c.textMuted}
+            selectionColor={c.accent}
+            cursorColor={c.text}
+            multiline
+            maxLength={CAPTION_MAX}
+            style={[styles.caption, { color: c.text, backgroundColor: c.surfaceRaised, borderColor: c.border }]}
+          />
+        </View>
 
-          <ParkButton park={park} onPress={() => setParkOpen(true)} />
+        <ParkButton park={park} onPress={() => setParkOpen(true)} />
 
-          {post.slides.length > 1 ? (
-            <View style={styles.section}>
-              <TagSectionTitle>{t('tagging.slides')}</TagSectionTitle>
-              <View style={styles.thumbs}>
-                {post.slides.map((s, i) => {
-                  const on = i === index;
-                  const uri = s.kind === 'photo' ? s.photoUrl : s.videoId ? videoThumbnailUrl(s.videoId, 160) : null;
-                  const tagged = tags[s.id] ? hasTags(tags[s.id]) : false;
-                  return (
-                    <Pressable
-                      key={s.id}
-                      accessibilityRole="button"
-                      accessibilityState={{ selected: on }}
-                      accessibilityLabel={
-                        tagged ? t('tagging.slideTagged', { number: i + 1 }) : t('tagging.slide', { number: i + 1 })
-                      }
-                      onPress={() => setIndex(i)}
-                      style={[styles.thumbHit, on && { borderColor: c.text }]}
-                    >
-                      <View style={{ width: THUMB_W, height: THUMB_H, backgroundColor: c.surfaceSunk }}>
-                        {uri ? (
-                          <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
-                        ) : (
-                          <View style={styles.center}>
-                            <Icon name={s.kind === 'video' ? 'video' : 'photo'} color={c.textSecondary} size={16} />
-                          </View>
-                        )}
-                      </View>
-                      {tagged ? (
-                        <View style={styles.tickBox}>
-                          <Icon name="check" color={c.accent} size={11} />
+        {post.slides.length > 1 ? (
+          <View style={styles.section}>
+            <TagSectionTitle>{t('tagging.slides')}</TagSectionTitle>
+            <View style={styles.thumbs}>
+              {post.slides.map((s, i) => {
+                const on = i === index;
+                const uri = s.kind === 'photo' ? s.photoUrl : s.videoId ? videoThumbnailUrl(s.videoId, 160) : null;
+                const tagged = tags[s.id] ? hasTags(tags[s.id]) : false;
+                return (
+                  <Pressable
+                    key={s.id}
+                    accessibilityRole="button"
+                    accessibilityState={{ selected: on }}
+                    accessibilityLabel={
+                      tagged ? t('tagging.slideTagged', { number: i + 1 }) : t('tagging.slide', { number: i + 1 })
+                    }
+                    onPress={() => setIndex(i)}
+                    style={[styles.thumbHit, on && { borderColor: c.text }]}
+                  >
+                    <View style={{ width: THUMB_W, height: THUMB_H, backgroundColor: c.surfaceSunk }}>
+                      {uri ? (
+                        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                      ) : (
+                        <View style={styles.center}>
+                          <Icon name={s.kind === 'video' ? 'video' : 'photo'} color={c.textSecondary} size={16} />
                         </View>
-                      ) : null}
-                    </Pressable>
-                  );
-                })}
-              </View>
+                      )}
+                    </View>
+                    {tagged ? (
+                      <View style={styles.tickBox}>
+                        <Icon name="check" color={c.accent} size={11} />
+                      </View>
+                    ) : null}
+                  </Pressable>
+                );
+              })}
             </View>
-          ) : null}
+          </View>
+        ) : null}
 
-          {slide && tags[slide.id] ? (
-            <SlideTagEditor
-              key={slide.id}
-              parkId={park?.id ?? null}
-              tags={tags[slide.id]}
-              names={names}
-              onChange={(next) => setTags((prev) => ({ ...prev, [slide.id]: next }))}
-              onName={(pid, username) => setNames((prev) => ({ ...prev, [pid]: username }))}
-            />
-          ) : null}
-        </ScrollView>
-      )}
+        {slide && tags[slide.id] ? (
+          <SlideTagEditor
+            key={slide.id}
+            parkId={park?.id ?? null}
+            tags={tags[slide.id]}
+            names={names}
+            onChange={(next) => setTags((prev) => ({ ...prev, [slide.id]: next }))}
+            onName={(pid, username) => setNames((prev) => ({ ...prev, [pid]: username }))}
+          />
+        ) : null}
+      </ScrollView>
 
       <ParkPickerModal visible={parkOpen} current={park} onClose={() => setParkOpen(false)} onPick={pickPark} />
     </SafeAreaView>

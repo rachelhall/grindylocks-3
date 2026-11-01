@@ -114,7 +114,14 @@
   },
   "home": {
     "title": "Home",
-    "feedSoon": "Your feed is coming. For now, here are your own posts."
+    "followingLabel": "Following · newest first",
+    "nearLabel": "Near you · {{metro}}",
+    "caughtUp": "You're caught up on people you follow",
+    "emptyTitle": "Nothing here yet",
+    "emptyBody": "Follow skaters you know, or be the first to post from your city.",
+    "emptyPost": "Post a clip",
+    "emptyFind": "Find skaters",
+    "loadError": "Couldn't load the feed. Check your connection."
   },
   "errors": {
     "generic": "Something went wrong.",
@@ -139,7 +146,9 @@
     "captionPlaceholder": "What went down?",
     "backgroundNote": "Uploads keep going in the background, even on bad signal.",
     "preparing": "Getting your photos and clips ready…",
-    "postIt": "Post it"
+    "postIt": "Post it",
+    "next": "Next",
+    "captionTitle": "Caption"
   },
   "uploads": {
     "uploading": "Uploading {{done}} of {{total}}",
@@ -151,14 +160,6 @@
     "discard": "Delete post",
     "discardTitle": "Delete this post?",
     "discardBody": "It hasn't been posted yet. This removes it and its uploads."
-  },
-  "myPosts": {
-    "title": "Your posts",
-    "empty": "Nothing posted yet.",
-    "noCaption": "No caption",
-    "posted_one": "Posted {{date}} · {{count}} slide",
-    "posted_other": "Posted {{date}} · {{count}} slides",
-    "notPosted": "Not posted yet: still uploading"
   },
   "viewer": {
     "title": "Post",
@@ -254,7 +255,15 @@
     "disciplineYours": "{{discipline}}, you ride this",
     "missing": "This park isn't available.",
     "fees": "Fees",
-    "more": "More"
+    "more": "More",
+    "regulars": "Regulars",
+    "noRegulars": "No regulars yet. Skaters show up here once they've posted here a few times or made it their home park.",
+    "latestPosts": "Latest posts",
+    "nothingPosted": "Nothing posted yet",
+    "nothingPostedBody": "Skated {{park}}? Tag it in your next post and it shows up here.",
+    "postHere": "Post a clip here",
+    "postHereToo": "Post a clip here too",
+    "morePosts": "More posts"
   },
   "disciplines": {
     "inline": "Inline",
@@ -536,5 +545,98 @@
     "listBody": "People you've blocked can't see your profile, posts or comments, and you don't see theirs.",
     "none": "You haven't blocked anyone.",
     "since": "Blocked {{date}}"
+  },
+  "time": {
+    "now": "now",
+    "minutes": "{{count}} min",
+    "hours": "{{count}} h",
+    "yesterday": "yesterday",
+    "days": "{{count}} d"
+  },
+  "tagging": {
+    "title": "Tag it",
+    "park": "Park",
+    "parkPick": "Pick a park",
+    "parkChange": "Park: {{park}}. Change park",
+    "parkNone": "No park",
+    "parkEverySlide": "Park for every slide · tap to change",
+    "parkEncourage": "Tag the park so it shows up on its page",
+    "parkTitle": "Pick a park",
+    "parkSearch": "Search parks",
+    "parkSearchPlaceholder": "Park name or what locals call it",
+    "homePark": "Your home park",
+    "noPark": "No park",
+    "noParkLine": "Garage sessions, street spots, anywhere else",
+    "slides": "Slides",
+    "slide": "Slide {{number}}",
+    "slideClip": "Slide {{number}} · {{duration}}",
+    "slideTagged": "Slide {{number}}, tagged",
+    "optional": "Tags are optional. Each slide can have its own.",
+    "sameAs": "Same tags as slide {{number}}",
+    "obstacle": "Obstacle",
+    "more": "More",
+    "pending": "waiting for approval",
+    "typeOnly": "type only",
+    "noObstacles": "No obstacles listed at this park yet.",
+    "notListed": "Not listed? Pick a type or suggest it",
+    "pickType": "Pick an obstacle type",
+    "typeTitle": "Obstacle type",
+    "typeBody": "Pick the kind of obstacle, or suggest it so it's added to the park. Suggestions are checked before others see them.",
+    "typeBodyNoPark": "Without a park, pick the kind of obstacle.",
+    "useType": "Use this type",
+    "suggestTitle": "Or suggest it for this park",
+    "suggestName": "What do locals call it?",
+    "suggestHint": "For example \"the long kinked rail by the bowl\". Pick its type above.",
+    "suggestPlaceholder": "Obstacle name",
+    "suggestSend": "Suggest and tag it",
+    "people": "People",
+    "tagSomeone": "+ Tag someone",
+    "addFilmer": "+ Add filmer",
+    "filmer": "Filmer",
+    "skating": "Skating",
+    "filmerOn": "Credit {{username}} as filmer",
+    "filmerOff": "{{username}} is the filmer. Tag as skating instead",
+    "removePerson": "Remove {{username}}",
+    "personTitle": "Tag someone",
+    "filmerTitle": "Who filmed it?",
+    "personSearch": "Username",
+    "personHint": "Type at least two letters of their username.",
+    "whatsTagged": "What's tagged",
+    "noTags": "No tags",
+    "filmedBy": "filmed by {{username}}",
+    "editLater": "You can edit the caption and tags after posting."
+  },
+  "postCard": {
+    "open": "Open {{username}}'s post",
+    "more": "More",
+    "noPark": "No park",
+    "noParkIn": "No park · {{metro}}",
+    "obstacleLink": "{{obstacle}}: see every post here",
+    "filmedBy": "Filmed by",
+    "with": "with",
+    "edit": "Edit post",
+    "delete": "Delete post",
+    "deleteTitle": "Delete this post?",
+    "deleteBody": "It's removed from your profile, the park and every feed.",
+    "removeMe": "Take me off this post",
+    "removeMeTitle": "Take yourself off this post?",
+    "removeMeBody": "Your tag and any filmer credit are removed, so it leaves your Tagged and Filmed tabs. The post stays up.",
+    "removeMeConfirm": "Take me off"
+  },
+  "postDetail": {
+    "edited": "edited",
+    "peopleButton": "{{count}} people in this slide",
+    "peopleTitle": "In slide {{number}}",
+    "filmerRow": "{{username}} · filmer",
+    "slideOf": "Slide {{number}} of {{total}}"
+  },
+  "editPost": {
+    "title": "Edit post",
+    "save": "Save"
+  },
+  "obstacle": {
+    "kicker": "Obstacle · {{type}}",
+    "empty": "Nothing tagged here yet. Tag this obstacle in a post and it shows up here.",
+    "missing": "This obstacle isn't available."
   }
 }

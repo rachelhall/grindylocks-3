@@ -247,7 +247,7 @@ export function useParkPosts(parkId: string | undefined) {
         .order('published_at', { ascending: false })
         .order('id', { ascending: false })
         .limit(GRID_PAGE);
-      if (cursor) q = q.or(`published_at.lt.${cursor.at},and(published_at.eq.${cursor.at},id.lt.${cursor.id})`);
+      if (cursor) q = q.or(`published_at.lt."${cursor.at}",and(published_at.eq."${cursor.at}",id.lt.${cursor.id})`);
       const { data, error } = await q;
       if (error) throw error;
       return toPosts((data ?? []) as unknown as Row[]);

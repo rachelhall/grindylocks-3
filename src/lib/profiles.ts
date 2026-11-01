@@ -240,6 +240,8 @@ export type GridPost = {
     photoUrl?: string;
     videoId?: string | null;
   } | null;
+  /** A name shown on the tile (the poster, on Filmed tabs and obstacle feeds). */
+  byline?: string | null;
 };
 
 const PAGE_SIZE = 30;

@@ -114,7 +114,14 @@
   },
   "home": {
     "title": "Hjem",
-    "feedSoon": "Dit feed er på vej. Indtil da er her dine egne opslag."
+    "followingLabel": "Følger · nyeste først",
+    "nearLabel": "Nær dig · {{metro}}",
+    "caughtUp": "Du har set alt fra dem, du følger",
+    "emptyTitle": "Intet her endnu",
+    "emptyBody": "Følg skatere, du kender, eller vær den første til at dele et opslag fra din by.",
+    "emptyPost": "Del et klip",
+    "emptyFind": "Find skatere",
+    "loadError": "Kunne ikke hente feedet. Tjek din forbindelse."
   },
   "errors": {
     "generic": "Noget gik galt.",
@@ -139,7 +146,9 @@
     "captionPlaceholder": "Hvad skete der?",
     "backgroundNote": "Uploads fortsætter i baggrunden, også med dårligt signal.",
     "preparing": "Gør dine billeder og klip klar …",
-    "postIt": "Del det"
+    "postIt": "Del det",
+    "next": "Næste",
+    "captionTitle": "Tekst"
   },
   "uploads": {
     "uploading": "Uploader {{done}} af {{total}}",
@@ -151,14 +160,6 @@
     "discard": "Slet opslag",
     "discardTitle": "Slet dette opslag?",
     "discardBody": "Det er ikke delt endnu. Det bliver fjernet sammen med dets uploads."
-  },
-  "myPosts": {
-    "title": "Dine opslag",
-    "empty": "Intet delt endnu.",
-    "noCaption": "Ingen tekst",
-    "posted_one": "Delt {{date}} · {{count}} slide",
-    "posted_other": "Delt {{date}} · {{count}} slides",
-    "notPosted": "Ikke delt endnu: uploader stadig"
   },
   "viewer": {
     "title": "Opslag",
@@ -254,7 +255,15 @@
     "disciplineYours": "{{discipline}}, det kører du",
     "missing": "Dette skatepark er ikke tilgængeligt.",
     "fees": "Priser",
-    "more": "Mere"
+    "more": "Mere",
+    "regulars": "Stamgæster",
+    "noRegulars": "Ingen stamgæster endnu. Skatere vises her, når de har lavet opslag herfra nogle gange eller gjort den til deres hjemmepark.",
+    "latestPosts": "Seneste opslag",
+    "nothingPosted": "Ingen opslag endnu",
+    "nothingPostedBody": "Har du skatet {{park}}? Tag parken i dit næste opslag, så vises det her.",
+    "postHere": "Del et klip herfra",
+    "postHereToo": "Del også et klip herfra",
+    "morePosts": "Flere opslag"
   },
   "disciplines": {
     "inline": "Inline",
@@ -536,5 +545,98 @@
     "listBody": "Folk, du har blokeret, kan ikke se din profil, dine opslag eller kommentarer, og du ser ikke deres.",
     "none": "Du har ikke blokeret nogen.",
     "since": "Blokeret {{date}}"
+  },
+  "time": {
+    "now": "nu",
+    "minutes": "{{count}} min",
+    "hours": "{{count}} t",
+    "yesterday": "i går",
+    "days": "{{count}} d"
+  },
+  "tagging": {
+    "title": "Tag det",
+    "park": "Park",
+    "parkPick": "Vælg en park",
+    "parkChange": "Park: {{park}}. Skift park",
+    "parkNone": "Ingen park",
+    "parkEverySlide": "Park for alle slides · tryk for at skifte",
+    "parkEncourage": "Tag parken, så opslaget vises på dens side",
+    "parkTitle": "Vælg en park",
+    "parkSearch": "Søg i parker",
+    "parkSearchPlaceholder": "Parkens navn eller hvad de lokale kalder den",
+    "homePark": "Din hjemmepark",
+    "noPark": "Ingen park",
+    "noParkLine": "Garagesessions, street-spots, alle andre steder",
+    "slides": "Slides",
+    "slide": "Slide {{number}}",
+    "slideClip": "Slide {{number}} · {{duration}}",
+    "slideTagged": "Slide {{number}}, tagget",
+    "optional": "Tags er valgfrie. Hver slide kan have sine egne.",
+    "sameAs": "Samme tags som slide {{number}}",
+    "obstacle": "Obstacle",
+    "more": "Flere",
+    "pending": "venter på godkendelse",
+    "typeOnly": "kun typen",
+    "noObstacles": "Der er ingen obstacles i denne park endnu.",
+    "notListed": "Ikke på listen? Vælg en type, eller foreslå den",
+    "pickType": "Vælg en type obstacle",
+    "typeTitle": "Type obstacle",
+    "typeBody": "Vælg typen, eller foreslå obstaclet, så det bliver føjet til parken. Forslag bliver tjekket, før andre kan se dem.",
+    "typeBodyNoPark": "Uden en park vælger du typen af obstacle.",
+    "useType": "Brug denne type",
+    "suggestTitle": "Eller foreslå det til parken",
+    "suggestName": "Hvad kalder de lokale det?",
+    "suggestHint": "For eksempel \"den lange kinkede rail ved bowlen\". Vælg typen ovenfor.",
+    "suggestPlaceholder": "Obstaclets navn",
+    "suggestSend": "Foreslå og tag det",
+    "people": "Personer",
+    "tagSomeone": "+ Tag nogen",
+    "addFilmer": "+ Tilføj filmer",
+    "filmer": "Filmer",
+    "skating": "Skater",
+    "filmerOn": "Kreditér {{username}} som filmer",
+    "filmerOff": "{{username}} er filmer. Tag som skater i stedet",
+    "removePerson": "Fjern {{username}}",
+    "personTitle": "Tag nogen",
+    "filmerTitle": "Hvem filmede det?",
+    "personSearch": "Brugernavn",
+    "personHint": "Skriv mindst to bogstaver af brugernavnet.",
+    "whatsTagged": "Det er tagget",
+    "noTags": "Ingen tags",
+    "filmedBy": "filmet af {{username}}",
+    "editLater": "Du kan rette teksten og tags, efter du har delt opslaget."
+  },
+  "postCard": {
+    "open": "Åbn opslaget fra {{username}}",
+    "more": "Mere",
+    "noPark": "Ingen park",
+    "noParkIn": "Ingen park · {{metro}}",
+    "obstacleLink": "{{obstacle}}: se alle opslag her",
+    "filmedBy": "Filmet af",
+    "with": "med",
+    "edit": "Ret opslag",
+    "delete": "Slet opslag",
+    "deleteTitle": "Slet dette opslag?",
+    "deleteBody": "Det fjernes fra din profil, parken og alle feeds.",
+    "removeMe": "Fjern mig fra opslaget",
+    "removeMeTitle": "Fjern dig selv fra opslaget?",
+    "removeMeBody": "Dit tag og eventuel filmer-kredit fjernes, så det forsvinder fra dine faner Tagget og Filmet. Opslaget bliver liggende.",
+    "removeMeConfirm": "Fjern mig"
+  },
+  "postDetail": {
+    "edited": "rettet",
+    "peopleButton": "{{count}} personer i denne slide",
+    "peopleTitle": "I slide {{number}}",
+    "filmerRow": "{{username}} · filmer",
+    "slideOf": "Slide {{number}} af {{total}}"
+  },
+  "editPost": {
+    "title": "Ret post",
+    "save": "Gem"
+  },
+  "obstacle": {
+    "kicker": "Obstacle · {{type}}",
+    "empty": "Intet tagget her endnu. Tag dette obstacle i et opslag, så vises det her.",
+    "missing": "Dette obstacle er ikke tilgængeligt."
   }
 }
