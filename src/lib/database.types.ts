@@ -977,6 +977,7 @@ export type Database = {
           age_confirmed_at: string | null
           avatar_path: string | null
           banned_at: string | null
+          bio: string | null
           deleted_at: string | null
           disciplines: Database["public"]["Enums"]["discipline"][]
           hide_from_regulars: boolean
@@ -991,11 +992,13 @@ export type Database = {
           open_to_meetup: boolean
           suspended_until: string | null
           username: string | null
+          username_changed_at: string | null
         }
         Insert: {
           age_confirmed_at?: string | null
           avatar_path?: string | null
           banned_at?: string | null
+          bio?: string | null
           deleted_at?: string | null
           disciplines?: Database["public"]["Enums"]["discipline"][]
           hide_from_regulars?: boolean
@@ -1010,11 +1013,13 @@ export type Database = {
           open_to_meetup?: boolean
           suspended_until?: string | null
           username?: string | null
+          username_changed_at?: string | null
         }
         Update: {
           age_confirmed_at?: string | null
           avatar_path?: string | null
           banned_at?: string | null
+          bio?: string | null
           deleted_at?: string | null
           disciplines?: Database["public"]["Enums"]["discipline"][]
           hide_from_regulars?: boolean
@@ -1029,6 +1034,7 @@ export type Database = {
           open_to_meetup?: boolean
           suspended_until?: string | null
           username?: string | null
+          username_changed_at?: string | null
         }
         Relationships: [
           {
@@ -1122,6 +1128,35 @@ export type Database = {
           {
             foreignKeyName: "reports_resolved_by_fkey"
             columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reserved_usernames: {
+        Row: {
+          created_at: string
+          reserved_until: string
+          user_id: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          reserved_until: string
+          user_id: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          reserved_until?: string
+          user_id?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reserved_usernames_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -1383,6 +1418,7 @@ export type Database = {
           username: string
         }[]
       }
+      username_available: { Args: { name: string }; Returns: boolean }
     }
     Enums: {
       announcement_kind: "joined" | "visiting"

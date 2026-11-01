@@ -28,3 +28,33 @@ app says clip uploads aren't switched on yet. Photos don't need any of this.
 
 The app also needs `EXPO_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE` in `.env`
 to play clips.
+
+## Storage buckets
+
+- `post-media` (private): post photos, `<user>/<post>/<slide>.jpg`.
+- `avatars` (private): profile photos, `<user>/<random id>.jpg`, 512 px
+  JPEG. Any signed-in member can read one unless either of you has blocked
+  the other; only the owner can write in their folder. The app asks for
+  signed URLs.
+
+## Auth email templates (Authentication → Emails)
+
+Sign-in and email changes both use 6-digit codes, never links, so every
+template the app relies on must include `{{ .Token }}`:
+
+- **Magic Link** (sign-in code): already in use.
+- **Change Email Address** (Settings → Email): the app verifies with
+  `verifyOtp({ type: 'email_change' })`. Suggested body:
+
+  ```html
+  <h2>Change your Grindylocks email</h2>
+  <p>Enter this code in the app to switch your sign-in email to {{ .NewEmail }}:</p>
+  <p style="font-size: 28px; letter-spacing: 6px"><strong>{{ .Token }}</strong></p>
+  <p>If you didn't ask for this, ignore this email and nothing changes.</p>
+  ```
+
+If **Secure email change** is on (Authentication → Providers → Email), a
+code goes to the current address too, and the change only happens once both
+are entered. The app handles that (it asks for the second code), but each
+code is sent with the same template, so the wording has to make sense for
+both addresses.
