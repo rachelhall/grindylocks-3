@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon",
-      "bundleIdentifier": "app.grindylocks",
+      "bundleIdentifier": "com.rachelhall.grindylocks",
       "supportsTablet": false
     },
     "android": {
@@ -20,7 +20,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "app.grindylocks"
+      "package": "com.rachelhall.grindylocks"
     },
     "web": {
       "output": "static",
