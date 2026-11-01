@@ -108,6 +108,57 @@ export async function pickFromLibrary(limit: number): Promise<{
   return { picked, rejected };
 }
 
+/** Opens the camera roll for up to `limit` photos only (no clips), in pick order. */
+export async function pickPhotos(limit: number): Promise<{ picked: PickedMedia[]; rejected: number }> {
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ['images'],
+    allowsMultipleSelection: limit > 1,
+    selectionLimit: limit,
+    orderedSelection: true,
+    quality: 1,
+    exif: false,
+  });
+  if (result.canceled) return { picked: [], rejected: 0 };
+  const picked: PickedMedia[] = [];
+  let rejected = 0;
+  for (const asset of result.assets) {
+    const mime = asset.mimeType?.toLowerCase();
+    const ext = extensionOf(asset.uri, asset.fileName);
+    const allowed = mime ? PHOTO_TYPES.includes(mime) : PHOTO_EXTENSIONS.includes(ext);
+    if (!allowed || !asset.width || !asset.height) {
+      rejected += 1;
+      continue;
+    }
+    picked.push({
+      key: asset.assetId ?? asset.uri,
+      kind: 'photo',
+      uri: asset.uri,
+      width: Math.round(asset.width),
+      height: Math.round(asset.height),
+      mimeType: mime,
+      fileSize: asset.fileSize,
+    });
+  }
+  return { picked: picked.slice(0, limit), rejected };
+}
+
+/**
+ * Re-encodes a photo the way every upload does: JPEG, at most 2048 px on the
+ * long edge, quality 0.82. HEIC and PNG come out as JPEG. The result is a
+ * temporary file; move or delete it when done.
+ */
+export async function encodePhoto(media: { uri: string; width: number; height: number }) {
+  const longEdge = Math.max(media.width, media.height);
+  const ctx = ImageManipulator.manipulate(media.uri);
+  if (longEdge > PHOTO_MAX_EDGE) {
+    if (media.width >= media.height) ctx.resize({ width: PHOTO_MAX_EDGE });
+    else ctx.resize({ height: PHOTO_MAX_EDGE });
+  }
+  const image = await ctx.renderAsync();
+  const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: PHOTO_QUALITY });
+  return { uri: saved.uri, width: saved.width, height: saved.height };
+}
+
 /* Local copies ------------------------------------------------------------ */
 
 /**
@@ -136,24 +187,11 @@ export async function prepareForUpload(media: PickedMedia, slideId: string): Pro
   const dir = uploadsDir();
 
   if (media.kind === 'photo') {
-    const longEdge = Math.max(media.width, media.height);
-    const ctx = ImageManipulator.manipulate(media.uri);
-    if (longEdge > PHOTO_MAX_EDGE) {
-      if (media.width >= media.height) ctx.resize({ width: PHOTO_MAX_EDGE });
-      else ctx.resize({ height: PHOTO_MAX_EDGE });
-    }
-    const image = await ctx.renderAsync();
-    const saved = await image.saveAsync({ format: SaveFormat.JPEG, compress: PHOTO_QUALITY });
+    const encoded = await encodePhoto(media);
     const target = new File(dir, `${slideId}.jpg`);
     if (target.exists) target.delete();
-    await new File(saved.uri).move(target);
-    return {
-      kind: 'photo',
-      uri: target.uri,
-      mimeType: 'image/jpeg',
-      width: saved.width,
-      height: saved.height,
-    };
+    await new File(encoded.uri).move(target);
+    return { kind: 'photo', uri: target.uri, mimeType: 'image/jpeg', width: encoded.width, height: encoded.height };
   }
 
   const ext = extensionOf(media.uri) || 'mp4';

@@ -61,6 +61,9 @@ export const keys = {
   myPosts: (userId: string) => ['posts', 'mine', userId] as const,
   post: (id: string) => ['post', id] as const,
   parkName: (id: string) => ['park-name', id] as const,
+  /** A park's photos (header and gallery). Shares the park's freshness. */
+  parkPhotos: (parkId: string) => ['park-photos', parkId] as const,
+  myRoles: (userId: string) => ['roles', 'mine', userId] as const,
 };
 
 let started = false;

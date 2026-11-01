@@ -684,6 +684,76 @@ export type Database = {
           },
         ]
       }
+      park_photos: {
+        Row: {
+          archived_at: string | null
+          archived_by: string | null
+          created_at: string
+          height: number
+          id: string
+          license: string
+          park_id: string
+          photographer: string
+          sort_order: number
+          source: string
+          storage_path: string
+          uploaded_by: string
+          width: number
+        }
+        Insert: {
+          archived_at?: string | null
+          archived_by?: string | null
+          created_at?: string
+          height: number
+          id?: string
+          license?: string
+          park_id: string
+          photographer?: string
+          sort_order?: number
+          source?: string
+          storage_path: string
+          uploaded_by: string
+          width: number
+        }
+        Update: {
+          archived_at?: string | null
+          archived_by?: string | null
+          created_at?: string
+          height?: number
+          id?: string
+          license?: string
+          park_id?: string
+          photographer?: string
+          sort_order?: number
+          source?: string
+          storage_path?: string
+          uploaded_by?: string
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "park_photos_archived_by_fkey"
+            columns: ["archived_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "park_photos_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "park_photos_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       park_sessions: {
         Row: {
           days: number[]
@@ -1354,6 +1424,10 @@ export type Database = {
           slug: string
           status: Database["public"]["Enums"]["park_status"]
         }[]
+      }
+      reorder_park_photos: {
+        Args: { park: string; photo_ids: string[] }
+        Returns: undefined
       }
       search_directory: {
         Args: { max_results?: number; q: string }
