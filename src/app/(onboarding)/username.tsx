@@ -1,74 +1,35 @@
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { FormScreen } from '@/components/screen';
 import { Button, ChoiceCard, StepHeader, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import type { Database } from '@/lib/database.types';
 import { ONBOARDING_STEPS } from '@/lib/onboarding';
+import { type Discipline, PROFILE_DISCIPLINES } from '@/lib/profiles';
 import { supabase } from '@/lib/supabase';
+import { useUsernameCheck } from '@/lib/username';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
 
-type Discipline = Database['public']['Enums']['discipline'];
-
-/** Signup offers these three; BMX and scooter exist only for park sessions. */
-const SIGNUP_DISCIPLINES = ['inline', 'quad', 'skateboard'] as const satisfies readonly Discipline[];
-
-// Matches the profiles_username_check constraint.
-const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{2,30}$/;
-
-type Availability = 'idle' | 'checking' | 'free' | 'taken' | 'invalid';
-
+/**
+ * Username and disciplines. The name is checked live as it's typed; a name
+ * the member already saved (coming back to this step) counts as free.
+ */
 export default function UsernameStep() {
   const { t } = useTranslation();
   const c = useColors();
   const { session, profile, refreshProfile } = useAuth();
   const [username, setUsername] = useState(profile?.username ?? '');
   const [disciplines, setDisciplines] = useState<Discipline[]>(profile?.disciplines ?? []);
-  // The last name the server checked, and whether it was taken.
-  const [checked, setChecked] = useState<{ name: string; taken: boolean } | null>(
-    profile?.username ? { name: profile.username, taken: false } : null,
-  );
   const [showErrors, setShowErrors] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   const myId = session?.user.id;
   const name = username.trim();
-
-  const valid = USERNAME_PATTERN.test(name);
-  const availability: Availability = !name
-    ? 'idle'
-    : !valid
-      ? 'invalid'
-      : checked?.name.toLowerCase() === name.toLowerCase()
-        ? checked.taken
-          ? 'taken'
-          : 'free'
-        : 'checking';
-
-  // Check the name is free, after the person stops typing for a moment.
-  useEffect(() => {
-    if (!valid) return;
-    let cancelled = false;
-    const timer = setTimeout(async () => {
-      // username is citext, so this match ignores case.
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('username', name)
-        .neq('id', myId ?? '')
-        .limit(1);
-      if (cancelled || error) return;
-      setChecked({ name, taken: data.length > 0 });
-    }, 400);
-    return () => {
-      cancelled = true;
-      clearTimeout(timer);
-    };
-  }, [name, valid, myId]);
+  const check = useUsernameCheck(name, profile?.username);
+  const availability = check.availability === 'unchanged' ? 'free' : check.availability;
 
   function toggle(d: Discipline) {
     setDisciplines((current) => (current.includes(d) ? current.filter((x) => x !== d) : [...current, d]));
@@ -86,7 +47,7 @@ export default function UsernameStep() {
     if (error) {
       setSaving(false);
       // 23505: someone took the name between the check and the save.
-      if (error.code === '23505') setChecked({ name, taken: true });
+      if (error.code === '23505') check.markTaken(name);
       else setSaveError(t('errors.generic'));
       return;
     }
@@ -153,7 +114,7 @@ export default function UsernameStep() {
           {t('onboarding.username.disciplinesLegend')}
           <Text variant="bodySm" color="textSecondary">{`  ${t('onboarding.username.pickAll')}`}</Text>
         </Text>
-        {SIGNUP_DISCIPLINES.map((d) => (
+        {PROFILE_DISCIPLINES.map((d) => (
           <ChoiceCard
             key={d}
             title={t(`onboarding.username.${d}`)}

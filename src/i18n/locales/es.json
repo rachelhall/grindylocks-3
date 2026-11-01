@@ -102,7 +102,6 @@
   },
   "home": {
     "title": "Inicio",
-    "signedInAs": "Sesión iniciada como @{{username}}",
     "feedSoon": "Tu feed llegará pronto. Por ahora, aquí están tus publicaciones."
   },
   "errors": {
@@ -287,12 +286,6 @@
     "title": "Notificaciones",
     "empty": "Nada por ahora. Aquí verás comentarios, etiquetas e invitaciones."
   },
-  "you": {
-    "title": "Tú",
-    "credits": "Créditos",
-    "osm": "Ubicaciones de skateparks © colaboradores de OpenStreetMap",
-    "osmLink": "openstreetmap.org/copyright"
-  },
   "feed": {
     "newPost": "Nueva publicación",
     "notifications": "Notificaciones",
@@ -319,7 +312,113 @@
     "privateAccount": "Cuenta privada"
   },
   "profile": {
-    "soon": "Los perfiles llegarán pronto."
+    "edit": "Editar perfil",
+    "homePark": "park habitual",
+    "joined": "Se unió en {{date}}",
+    "activeToday": "Activo hoy",
+    "activeYesterday": "Activo ayer",
+    "activeDaysAgo_one": "Activo hace {{count}} día",
+    "activeDaysAgo_other": "Activo hace {{count}} días",
+    "activeOn": "Activo en {{date}}",
+    "openToMeetup": "Abierto a quedar",
+    "role": {
+      "owner": "Propietaria",
+      "city_admin": "Admin de ciudad",
+      "park_admin": "Admin de park",
+      "park_contributor": "Colaborador del park"
+    },
+    "roleAt": "{{role}} · {{place}}",
+    "tabs": {
+      "posts": "Posts",
+      "tagged": "Etiquetado",
+      "filmed": "Grabado",
+      "saved": "Guardado"
+    },
+    "onlyYou": "Solo tú puedes verlo",
+    "postLabel": "Post del {{date}}",
+    "clipLabel": "Clip del {{date}}",
+    "unavailable": "Este perfil no está disponible.",
+    "privateBody": "Esta cuenta es privada. Solo las personas que ha aceptado como seguidores ven sus posts.",
+    "emptyPostsOwn": "Aún no has publicado nada. Tus posts aparecerán aquí.",
+    "emptyPosts": "{{username}} aún no ha publicado.",
+    "emptyTaggedOwn": "Aquí aparecerán los posts en los que te etiqueten.",
+    "emptyTagged": "Aquí aparecerán los posts en los que etiqueten a {{username}}.",
+    "emptyFilmedOwn": "Aquí aparecerán los clips que hayas grabado.",
+    "emptyFilmed": "Aquí aparecerán los clips que haya grabado {{username}}.",
+    "emptySaved": "Aquí aparecen los parks que guardes en quiero patinar. Solo tú puedes verlos."
+  },
+  "editProfile": {
+    "title": "Editar perfil",
+    "save": "Guardar",
+    "done": "Listo",
+    "discardTitle": "¿Descartar los cambios?",
+    "keepEditing": "Seguir editando",
+    "discard": "Descartar",
+    "changePhoto": "Cambiar foto",
+    "usernameNote": "Puedes cambiarlo una vez cada 30 días. Tu nombre anterior queda reservado para ti durante 14 días. Las etiquetas y menciones se actualizan solas.",
+    "usernameLocked": "Cambiaste tu nombre de usuario hace poco. Podrás volver a cambiarlo el {{date}}.",
+    "usernameCooldown": "Solo puedes cambiar tu nombre de usuario una vez cada 30 días.",
+    "takeBack": "Recuperar @{{username}}",
+    "heldUntil": "Reservado para ti hasta el {{date}}",
+    "bio": "Bio",
+    "bioPlaceholder": "Dónde patinas, qué usas, a quién grabas",
+    "bioCountLabel": "{{count}} de {{max}} caracteres",
+    "iSkate": "Patino",
+    "home": "Casa",
+    "noHomePark": "Ninguno",
+    "homeNote": "¿Te mudas? Te preguntaremos si quieres saludar a los skaters de tu nueva ciudad. Tus posts anteriores se quedan donde se grabaron.",
+    "meetupNote": "Muestra una etiqueta en tu perfil"
+  },
+  "sayHi": {
+    "title": "Bienvenido a {{city}}",
+    "body": "Tu ciudad se ha actualizado. Tus posts anteriores se quedan donde se grabaron."
+  },
+  "settings": {
+    "title": "Ajustes",
+    "account": "Cuenta",
+    "email": "Correo",
+    "emailPending": "{{email}} · cambiando a {{next}}",
+    "change": "Cambiar",
+    "appleGoogle": "Inicio de sesión con Apple y Google",
+    "appleGoogleBody": "Vincúlalos para entrar sin código",
+    "privacy": "Privacidad",
+    "private": "Cuenta privada",
+    "privateBody": "Los nuevos seguidores necesitan tu aprobación. Nunca apareces como habitual.",
+    "regulars": "Mostrarme en las listas de habituales",
+    "regularsBody": "En tu park habitual y en los parks donde publicas a menudo",
+    "roleBadge": "Mostrar mi insignia de rol",
+    "app": "App",
+    "language": "Idioma",
+    "languageBody": "Sigue el idioma de tu teléfono. Cámbialo para Grindylocks en los ajustes del teléfono.",
+    "languageName": "Español",
+    "distances": "Distancias",
+    "distancesBody": "Según la región de tu teléfono",
+    "miles": "Millas",
+    "kilometers": "Kilómetros",
+    "help": "Ayuda y legal",
+    "contact": "Ayuda y contacto",
+    "privacyPolicy": "Política de privacidad",
+    "dataCopy": "Obtener una copia de mis datos",
+    "dataCopyBody": "Te la enviaremos por correo",
+    "dataCopySubject": "Copia de mis datos (@{{username}})",
+    "credits": "Créditos",
+    "version": "Grindylocks beta · {{version}}"
+  },
+  "credits": {
+    "osm": "Datos del mapa © colaboradores de OpenStreetMap",
+    "osmBody": "Las ubicaciones de los parks vienen de OpenStreetMap, disponible bajo la Open Database License.",
+    "osmLink": "openstreetmap.org/copyright"
+  },
+  "changeEmail": {
+    "title": "Cambiar correo",
+    "body": "Ahora entras con {{email}}. Enviaremos un código a la nueva dirección para comprobar que es tuya.",
+    "label": "Correo nuevo",
+    "same": "Ese ya es tu correo.",
+    "taken": "Otra cuenta ya usa ese correo.",
+    "confirm": "Cambiar correo",
+    "codeCurrent": "Un paso más: también enviamos un código a tu dirección actual, {{email}}. Escríbelo abajo.",
+    "doneTitle": "Correo cambiado",
+    "doneBody": "A partir de ahora entrarás con {{email}}."
   },
   "parkPhotos": {
     "open": "Abrir fotos de {{park}}",

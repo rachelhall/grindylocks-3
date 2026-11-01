@@ -102,7 +102,6 @@
   },
   "home": {
     "title": "Home",
-    "signedInAs": "Signed in as @{{username}}",
     "feedSoon": "Your feed is coming. For now, here are your own posts."
   },
   "errors": {
@@ -287,12 +286,6 @@
     "title": "Notifications",
     "empty": "Nothing yet. Comments, tags and invites will show up here."
   },
-  "you": {
-    "title": "You",
-    "credits": "Credits",
-    "osm": "Park locations © OpenStreetMap contributors",
-    "osmLink": "openstreetmap.org/copyright"
-  },
   "feed": {
     "newPost": "New post",
     "notifications": "Notifications",
@@ -319,7 +312,113 @@
     "privateAccount": "Private account"
   },
   "profile": {
-    "soon": "Profiles are coming soon."
+    "edit": "Edit profile",
+    "homePark": "home park",
+    "joined": "Joined {{date}}",
+    "activeToday": "Active today",
+    "activeYesterday": "Active yesterday",
+    "activeDaysAgo_one": "Active {{count}} day ago",
+    "activeDaysAgo_other": "Active {{count}} days ago",
+    "activeOn": "Active {{date}}",
+    "openToMeetup": "Open to meeting up",
+    "role": {
+      "owner": "Owner",
+      "city_admin": "City admin",
+      "park_admin": "Park admin",
+      "park_contributor": "Park contributor"
+    },
+    "roleAt": "{{role}} · {{place}}",
+    "tabs": {
+      "posts": "Posts",
+      "tagged": "Tagged",
+      "filmed": "Filmed",
+      "saved": "Saved"
+    },
+    "onlyYou": "Only you can see this",
+    "postLabel": "Post from {{date}}",
+    "clipLabel": "Clip from {{date}}",
+    "unavailable": "This profile isn't available.",
+    "privateBody": "This account is private. Only people they've accepted as followers see their posts.",
+    "emptyPostsOwn": "Nothing posted yet. Your posts show up here.",
+    "emptyPosts": "{{username}} hasn't posted yet.",
+    "emptyTaggedOwn": "Posts you're tagged in will show up here.",
+    "emptyTagged": "Posts {{username}} is tagged in will show up here.",
+    "emptyFilmedOwn": "Clips you filmed will show up here.",
+    "emptyFilmed": "Clips {{username}} filmed will show up here.",
+    "emptySaved": "Parks you save to want to skate show up here. Only you can see them."
+  },
+  "editProfile": {
+    "title": "Edit profile",
+    "save": "Save",
+    "done": "Done",
+    "discardTitle": "Discard your changes?",
+    "keepEditing": "Keep editing",
+    "discard": "Discard",
+    "changePhoto": "Change photo",
+    "usernameNote": "You can change it once every 30 days. Your old name stays reserved for you for 14 days. Tags and mentions update on their own.",
+    "usernameLocked": "You changed your username recently. You can change it again on {{date}}.",
+    "usernameCooldown": "You can only change your username once every 30 days.",
+    "takeBack": "Take back @{{username}}",
+    "heldUntil": "Held for you until {{date}}",
+    "bio": "Bio",
+    "bioPlaceholder": "Where you skate, what you ride, who you film",
+    "bioCountLabel": "{{count}} of {{max}} characters",
+    "iSkate": "I skate",
+    "home": "Home",
+    "noHomePark": "None",
+    "homeNote": "Moving cities? You'll be asked whether to say hi to skaters in your new city. Your old posts stay where they were filmed.",
+    "meetupNote": "Shows a tag on your profile"
+  },
+  "sayHi": {
+    "title": "Welcome to {{city}}",
+    "body": "Your home city is updated. Your old posts stay where they were filmed."
+  },
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "email": "Email",
+    "emailPending": "{{email}} · changing to {{next}}",
+    "change": "Change",
+    "appleGoogle": "Apple and Google sign-in",
+    "appleGoogleBody": "Link them to sign in without a code",
+    "privacy": "Privacy",
+    "private": "Private account",
+    "privateBody": "New followers need your OK. You're never shown as a regular.",
+    "regulars": "Show me in regulars lists",
+    "regularsBody": "At your home park and parks you post at a lot",
+    "roleBadge": "Show my role badge",
+    "app": "App",
+    "language": "Language",
+    "languageBody": "Follows your phone. Change it for Grindylocks in your phone's settings.",
+    "languageName": "English",
+    "distances": "Distances",
+    "distancesBody": "From your phone's region",
+    "miles": "Miles",
+    "kilometers": "Kilometers",
+    "help": "Help and legal",
+    "contact": "Help and contact",
+    "privacyPolicy": "Privacy policy",
+    "dataCopy": "Get a copy of my data",
+    "dataCopyBody": "We'll email it to you",
+    "dataCopySubject": "Copy of my data (@{{username}})",
+    "credits": "Credits",
+    "version": "Grindylocks beta · {{version}}"
+  },
+  "credits": {
+    "osm": "Map data © OpenStreetMap contributors",
+    "osmBody": "Park locations come from OpenStreetMap, available under the Open Database License.",
+    "osmLink": "openstreetmap.org/copyright"
+  },
+  "changeEmail": {
+    "title": "Change email",
+    "body": "You sign in with {{email}} now. We'll send a code to the new address to check it's yours.",
+    "label": "New email",
+    "same": "That's already your email.",
+    "taken": "Another account already uses that email.",
+    "confirm": "Change email",
+    "codeCurrent": "One more step: we also sent a code to your current address, {{email}}. Enter it below.",
+    "doneTitle": "Email changed",
+    "doneBody": "You'll sign in with {{email}} from now on."
   },
   "parkPhotos": {
     "open": "Open photos of {{park}}",

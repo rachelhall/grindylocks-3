@@ -52,16 +52,22 @@ src/
   app/            Expo Router screens (every file is a route)
     (auth)/       welcome and email sign-in
     (onboarding)/ age, username, city, regulars notice
-    (app)/        the signed-in app: (tabs)/ (home, map + search, notifications, you),
-                  new-post, post/[id], park/[slug]/ (the park page and its photos)
+    (app)/        the signed-in app: (tabs)/ (home, map, messages, search, you),
+                  new-post, post/[id], park/[slug]/ (the park page and its photos),
+                  profile/[username], edit-profile, say-hi, settings/ (index, email, credits)
   i18n/           i18next setup; locales/en.json is the source of truth
   lib/
     media.ts      picking, compressing and showing photos and clips
     uploads.ts    the persisted background upload queue; createPost()
     parks.ts      park directory data; hours.ts is open-now and sunrise/sunset
+    profiles.ts   profiles, the posts grid, profile photos, Edit profile and Settings saves
+    username.ts   the live free/taken username check (onboarding and Edit profile)
+    query.ts      TanStack Query client, cache keys and freshness
+    config.ts     support email and privacy policy URL (placeholders for now)
     park-photos.ts  park photos: gallery reads, uploads, reorder and remove
     supabase.ts   Supabase client, session encrypted with a SecureStore key
-    database.types.ts  generated; refresh with `npm run db:types` after migrations
+    database.types.ts  generated; refresh with `npm run db:types` after migrations,
+                       then put back `| null` on search_people's follow_status, home_metro_name and home_park_name (the generator drops it)
     env.ts        public EXPO_PUBLIC_ config
     sentry.ts     crash reporting (off until EXPO_PUBLIC_SENTRY_DSN is set)
   theme/          design system tokens and the <Text> component
