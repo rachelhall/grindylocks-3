@@ -5,7 +5,9 @@
     "retry": "Erneut versuchen",
     "continue": "Weiter",
     "back": "Zurück",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   },
   "auth": {
     "welcome": {
@@ -240,7 +242,13 @@
     "osmCredit": "Standort © OpenStreetMap-Mitwirkende",
     "disciplineYours": "{{discipline}}, fährst du",
     "missing": "Dieser Skatepark ist nicht verfügbar.",
-    "fees": "Preise"
+    "fees": "Preise",
+    "more": "Mehr",
+    "youAre": {
+      "park_contributor": "Du bist Mitwirkende*r",
+      "park_admin": "Du bist Park-Admin",
+      "city_admin": "Du bist Stadt-Admin"
+    }
   },
   "disciplines": {
     "inline": "Inline",
@@ -317,5 +325,51 @@
   },
   "profile": {
     "soon": "Profile kommen bald."
+  },
+  "parkPhotos": {
+    "title": "Parkfotos",
+    "open": "Fotos von {{park}} öffnen",
+    "add": "Fotos hinzufügen",
+    "addPark": "Parkfotos hinzufügen",
+    "noneYet": "Dieser Park hat noch keine Fotos",
+    "count": "{{current}} / {{max}}",
+    "tipWide": "Am besten zwei oder drei breite Querformat-Fotos vom ganzen Park.",
+    "tipPeople": "Lass Leute weg oder halte sie so klein, dass man sie nicht erkennt. Fahrfotos gehören in Posts.",
+    "tipRights": "Füge nur Fotos hinzu, die du selbst gemacht hast oder nutzen darfst.",
+    "full": "Dieser Park hat schon {{max}} Fotos. Archiviere eins, um ein neues hinzuzufügen.",
+    "unsupported_one": "{{count}} Foto konnte nicht hinzugefügt werden. Nutze JPEG, HEIC oder PNG.",
+    "unsupported_other": "{{count}} Fotos konnten nicht hinzugefügt werden. Nutze JPEG, HEIC oder PNG.",
+    "sheetTitle_one": "{{count}} Foto hinzufügen",
+    "sheetTitle_other": "{{count}} Fotos hinzufügen",
+    "upload_one": "Foto hochladen",
+    "upload_other": "{{count}} Fotos hochladen",
+    "photographer": "Fotograf*in",
+    "photographerHint": "Wer es gemacht hat. Lass deinen Benutzernamen stehen, wenn es deins ist.",
+    "source": "Quelle",
+    "sourceOwn": "Eigenes Foto",
+    "sourcePermission": "Erlaubnis von {{park}}",
+    "sourceOther": "Woanders her",
+    "sourceWhere": "Woher es stammt",
+    "license": "Lizenz",
+    "licenseOwn": "Eigenes",
+    "licensePermission": "Erlaubnis",
+    "licenseOther": "Andere",
+    "licenseWhich": "Welche Lizenz",
+    "uploadFailed": "Der Upload ist nicht fertig geworden. Prüf deine Verbindung und versuch es noch mal.",
+    "position": "Parkfotos · {{current}} / {{total}}",
+    "photoOf": "Foto {{current}} von {{total}}",
+    "photoBy": "Foto von",
+    "photoAlt": "Foto des Parks",
+    "added": "Hinzugefügt {{date}}",
+    "swipeHint": "Wisch für mehr. Fahrfotos findest du in Posts.",
+    "seePosts": "Posts von {{park}} ansehen",
+    "details": "Fotodetails",
+    "detailPhotographer": "Fotograf*in: {{name}}",
+    "detailSource": "Quelle: {{source}}",
+    "detailLicense": "Lizenz: {{license}}",
+    "makeFirst": "Als Titelfoto verwenden",
+    "archive": "Foto archivieren",
+    "archiveTitle": "Dieses Foto archivieren?",
+    "archiveBody": "Es verschwindet für alle aus der Galerie des Parks."
   }
 }

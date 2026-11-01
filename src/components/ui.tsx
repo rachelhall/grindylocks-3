@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   type KeyboardTypeOptions,
+  Modal,
   Pressable,
   StyleSheet,
   TextInput,
@@ -14,6 +15,8 @@ import {
   View,
   type ViewStyle,
 } from 'react-native';
+
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { fontFamily, size, space, stroke, Text, type ThemeColors, useColors } from '@/theme';
 
@@ -50,6 +53,12 @@ const icons = {
   chatFill: { ios: 'bubble.left.fill', android: 'chat' },
   lock: { ios: 'lock.fill', android: 'lock' },
   findPeople: { ios: 'person.2', android: 'person_search' },
+  more: { ios: 'ellipsis', android: 'more_horiz' },
+  addPhoto: { ios: 'photo.badge.plus', android: 'add_a_photo' },
+  landscape: { ios: 'photo', android: 'landscape' },
+  archive: { ios: 'archivebox', android: 'archive' },
+  star: { ios: 'star', android: 'star' },
+  info: { ios: 'info.circle', android: 'info' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
@@ -408,7 +417,89 @@ export function Toggle({
   );
 }
 
+/* Action sheet ------------------------------------------------------------ */
+
+export type SheetAction = { label: string; icon?: IconName; destructive?: boolean; onPress: () => void };
+
+/**
+ * A list of actions that slides up from the bottom, for "More" buttons.
+ * Square, outlined, 52px rows, with Cancel last.
+ */
+export function ActionSheet({
+  visible,
+  title,
+  actions,
+  onClose,
+}: {
+  visible: boolean;
+  title?: string;
+  actions: SheetAction[];
+  onClose: () => void;
+}) {
+  const c = useColors();
+  const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose} statusBarTranslucent>
+      <View style={styles.sheetRoot}>
+        <Pressable accessibilityLabel={t('common.cancel')} style={styles.sheetBackdrop} onPress={onClose} />
+        <View
+          style={[
+            styles.sheet,
+            { backgroundColor: c.surfaceRaised, borderColor: c.border, paddingBottom: insets.bottom + space[2] },
+          ]}
+        >
+          {title ? (
+            <Text variant="label" color="textSecondary" style={styles.sheetTitle}>
+              {title}
+            </Text>
+          ) : null}
+          {actions.map((a) => (
+            <Pressable
+              key={a.label}
+              accessibilityRole="button"
+              onPress={() => {
+                onClose();
+                // Let the sheet finish closing first: iOS drops a picker or
+                // alert opened while a modal is still dismissing.
+                setTimeout(a.onPress, 350);
+              }}
+              style={({ pressed }) => [styles.sheetRow, { borderBottomColor: c.borderSubtle }, pressed && styles.buttonPressed]}
+            >
+              {a.icon ? <Icon name={a.icon} color={a.destructive ? c.statusClosed : c.text} size={22} /> : null}
+              <Text variant="headline" color={a.destructive ? 'statusClosed' : 'text'}>
+                {a.label}
+              </Text>
+            </Pressable>
+          ))}
+          <Pressable
+            accessibilityRole="button"
+            onPress={onClose}
+            style={({ pressed }) => [styles.sheetRow, styles.sheetCancel, pressed && styles.buttonPressed]}
+          >
+            <Text variant="headline" color="textSecondary">
+              {t('common.cancel')}
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
 const styles = StyleSheet.create({
+  sheetRoot: { flex: 1, justifyContent: 'flex-end' },
+  sheetBackdrop: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, backgroundColor: 'rgba(17,17,17,0.5)' },
+  sheet: { borderTopWidth: stroke.rule, paddingHorizontal: space[4], paddingTop: space[3] },
+  sheetTitle: { paddingVertical: space[2] },
+  sheetRow: {
+    minHeight: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    borderBottomWidth: stroke.hairline,
+  },
+  sheetCancel: { borderBottomWidth: 0, justifyContent: 'center' },
   button: {
     minHeight: 56,
     borderWidth: stroke.rule,

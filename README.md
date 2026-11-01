@@ -53,16 +53,19 @@ src/
     (auth)/       welcome and email sign-in
     (onboarding)/ age, username, city, regulars notice
     (app)/        the signed-in app: (tabs)/ (home, map + search, notifications, you),
-                  new-post, post/[id], park/[slug]
+                  new-post, post/[id], park/[slug] and its photo gallery (park/[slug]/photos)
   i18n/           i18next setup; locales/en.json is the source of truth
   lib/
     media.ts      picking, compressing and showing photos and clips
     uploads.ts    the persisted background upload queue; createPost()
     parks.ts      park directory data; hours.ts is open-now and sunrise/sunset
+    park-photos.ts  park photos: reads, uploads, reorder, archive (park-media bucket)
+    roles.ts      the member's roles, for role-only controls and badges
     supabase.ts   Supabase client, session encrypted with a SecureStore key
     database.types.ts  generated; refresh with `npm run db:types` after migrations
     env.ts        public EXPO_PUBLIC_ config
     sentry.ts     crash reporting (off until EXPO_PUBLIC_SENTRY_DSN is set)
+  components/     shared UI; photocopy.tsx holds the park header's Skia filter values
   theme/          design system tokens and the <Text> component
 locales/          translated iOS permission prompts (es, da, de)
 supabase/         migrations from Nov 1 on, and Edge Functions

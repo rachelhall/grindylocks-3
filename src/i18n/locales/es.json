@@ -5,7 +5,9 @@
     "retry": "Reintentar",
     "continue": "Continuar",
     "back": "Atrás",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "cancel": "Cancelar",
+    "close": "Cerrar"
   },
   "auth": {
     "welcome": {
@@ -240,7 +242,13 @@
     "osmCredit": "Ubicación © colaboradores de OpenStreetMap",
     "disciplineYours": "{{discipline}}, lo practicas tú",
     "missing": "Este skatepark no está disponible.",
-    "fees": "Precios"
+    "fees": "Precios",
+    "more": "Más",
+    "youAre": {
+      "park_contributor": "Eres colaborador",
+      "park_admin": "Eres admin del parque",
+      "city_admin": "Eres admin de la ciudad"
+    }
   },
   "disciplines": {
     "inline": "Inline",
@@ -317,5 +325,51 @@
   },
   "profile": {
     "soon": "Los perfiles llegarán pronto."
+  },
+  "parkPhotos": {
+    "title": "Fotos del parque",
+    "open": "Abrir fotos de {{park}}",
+    "add": "Añadir fotos",
+    "addPark": "Añadir fotos del parque",
+    "noneYet": "Este parque aún no tiene fotos",
+    "count": "{{current}} / {{max}}",
+    "tipWide": "Lo mejor son dos o tres fotos anchas, en horizontal, de todo el parque.",
+    "tipPeople": "No incluyas personas, o que salgan tan pequeñas que no se reconozcan. Las fotos patinando van en publicaciones.",
+    "tipRights": "Añade solo fotos que hayas hecho tú o que tengas permiso para usar.",
+    "full": "Este parque ya tiene {{max}} fotos. Archiva una para añadir otra.",
+    "unsupported_one": "No se pudo añadir {{count}} foto. Usa JPEG, HEIC o PNG.",
+    "unsupported_other": "No se pudieron añadir {{count}} fotos. Usa JPEG, HEIC o PNG.",
+    "sheetTitle_one": "Añadir {{count}} foto",
+    "sheetTitle_other": "Añadir {{count}} fotos",
+    "upload_one": "Subir foto",
+    "upload_other": "Subir {{count}} fotos",
+    "photographer": "Fotógrafo/a",
+    "photographerHint": "Quién la hizo. Deja tu nombre de usuario si es tuya.",
+    "source": "Origen",
+    "sourceOwn": "Foto propia",
+    "sourcePermission": "Con permiso de {{park}}",
+    "sourceOther": "Otro sitio",
+    "sourceWhere": "De dónde es",
+    "license": "Licencia",
+    "licenseOwn": "Propia",
+    "licensePermission": "Con permiso",
+    "licenseOther": "Otra",
+    "licenseWhich": "Qué licencia",
+    "uploadFailed": "La subida no terminó. Revisa tu conexión e inténtalo de nuevo.",
+    "position": "Fotos del parque · {{current}} / {{total}}",
+    "photoOf": "Foto {{current}} de {{total}}",
+    "photoBy": "Foto de",
+    "photoAlt": "Foto del parque",
+    "added": "Añadida en {{date}}",
+    "swipeHint": "Desliza para ver más. Las fotos patinando están en las publicaciones.",
+    "seePosts": "Ver publicaciones de {{park}}",
+    "details": "Detalles de la foto",
+    "detailPhotographer": "Fotógrafo/a: {{name}}",
+    "detailSource": "Origen: {{source}}",
+    "detailLicense": "Licencia: {{license}}",
+    "makeFirst": "Usar como foto de cabecera",
+    "archive": "Archivar foto",
+    "archiveTitle": "¿Archivar esta foto?",
+    "archiveBody": "Desaparece de la galería del parque para todos."
   }
 }

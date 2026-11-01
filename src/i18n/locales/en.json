@@ -5,7 +5,9 @@
     "retry": "Try again",
     "continue": "Continue",
     "back": "Back",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "auth": {
     "welcome": {
@@ -240,7 +242,13 @@
     "osmCredit": "Location © OpenStreetMap contributors",
     "disciplineYours": "{{discipline}}, you ride this",
     "missing": "This park isn't available.",
-    "fees": "Fees"
+    "fees": "Fees",
+    "more": "More",
+    "youAre": {
+      "park_contributor": "You're a contributor",
+      "park_admin": "You're a park admin",
+      "city_admin": "You're a city admin"
+    }
   },
   "disciplines": {
     "inline": "Inline",
@@ -317,5 +325,51 @@
   },
   "profile": {
     "soon": "Profiles are coming soon."
+  },
+  "parkPhotos": {
+    "title": "Park photos",
+    "open": "Open photos of {{park}}",
+    "add": "Add photos",
+    "addPark": "Add park photos",
+    "noneYet": "This park has no photos yet",
+    "count": "{{current}} / {{max}}",
+    "tipWide": "Two or three wide, landscape shots of the whole park work best.",
+    "tipPeople": "Leave people out, or keep them too small to recognise. Riding shots go in posts.",
+    "tipRights": "Only add photos you took or have permission to use.",
+    "full": "This park already has {{max}} photos. Archive one to add another.",
+    "unsupported_one": "{{count}} photo couldn't be added. Use a JPEG, HEIC or PNG.",
+    "unsupported_other": "{{count}} photos couldn't be added. Use JPEG, HEIC or PNG.",
+    "sheetTitle_one": "Add {{count}} photo",
+    "sheetTitle_other": "Add {{count}} photos",
+    "upload_one": "Upload photo",
+    "upload_other": "Upload {{count}} photos",
+    "photographer": "Photographer",
+    "photographerHint": "Who took it. Leave your username if it's yours.",
+    "source": "Source",
+    "sourceOwn": "Own photo",
+    "sourcePermission": "Permission from {{park}}",
+    "sourceOther": "Somewhere else",
+    "sourceWhere": "Where it's from",
+    "license": "License",
+    "licenseOwn": "Own",
+    "licensePermission": "Permission",
+    "licenseOther": "Other",
+    "licenseWhich": "Which license",
+    "uploadFailed": "The upload didn't finish. Check your connection and try again.",
+    "position": "Park photos · {{current}} / {{total}}",
+    "photoOf": "Photo {{current}} of {{total}}",
+    "photoBy": "Photo by",
+    "photoAlt": "Photo of the park",
+    "added": "Added {{date}}",
+    "swipeHint": "Swipe for more. Skating shots live in posts.",
+    "seePosts": "See posts from {{park}}",
+    "details": "Photo details",
+    "detailPhotographer": "Photographer: {{name}}",
+    "detailSource": "Source: {{source}}",
+    "detailLicense": "License: {{license}}",
+    "makeFirst": "Make this the header photo",
+    "archive": "Archive photo",
+    "archiveTitle": "Archive this photo?",
+    "archiveBody": "It leaves the park's gallery for everyone."
   }
 }

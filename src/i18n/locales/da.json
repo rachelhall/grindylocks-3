@@ -5,7 +5,9 @@
     "retry": "Prøv igen",
     "continue": "Fortsæt",
     "back": "Tilbage",
-    "signOut": "Log ud"
+    "signOut": "Log ud",
+    "cancel": "Annuller",
+    "close": "Luk"
   },
   "auth": {
     "welcome": {
@@ -240,7 +242,13 @@
     "osmCredit": "Placering © OpenStreetMap-bidragydere",
     "disciplineYours": "{{discipline}}, det kører du",
     "missing": "Dette skatepark er ikke tilgængeligt.",
-    "fees": "Priser"
+    "fees": "Priser",
+    "more": "Mere",
+    "youAre": {
+      "park_contributor": "Du er bidragyder",
+      "park_admin": "Du er parkadmin",
+      "city_admin": "Du er byadmin"
+    }
   },
   "disciplines": {
     "inline": "Inline",
@@ -317,5 +325,51 @@
   },
   "profile": {
     "soon": "Profiler kommer snart."
+  },
+  "parkPhotos": {
+    "title": "Parkbilleder",
+    "open": "Åbn billeder af {{park}}",
+    "add": "Tilføj billeder",
+    "addPark": "Tilføj parkbilleder",
+    "noneYet": "Parken har ingen billeder endnu",
+    "count": "{{current}} / {{max}}",
+    "tipWide": "To eller tre brede billeder på langs af hele parken virker bedst.",
+    "tipPeople": "Lad folk være ude af billedet, eller hold dem så små, at de ikke kan genkendes. Billeder af kørsel hører til i opslag.",
+    "tipRights": "Tilføj kun billeder, du selv har taget eller har lov til at bruge.",
+    "full": "Parken har allerede {{max}} billeder. Arkivér ét for at tilføje et nyt.",
+    "unsupported_one": "{{count}} billede kunne ikke tilføjes. Brug JPEG, HEIC eller PNG.",
+    "unsupported_other": "{{count}} billeder kunne ikke tilføjes. Brug JPEG, HEIC eller PNG.",
+    "sheetTitle_one": "Tilføj {{count}} billede",
+    "sheetTitle_other": "Tilføj {{count}} billeder",
+    "upload_one": "Upload billede",
+    "upload_other": "Upload {{count}} billeder",
+    "photographer": "Fotograf",
+    "photographerHint": "Hvem der tog det. Behold dit brugernavn, hvis det er dit.",
+    "source": "Kilde",
+    "sourceOwn": "Eget billede",
+    "sourcePermission": "Tilladelse fra {{park}}",
+    "sourceOther": "Et andet sted",
+    "sourceWhere": "Hvor det kommer fra",
+    "license": "Licens",
+    "licenseOwn": "Egen",
+    "licensePermission": "Tilladelse",
+    "licenseOther": "Anden",
+    "licenseWhich": "Hvilken licens",
+    "uploadFailed": "Uploaden blev ikke færdig. Tjek din forbindelse, og prøv igen.",
+    "position": "Parkbilleder · {{current}} / {{total}}",
+    "photoOf": "Billede {{current}} af {{total}}",
+    "photoBy": "Foto:",
+    "photoAlt": "Billede af parken",
+    "added": "Tilføjet {{date}}",
+    "swipeHint": "Swipe for flere. Billeder af kørsel ligger i opslag.",
+    "seePosts": "Se opslag fra {{park}}",
+    "details": "Billeddetaljer",
+    "detailPhotographer": "Fotograf: {{name}}",
+    "detailSource": "Kilde: {{source}}",
+    "detailLicense": "Licens: {{license}}",
+    "makeFirst": "Brug som topbillede",
+    "archive": "Arkivér billede",
+    "archiveTitle": "Arkivér dette billede?",
+    "archiveBody": "Det forsvinder fra parkens galleri for alle."
   }
 }
