@@ -52,13 +52,19 @@ function extensionOf(uri: string, fileName?: string | null): string {
   return dot === -1 ? '' : name.slice(dot + 1).toLowerCase();
 }
 
-/** Opens the camera roll for up to `limit` photos and clips, in pick order. */
-export async function pickFromLibrary(limit: number): Promise<{
+/**
+ * Opens the camera roll for up to `limit` photos and clips, in pick order.
+ * `photosOnly` hides clips (park photos).
+ */
+export async function pickFromLibrary(
+  limit: number,
+  { photosOnly = false }: { photosOnly?: boolean } = {},
+): Promise<{
   picked: PickedMedia[];
   rejected: { kind: MediaKind; reason: Rejection }[];
 }> {
   const result = await ImagePicker.launchImageLibraryAsync({
-    mediaTypes: ['images', 'videos'],
+    mediaTypes: photosOnly ? ['images'] : ['images', 'videos'],
     allowsMultipleSelection: true,
     selectionLimit: limit,
     orderedSelection: true,
@@ -131,7 +137,10 @@ export type PreparedMedia = {
   durationS?: number;
 };
 
-/** Compresses a photo or copies a clip into the uploads folder. */
+/**
+ * Compresses a photo or copies a clip into the uploads folder, named after
+ * `slideId` (a park photo's ID for park photos).
+ */
 export async function prepareForUpload(media: PickedMedia, slideId: string): Promise<PreparedMedia> {
   const dir = uploadsDir();
 
@@ -181,10 +190,16 @@ export function deleteLocalFile(uri: string) {
 
 /* Showing media ------------------------------------------------------------ */
 
-/** Short-lived signed URLs for photos the viewer is allowed to see. */
-export async function photoUrls(paths: string[]): Promise<Record<string, string>> {
+/**
+ * Short-lived (one hour) signed URLs for photos the viewer is allowed to
+ * see: post photos, or park photos from the park-media bucket.
+ */
+export async function photoUrls(
+  paths: string[],
+  bucket: 'post-media' | 'park-media' = 'post-media',
+): Promise<Record<string, string>> {
   if (paths.length === 0) return {};
-  const { data, error } = await supabase.storage.from('post-media').createSignedUrls(paths, 60 * 60);
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrls(paths, 60 * 60);
   if (error || !data) return {};
   const out: Record<string, string> = {};
   for (const item of data) {
