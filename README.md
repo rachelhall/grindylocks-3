@@ -1,56 +1,63 @@
-# Welcome to your Expo app 👋
+# Grindylocks
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Skate park directory and social app for bladers, quad skaters and skateboarders. iOS and Android, built with Expo (SDK 57) and Supabase.
 
-## Get started
+Product context lives in the Grindylocks Claude project (Project Brief, Roadmap, Product Decisions). Visual rules live in the Grindylocks design system.
 
-1. Install dependencies
+## Setup
 
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm install
+cp .env.example .env   # public Supabase URL and publishable key are pre-filled
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Running the app
 
-### Other setup steps
+The app runs as a **development build**, not in Expo Go: uploads, video compression, Google sign-in and native crash reporting all need native modules Expo Go doesn't have.
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Build and install the dev build once, then rebuild only when you add a package with native code or change `app.json`:
 
-## Learn more
+```sh
+npm run ios       # builds with Xcode, installs on the simulator or a plugged-in iPhone
+npm run android   # builds with Android Studio's SDK, installs on an emulator or device
+# or build in the cloud instead:
+npx eas-cli@latest build --profile development --platform ios
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Day to day, just start the dev server and open the installed app:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```sh
+npm start
+```
 
-## Join the community
+## Checks
 
-Join our community of developers creating universal apps.
+```sh
+npm run typecheck
+npm run lint
+npm run check:i18n   # es, da and de have exactly the keys en has
+npx expo-doctor
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Layout
+
+```
+src/
+  app/            Expo Router screens (every file is a route)
+  i18n/           i18next setup; locales/en.json is the source of truth
+  lib/
+    supabase.ts   Supabase client, session encrypted with a SecureStore key
+    database.types.ts  generated; refresh with `npm run db:types` after migrations
+    env.ts        public EXPO_PUBLIC_ config
+    sentry.ts     crash reporting (off until EXPO_PUBLIC_SENTRY_DSN is set)
+  theme/          design system tokens and the <Text> component
+```
+
+## Conventions
+
+- **Theme:** use semantic colors from `useColors()` (`surface`, `text`, `accent`…), never raw hex. No rounded corners, no shadows; depth is a 2px `border` outline. Tappable things are at least 48px.
+- **Text:** use `<Text variant="...">` from `@/theme`; display styles and labels are uppercased automatically.
+- **Translations:** every user-facing string goes through `t()`. Add the key to `en.json` first, then the other three. Trick names are never translated; captions and comments stay as written.
+- **Units:** store metric, display by locale (`usesMetric()`).
+- **Secrets:** only public values go in `EXPO_PUBLIC_` variables. The service-role key never ships in the app.
+- **Packages:** install with `npx expo install` so versions match the SDK.

@@ -1,0 +1,14 @@
+{
+  "common": {
+    "appName": "Grindylocks",
+    "loading": "Indlæser",
+    "retry": "Prøv igen"
+  },
+  "home": {
+    "title": "Parker",
+    "comingSoon": "Parkoversigten kommer i M2."
+  },
+  "errors": {
+    "generic": "Noget gik galt."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "common": {
+    "appName": "Grindylocks",
+    "loading": "Wird geladen",
+    "retry": "Erneut versuchen"
+  },
+  "home": {
+    "title": "Parks",
+    "comingSoon": "Das Parkverzeichnis kommt in M2."
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "common": {
+    "appName": "Grindylocks",
+    "loading": "Loading",
+    "retry": "Try again"
+  },
+  "home": {
+    "title": "Parks",
+    "comingSoon": "Park directory coming in M2."
+  },
+  "errors": {
+    "generic": "Something went wrong."
+  }
+}
