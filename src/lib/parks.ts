@@ -1,8 +1,10 @@
 /** Park directory data: map pins, near me, search and park pages. */
-import { useCallback, useEffect, useState } from 'react';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 
 import type { Database } from './database.types';
 import type { SessionRow } from './hours';
+import { fresh, keys, queryClient } from './query';
 import { supabase } from './supabase';
 
 type Enums = Database['public']['Enums'];
@@ -163,45 +165,130 @@ export function pickDescription(descriptions: { locale: string; body: string }[]
   )?.body;
 }
 
+/* Cached reads ------------------------------------------------------------------ */
+
+/**
+ * A park's full detail. The map card and the park page share this entry, so
+ * switching between cards or opening the page shows cached hours at once.
+ */
+export function usePark(slug: string | undefined) {
+  return useQuery({
+    queryKey: keys.park(slug ?? ''),
+    queryFn: () => fetchPark(slug!),
+    enabled: Boolean(slug),
+    staleTime: fresh.parks,
+  });
+}
+
+/** Pins for the visible map area; the last pins stay up while new ones load. */
+export function useParksInBounds(bounds: Bounds | null) {
+  return useQuery({
+    queryKey: bounds ? keys.parksInBounds(bounds) : ['parks', 'bounds', 'none'],
+    queryFn: () => parksInBounds(bounds!),
+    enabled: bounds !== null,
+    staleTime: fresh.parks,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useParksInMetro(metroId: string | null | undefined) {
+  return useQuery({
+    queryKey: keys.parksInMetro(metroId ?? ''),
+    queryFn: () => parksInMetro(metroId!),
+    enabled: Boolean(metroId),
+    staleTime: fresh.parks,
+  });
+}
+
+export function useMetro(id: string | null | undefined) {
+  return useQuery({
+    queryKey: keys.metro(id ?? ''),
+    queryFn: () => fetchMetro(id!),
+    enabled: Boolean(id),
+    staleTime: fresh.parks,
+  });
+}
+
+/** Directory search; the last results stay up while the next ones load. */
+export function useDirectorySearch(q: string) {
+  const query = q.trim();
+  return useQuery({
+    queryKey: keys.search(query),
+    queryFn: () => searchDirectory(query),
+    enabled: query.length >= 2,
+    staleTime: fresh.search,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** One-off reads outside a component (the map's first framing), through the same cache. */
+export const fetchParksInMetroCached = (metroId: string) =>
+  queryClient.fetchQuery({
+    queryKey: keys.parksInMetro(metroId),
+    queryFn: () => parksInMetro(metroId),
+    staleTime: fresh.parks,
+  });
+
+export const fetchParksNearCached = (lat: number, lng: number, max: number) =>
+  queryClient.fetchQuery({
+    queryKey: keys.parksNear(lat, lng, max),
+    queryFn: () => parksNear(lat, lng, max),
+    staleTime: fresh.parks,
+  });
+
+/** Starts loading a park before it's needed (e.g. the card picked on first open). */
+export const prefetchPark = (slug: string) =>
+  queryClient.prefetchQuery({ queryKey: keys.park(slug), queryFn: () => fetchPark(slug), staleTime: fresh.parks });
+
 /* Saved parks ("want to skate") ------------------------------------------------- */
 
+async function fetchSavedParkIds(userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from('saved_parks').select('park_id').eq('user_id', userId);
+  if (error) throw error;
+  return (data ?? []).map((r) => r.park_id);
+}
+
+/**
+ * The member's saved parks, shared by every bookmark on screen. Toggling is
+ * optimistic: every bookmark flips at once and flips back if the write fails.
+ */
 export function useSavedParks(userId: string | undefined) {
-  const [saved, setSaved] = useState<Set<string>>(new Set());
+  const client = useQueryClient();
+  const key = keys.savedParks(userId ?? '');
 
-  useEffect(() => {
-    if (!userId) return;
-    supabase
-      .from('saved_parks')
-      .select('park_id')
-      .eq('user_id', userId)
-      .then(({ data }) => setSaved(new Set((data ?? []).map((r) => r.park_id))));
-  }, [userId]);
+  const { data } = useQuery({
+    queryKey: key,
+    queryFn: () => fetchSavedParkIds(userId!),
+    enabled: Boolean(userId),
+    staleTime: fresh.mine,
+  });
+  const saved = useMemo(() => new Set(data ?? []), [data]);
 
-  const toggle = useCallback(
-    async (parkId: string) => {
-      if (!userId) return;
-      const wasSaved = saved.has(parkId);
-      // Optimistic, then undone if the write fails.
-      setSaved((prev) => {
-        const next = new Set(prev);
-        if (wasSaved) next.delete(parkId);
-        else next.add(parkId);
-        return next;
-      });
-      const { error } = wasSaved
-        ? await supabase.from('saved_parks').delete().eq('user_id', userId).eq('park_id', parkId)
-        : await supabase.from('saved_parks').insert({ user_id: userId, park_id: parkId });
-      if (error) {
-        setSaved((prev) => {
-          const next = new Set(prev);
-          if (wasSaved) next.add(parkId);
-          else next.delete(parkId);
-          return next;
-        });
-      }
+  const mutation = useMutation({
+    mutationFn: async ({ parkId, save }: { parkId: string; save: boolean }) => {
+      const { error } = save
+        ? await supabase.from('saved_parks').insert({ user_id: userId!, park_id: parkId })
+        : await supabase.from('saved_parks').delete().eq('user_id', userId!).eq('park_id', parkId);
+      if (error) throw error;
     },
-    [saved, userId],
-  );
+    onMutate: async ({ parkId, save }) => {
+      await client.cancelQueries({ queryKey: key });
+      const previous = client.getQueryData<string[]>(key);
+      client.setQueryData<string[]>(key, (ids = []) =>
+        save ? [...new Set([...ids, parkId])] : ids.filter((id) => id !== parkId),
+      );
+      return { previous };
+    },
+    onError: (_error, _vars, context) => {
+      client.setQueryData(key, context?.previous);
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: key }),
+  });
+
+  const toggle = async (parkId: string) => {
+    if (!userId) return;
+    await mutation.mutateAsync({ parkId, save: !saved.has(parkId) }).catch(() => undefined);
+  };
 
   return { saved, toggle };
 }

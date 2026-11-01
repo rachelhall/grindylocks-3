@@ -29,6 +29,18 @@ Run lint and typecheck before declaring any task done.
 - Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
 - Docs: https://docs.expo.dev/router/introduction.md
 
+## Data fetching (TanStack Query)
+
+Server data is cached with **TanStack Query** (`@tanstack/react-query`); the client and its React Native wiring live in `src/lib/query.ts`.
+
+- **Reads go through query hooks**, never `useEffect` + `useState`. Fetch functions stay plain async functions in `src/lib/` (they throw on error); hooks wrap them (`usePark`, `useParksInBounds`, `useSavedParks`, …). Outside a component, use `queryClient.fetchQuery` / `prefetchQuery` with the same key so the cache is shared.
+- **Keys come from `keys` in `src/lib/query.ts`.** Screens that show the same data use the same key: the map card and the park page both read `keys.park(slug)`.
+- **Freshness comes from `fresh`:** park data 10 minutes, your own data always refetched on view, posts 5 minutes because their signed photo URLs expire after an hour.
+- **Writes go through `useMutation`.** Toggles a member expects to flip at once (saving a park) update the cache optimistically and roll back on error; then invalidate the key.
+- Refetching on foreground and reconnect is wired up through `AppState` and `expo-network`. The cache is cleared on sign-out, and anything per-member has the user ID in its key.
+- Exceptions: the signed-in profile stays in `AuthProvider` (it decides routing), and the onboarding username check is a live validation, not cached data.
+- No GraphQL layer: PostgREST nested selects and RPCs cover it.
+
 ## Building with EAS
 
 Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submit`) and to ship over-the-air updates (`eas update`) — no local Xcode or Android Studio required. Run EAS CLI as `bunx eas-cli <command>` in Bun projects, or `npx eas-cli@latest <command>` otherwise; substitute that for bare `eas` in docs examples.

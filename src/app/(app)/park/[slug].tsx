@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -17,7 +17,7 @@ import {
   sunTime,
   weekdayName,
 } from '@/lib/hours';
-import { type Discipline, fetchPark, type ParkDetail, pickDescription, useSavedParks } from '@/lib/parks';
+import { type Discipline, type ParkDetail, pickDescription, usePark, useSavedParks } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 type HoursLine = { key: string; season: string | null; days: string; time: string; disciplines: Discipline[]; note: string | null };
@@ -33,15 +33,10 @@ export default function ParkScreen() {
   const c = useColors();
   const { session, profile } = useAuth();
   const { saved, toggle } = useSavedParks(session?.user.id);
-  const [park, setPark] = useState<ParkDetail | null | undefined>(undefined);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    if (!slug) return;
-    fetchPark(slug)
-      .then(setPark)
-      .catch(() => setFailed(true));
-  }, [slug]);
+  // Shared with the map card's cache entry, so a park opened from its card
+  // shows straight away. `null` means no park has this slug.
+  const { data: park, isError, refetch } = usePark(slug);
+  const failed = isError && park === undefined;
 
   const locale = i18n.language;
   const place = useMemo(
@@ -121,6 +116,7 @@ export default function ParkScreen() {
           <Text variant="body" color="textSecondary">
             {failed ? t('errors.network') : t('park.missing')}
           </Text>
+          {failed ? <Button label={t('common.retry')} onPress={() => void refetch()} /> : null}
           <Button label={t('common.back')} variant="secondary" onPress={() => router.back()} />
         </View>
       </SafeAreaView>

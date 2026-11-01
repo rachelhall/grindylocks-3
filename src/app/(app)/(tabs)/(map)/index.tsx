@@ -1,6 +1,6 @@
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
@@ -14,13 +14,12 @@ import { openState } from '@/lib/hours';
 import {
   type Bounds,
   distanceMeters,
-  fetchPark,
+  fetchParksInMetroCached,
+  fetchParksNearCached,
   formatDistance,
-  type ParkDetail,
   type ParkPin,
-  parksInBounds,
-  parksInMetro,
-  parksNear,
+  usePark,
+  useParksInBounds,
   useSavedParks,
 } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
@@ -55,12 +54,10 @@ export default function MapScreen() {
   const { saved, toggle } = useSavedParks(session?.user.id);
   const describe = useParkLine();
 
-  const [pins, setPins] = useState<ParkPin[]>([]);
+  const [bounds, setBounds] = useState<Bounds | null>(null);
   const [selected, setSelected] = useState<ParkPin | null>(null);
-  const [detail, setDetail] = useState<ParkDetail | null>(null);
   const [me, setMe] = useState<LatLng | null>(null);
   const [locationOn, setLocationOn] = useState(false);
-  const [loadError, setLoadError] = useState(false);
   const [mapReady, setMapReady] = useState(false);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -81,7 +78,7 @@ export default function MapScreen() {
   const showHomeCity = useCallback(async () => {
     const metroId = profile?.home_metro_area_id;
     if (!metroId) return;
-    const parks = await parksInMetro(metroId).catch(() => []);
+    const parks = await fetchParksInMetroCached(metroId).catch(() => []);
     const located = parks.filter((p) => p.latitude !== null);
     fitTo(located);
     if (located[0]) setSelected((s) => s ?? located[0]);
@@ -114,7 +111,7 @@ export default function MapScreen() {
     let cancelled = false;
     (async () => {
       if (metro) {
-        const parks = await parksInMetro(metro).catch(() => []);
+        const parks = await fetchParksInMetroCached(metro).catch(() => []);
         if (cancelled) return;
         const located = parks.filter((p) => p.latitude !== null);
         fitTo(located);
@@ -128,7 +125,7 @@ export default function MapScreen() {
         await showHomeCity();
         return;
       }
-      const near = await parksNear(here.latitude, here.longitude, 5).catch(() => []);
+      const near = await fetchParksNearCached(here.latitude, here.longitude, 5).catch(() => []);
       if (cancelled) return;
       if (near[0]) {
         setSelected(near[0]);
@@ -145,31 +142,27 @@ export default function MapScreen() {
 
   /* Pins for the visible area --------------------------------------------- */
 
+  // Settles 250 ms after the map stops moving; the cache keeps the last pins
+  // up while the new area loads, and panning back reuses earlier results.
   const onRegionChangeComplete = useCallback((region: Region) => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);
-    fetchTimer.current = setTimeout(() => {
-      parksInBounds(toBounds(region))
-        .then((parks) => {
-          setPins(parks);
-          setLoadError(false);
-        })
-        .catch(() => setLoadError(true));
-    }, 250);
+    fetchTimer.current = setTimeout(() => setBounds(toBounds(region)), 250);
   }, []);
 
-  // The card needs hours and the metro's time zone for "open now".
-  useEffect(() => {
-    if (!selected) return;
-    let cancelled = false;
-    fetchPark(selected.slug)
-      .then((d) => {
-        if (!cancelled) setDetail(d);
-      })
-      .catch(() => undefined);
-    return () => {
-      cancelled = true;
-    };
-  }, [selected]);
+  useEffect(
+    () => () => {
+      if (fetchTimer.current) clearTimeout(fetchTimer.current);
+    },
+    [],
+  );
+
+  const pinsQuery = useParksInBounds(bounds);
+  const pins = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
+  const loadError = pinsQuery.isError;
+
+  // The card needs hours and the metro's time zone for "open now". It's the
+  // same cache entry the park page reads, so a park seen once shows at once.
+  const { data: detail } = usePark(selected?.slug);
 
   async function recenter() {
     const here = me ?? (await locate(true));

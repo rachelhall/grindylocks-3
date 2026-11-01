@@ -1,5 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Carousel, type ViewSlide } from '@/components/media';
 import { BackButton, Button } from '@/components/ui';
 import { photoUrls } from '@/lib/media';
+import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { space, Text, useColors } from '@/theme';
 
@@ -26,7 +27,8 @@ async function loadPost(id: string): Promise<Loaded | null> {
     )
     .eq('id', id)
     .maybeSingle();
-  if (error || !data) return null;
+  if (error) throw error;
+  if (!data) return null;
 
   const rows = [...data.post_slides].sort((a, b) => a.position - b.position);
   const urls = await photoUrls(
@@ -60,21 +62,17 @@ export default function PostScreen() {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const { width } = useWindowDimensions();
-  const [post, setPost] = useState<Loaded | null | undefined>(undefined);
-
-  const refresh = useCallback(() => {
-    if (id) loadPost(id).then(setPost);
-  }, [id]);
-
-  useEffect(refresh, [refresh]);
-
-  // While anything is still uploading, check back every few seconds.
-  const pending = post?.slides.some((s) => s.status !== 'ready' && s.status !== 'failed');
-  useEffect(() => {
-    if (!pending) return;
-    const timer = setInterval(refresh, 5000);
-    return () => clearInterval(timer);
-  }, [pending, refresh]);
+  const { data, isError } = useQuery({
+    queryKey: keys.post(id ?? ''),
+    queryFn: () => loadPost(id!),
+    enabled: Boolean(id),
+    staleTime: fresh.posts,
+    // While anything is still uploading, check back every few seconds.
+    refetchInterval: (query) =>
+      query.state.data?.slides.some((s) => s.status !== 'ready' && s.status !== 'failed') ? 5000 : false,
+  });
+  // undefined while loading; null when the post is gone or couldn't load.
+  const post: Loaded | null | undefined = data ?? (isError ? null : undefined);
 
   const date = post
     ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(

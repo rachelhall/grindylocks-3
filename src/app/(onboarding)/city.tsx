@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -7,6 +8,7 @@ import { FormScreen } from '@/components/screen';
 import { Button, SelectRow, StepHeader, TextField, Toggle } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { ONBOARDING_STEPS, useOnboarding } from '@/lib/onboarding';
+import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { fontFamily, space, Text, useColors } from '@/theme';
 
@@ -31,8 +33,8 @@ function fold(s: string) {
     .toLowerCase();
 }
 
-/** Every metro area and park, for the pickers. Null if either fails to load. */
-async function fetchDirectory(): Promise<{ metros: Metro[]; parks: Park[] } | null> {
+/** Every metro area and park, for the pickers. */
+async function fetchDirectory(): Promise<{ metros: Metro[]; parks: Park[] }> {
   const [m, p] = await Promise.all([
     supabase.from('metro_areas').select('id, name').order('name'),
     supabase
@@ -40,7 +42,8 @@ async function fetchDirectory(): Promise<{ metros: Metro[]; parks: Park[] } | nu
       .select('id, display_name, official_name, aliases, city, metro_area_id')
       .order('display_name'),
   ]);
-  if (m.error || p.error) return null;
+  if (m.error) throw m.error;
+  if (p.error) throw p.error;
   return { metros: m.data, parks: p.data };
 }
 
@@ -55,9 +58,10 @@ export default function CityStep() {
   const { session, profile, refreshProfile } = useAuth();
   const { announce, setAnnounce, setAnnounceAsked } = useOnboarding();
 
-  const [metros, setMetros] = useState<Metro[] | null>(null);
-  const [parks, setParks] = useState<Park[]>([]);
-  const [loadError, setLoadError] = useState(false);
+  const directory = useQuery({ queryKey: keys.directory(), queryFn: fetchDirectory, staleTime: fresh.parks });
+  const metros = directory.data?.metros ?? null;
+  const parks = useMemo(() => directory.data?.parks ?? [], [directory.data]);
+  const loadError = directory.isError && !directory.data;
   const [metroId, setMetroId] = useState<string | null>(profile?.home_metro_area_id ?? null);
   const [parkId, setParkId] = useState<string | null>(profile?.home_park_id ?? null);
   const [cityQuery, setCityQuery] = useState('');
@@ -66,29 +70,8 @@ export default function CityStep() {
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  function applyDirectory(result: Awaited<ReturnType<typeof fetchDirectory>>) {
-    if (!result) {
-      setLoadError(true);
-      return;
-    }
-    setLoadError(false);
-    setMetros(result.metros);
-    setParks(result.parks);
-  }
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchDirectory().then((result) => {
-      if (!cancelled) applyDirectory(result);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  async function retry() {
-    setLoadError(false);
-    applyDirectory(await fetchDirectory());
+  function retry() {
+    void directory.refetch();
   }
 
   const parkCount = useMemo(() => {

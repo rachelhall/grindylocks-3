@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,15 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SaveButton, StatusChip, useParkLine } from '@/components/parks';
 import { BackButton, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import {
-  fetchMetro,
-  type Metro,
-  type ParkPin,
-  parksInMetro,
-  type SearchResult,
-  searchDirectory,
-  useSavedParks,
-} from '@/lib/parks';
+import { type ParkPin, useDirectorySearch, useMetro, useParksInMetro, useSavedParks } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /** "Denmark" for "DK", in the reader's language; falls back to the code. */
@@ -41,49 +33,35 @@ export default function Search() {
   const describe = useParkLine();
 
   const [q, setQ] = useState('');
-  const [results, setResults] = useState<SearchResult[] | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [metro, setMetro] = useState<Metro | null>(null);
-  const [metroParks, setMetroParks] = useState<ParkPin[]>([]);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debounced, setDebounced] = useState('');
+  const [metroId, setMetroId] = useState<string | null>(null);
 
-  const latest = useRef('');
+  // Searches 250 ms after typing stops. Results are cached by query text, so
+  // backspacing to an earlier query shows its results at once, and the last
+  // results stay up while the next ones load.
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(q.trim()), 250);
+    return () => clearTimeout(timer);
+  }, [q]);
 
-  // Searches 250 ms after typing stops; late answers to old queries are dropped.
+  const query = q.trim();
+  const search = useDirectorySearch(debounced);
+  const results = query.length < 2 ? null : (search.data ?? (search.isError ? [] : null));
+  const searching = query.length >= 2 && (query !== debounced || search.isFetching);
+
+  // A picked city shows once both its name and its parks are in.
+  const metroQuery = useMetro(metroId);
+  const metroParksQuery = useParksInMetro(metroId);
+  const metro = metroId && metroQuery.data && metroParksQuery.data ? metroQuery.data : null;
+  const metroParks: ParkPin[] = metroParksQuery.data ?? [];
+
   function onChangeQuery(value: string) {
     setQ(value);
-    setMetro(null);
-    if (timer.current) clearTimeout(timer.current);
-    const query = value.trim();
-    latest.current = query;
-    if (query.length < 2) {
-      setResults(null);
-      setSearching(false);
-      return;
-    }
-    setSearching(true);
-    timer.current = setTimeout(() => {
-      searchDirectory(query)
-        .catch(() => [])
-        .then((rows) => {
-          if (latest.current !== query) return;
-          setResults(rows);
-          setSearching(false);
-        });
-    }, 250);
+    setMetroId(null);
   }
 
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-    },
-    [],
-  );
-
-  async function openMetro(id: string) {
-    const [m, parks] = await Promise.all([fetchMetro(id), parksInMetro(id).catch(() => [])]);
-    setMetro(m);
-    setMetroParks(parks);
+  function openMetro(id: string) {
+    setMetroId(id);
   }
 
   function openPark(slug: string) {
@@ -96,7 +74,7 @@ export default function Search() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
       <View style={styles.header}>
-        <BackButton onPress={() => (metro ? setMetro(null) : router.back())} />
+        <BackButton onPress={() => (metroId ? setMetroId(null) : router.back())} />
         <View style={[styles.input, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
           <Icon name="search" color={c.text} size={20} />
           <TextInput
@@ -213,7 +191,7 @@ export default function Search() {
                   <Pressable
                     key={m.id}
                     accessibilityRole="button"
-                    onPress={() => void openMetro(m.id)}
+                    onPress={() => openMetro(m.id)}
                     style={({ pressed }) => [styles.row, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
                   >
                     <View style={styles.flex}>

@@ -1,5 +1,6 @@
+import { useQuery } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,9 +8,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { UploadCard } from '@/components/media';
 import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { uploads, useUploads } from '@/lib/uploads';
 import { space, stroke, Text, useColors } from '@/theme';
+
+async function fetchMyPosts(userId: string) {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('id, caption, created_at, published_at, slide_count')
+    .eq('author_id', userId)
+    .neq('status', 'deleted')
+    .order('created_at', { ascending: false })
+    .limit(20);
+  if (error) throw error;
+  return data ?? [];
+}
 
 type MyPost = {
   id: string;
@@ -28,26 +42,34 @@ export default function Home() {
   const c = useColors();
   const { session } = useAuth();
   const queued = useUploads();
-  const [posts, setPosts] = useState<MyPost[]>([]);
-
   const userId = session?.user.id;
-  const load = useCallback(() => {
-    if (!userId) return;
-    supabase
-      .from('posts')
-      .select('id, caption, created_at, published_at, slide_count')
-      .eq('author_id', userId)
-      .neq('status', 'deleted')
-      .order('created_at', { ascending: false })
-      .limit(20)
-      .then(({ data }) => setPosts(data ?? []));
-  }, [userId]);
 
-  useFocusEffect(load);
+  const { data, refetch } = useQuery({
+    queryKey: keys.myPosts(userId ?? ''),
+    queryFn: () => fetchMyPosts(userId!),
+    enabled: Boolean(userId),
+    staleTime: fresh.mine,
+  });
+  const posts: MyPost[] = data ?? [];
+  const load = useCallback(() => void refetch(), [refetch]);
+
+  // Shows the cached list straight away, then checks for changes, whenever
+  // the tab comes back into view (skipping the first time, which the query
+  // already loads).
+  const focusedOnce = useRef(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (focusedOnce.current) load();
+      focusedOnce.current = true;
+    }, [load]),
+  );
 
   // Refresh the list when a post joins or leaves the upload queue.
   const queuedIds = queued.map((q) => q.postId).join(',');
+  const lastQueued = useRef(queuedIds);
   useEffect(() => {
+    if (lastQueued.current === queuedIds) return;
+    lastQueued.current = queuedIds;
     load();
   }, [queuedIds, load]);
 
