@@ -282,6 +282,7 @@ export type Database = {
           id: string
           name: string
           region: string | null
+          timezone: string | null
         }
         Insert: {
           country: string
@@ -289,6 +290,7 @@ export type Database = {
           id?: string
           name: string
           region?: string | null
+          timezone?: string | null
         }
         Update: {
           country?: string
@@ -296,6 +298,7 @@ export type Database = {
           id?: string
           name?: string
           region?: string | null
+          timezone?: string | null
         }
         Relationships: []
       }
@@ -749,7 +752,9 @@ export type Database = {
           helmet_required: boolean | null
           id: string
           is_paid: boolean
+          latitude: number | null
           location: unknown
+          longitude: number | null
           metro_area_id: string
           night_lighting: boolean | null
           official_name: string | null
@@ -1332,6 +1337,38 @@ export type Database = {
           banned_at: string
           invites_remaining: number
           suspended_until: string
+        }[]
+      }
+      parks_near: {
+        Args: { lat: number; lng: number; max_results?: number }
+        Returns: {
+          city: string
+          display_name: string
+          distance_m: number
+          id: string
+          latitude: number
+          longitude: number
+          night_lighting: boolean
+          park_type: Database["public"]["Enums"]["park_type"]
+          setting: Database["public"]["Enums"]["park_setting"]
+          slug: string
+          status: Database["public"]["Enums"]["park_status"]
+        }[]
+      }
+      search_directory: {
+        Args: { max_results?: number; q: string }
+        Returns: {
+          country: string
+          detail: string
+          id: string
+          kind: string
+          matched_alias: string
+          metro_area_id: string
+          name: string
+          park_count: number
+          park_type: Database["public"]["Enums"]["park_type"]
+          slug: string
+          status: Database["public"]["Enums"]["park_status"]
         }[]
       }
     }

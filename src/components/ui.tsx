@@ -30,6 +30,21 @@ const icons = {
   sync: { ios: 'arrow.triangle.2.circlepath', android: 'sync' },
   photo: { ios: 'photo', android: 'image' },
   video: { ios: 'video', android: 'videocam' },
+  home: { ios: 'house', android: 'home' },
+  homeFill: { ios: 'house.fill', android: 'home' },
+  map: { ios: 'map', android: 'map' },
+  mapFill: { ios: 'map.fill', android: 'map' },
+  bell: { ios: 'bell', android: 'notifications' },
+  bellFill: { ios: 'bell.fill', android: 'notifications' },
+  person: { ios: 'person', android: 'person' },
+  personFill: { ios: 'person.fill', android: 'person' },
+  bookmark: { ios: 'bookmark', android: 'bookmark' },
+  bookmarkFill: { ios: 'bookmark.fill', android: 'bookmark' },
+  pin: { ios: 'mappin', android: 'location_on' },
+  directions: { ios: 'arrow.triangle.turn.up.right.diamond', android: 'directions' },
+  locate: { ios: 'location', android: 'my_location' },
+  list: { ios: 'list.bullet', android: 'list' },
+  chevron: { ios: 'chevron.right', android: 'chevron_right' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

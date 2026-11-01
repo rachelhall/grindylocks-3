@@ -99,9 +99,9 @@
     }
   },
   "home": {
-    "title": "Parks",
-    "comingSoon": "Park directory coming in M2.",
-    "signedInAs": "Signed in as @{{username}}"
+    "title": "Home",
+    "signedInAs": "Signed in as @{{username}}",
+    "feedSoon": "Your feed is coming. For now, here are your own posts."
   },
   "errors": {
     "generic": "Something went wrong.",
@@ -154,5 +154,140 @@
     "videoUnavailable": "Clips can't play yet: video playback isn't set up.",
     "posted": "Posted {{date}}",
     "notPosted": "Not posted yet: still uploading"
+  },
+  "tabs": {
+    "home": "Home",
+    "map": "Map",
+    "newPost": "New post",
+    "notifications": "Notifications",
+    "you": "You"
+  },
+  "map": {
+    "search": "Search a city or park",
+    "locate": "Centre on my location",
+    "viewPark": "View park",
+    "directions": "Directions",
+    "noParksHere": "No parks on this part of the map yet.",
+    "pinSelected": "{{park}}, selected",
+    "loadError": "Couldn't load parks. Check your connection."
+  },
+  "search": {
+    "back": "Back to map",
+    "clear": "Clear search",
+    "hint": "Search by city, park name or what locals call it.",
+    "cities": "Cities",
+    "parks": "Parks",
+    "noResults": "Nothing matches “{{q}}” yet.",
+    "alsoKnownAs": "Also known as {{name}}",
+    "parkCount_one": "{{count}} park",
+    "parkCount_other": "{{count}} parks",
+    "indoorCount": "{{count}} indoor",
+    "view": "View",
+    "list": "List",
+    "map": "Map"
+  },
+  "park": {
+    "openUntil": "Open · until {{time}}",
+    "opensAt": "Closed · opens {{time}}",
+    "closedNow": "Closed now",
+    "closedToday": "Closed today",
+    "openHoursUnknown": "Open · hours not listed",
+    "status": {
+      "open": "Open",
+      "temporarily_closed": "Temporarily closed",
+      "seasonal_closure": "Closed for the season",
+      "coming_soon": "Coming soon"
+    },
+    "type": {
+      "skatepark": "Skatepark",
+      "pump_track": "Pump track",
+      "diy": "DIY"
+    },
+    "setting": {
+      "indoor": "Indoor",
+      "outdoor": "Outdoor",
+      "covered_outdoor": "Covered"
+    },
+    "paid": "Paid",
+    "free": "Free",
+    "lit": "Lit",
+    "verified": "Verified {{date}}",
+    "lastVerified": "Last verified {{date}}",
+    "notVerified": "Not verified yet",
+    "save": "Want to skate",
+    "saved": "Saved",
+    "saveLabel": "Save {{park}} to want to skate",
+    "savedLabel": "{{park}} is saved to want to skate. Tap to remove it.",
+    "directions": "Directions",
+    "hours": "Hours",
+    "lights": "Lights",
+    "surface": "Surface",
+    "entry": "Entry",
+    "whoCanSkate": "Who can skate",
+    "helmet": "Helmets required here.",
+    "litYes": "Lit at night",
+    "litNo": "No lights",
+    "unknown": "Not known",
+    "daily": "Daily",
+    "hoursUnknown": "Hours not listed",
+    "sunrise": "sunrise",
+    "sunset": "sunset",
+    "timeRange": "{{start}}–{{end}}",
+    "season": "{{start}} – {{end}}",
+    "today": "Today",
+    "obstacles": "Obstacles",
+    "noObstacles": "No obstacles listed yet.",
+    "osmCredit": "Location © OpenStreetMap contributors",
+    "disciplineYours": "{{discipline}}, you ride this",
+    "missing": "This park isn't available.",
+    "fees": "Fees"
+  },
+  "disciplines": {
+    "inline": "Inline",
+    "quad": "Quad",
+    "skateboard": "Skateboard",
+    "bmx": "BMX",
+    "scooter": "Scooter"
+  },
+  "obstacleTypes": {
+    "rail": "Rail",
+    "ledge": "Ledge",
+    "hubba": "Hubba",
+    "manual_pad": "Manual pad",
+    "stairs": "Stairs",
+    "gap": "Gap",
+    "bank": "Bank",
+    "pyramid": "Pyramid",
+    "fun_box": "Fun box",
+    "box": "Box",
+    "hip": "Hip",
+    "quarter_pipe": "Quarter pipe",
+    "kicker": "Kicker",
+    "mini_ramp": "Mini ramp",
+    "half_pipe": "Half pipe",
+    "vert_ramp": "Vert ramp",
+    "spine": "Spine",
+    "bump": "Bump",
+    "volcano": "Volcano",
+    "bowl": "Bowl",
+    "pool": "Pool",
+    "snake_run": "Snake run",
+    "ditch": "Ditch",
+    "full_pipe": "Full pipe",
+    "pump_track": "Pump track",
+    "pole_jam": "Pole jam",
+    "rainbow_bench": "Rainbow bench",
+    "other": "Other",
+    "street_plaza": "Street plaza"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "empty": "Nothing yet. Comments, tags and invites will show up here."
+  },
+  "you": {
+    "title": "You",
+    "credits": "Credits",
+    "osm": "Park locations © OpenStreetMap contributors",
+    "osmLink": "openstreetmap.org/copyright"
   }
 }

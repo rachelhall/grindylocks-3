@@ -20,13 +20,13 @@ type MyPost = {
 };
 
 /**
- * Placeholder home until the M2 map and M4 feed. For now it's where the
- * upload path is tested: start a post, watch it upload, open your posts.
+ * Home tab. The feed is M4; until then this is where the upload path is
+ * tested: start a post, watch it upload, open your own posts.
  */
 export default function Home() {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const { session, profile, signOut } = useAuth();
+  const { session } = useAuth();
   const queued = useUploads();
   const [posts, setPosts] = useState<MyPost[]>([]);
 
@@ -67,9 +67,12 @@ export default function Home() {
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Text variant="displayXl" numberOfLines={1} adjustsFontSizeToFit>
-          {t('common.appName')}
-        </Text>
+        <View style={styles.section}>
+          <Text variant="display">{t('home.title')}</Text>
+          <Text variant="body" color="textSecondary">
+            {t('home.feedSoon')}
+          </Text>
+        </View>
 
         <Button
           label={t('post.newTitle')}
@@ -114,13 +117,6 @@ export default function Home() {
             ))
           )}
         </View>
-
-        <View style={styles.account}>
-          <Text variant="body" color="textSecondary">
-            {t('home.signedInAs', { username: profile?.username ?? '' })}
-          </Text>
-          <Button label={t('common.signOut')} variant="secondary" onPress={signOut} />
-        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -131,5 +127,4 @@ const styles = StyleSheet.create({
   content: { padding: space[4], gap: space[6] },
   section: { gap: space[3] },
   row: { borderWidth: stroke.hairline, padding: space[3], gap: space[1] },
-  account: { gap: space[3], marginTop: space[6] },
 });

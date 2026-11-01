@@ -99,9 +99,9 @@
     }
   },
   "home": {
-    "title": "Parker",
-    "comingSoon": "Parkoversigten kommer i M2.",
-    "signedInAs": "Logget ind som @{{username}}"
+    "title": "Hjem",
+    "signedInAs": "Logget ind som @{{username}}",
+    "feedSoon": "Dit feed er på vej. Indtil da er her dine egne opslag."
   },
   "errors": {
     "generic": "Noget gik galt.",
@@ -154,5 +154,140 @@
     "videoUnavailable": "Klip kan ikke afspilles endnu: videoafspilning er ikke sat op.",
     "posted": "Delt {{date}}",
     "notPosted": "Ikke delt endnu: uploader stadig"
+  },
+  "tabs": {
+    "home": "Hjem",
+    "map": "Kort",
+    "newPost": "Nyt opslag",
+    "notifications": "Notifikationer",
+    "you": "Dig"
+  },
+  "map": {
+    "search": "Søg efter en by eller et skatepark",
+    "locate": "Centrér på min placering",
+    "viewPark": "Se skatepark",
+    "directions": "Rutevejledning",
+    "noParksHere": "Ingen skateparks på denne del af kortet endnu.",
+    "pinSelected": "{{park}}, valgt",
+    "loadError": "Kunne ikke hente skateparks. Tjek din forbindelse."
+  },
+  "search": {
+    "back": "Tilbage til kortet",
+    "clear": "Ryd søgning",
+    "hint": "Søg efter by, parkens navn eller det, de lokale kalder den.",
+    "cities": "Byer",
+    "parks": "Skateparks",
+    "noResults": "Intet matcher “{{q}}” endnu.",
+    "alsoKnownAs": "Også kendt som {{name}}",
+    "parkCount_one": "{{count}} skatepark",
+    "parkCount_other": "{{count}} skateparks",
+    "indoorCount": "{{count}} indendørs",
+    "view": "Visning",
+    "list": "Liste",
+    "map": "Kort"
+  },
+  "park": {
+    "openUntil": "Åben · til {{time}}",
+    "opensAt": "Lukket · åbner {{time}}",
+    "closedNow": "Lukket nu",
+    "closedToday": "Lukket i dag",
+    "openHoursUnknown": "Åben · åbningstider ikke oplyst",
+    "status": {
+      "open": "Åben",
+      "temporarily_closed": "Midlertidigt lukket",
+      "seasonal_closure": "Lukket for sæsonen",
+      "coming_soon": "Kommer snart"
+    },
+    "type": {
+      "skatepark": "Skatepark",
+      "pump_track": "Pumptrack",
+      "diy": "DIY"
+    },
+    "setting": {
+      "indoor": "Indendørs",
+      "outdoor": "Udendørs",
+      "covered_outdoor": "Overdækket"
+    },
+    "paid": "Betaling",
+    "free": "Gratis",
+    "lit": "Lys",
+    "verified": "Bekræftet {{date}}",
+    "lastVerified": "Sidst bekræftet {{date}}",
+    "notVerified": "Ikke bekræftet endnu",
+    "save": "Vil skate her",
+    "saved": "Gemt",
+    "saveLabel": "Gem {{park}} under vil skate her",
+    "savedLabel": "{{park}} er gemt under vil skate her. Tryk for at fjerne den.",
+    "directions": "Rutevejledning",
+    "hours": "Åbningstider",
+    "lights": "Lys",
+    "surface": "Underlag",
+    "entry": "Adgang",
+    "whoCanSkate": "Hvem må skate",
+    "helmet": "Hjelm er påkrævet her.",
+    "litYes": "Oplyst om aftenen",
+    "litNo": "Intet lys",
+    "unknown": "Ukendt",
+    "daily": "Alle dage",
+    "hoursUnknown": "Åbningstider ikke oplyst",
+    "sunrise": "solopgang",
+    "sunset": "solnedgang",
+    "timeRange": "{{start}}–{{end}}",
+    "season": "{{start}} – {{end}}",
+    "today": "I dag",
+    "obstacles": "Obstacles",
+    "noObstacles": "Ingen obstacles oplyst endnu.",
+    "osmCredit": "Placering © OpenStreetMap-bidragydere",
+    "disciplineYours": "{{discipline}}, det kører du",
+    "missing": "Dette skatepark er ikke tilgængeligt.",
+    "fees": "Priser"
+  },
+  "disciplines": {
+    "inline": "Inline",
+    "quad": "Quad",
+    "skateboard": "Skateboard",
+    "bmx": "BMX",
+    "scooter": "Løbehjul"
+  },
+  "obstacleTypes": {
+    "rail": "Rail",
+    "ledge": "Ledge",
+    "hubba": "Hubba",
+    "manual_pad": "Manual pad",
+    "stairs": "Trapper",
+    "gap": "Gap",
+    "bank": "Bank",
+    "pyramid": "Pyramide",
+    "fun_box": "Fun box",
+    "box": "Kasse",
+    "hip": "Hip",
+    "quarter_pipe": "Quarter pipe",
+    "kicker": "Kicker",
+    "mini_ramp": "Mini ramp",
+    "half_pipe": "Half pipe",
+    "vert_ramp": "Vert ramp",
+    "spine": "Spine",
+    "bump": "Bump",
+    "volcano": "Vulkan",
+    "bowl": "Bowl",
+    "pool": "Pool",
+    "snake_run": "Snake run",
+    "ditch": "Grøft",
+    "full_pipe": "Full pipe",
+    "pump_track": "Pump track",
+    "pole_jam": "Pole jam",
+    "rainbow_bench": "Regnbuebænk",
+    "other": "Andet",
+    "street_plaza": "Streetområde"
+  },
+  "notifications": {
+    "title": "Notifikationer",
+    "empty": "Intet endnu. Kommentarer, tags og invitationer dukker op her."
+  },
+  "you": {
+    "title": "Dig",
+    "credits": "Kreditering",
+    "osm": "Skateparkernes placering © OpenStreetMap-bidragydere",
+    "osmLink": "openstreetmap.org/copyright"
   }
 }
