@@ -49,6 +49,7 @@
   "devDependencies": {
     "@types/aes-js": "^3.1.4",
     "@types/react": "~19.2.2",
+    "eas-cli": "^27.2.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "~57.0.2",
     "typescript": "~6.0.3"
@@ -61,7 +62,9 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "check:i18n": "node scripts/check-translations.mjs",
-    "db:types": "supabase gen types typescript --project-id ytfdgacofenkehnbbhsc > src/lib/database.types.ts"
+    "db:types": "supabase gen types typescript --project-id ytfdgacofenkehnbbhsc > src/lib/database.types.ts",
+    "build:ios-sim": "eas build --profile development-simulator --platform ios",
+    "run:ios-sim": "eas build:run --platform ios --latest"
   },
   "private": true
 }

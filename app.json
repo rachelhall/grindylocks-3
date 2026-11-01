@@ -82,6 +82,13 @@
       "es": "./locales/es.json",
       "da": "./locales/da.json",
       "de": "./locales/de.json"
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "9ea6f270-dd81-486d-ac14-1f0b7e45672a"
+      }
+    },
+    "owner": "rachelhall"
   }
 }
