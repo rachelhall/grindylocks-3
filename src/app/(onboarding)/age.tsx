@@ -6,12 +6,15 @@ import { FormScreen } from '@/components/screen';
 import { Button, StepHeader } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { ONBOARDING_STEPS } from '@/lib/onboarding';
+import { Sentry } from '@/lib/sentry';
+import { redeemMyInvite } from '@/lib/social';
 import { supabase } from '@/lib/supabase';
 import { Text } from '@/theme';
 
 /**
  * Age gate (minimum age 16). Only the fact that someone confirmed, and when,
- * is stored — never a birthdate. Saying yes creates the profile row.
+ * is stored — never a birthdate. Saying yes creates the profile row, then
+ * redeems the invite the account was created with.
  */
 export default function AgeStep() {
   const { t } = useTranslation();
@@ -32,6 +35,10 @@ export default function AgeStep() {
       setError(t('errors.generic'));
       return;
     }
+    // Now there's a profile, mark the invite used, follow the inviter and
+    // tell them. Does nothing for accounts made without an invite, and is
+    // safe to repeat. A failure here doesn't hold up onboarding.
+    await redeemMyInvite().catch((e: unknown) => Sentry.captureException(e));
     await refreshProfile();
     setSaving(false);
     router.push('/username');

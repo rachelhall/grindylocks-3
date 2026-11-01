@@ -4,6 +4,7 @@ import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
+  Alert,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   Pressable,
@@ -17,7 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { MediaTag } from '@/components/media';
 import { ParkRow, useParkLine } from '@/components/parks';
-import { BackButton, Button, Icon } from '@/components/ui';
+import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { formatDuration, videoThumbnailUrl } from '@/lib/media';
 import { useParksByIds, useSavedParks } from '@/lib/parks';
@@ -31,6 +32,7 @@ import {
   useProfilePosts,
   visibleBadge,
 } from '@/lib/profiles';
+import { useBlock, useFollow, useMyInvites } from '@/lib/social';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 type Tab = 'posts' | 'tagged' | 'filmed' | 'saved';
@@ -97,7 +99,7 @@ function useActiveLabel() {
   };
 }
 
-function ProfileHeader({ profile, own }: { profile: Profile; own: boolean }) {
+function ProfileHeader({ profile, actions }: { profile: Profile; actions?: ReactNode }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const roleLabel = useRoleLabel();
@@ -177,15 +179,70 @@ function ProfileHeader({ profile, own }: { profile: Profile; own: boolean }) {
         </View>
       ) : null}
 
-      {own ? (
-        <Button
-          label={t('profile.edit')}
-          variant="secondary"
-          onPress={() => router.push('/edit-profile')}
-          style={styles.editButton}
-        />
-      ) : null}
+      {actions}
     </View>
+  );
+}
+
+/** Edit profile and Invites, side by side under your own bio. */
+function OwnActions({ userId }: { userId: string }) {
+  const { t } = useTranslation();
+  const { data } = useMyInvites(userId);
+  return (
+    <View style={styles.actionRow}>
+      <Button
+        label={t('profile.edit')}
+        variant="secondary"
+        onPress={() => router.push('/edit-profile')}
+        style={styles.ownButton}
+      />
+      <Button
+        label={data ? t('profile.invitesCount', { count: data.remaining }) : t('profile.invites')}
+        variant="secondary"
+        onPress={() => router.push('/invites')}
+        style={styles.ownButton}
+      />
+    </View>
+  );
+}
+
+/**
+ * Follow, Requested (private accounts) or Following. Following and Requested
+ * ask before undoing, since a private account would have to accept again.
+ */
+function FollowButton({ viewerId, profile }: { viewerId: string; profile: Profile }) {
+  const { t } = useTranslation();
+  const follow = useFollow(viewerId, profile);
+  const status = profile.followStatus;
+  const onError = () => Alert.alert(t('errors.generic'), t('errors.network'));
+
+  function press() {
+    if (!status) {
+      follow.mutate('follow', { onError });
+      return;
+    }
+    const pending = status === 'pending';
+    Alert.alert(
+      pending ? t('follow.cancelRequestTitle') : t('follow.unfollowTitle', { username: profile.username }),
+      pending || !profile.isPrivate ? undefined : t('follow.unfollowPrivateBody'),
+      [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: pending ? t('follow.cancelRequest') : t('follow.unfollow'),
+          style: 'destructive',
+          onPress: () => follow.mutate('unfollow', { onError }),
+        },
+      ],
+    );
+  }
+
+  return (
+    <Button
+      label={status === 'accepted' ? t('find.following') : status === 'pending' ? t('find.requested') : t('follow.follow')}
+      variant={status ? 'secondary' : 'primary'}
+      onPress={press}
+      style={styles.editButton}
+    />
   );
 }
 
@@ -413,6 +470,27 @@ export function ProfileView({ username }: { username?: string }) {
 
   const gridPosts = useMemo(() => posts.data?.pages.flat() ?? [], [posts.data]);
 
+  const { sheet, show } = useActionSheet();
+  const block = useBlock(myId);
+  function confirmBlock(person: Profile) {
+    Alert.alert(t('block.title', { username: person.username }), t('block.body'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('block.block'),
+        style: 'destructive',
+        onPress: () =>
+          block.mutate(
+            { personId: person.id, block: true },
+            {
+              // They disappear for you, so there's nothing left to show here.
+              onSuccess: () => (router.canGoBack() ? router.back() : router.replace('/home')),
+              onError: () => Alert.alert(t('errors.generic'), t('errors.network')),
+            },
+          ),
+      },
+    ]);
+  }
+
   const topBar = (
     <View style={[styles.topBar, { justifyContent: username ? 'space-between' : 'flex-end' }]}>
       {username ? <BackButton /> : null}
@@ -424,6 +502,20 @@ export function ProfileView({ username }: { username?: string }) {
           style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
         >
           <Icon name="settings" color={c.text} />
+        </Pressable>
+      ) : profile ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('profile.more')}
+          onPress={() =>
+            show({
+              title: profile.username,
+              actions: [{ label: t('block.block'), destructive: true, onPress: () => confirmBlock(profile) }],
+            })
+          }
+          style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
+        >
+          <Icon name="more" color={c.text} />
         </Pressable>
       ) : null}
     </View>
@@ -447,7 +539,12 @@ export function ProfileView({ username }: { username?: string }) {
     const name = profile.username;
     body = (
       <>
-        <ProfileHeader profile={profile} own={isMe} />
+        <ProfileHeader
+          profile={profile}
+          actions={
+            isMe && myId ? <OwnActions userId={myId} /> : myId ? <FollowButton viewerId={myId} profile={profile} /> : null
+          }
+        />
         {!canSeePosts ? (
           <EmptyTab icon="lock" text={t('profile.privateBody')} />
         ) : (
@@ -495,6 +592,7 @@ export function ProfileView({ username }: { username?: string }) {
       >
         {body}
       </ScrollView>
+      {sheet}
     </SafeAreaView>
   );
 }
@@ -519,6 +617,8 @@ const styles = StyleSheet.create({
   shrink: { flexShrink: 1 },
   meetup: { alignSelf: 'flex-start', borderWidth: stroke.rule, paddingHorizontal: 6, paddingVertical: 1 },
   editButton: { minHeight: size.tapMin },
+  actionRow: { flexDirection: 'row', gap: space[2] },
+  ownButton: { minHeight: size.tapMin, flex: 1 },
   tabs: {
     flexDirection: 'row',
     gap: space[2],

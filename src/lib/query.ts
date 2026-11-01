@@ -83,6 +83,14 @@ export const keys = {
   reservedUsernames: (userId: string) => ['reserved-usernames', userId] as const,
   /** A signed URL for a profile photo. */
   avatar: (path: string) => ['avatar', path] as const,
+  /** Your invite links and how many you have left. */
+  myInvites: (userId: string) => ['invites', userId] as const,
+  /** People waiting for you to accept their follow request. */
+  followRequests: (userId: string) => ['follow-requests', userId] as const,
+  /** The people you blocked (Settings › Blocked accounts). */
+  blocked: (userId: string) => ['blocked', userId] as const,
+  /** "Joined with your invite" notices. */
+  inviteNotices: (userId: string) => ['notices', 'invite-used', userId] as const,
 };
 
 let started = false;

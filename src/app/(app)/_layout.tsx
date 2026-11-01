@@ -8,7 +8,7 @@ import { brand, useColors } from '@/theme';
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
  * (new post, notifications, a post, a park and its photos, a profile, edit
- * profile and settings). Starts the upload queue for this member, so
+ * profile, settings and invites). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
  */
 export default function AppLayout() {
@@ -39,6 +39,8 @@ export default function AppLayout() {
       <Stack.Screen name="settings/index" />
       <Stack.Screen name="settings/email" />
       <Stack.Screen name="settings/credits" />
+      <Stack.Screen name="settings/blocked" />
+      <Stack.Screen name="invites" />
     </Stack>
   );
 }

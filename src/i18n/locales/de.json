@@ -7,7 +7,8 @@
     "back": "Zurück",
     "signOut": "Abmelden",
     "cancel": "Abbrechen",
-    "close": "Schließen"
+    "close": "Schließen",
+    "deletedUser": "gelöschtes Konto"
   },
   "auth": {
     "welcome": {
@@ -17,7 +18,8 @@
       "apple": "Weiter mit Apple",
       "google": "Weiter mit Google",
       "soon": "Bald verfügbar",
-      "inviteOnly": "Neu hier? Grindylocks geht im Moment nur mit Einladung. Frag jemanden, den du vom Skaten kennst, nach einem Einladungslink."
+      "inviteOnly": "Neu hier? Grindylocks geht im Moment nur mit Einladung. Frag jemanden, den du vom Skaten kennst, nach einem Einladungslink.",
+      "haveCode": "Ich habe einen Einladungscode"
     },
     "email": {
       "title": "Mit E-Mail anmelden",
@@ -39,6 +41,16 @@
       "resendIn": "Neuen Code senden in {{seconds}} s",
       "resent": "Neuer Code gesendet.",
       "otherEmail": "Andere E-Mail verwenden"
+    },
+    "invite": {
+      "title": "Einladung eingeben",
+      "body": "Gib den Code aus der Einladung ein, die dir jemand geschickt hat. Er sieht aus wie ABCD-2345.",
+      "label": "Einladungscode",
+      "check": "Einladung prüfen",
+      "invalid": "Diese Einladung funktioniert nicht. Sie ist vielleicht abgelaufen, schon benutzt oder zurückgezogen. Frag nach einer neuen.",
+      "invitedYou": "@{{username}} hat dich eingeladen",
+      "validFor": "Die Einladung {{code}} funktioniert einmal und läuft 7 Tage nach dem Erstellen ab.",
+      "otherWays": "Anmeldung mit Apple und Google kommt bald."
     }
   },
   "onboarding": {
@@ -284,7 +296,10 @@
   },
   "notifications": {
     "title": "Mitteilungen",
-    "empty": "Noch nichts. Kommentare, Markierungen und Einladungen erscheinen hier."
+    "empty": "Noch nichts. Kommentare, Markierungen, Follower-Anfragen und Einladungen erscheinen hier.",
+    "earlier": "Einladungen",
+    "inviteUsed": "@{{username}} ist über deine Einladung dabei",
+    "inviteUsedSomeone": "Jemand ist über deine Einladung dabei"
   },
   "feed": {
     "newPost": "Neuer Beitrag",
@@ -345,7 +360,11 @@
     "emptyTagged": "Posts, in denen {{username}} markiert ist, erscheinen hier.",
     "emptyFilmedOwn": "Clips, die du gefilmt hast, erscheinen hier.",
     "emptyFilmed": "Clips, die {{username}} gefilmt hat, erscheinen hier.",
-    "emptySaved": "Parks, die du unter Will ich skaten merkst, erscheinen hier. Nur du siehst sie."
+    "emptySaved": "Parks, die du unter Will ich skaten merkst, erscheinen hier. Nur du siehst sie.",
+    "invites": "Einladungen",
+    "invitesCount_one": "Einladungen · {{count}}",
+    "invitesCount_other": "Einladungen · {{count}}",
+    "more": "Mehr"
   },
   "editProfile": {
     "title": "Profil bearbeiten",
@@ -471,5 +490,51 @@
     "removeBody": "Es verschwindet für alle aus der Galerie.",
     "removeFailed": "Das Foto konnte nicht entfernt werden. Versuch es noch mal.",
     "reorderFailed": "Das Foto konnte nicht verschoben werden. Versuch es noch mal."
+  },
+  "invites": {
+    "title": "Einladungen",
+    "left_one": "Einladung übrig",
+    "left_other": "Einladungen übrig",
+    "body": "Jeder Link funktioniert einmal und läuft nach 7 Tagen ab. Wird er zurückgezogen oder läuft ungenutzt ab, bekommst du die Einladung zurück. Brauchst du mehr? Frag dein Stadt- oder Park-Admin.",
+    "make": "Einladungslink erstellen",
+    "noneLeftTitle": "Keine Einladungen übrig",
+    "noneLeftBody": "Frag dein Stadt- oder Park-Admin, wenn du mehr brauchst.",
+    "yours": "Deine Links",
+    "expiresIn_one": "Läuft in {{count}} Tag ab",
+    "expiresIn_other": "Läuft in {{count}} Tagen ab",
+    "usedBy": "@{{username}} ist dabei · {{date}}",
+    "usedByDeleted": "Von einem gelöschten Konto benutzt · {{date}}",
+    "expired": "Ungenutzt abgelaufen · {{date}}",
+    "share": "Teilen",
+    "cancel": "Link zurückziehen",
+    "keep": "Behalten",
+    "cancelTitle": "Einladung zurückziehen?",
+    "cancelBody": "{{code}} funktioniert dann nicht mehr, und du bekommst die Einladung zurück.",
+    "view": "Profil ansehen",
+    "shareMessage": "@{{username}} hat dich zu Grindylocks eingeladen, der Skatepark-App für Inliner, Rollschuh- und Skateboardfahrer.\n\nEinladungscode: {{code}} (einmal gültig, 7 Tage lang)\n\nHast du die App? Öffne {{link}}"
+  },
+  "follow": {
+    "follow": "Folgen",
+    "unfollow": "Nicht mehr folgen",
+    "unfollowTitle": "{{username}} nicht mehr folgen?",
+    "unfollowPrivateBody": "Das Konto ist privat. Um die Beiträge zu sehen, müsstest du wieder anfragen.",
+    "cancelRequest": "Anfrage zurückziehen",
+    "cancelRequestTitle": "Deine Anfrage zurückziehen?",
+    "requestsTitle": "Follower-Anfragen",
+    "wantsToFollow": "Möchte dir folgen",
+    "accept": "Annehmen",
+    "decline": "Ablehnen"
+  },
+  "block": {
+    "block": "Blockieren",
+    "title": "{{username}} blockieren?",
+    "body": "Ihr seht gegenseitig keine Profile, Beiträge oder Kommentare mehr, und niemand von euch folgt dem anderen. Die Person wird nicht benachrichtigt. Du kannst die Blockierung in den Einstellungen aufheben.",
+    "unblock": "Blockierung aufheben",
+    "unblockTitle": "Blockierung von {{username}} aufheben?",
+    "unblockBody": "Ihr seht euch wieder. Was die Blockierung an Folgen beendet hat, kommt nicht zurück; ihr könnt beide wieder folgen.",
+    "listTitle": "Blockierte Konten",
+    "listBody": "Wen du blockiert hast, sieht dein Profil, deine Beiträge und Kommentare nicht, und du siehst ihre nicht.",
+    "none": "Du hast niemanden blockiert.",
+    "since": "Blockiert am {{date}}"
   }
 }

@@ -1,16 +1,22 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { FormScreen } from '@/components/screen';
 import { BackButton, Button, TextField } from '@/components/ui';
-import { authErrorKey, isEmail } from '@/lib/auth-errors';
+import { authErrorKey, isEmail, otpOptions } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 import { Text } from '@/theme';
 
-/** Step 1 of email sign-in: ask for the address and send a one-time code. */
+/**
+ * Step 1 of email sign-in: ask for the address and send a one-time code.
+ * Opened from an invite, it may create the account: the code goes along as
+ * user metadata, and the before_user_created hook checks it. Without one,
+ * only existing members get a code.
+ */
 export default function EmailSignIn() {
   const { t } = useTranslation();
+  const { invite } = useLocalSearchParams<{ invite?: string }>();
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
@@ -23,18 +29,16 @@ export default function EmailSignIn() {
     }
     setSending(true);
     setError(null);
-    // shouldCreateUser: false — sign-ups stay closed until invites (M3), so
-    // only members who already exist can get a code.
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email: address,
-      options: { shouldCreateUser: false },
+      options: otpOptions(invite),
     });
     setSending(false);
     if (sendError) {
-      setError(t(authErrorKey(sendError)));
+      setError(t(authErrorKey(sendError, Boolean(invite))));
       return;
     }
-    router.push({ pathname: '/code', params: { email: address } });
+    router.push({ pathname: '/code', params: invite ? { email: address, invite } : { email: address } });
   }
 
   return (

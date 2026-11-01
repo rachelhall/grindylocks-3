@@ -58,3 +58,26 @@ code goes to the current address too, and the change only happens once both
 are entered. The app handles that (it asks for the second code), but each
 code is sent with the same template, so the wording has to make sense for
 both addresses.
+
+## Invite-only sign-up (migration `invites_follows_blocks`)
+
+New accounts need an invite code. The app sends it as user metadata when it
+asks for a sign-in code; the **Before User Created** hook checks it and
+claims it for that email. Existing members sign in as before.
+
+Turn it on in this order, so there's never a moment when anyone can sign up:
+
+1. Apply the migration.
+2. **Authentication → Hooks → Before User Created**: add a Postgres hook,
+   schema `public`, function `before_user_created`.
+3. **Authentication → Sign In / Providers**: turn **Allow new users to sign
+   up** back on. With the hook on, only someone with a valid, unclaimed
+   invite gets an account.
+
+The hook also refuses accounts added by hand with **Add user** in the
+dashboard (they have no invite). To add a tester, make an invite in the app
+(You → Invites) and send them the code instead.
+
+Codes are claimed by the first email that signs up with them. If someone
+starts with one email and never finishes, the code stays tied to that email:
+cancel the link in the app (the invite comes back) and make a new one.

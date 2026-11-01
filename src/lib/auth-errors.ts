@@ -6,11 +6,26 @@ export function isEmail(value: string): boolean {
 }
 
 /**
+ * Options for asking Supabase for a sign-in code. Without an invite only
+ * existing members get one. With an invite, a new account may be created;
+ * the code rides along as user metadata for the before_user_created hook
+ * (and redeem_my_invite() later). Existing members who open someone's invite
+ * just sign in, and the code is ignored.
+ */
+export function otpOptions(invite?: string) {
+  return invite
+    ? { shouldCreateUser: true, data: { invite_code: invite.toUpperCase().replace(/[^A-Z0-9]/g, '') } }
+    : { shouldCreateUser: false };
+}
+
+/**
  * Map a Supabase Auth error to a translation key.
  * See https://supabase.com/docs/guides/auth/debugging/error-codes
  */
-export function authErrorKey(error: AuthError) {
+export function authErrorKey(error: AuthError, withInvite = false) {
   const code = isAuthApiError(error) ? error.code : undefined;
+  // The sign-up hook turned the invite down (used, expired or cancelled).
+  if (withInvite && /invite_(invalid|required)/.test(error.message)) return 'auth.invite.invalid' as const;
   switch (code) {
     // Sign-ups are off, so asking for a code for an unknown address fails.
     case 'otp_disabled':

@@ -15,8 +15,8 @@ const muted = colors.dark.textSecondary;
 const quietBorder = colors.light.textSecondary;
 
 /**
- * First screen for anyone signed out. Without an invite link, this is how
- * existing members (and Rachel's hand-added testers) sign in.
+ * First screen for anyone signed out. Existing members sign in here; new
+ * people come through an invite link, or type their invite code.
  *
  * Apple and Google sign-in need native setup and a new build, so their
  * buttons are shown but switched off until then.
@@ -69,6 +69,12 @@ export default function Welcome() {
       <Text variant="bodySm" style={[styles.footnote, { color: muted }]}>
         {t('auth.welcome.inviteOnly')}
       </Text>
+      <Button
+        variant="tertiary"
+        label={t('auth.welcome.haveCode')}
+        onPress={() => router.push('/invite')}
+        palette={{ fill: 'transparent', text: paper, border: 'transparent' }}
+      />
     </SafeAreaView>
   );
 }

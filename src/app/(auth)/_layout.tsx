@@ -11,6 +11,7 @@ export default function AuthLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="email" />
       <Stack.Screen name="code" />
+      <Stack.Screen name="invite" />
     </Stack>
   );
 }
