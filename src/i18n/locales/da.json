@@ -158,9 +158,9 @@
   "tabs": {
     "home": "Hjem",
     "map": "Kort",
-    "newPost": "Nyt opslag",
-    "notifications": "Notifikationer",
-    "you": "Dig"
+    "you": "Dig",
+    "messages": "Beskeder",
+    "search": "Søg"
   },
   "map": {
     "search": "Søg efter en by eller et skatepark",
@@ -289,5 +289,33 @@
     "credits": "Kreditering",
     "osm": "Skateparkernes placering © OpenStreetMap-bidragydere",
     "osmLink": "openstreetmap.org/copyright"
+  },
+  "feed": {
+    "newPost": "Nyt opslag",
+    "notifications": "Notifikationer",
+    "notificationsUnread": "Notifikationer, noget nyt"
+  },
+  "messages": {
+    "title": "Beskeder",
+    "comingSoon": "Kommer snart",
+    "heading": "Direkte beskeder er på vej",
+    "body": "Indtil da kan du sige hej i kommentarerne, tagge folk i dine opslag eller finde skatere blandt en parks stamgæster.",
+    "findSkaters": "Find skatere"
+  },
+  "find": {
+    "title": "Søg",
+    "placeholder": "Søg efter folk eller parker",
+    "show": "Vis",
+    "all": "Alle",
+    "people": "Folk",
+    "parks": "Parker",
+    "hint": "Find skatere på brugernavn, eller parker på navn eller det, de lokale kalder dem.",
+    "error": "Kunne ikke søge. Tjek din forbindelse.",
+    "following": "Følger",
+    "requested": "Anmodet",
+    "privateAccount": "Privat konto"
+  },
+  "profile": {
+    "soon": "Profiler kommer snart."
   }
 }

@@ -1,4 +1,5 @@
 import { SymbolView, type SymbolViewProps } from 'expo-symbols';
+import bold from 'expo-symbols/androidWeights/bold';
 import semiBold from 'expo-symbols/androidWeights/semiBold';
 import { router } from 'expo-router';
 import type { ReactNode } from 'react';
@@ -45,18 +46,36 @@ const icons = {
   locate: { ios: 'location', android: 'my_location' },
   list: { ios: 'list.bullet', android: 'list' },
   chevron: { ios: 'chevron.right', android: 'chevron_right' },
+  chat: { ios: 'bubble.left', android: 'chat' },
+  chatFill: { ios: 'bubble.left.fill', android: 'chat' },
+  lock: { ios: 'lock.fill', android: 'lock' },
+  findPeople: { ios: 'person.2', android: 'person_search' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
 
-/** SF Symbols on iOS, Material Symbols on Android. Always decorative. */
-export function Icon({ name, color, size: s = size.icon }: { name: IconName; color: string; size?: number }) {
+/**
+ * SF Symbols on iOS, Material Symbols on Android. Always decorative.
+ * `heavy` is for icons with no filled form (search) when they mark the
+ * current tab.
+ */
+export function Icon({
+  name,
+  color,
+  size: s = size.icon,
+  heavy,
+}: {
+  name: IconName;
+  color: string;
+  size?: number;
+  heavy?: boolean;
+}) {
   return (
     <SymbolView
       name={icons[name]}
       tintColor={color}
       size={s}
-      weight={{ ios: 'semibold', android: semiBold }}
+      weight={heavy ? { ios: 'heavy', android: bold } : { ios: 'semibold', android: semiBold }}
       accessibilityElementsHidden
       importantForAccessibility="no"
     />

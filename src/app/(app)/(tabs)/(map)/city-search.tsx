@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { SaveButton, StatusChip, useParkLine } from '@/components/parks';
+import { ParkRow, useParkLine } from '@/components/parks';
 import { BackButton, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { type ParkPin, useDirectorySearch, useMetro, useParksInMetro, useSavedParks } from '@/lib/parks';
@@ -25,7 +25,7 @@ function countryName(code: string, locale: string): string {
  * or alias. Picking a city lists its parks, with a toggle to see them on the
  * map instead.
  */
-export default function Search() {
+export default function CitySearch() {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const { session } = useAuth();
@@ -240,43 +240,6 @@ export default function Search() {
   );
 }
 
-/** A park in a list: name, one line, a status chip unless open, and the bookmark. */
-function ParkRow({
-  name,
-  line,
-  status,
-  saved,
-  onPress,
-  onSave,
-}: {
-  name: string;
-  line: string;
-  status: ParkPin['status'];
-  saved: boolean;
-  onPress: () => void;
-  onSave: () => void;
-}) {
-  const c = useColors();
-  return (
-    <View style={[styles.parkRow, { backgroundColor: c.surfaceRaised }]}>
-      <Pressable
-        accessibilityRole="button"
-        onPress={onPress}
-        style={({ pressed }) => [styles.parkMain, pressed && styles.pressed]}
-      >
-        <Text variant="headline">{name}</Text>
-        {line ? (
-          <Text variant="bodySm" color="textSecondary">
-            {line}
-          </Text>
-        ) : null}
-        {status !== 'open' ? <StatusChip state={{ kind: 'status', status }} /> : null}
-      </Pressable>
-      <SaveButton saved={saved} onPress={onSave} parkName={name} />
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   flex: { flex: 1 },
@@ -301,6 +264,4 @@ const styles = StyleSheet.create({
   toggleItem: { height: 36, paddingHorizontal: 10, flexDirection: 'row', alignItems: 'center', gap: 4 },
   list: { gap: 6 },
   row: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], paddingVertical: space[2] },
-  parkRow: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingLeft: space[3], paddingRight: space[1], paddingVertical: space[2] },
-  parkMain: { flex: 1, gap: 3, minWidth: 0 },
 });

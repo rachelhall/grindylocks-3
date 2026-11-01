@@ -8,7 +8,7 @@ export default function MapLayout() {
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.surface } }}>
       <Stack.Screen name="index" />
-      <Stack.Screen name="search" options={{ animation: 'fade' }} />
+      <Stack.Screen name="city-search" options={{ animation: 'fade' }} />
     </Stack>
   );
 }

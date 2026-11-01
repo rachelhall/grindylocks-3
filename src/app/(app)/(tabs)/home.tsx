@@ -5,8 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { FeedHeader } from '@/components/feed';
 import { UploadCard } from '@/components/media';
-import { Button } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
@@ -34,8 +34,9 @@ type MyPost = {
 };
 
 /**
- * Home tab. The feed is M4; until then this is where the upload path is
- * tested: start a post, watch it upload, open your own posts.
+ * Home tab. The top row has New post and the notifications bell (Nov 1).
+ * The feed is M4; until then this is where the upload path is tested: start
+ * a post, watch it upload, open your own posts.
  */
 export default function Home() {
   const { t, i18n } = useTranslation();
@@ -87,20 +88,13 @@ export default function Home() {
   const dateFormat = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' });
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
+    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
+      {/* TODO(M4): pass hasUnread once notifications exist. */}
+      <FeedHeader title={t('home.title')} />
       <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.section}>
-          <Text variant="display">{t('home.title')}</Text>
-          <Text variant="body" color="textSecondary">
-            {t('home.feedSoon')}
-          </Text>
-        </View>
-
-        <Button
-          label={t('post.newTitle')}
-          onPress={() => router.push('/new-post')}
-          palette={{ fill: c.accent, text: c.onAccent, border: c.accent }}
-        />
+        <Text variant="body" color="textSecondary">
+          {t('home.feedSoon')}
+        </Text>
 
         {queued.map((job) => (
           <UploadCard key={job.postId} job={job} onDiscard={() => confirmDiscard(job.postId)} />

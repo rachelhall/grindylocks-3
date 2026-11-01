@@ -158,9 +158,9 @@
   "tabs": {
     "home": "Inicio",
     "map": "Mapa",
-    "newPost": "Nueva publicación",
-    "notifications": "Notificaciones",
-    "you": "Tú"
+    "you": "Tú",
+    "messages": "Mensajes",
+    "search": "Buscar"
   },
   "map": {
     "search": "Busca una ciudad o un skatepark",
@@ -289,5 +289,33 @@
     "credits": "Créditos",
     "osm": "Ubicaciones de skateparks © colaboradores de OpenStreetMap",
     "osmLink": "openstreetmap.org/copyright"
+  },
+  "feed": {
+    "newPost": "Nueva publicación",
+    "notifications": "Notificaciones",
+    "notificationsUnread": "Notificaciones, hay algo nuevo"
+  },
+  "messages": {
+    "title": "Mensajes",
+    "comingSoon": "Muy pronto",
+    "heading": "Los mensajes directos están en camino",
+    "body": "Mientras tanto, saluda en los comentarios, etiqueta a gente en tus publicaciones o encuentra patinadores entre los habituales de un parque.",
+    "findSkaters": "Buscar patinadores"
+  },
+  "find": {
+    "title": "Buscar",
+    "placeholder": "Busca personas o parques",
+    "show": "Mostrar",
+    "all": "Todo",
+    "people": "Personas",
+    "parks": "Parques",
+    "hint": "Encuentra patinadores por nombre de usuario, o parques por su nombre o como los llaman los locales.",
+    "error": "No se pudo buscar. Revisa tu conexión.",
+    "following": "Siguiendo",
+    "requested": "Solicitado",
+    "privateAccount": "Cuenta privada"
+  },
+  "profile": {
+    "soon": "Los perfiles llegarán pronto."
   }
 }

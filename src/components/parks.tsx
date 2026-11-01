@@ -3,7 +3,7 @@ import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/ui';
 import { formatClock, type OpenState } from '@/lib/hours';
-import type { Discipline, ParkSetting, ParkType } from '@/lib/parks';
+import type { Discipline, ParkSetting, ParkStatus, ParkType } from '@/lib/parks';
 import { size, space, stroke, Text, type ThemeColors, useColors } from '@/theme';
 
 /* Status ----------------------------------------------------------------------- */
@@ -195,6 +195,49 @@ export function DisciplineChips({ disciplines, mine }: { disciplines: Discipline
   );
 }
 
+/* List rows ---------------------------------------------------------------------- */
+
+/**
+ * A park in a list (city search, the Search tab): name, one line, a status
+ * chip unless open, and the bookmark. The row opens the park page.
+ */
+export function ParkRow({
+  name,
+  line,
+  status,
+  saved,
+  onPress,
+  onSave,
+}: {
+  name: string;
+  line: string;
+  status: ParkStatus;
+  saved: boolean;
+  onPress: () => void;
+  onSave: () => void;
+}) {
+  const c = useColors();
+  return (
+    <View style={[styles.parkRow, { backgroundColor: c.surfaceRaised }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={line ? `${name}, ${line}` : name}
+        onPress={onPress}
+        style={({ pressed }) => [styles.parkMain, pressed && styles.pressed]}
+      >
+        <Text variant="headline">{name}</Text>
+        {line ? (
+          <Text variant="bodySm" color="textSecondary">
+            {line}
+          </Text>
+        ) : null}
+        {status !== 'open' ? <StatusChip state={{ kind: 'status', status }} /> : null}
+      </Pressable>
+      <SaveButton saved={saved} onPress={onSave} parkName={name} />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   chip: { alignSelf: 'flex-start', borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: 2 },
   iconButton: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
@@ -202,4 +245,6 @@ const styles = StyleSheet.create({
   stack: { width: 22, height: 22 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   discipline: { paddingHorizontal: 10, paddingVertical: 4 },
+  parkRow: { minHeight: 64, flexDirection: 'row', alignItems: 'center', gap: space[2], paddingLeft: space[3], paddingRight: space[1], paddingVertical: space[2] },
+  parkMain: { flex: 1, gap: 3, minWidth: 0 },
 });

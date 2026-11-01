@@ -158,9 +158,9 @@
   "tabs": {
     "home": "Start",
     "map": "Karte",
-    "newPost": "Neuer Post",
-    "notifications": "Mitteilungen",
-    "you": "Du"
+    "you": "Du",
+    "messages": "Nachrichten",
+    "search": "Suche"
   },
   "map": {
     "search": "Stadt oder Skatepark suchen",
@@ -289,5 +289,33 @@
     "credits": "Quellen",
     "osm": "Skatepark-Standorte © OpenStreetMap-Mitwirkende",
     "osmLink": "openstreetmap.org/copyright"
+  },
+  "feed": {
+    "newPost": "Neuer Beitrag",
+    "notifications": "Benachrichtigungen",
+    "notificationsUnread": "Benachrichtigungen, etwas Neues"
+  },
+  "messages": {
+    "title": "Nachrichten",
+    "comingSoon": "Bald verfügbar",
+    "heading": "Direktnachrichten sind unterwegs",
+    "body": "Bis dahin: Sag Hallo in den Kommentaren, markiere Leute in deinen Beiträgen oder finde Skater unter den Stammgästen eines Parks.",
+    "findSkaters": "Skater finden"
+  },
+  "find": {
+    "title": "Suche",
+    "placeholder": "Leute oder Parks suchen",
+    "show": "Anzeigen",
+    "all": "Alle",
+    "people": "Leute",
+    "parks": "Parks",
+    "hint": "Finde Skater über ihren Benutzernamen, oder Parks über ihren Namen oder wie die Locals sie nennen.",
+    "error": "Suche fehlgeschlagen. Prüf deine Verbindung.",
+    "following": "Folgst du",
+    "requested": "Angefragt",
+    "privateAccount": "Privates Konto"
+  },
+  "profile": {
+    "soon": "Profile kommen bald."
   }
 }
