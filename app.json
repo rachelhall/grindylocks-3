@@ -53,7 +53,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Grindylocks opens your photo library so you can pick photos and clips to post.",
+          "photosPermission": "Grindylocks opens your photo library so you can pick photos and clips to post, or a profile photo.",
           "cameraPermission": false,
           "microphonePermission": false
         }

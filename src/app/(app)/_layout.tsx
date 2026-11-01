@@ -7,7 +7,8 @@ import { useColors } from '@/theme';
 
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
- * (new post, notifications, a post, a park, a profile). Starts the upload queue for this member, so
+ * (new post, notifications, a post, a park, a profile, edit profile and
+ * settings). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
  */
 export default function AppLayout() {
@@ -29,6 +30,11 @@ export default function AppLayout() {
       <Stack.Screen name="post/[id]" />
       <Stack.Screen name="park/[slug]" />
       <Stack.Screen name="profile/[username]" />
+      <Stack.Screen name="edit-profile" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="say-hi" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
+      <Stack.Screen name="settings/index" />
+      <Stack.Screen name="settings/email" />
+      <Stack.Screen name="settings/credits" />
     </Stack>
   );
 }

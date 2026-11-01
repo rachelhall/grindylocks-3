@@ -50,6 +50,9 @@ const icons = {
   chatFill: { ios: 'bubble.left.fill', android: 'chat' },
   lock: { ios: 'lock.fill', android: 'lock' },
   findPeople: { ios: 'person.2', android: 'person_search' },
+  settings: { ios: 'gearshape', android: 'settings' },
+  external: { ios: 'arrow.up.right.square', android: 'open_in_new' },
+  camera: { ios: 'camera', android: 'add_a_photo' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

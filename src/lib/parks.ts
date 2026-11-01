@@ -100,6 +100,65 @@ export async function fetchMetro(id: string): Promise<Metro | null> {
   return data;
 }
 
+/* Directory (home city and park pickers) ------------------------------------------- */
+
+export type DirectoryMetro = { id: string; name: string };
+export type DirectoryPark = {
+  id: string;
+  display_name: string;
+  official_name: string | null;
+  aliases: string[];
+  city: string;
+  metro_area_id: string;
+};
+
+/** Every metro area and park, for the home city and park pickers. */
+export async function fetchDirectory(): Promise<{ metros: DirectoryMetro[]; parks: DirectoryPark[] }> {
+  const [m, p] = await Promise.all([
+    supabase.from('metro_areas').select('id, name').order('name'),
+    supabase
+      .from('parks')
+      .select('id, display_name, official_name, aliases, city, metro_area_id')
+      .order('display_name'),
+  ]);
+  if (m.error) throw m.error;
+  if (p.error) throw p.error;
+  return { metros: m.data, parks: p.data };
+}
+
+export function useDirectory() {
+  return useQuery({ queryKey: keys.directory(), queryFn: fetchDirectory, staleTime: fresh.parks });
+}
+
+/** Lowercase and strip accents, so "faelled" finds "Fælledparken" and "penasquitos" finds "Peñasquitos". */
+export function fold(s: string) {
+  return s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/æ/g, 'ae')
+    .replace(/ø/g, 'o')
+    .replace(/å/g, 'a')
+    .toLowerCase();
+}
+
+/** A few parks by ID, A to Z (the Saved tab on your profile). */
+export async function parksByIds(ids: string[]): Promise<ParkPin[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from('parks').select(PIN_COLUMNS).in('id', ids).order('display_name');
+  if (error) throw error;
+  return (data ?? []) as ParkPin[];
+}
+
+export function useParksByIds(ids: string[]) {
+  return useQuery({
+    queryKey: keys.parksByIds(ids),
+    queryFn: () => parksByIds(ids),
+    staleTime: fresh.parks,
+    // Unsaving a park keeps the other rows up while the list reloads.
+    placeholderData: keepPreviousData,
+  });
+}
+
 /* Park page ---------------------------------------------------------------------- */
 
 export type Obstacle = {

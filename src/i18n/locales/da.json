@@ -100,7 +100,6 @@
   },
   "home": {
     "title": "Hjem",
-    "signedInAs": "Logget ind som @{{username}}",
     "feedSoon": "Dit feed er på vej. Indtil da er her dine egne opslag."
   },
   "errors": {
@@ -284,12 +283,6 @@
     "title": "Notifikationer",
     "empty": "Intet endnu. Kommentarer, tags og invitationer dukker op her."
   },
-  "you": {
-    "title": "Dig",
-    "credits": "Kreditering",
-    "osm": "Skateparkernes placering © OpenStreetMap-bidragydere",
-    "osmLink": "openstreetmap.org/copyright"
-  },
   "feed": {
     "newPost": "Nyt opslag",
     "notifications": "Notifikationer",
@@ -316,6 +309,112 @@
     "privateAccount": "Privat konto"
   },
   "profile": {
-    "soon": "Profiler kommer snart."
+    "edit": "Rediger profil",
+    "homePark": "hjemmepark",
+    "joined": "Med siden {{date}}",
+    "activeToday": "Aktiv i dag",
+    "activeYesterday": "Aktiv i går",
+    "activeDaysAgo_one": "Aktiv for {{count}} dag siden",
+    "activeDaysAgo_other": "Aktiv for {{count}} dage siden",
+    "activeOn": "Aktiv {{date}}",
+    "openToMeetup": "Åben for at mødes",
+    "role": {
+      "owner": "Ejer",
+      "city_admin": "Byadmin",
+      "park_admin": "Parkadmin",
+      "park_contributor": "Parkbidragyder"
+    },
+    "roleAt": "{{role}} · {{place}}",
+    "tabs": {
+      "posts": "Opslag",
+      "tagged": "Tagget",
+      "filmed": "Filmet",
+      "saved": "Gemt"
+    },
+    "onlyYou": "Kun du kan se dette",
+    "postLabel": "Opslag fra {{date}}",
+    "clipLabel": "Klip fra {{date}}",
+    "unavailable": "Denne profil er ikke tilgængelig.",
+    "privateBody": "Denne konto er privat. Kun folk, de har godkendt som følgere, kan se deres opslag.",
+    "emptyPostsOwn": "Intet opslået endnu. Dine opslag dukker op her.",
+    "emptyPosts": "{{username}} har ikke lavet opslag endnu.",
+    "emptyTaggedOwn": "Opslag, du er tagget i, dukker op her.",
+    "emptyTagged": "Opslag, {{username}} er tagget i, dukker op her.",
+    "emptyFilmedOwn": "Klip, du har filmet, dukker op her.",
+    "emptyFilmed": "Klip, {{username}} har filmet, dukker op her.",
+    "emptySaved": "Parker, du gemmer under vil skate, dukker op her. Kun du kan se dem."
+  },
+  "editProfile": {
+    "title": "Rediger profil",
+    "save": "Gem",
+    "done": "Færdig",
+    "discardTitle": "Kassér dine ændringer?",
+    "keepEditing": "Fortsæt med at redigere",
+    "discard": "Kassér",
+    "changePhoto": "Skift billede",
+    "usernameNote": "Du kan skifte det én gang hver 30. dag. Dit gamle navn er reserveret til dig i 14 dage. Tags og omtaler opdateres af sig selv.",
+    "usernameLocked": "Du har for nylig skiftet brugernavn. Du kan skifte det igen den {{date}}.",
+    "usernameCooldown": "Du kan kun skifte brugernavn én gang hver 30. dag.",
+    "takeBack": "Tag @{{username}} tilbage",
+    "heldUntil": "Reserveret til dig indtil {{date}}",
+    "bio": "Bio",
+    "bioPlaceholder": "Hvor du skater, hvad du kører på, hvem du filmer",
+    "bioCountLabel": "{{count}} af {{max}} tegn",
+    "iSkate": "Jeg kører",
+    "home": "Hjem",
+    "noHomePark": "Ingen",
+    "homeNote": "Flytter du? Du bliver spurgt, om du vil sige hej til skatere i din nye by. Dine gamle opslag bliver, hvor de blev filmet.",
+    "meetupNote": "Viser et mærke på din profil"
+  },
+  "sayHi": {
+    "title": "Velkommen til {{city}}",
+    "body": "Din hjemby er opdateret. Dine gamle opslag bliver, hvor de blev filmet."
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "account": "Konto",
+    "email": "E-mail",
+    "emailPending": "{{email}} · skifter til {{next}}",
+    "change": "Skift",
+    "appleGoogle": "Log ind med Apple og Google",
+    "appleGoogleBody": "Forbind dem for at logge ind uden kode",
+    "privacy": "Privatliv",
+    "private": "Privat konto",
+    "privateBody": "Nye følgere skal godkendes af dig. Du vises aldrig som stamgæst.",
+    "regulars": "Vis mig på stamgæstlister",
+    "regularsBody": "I din hjemmepark og parker, hvor du ofte laver opslag",
+    "roleBadge": "Vis mit rollemærke",
+    "app": "App",
+    "language": "Sprog",
+    "languageBody": "Følger din telefon. Skift det for Grindylocks i telefonens indstillinger.",
+    "languageName": "Dansk",
+    "distances": "Afstande",
+    "distancesBody": "Ud fra din telefons region",
+    "miles": "Miles",
+    "kilometers": "Kilometer",
+    "help": "Hjælp og jura",
+    "contact": "Hjælp og kontakt",
+    "privacyPolicy": "Privatlivspolitik",
+    "dataCopy": "Få en kopi af mine data",
+    "dataCopyBody": "Vi sender den til dig på e-mail",
+    "dataCopySubject": "Kopi af mine data (@{{username}})",
+    "credits": "Krediteringer",
+    "version": "Grindylocks beta · {{version}}"
+  },
+  "credits": {
+    "osm": "Kortdata © OpenStreetMap-bidragydere",
+    "osmBody": "Parkernes placeringer kommer fra OpenStreetMap, som er tilgængeligt under Open Database License.",
+    "osmLink": "openstreetmap.org/copyright"
+  },
+  "changeEmail": {
+    "title": "Skift e-mail",
+    "body": "Du logger ind med {{email}} nu. Vi sender en kode til den nye adresse for at tjekke, at den er din.",
+    "label": "Ny e-mail",
+    "same": "Det er allerede din e-mail.",
+    "taken": "En anden konto bruger allerede den e-mail.",
+    "confirm": "Skift e-mail",
+    "codeCurrent": "Et skridt mere: Vi har også sendt en kode til din nuværende adresse, {{email}}. Skriv den herunder.",
+    "doneTitle": "E-mail skiftet",
+    "doneBody": "Fremover logger du ind med {{email}}."
   }
 }

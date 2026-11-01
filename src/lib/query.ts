@@ -43,6 +43,8 @@ export const fresh = {
    * post must never outlive them: refetched after 5 minutes, dropped after 30.
    */
   posts: 5 * MINUTE,
+  /** Profile photo URLs are signed for an hour too; re-signed after 50 minutes. */
+  avatars: 50 * MINUTE,
 } as const;
 
 /** Query keys, in one place so invalidation can't miss a spelling. */
@@ -61,6 +63,19 @@ export const keys = {
   myPosts: (userId: string) => ['posts', 'mine', userId] as const,
   post: (id: string) => ['post', id] as const,
   parkName: (id: string) => ['park-name', id] as const,
+  parksByIds: (ids: string[]) => ['parks', 'ids', ...[...ids].sort()] as const,
+  /** Every profile query starts with 'profile', so one invalidation covers them all. */
+  profiles: () => ['profile'] as const,
+  /** Someone's profile, looked up by username (any capitals). */
+  profile: (username: string) => ['profile', 'username', username.toLowerCase()] as const,
+  /** The signed-in member's own profile, with their private settings. */
+  myProfile: (userId: string) => ['profile', 'me', userId] as const,
+  /** A member's posts for the profile grid. */
+  profilePosts: (userId: string) => ['posts', 'by', userId] as const,
+  /** Usernames you changed away from in the last 14 days. */
+  reservedUsernames: (userId: string) => ['reserved-usernames', userId] as const,
+  /** A signed URL for a profile photo. */
+  avatar: (path: string) => ['avatar', path] as const,
 };
 
 let started = false;

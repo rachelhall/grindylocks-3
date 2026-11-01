@@ -6,9 +6,9 @@ import { StyleSheet, View } from 'react-native';
 
 import { FormScreen } from '@/components/screen';
 import { Button, StepHeader } from '@/components/ui';
+import { announceArrival } from '@/lib/announcements';
 import { useAuth } from '@/lib/auth';
 import { ONBOARDING_STEPS, useOnboarding } from '@/lib/onboarding';
-import { Sentry } from '@/lib/sentry';
 import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { space, Text, useColors } from '@/theme';
@@ -58,14 +58,7 @@ export default function RegularsStep() {
 
     // Only announce if they saw the toggle in this run and left it on.
     if (announceAsked && announce) {
-      const { error: announceError } = await supabase.from('announcements').insert({
-        user_id: session.user.id,
-        kind: 'joined',
-        metro_area_id: profile.home_metro_area_id,
-        park_id: homeParkId,
-      });
-      // Not worth blocking the member over; they've joined either way.
-      if (announceError) Sentry.captureException(announceError);
+      await announceArrival(session.user.id, profile.home_metro_area_id, homeParkId);
     }
 
     // Once onboarded_at is set, the root layout switches to the app.
