@@ -42,7 +42,14 @@
       ],
       "expo-secure-store",
       "expo-localization",
-      "@sentry/react-native"
+      [
+        "@sentry/react-native",
+        {
+          "organization": "grindylocks",
+          "project": "grindylocks-app",
+          "url": "https://sentry.io/"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
