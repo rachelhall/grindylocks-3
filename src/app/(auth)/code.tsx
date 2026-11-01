@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 
 import { FormScreen } from '@/components/screen';
 import { BackButton, Button, TextField } from '@/components/ui';
-import { authErrorKey } from '@/lib/auth-errors';
+import { authErrorKey, otpOptions } from '@/lib/auth-errors';
 import { supabase } from '@/lib/supabase';
 import { Text } from '@/theme';
 
@@ -17,7 +17,7 @@ const RESEND_SECONDS = 60;
  */
 export default function CodeSignIn() {
   const { t } = useTranslation();
-  const { email } = useLocalSearchParams<{ email: string }>();
+  const { email, invite } = useLocalSearchParams<{ email: string; invite?: string }>();
   const [code, setCode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -52,10 +52,10 @@ export default function CodeSignIn() {
     setNotice(null);
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email,
-      options: { shouldCreateUser: false },
+      options: otpOptions(invite),
     });
     if (sendError) {
-      setError(t(authErrorKey(sendError)));
+      setError(t(authErrorKey(sendError, Boolean(invite))));
       return;
     }
     setWait(RESEND_SECONDS);

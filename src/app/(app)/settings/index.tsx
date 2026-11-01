@@ -25,9 +25,9 @@ async function openMail(subject?: string) {
 }
 
 /**
- * Settings, first version (Nov 1). Rows arrive with their features: blocked
- * accounts come with blocking, push notifications with notifications and
- * delete account later, never as disabled placeholders.
+ * Settings. Rows arrive with their features: blocked accounts came with
+ * blocking; push notifications come with notifications (M4) and delete
+ * account with M5, never as disabled placeholders.
  */
 export default function Settings() {
   const { t } = useTranslation();
@@ -116,6 +116,11 @@ export default function Settings() {
               }
             />
           ) : null}
+          <SettingsRow
+            title={t('block.listTitle')}
+            trailing="chevron"
+            onPress={() => router.push('/settings/blocked')}
+          />
         </SettingsSection>
 
         <SettingsSection title={t('settings.app')}>

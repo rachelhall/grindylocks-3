@@ -7,7 +7,8 @@
     "back": "Back",
     "signOut": "Sign out",
     "cancel": "Cancel",
-    "close": "Close"
+    "close": "Close",
+    "deletedUser": "deleted user"
   },
   "auth": {
     "welcome": {
@@ -17,7 +18,8 @@
       "apple": "Continue with Apple",
       "google": "Continue with Google",
       "soon": "Coming soon",
-      "inviteOnly": "New here? Grindylocks is invite only for now. Ask a skater you know to send you an invite link."
+      "inviteOnly": "New here? Grindylocks is invite only for now. Ask a skater you know to send you an invite link.",
+      "haveCode": "I have an invite code"
     },
     "email": {
       "title": "Sign in with email",
@@ -39,6 +41,16 @@
       "resendIn": "Send a new code in {{seconds}}s",
       "resent": "New code sent.",
       "otherEmail": "Use a different email"
+    },
+    "invite": {
+      "title": "Enter your invite",
+      "body": "Type the code from the invite a skater sent you. It looks like ABCD-2345.",
+      "label": "Invite code",
+      "check": "Check invite",
+      "invalid": "That invite doesn't work. It may have expired, been used or been cancelled. Ask for a new one.",
+      "invitedYou": "@{{username}} invited you",
+      "validFor": "Invite {{code}} works once and expires 7 days after it was made.",
+      "otherWays": "Apple and Google sign-in are coming soon."
     }
   },
   "onboarding": {
@@ -284,7 +296,10 @@
   },
   "notifications": {
     "title": "Notifications",
-    "empty": "Nothing yet. Comments, tags and invites will show up here."
+    "empty": "Nothing yet. Comments, tags, follow requests and invites will show up here.",
+    "earlier": "Invites",
+    "inviteUsed": "@{{username}} joined with your invite",
+    "inviteUsedSomeone": "Someone joined with your invite"
   },
   "feed": {
     "newPost": "New post",
@@ -345,7 +360,11 @@
     "emptyTagged": "Posts {{username}} is tagged in will show up here.",
     "emptyFilmedOwn": "Clips you filmed will show up here.",
     "emptyFilmed": "Clips {{username}} filmed will show up here.",
-    "emptySaved": "Parks you save to want to skate show up here. Only you can see them."
+    "emptySaved": "Parks you save to want to skate show up here. Only you can see them.",
+    "invites": "Invites",
+    "invitesCount_one": "Invites · {{count}}",
+    "invitesCount_other": "Invites · {{count}}",
+    "more": "More"
   },
   "editProfile": {
     "title": "Edit profile",
@@ -471,5 +490,51 @@
     "removeBody": "It comes out of the gallery for everyone.",
     "removeFailed": "Couldn't remove the photo. Try again.",
     "reorderFailed": "Couldn't move the photo. Try again."
+  },
+  "invites": {
+    "title": "Invites",
+    "left_one": "invite left",
+    "left_other": "invites left",
+    "body": "Each link works once and expires after 7 days. If it's cancelled or expires unused, you get the invite back. Need more? Ask your city or park admin.",
+    "make": "Make an invite link",
+    "noneLeftTitle": "No invites left",
+    "noneLeftBody": "Ask your city or park admin if you need more.",
+    "yours": "Your links",
+    "expiresIn_one": "Expires in {{count}} day",
+    "expiresIn_other": "Expires in {{count}} days",
+    "usedBy": "@{{username}} joined · {{date}}",
+    "usedByDeleted": "Used by a deleted user · {{date}}",
+    "expired": "Expired unused · {{date}}",
+    "share": "Share",
+    "cancel": "Cancel link",
+    "keep": "Keep it",
+    "cancelTitle": "Cancel this invite?",
+    "cancelBody": "{{code}} will stop working and you'll get the invite back.",
+    "view": "View profile",
+    "shareMessage": "@{{username}} invited you to Grindylocks, the skatepark app for bladers, quad skaters and skateboarders.\n\nInvite code: {{code}} (works once, for 7 days)\n\nGot the app? Open {{link}}"
+  },
+  "follow": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "unfollowTitle": "Unfollow {{username}}?",
+    "unfollowPrivateBody": "Their account is private, so you'd have to ask again to see their posts.",
+    "cancelRequest": "Cancel request",
+    "cancelRequestTitle": "Cancel your follow request?",
+    "requestsTitle": "Follow requests",
+    "wantsToFollow": "Wants to follow you",
+    "accept": "Accept",
+    "decline": "Decline"
+  },
+  "block": {
+    "block": "Block",
+    "title": "Block {{username}}?",
+    "body": "You won't see each other's profiles, posts or comments, and neither of you will follow the other. They aren't told. You can unblock them in Settings.",
+    "unblock": "Unblock",
+    "unblockTitle": "Unblock {{username}}?",
+    "unblockBody": "You'll see each other again. Follows the block ended don't come back; either of you can follow again.",
+    "listTitle": "Blocked accounts",
+    "listBody": "People you've blocked can't see your profile, posts or comments, and you don't see theirs.",
+    "none": "You haven't blocked anyone.",
+    "since": "Blocked {{date}}"
   }
 }

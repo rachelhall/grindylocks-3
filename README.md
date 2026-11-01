@@ -50,11 +50,12 @@ npx expo-doctor
 ```
 src/
   app/            Expo Router screens (every file is a route)
-    (auth)/       welcome and email sign-in
+    (auth)/       welcome, email sign-in and the invite screen
     (onboarding)/ age, username, city, regulars notice
     (app)/        the signed-in app: (tabs)/ (home, map, messages, search, you),
                   new-post, post/[id], park/[slug]/ (the park page and its photos),
-                  profile/[username], edit-profile, say-hi, settings/ (index, email, credits)
+                  profile/[username], edit-profile, say-hi, invites, notifications,
+                  settings/ (index, email, credits, blocked)
   i18n/           i18next setup; locales/en.json is the source of truth
   lib/
     media.ts      picking, compressing and showing photos and clips
@@ -62,6 +63,7 @@ src/
     parks.ts      park directory data; hours.ts is open-now and sunrise/sunset
     profiles.ts   profiles, the posts grid, profile photos, Edit profile and Settings saves
     username.ts   the live free/taken username check (onboarding and Edit profile)
+    social.ts     invites, following (and requests) and blocking
     query.ts      TanStack Query client, cache keys and freshness
     config.ts     support email and privacy policy URL (placeholders for now)
     park-photos.ts  park photos: gallery reads, uploads, reorder and remove

@@ -7,7 +7,8 @@
     "back": "Atrás",
     "signOut": "Cerrar sesión",
     "cancel": "Cancelar",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "deletedUser": "usuario eliminado"
   },
   "auth": {
     "welcome": {
@@ -17,7 +18,8 @@
       "apple": "Continuar con Apple",
       "google": "Continuar con Google",
       "soon": "Próximamente",
-      "inviteOnly": "¿Eres nuevo? De momento Grindylocks es solo con invitación. Pide a algún patinador que conozcas que te mande un enlace."
+      "inviteOnly": "¿Eres nuevo? De momento Grindylocks es solo con invitación. Pide a algún patinador que conozcas que te mande un enlace.",
+      "haveCode": "Tengo un código de invitación"
     },
     "email": {
       "title": "Entra con tu email",
@@ -39,6 +41,16 @@
       "resendIn": "Enviar un código nuevo en {{seconds}} s",
       "resent": "Código nuevo enviado.",
       "otherEmail": "Usar otro email"
+    },
+    "invite": {
+      "title": "Introduce tu invitación",
+      "body": "Escribe el código de la invitación que te mandó un patinador. Se parece a ABCD-2345.",
+      "label": "Código de invitación",
+      "check": "Comprobar invitación",
+      "invalid": "Esa invitación no funciona. Puede que haya caducado, ya se haya usado o se haya cancelado. Pide una nueva.",
+      "invitedYou": "@{{username}} te ha invitado",
+      "validFor": "La invitación {{code}} sirve una sola vez y caduca 7 días después de crearse.",
+      "otherWays": "El inicio de sesión con Apple y Google llegará pronto."
     }
   },
   "onboarding": {
@@ -284,7 +296,10 @@
   },
   "notifications": {
     "title": "Notificaciones",
-    "empty": "Nada por ahora. Aquí verás comentarios, etiquetas e invitaciones."
+    "empty": "Nada todavía. Aquí aparecerán comentarios, etiquetas, solicitudes para seguirte e invitaciones.",
+    "earlier": "Invitaciones",
+    "inviteUsed": "@{{username}} se unió con tu invitación",
+    "inviteUsedSomeone": "Alguien se unió con tu invitación"
   },
   "feed": {
     "newPost": "Nueva publicación",
@@ -345,7 +360,11 @@
     "emptyTagged": "Aquí aparecerán los posts en los que etiqueten a {{username}}.",
     "emptyFilmedOwn": "Aquí aparecerán los clips que hayas grabado.",
     "emptyFilmed": "Aquí aparecerán los clips que haya grabado {{username}}.",
-    "emptySaved": "Aquí aparecen los parks que guardes en quiero patinar. Solo tú puedes verlos."
+    "emptySaved": "Aquí aparecen los parks que guardes en quiero patinar. Solo tú puedes verlos.",
+    "invites": "Invitaciones",
+    "invitesCount_one": "Invitaciones · {{count}}",
+    "invitesCount_other": "Invitaciones · {{count}}",
+    "more": "Más"
   },
   "editProfile": {
     "title": "Editar perfil",
@@ -471,5 +490,51 @@
     "removeBody": "Desaparece de la galería para todos.",
     "removeFailed": "No se pudo quitar la foto. Vuelve a intentarlo.",
     "reorderFailed": "No se pudo mover la foto. Vuelve a intentarlo."
+  },
+  "invites": {
+    "title": "Invitaciones",
+    "left_one": "invitación disponible",
+    "left_other": "invitaciones disponibles",
+    "body": "Cada enlace sirve una vez y caduca a los 7 días. Si se cancela o caduca sin usarse, recuperas la invitación. ¿Necesitas más? Pídeselas a tu admin de ciudad o de parque.",
+    "make": "Crear enlace de invitación",
+    "noneLeftTitle": "No te quedan invitaciones",
+    "noneLeftBody": "Pide más a tu admin de ciudad o de parque si las necesitas.",
+    "yours": "Tus enlaces",
+    "expiresIn_one": "Caduca en {{count}} día",
+    "expiresIn_other": "Caduca en {{count}} días",
+    "usedBy": "@{{username}} se unió · {{date}}",
+    "usedByDeleted": "Usada por un usuario eliminado · {{date}}",
+    "expired": "Caducó sin usarse · {{date}}",
+    "share": "Compartir",
+    "cancel": "Cancelar enlace",
+    "keep": "Mantenerlo",
+    "cancelTitle": "¿Cancelar esta invitación?",
+    "cancelBody": "{{code}} dejará de funcionar y recuperarás la invitación.",
+    "view": "Ver perfil",
+    "shareMessage": "@{{username}} te ha invitado a Grindylocks, la app de skateparks para patinadores en línea, de quads y skaters.\n\nCódigo de invitación: {{code}} (sirve una vez, durante 7 días)\n\n¿Ya tienes la app? Abre {{link}}"
+  },
+  "follow": {
+    "follow": "Seguir",
+    "unfollow": "Dejar de seguir",
+    "unfollowTitle": "¿Dejar de seguir a {{username}}?",
+    "unfollowPrivateBody": "Su cuenta es privada, así que tendrías que volver a pedirlo para ver sus publicaciones.",
+    "cancelRequest": "Cancelar solicitud",
+    "cancelRequestTitle": "¿Cancelar tu solicitud para seguir?",
+    "requestsTitle": "Solicitudes para seguirte",
+    "wantsToFollow": "Quiere seguirte",
+    "accept": "Aceptar",
+    "decline": "Rechazar"
+  },
+  "block": {
+    "block": "Bloquear",
+    "title": "¿Bloquear a {{username}}?",
+    "body": "No veréis los perfiles, publicaciones ni comentarios del otro, y ninguno seguirá al otro. No se le avisa. Puedes desbloquearlo en Ajustes.",
+    "unblock": "Desbloquear",
+    "unblockTitle": "¿Desbloquear a {{username}}?",
+    "unblockBody": "Os volveréis a ver. Los seguimientos que terminó el bloqueo no vuelven; cualquiera de los dos puede volver a seguir.",
+    "listTitle": "Cuentas bloqueadas",
+    "listBody": "Las personas que has bloqueado no ven tu perfil, publicaciones ni comentarios, y tú no ves los suyos.",
+    "none": "No has bloqueado a nadie.",
+    "since": "Bloqueado el {{date}}"
   }
 }

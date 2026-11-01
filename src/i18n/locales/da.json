@@ -7,7 +7,8 @@
     "back": "Tilbage",
     "signOut": "Log ud",
     "cancel": "Annuller",
-    "close": "Luk"
+    "close": "Luk",
+    "deletedUser": "slettet bruger"
   },
   "auth": {
     "welcome": {
@@ -17,7 +18,8 @@
       "apple": "Fortsæt med Apple",
       "google": "Fortsæt med Google",
       "soon": "Kommer snart",
-      "inviteOnly": "Ny her? Grindylocks kræver en invitation lige nu. Bed en skater, du kender, om at sende dig et invitationslink."
+      "inviteOnly": "Ny her? Grindylocks kræver en invitation lige nu. Bed en skater, du kender, om at sende dig et invitationslink.",
+      "haveCode": "Jeg har en invitationskode"
     },
     "email": {
       "title": "Log ind med e-mail",
@@ -39,6 +41,16 @@
       "resendIn": "Send en ny kode om {{seconds}} s",
       "resent": "Ny kode sendt.",
       "otherEmail": "Brug en anden e-mail"
+    },
+    "invite": {
+      "title": "Skriv din invitation",
+      "body": "Skriv koden fra den invitation, en skater har sendt dig. Den ligner ABCD-2345.",
+      "label": "Invitationskode",
+      "check": "Tjek invitation",
+      "invalid": "Den invitation virker ikke. Den kan være udløbet, brugt eller annulleret. Bed om en ny.",
+      "invitedYou": "@{{username}} har inviteret dig",
+      "validFor": "Invitation {{code}} virker én gang og udløber 7 dage efter, den blev lavet.",
+      "otherWays": "Log ind med Apple og Google kommer snart."
     }
   },
   "onboarding": {
@@ -284,7 +296,10 @@
   },
   "notifications": {
     "title": "Notifikationer",
-    "empty": "Intet endnu. Kommentarer, tags og invitationer dukker op her."
+    "empty": "Intet endnu. Kommentarer, tags, anmodninger om at følge dig og invitationer dukker op her.",
+    "earlier": "Invitationer",
+    "inviteUsed": "@{{username}} er med via din invitation",
+    "inviteUsedSomeone": "En er med via din invitation"
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -345,7 +360,11 @@
     "emptyTagged": "Opslag, {{username}} er tagget i, dukker op her.",
     "emptyFilmedOwn": "Klip, du har filmet, dukker op her.",
     "emptyFilmed": "Klip, {{username}} har filmet, dukker op her.",
-    "emptySaved": "Parker, du gemmer under vil skate, dukker op her. Kun du kan se dem."
+    "emptySaved": "Parker, du gemmer under vil skate, dukker op her. Kun du kan se dem.",
+    "invites": "Invitationer",
+    "invitesCount_one": "Invitationer · {{count}}",
+    "invitesCount_other": "Invitationer · {{count}}",
+    "more": "Mere"
   },
   "editProfile": {
     "title": "Rediger profil",
@@ -471,5 +490,51 @@
     "removeBody": "Det forsvinder fra galleriet for alle.",
     "removeFailed": "Billedet kunne ikke fjernes. Prøv igen.",
     "reorderFailed": "Billedet kunne ikke flyttes. Prøv igen."
+  },
+  "invites": {
+    "title": "Invitationer",
+    "left_one": "invitation tilbage",
+    "left_other": "invitationer tilbage",
+    "body": "Hvert link virker én gang og udløber efter 7 dage. Bliver det annulleret eller udløber ubrugt, får du invitationen tilbage. Brug for flere? Spørg din by- eller parkadmin.",
+    "make": "Lav et invitationslink",
+    "noneLeftTitle": "Ingen invitationer tilbage",
+    "noneLeftBody": "Spørg din by- eller parkadmin, hvis du har brug for flere.",
+    "yours": "Dine links",
+    "expiresIn_one": "Udløber om {{count}} dag",
+    "expiresIn_other": "Udløber om {{count}} dage",
+    "usedBy": "@{{username}} er med · {{date}}",
+    "usedByDeleted": "Brugt af en slettet bruger · {{date}}",
+    "expired": "Udløbet ubrugt · {{date}}",
+    "share": "Del",
+    "cancel": "Annullér link",
+    "keep": "Behold det",
+    "cancelTitle": "Annullér invitationen?",
+    "cancelBody": "{{code}} holder op med at virke, og du får invitationen tilbage.",
+    "view": "Se profil",
+    "shareMessage": "@{{username}} har inviteret dig til Grindylocks, skateparkappen for inlinere, rulleskøjteløbere og skatere.\n\nInvitationskode: {{code}} (virker én gang, i 7 dage)\n\nHar du appen? Åbn {{link}}"
+  },
+  "follow": {
+    "follow": "Følg",
+    "unfollow": "Følg ikke længere",
+    "unfollowTitle": "Stop med at følge {{username}}?",
+    "unfollowPrivateBody": "Kontoen er privat, så du skal spørge igen for at se opslagene.",
+    "cancelRequest": "Træk anmodning tilbage",
+    "cancelRequestTitle": "Træk din anmodning tilbage?",
+    "requestsTitle": "Anmodninger om at følge dig",
+    "wantsToFollow": "Vil gerne følge dig",
+    "accept": "Acceptér",
+    "decline": "Afvis"
+  },
+  "block": {
+    "block": "Blokér",
+    "title": "Blokér {{username}}?",
+    "body": "I kan ikke se hinandens profiler, opslag eller kommentarer, og ingen af jer følger den anden. Personen får ikke besked. Du kan fjerne blokeringen i Indstillinger.",
+    "unblock": "Fjern blokering",
+    "unblockTitle": "Fjern blokeringen af {{username}}?",
+    "unblockBody": "I kan se hinanden igen. Følgninger, som blokeringen stoppede, kommer ikke tilbage; I kan begge følge igen.",
+    "listTitle": "Blokerede konti",
+    "listBody": "Folk, du har blokeret, kan ikke se din profil, dine opslag eller kommentarer, og du ser ikke deres.",
+    "none": "Du har ikke blokeret nogen.",
+    "since": "Blokeret {{date}}"
   }
 }
