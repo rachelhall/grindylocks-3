@@ -53,12 +53,13 @@ src/
     (auth)/       welcome and email sign-in
     (onboarding)/ age, username, city, regulars notice
     (app)/        the signed-in app: (tabs)/ (home, map + search, notifications, you),
-                  new-post, post/[id], park/[slug]
+                  new-post, post/[id], park/[slug]/ (the park page and its photos)
   i18n/           i18next setup; locales/en.json is the source of truth
   lib/
     media.ts      picking, compressing and showing photos and clips
     uploads.ts    the persisted background upload queue; createPost()
     parks.ts      park directory data; hours.ts is open-now and sunrise/sunset
+    park-photos.ts  park photos: gallery reads, uploads, reorder and remove
     supabase.ts   Supabase client, session encrypted with a SecureStore key
     database.types.ts  generated; refresh with `npm run db:types` after migrations
     env.ts        public EXPO_PUBLIC_ config

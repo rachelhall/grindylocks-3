@@ -5,7 +5,9 @@
     "retry": "Reintentar",
     "continue": "Continuar",
     "back": "Atrás",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "cancel": "Cancelar",
+    "close": "Cerrar"
   },
   "auth": {
     "welcome": {
@@ -240,7 +242,8 @@
     "osmCredit": "Ubicación © colaboradores de OpenStreetMap",
     "disciplineYours": "{{discipline}}, lo practicas tú",
     "missing": "Este skatepark no está disponible.",
-    "fees": "Precios"
+    "fees": "Precios",
+    "more": "Más"
   },
   "disciplines": {
     "inline": "Inline",
@@ -317,5 +320,57 @@
   },
   "profile": {
     "soon": "Los perfiles llegarán pronto."
+  },
+  "parkPhotos": {
+    "open": "Abrir fotos de {{park}}",
+    "add": "Añadir fotos",
+    "addPark": "Añadir fotos del parque",
+    "see": "Ver fotos del parque",
+    "full": "Este parque ya tiene {{max}} fotos. Quita una para añadir otra.",
+    "unsupported": "Algunas no se pudieron añadir. Las fotos del parque pueden ser JPEG, PNG o HEIC.",
+    "noneYet": "Este parque aún no tiene fotos",
+    "count": "{{count}} / {{max}}",
+    "tipWide": "Lo mejor son dos o tres fotos horizontales y abiertas de todo el parque.",
+    "tipPeople": "Deja fuera a la gente, o que salga tan pequeña que no se reconozca. Las fotos patinando van en posts.",
+    "tipRights": "Añade solo fotos que hayas hecho tú o que tengas permiso para usar.",
+    "role": {
+      "owner": "Administras Grindylocks",
+      "city_admin": "Eres admin de la ciudad",
+      "park_admin": "Eres admin del parque",
+      "park_contributor": "Colaboras en este parque"
+    },
+    "photographer": "Fotógrafo/a",
+    "photographerHint": "Aparece como \"Foto de …\" en la galería.",
+    "source": "De dónde son",
+    "sourceOwn": "Fotos mías",
+    "sourcePermission": "Con permiso de {{park}}",
+    "sourceWikimedia": "Wikimedia Commons",
+    "sourceOther": "De otro sitio",
+    "sourceOtherLabel": "Fuente",
+    "license": "Licencia",
+    "licenseHint": "\"own\" para tus fotos, \"permission\" si el parque dijo que sí, o el nombre de la licencia, como CC BY-SA 4.0.",
+    "upload_one": "Añadir foto",
+    "upload_other": "Añadir {{count}} fotos",
+    "uploading": "Subiendo {{current}} de {{count}}…",
+    "failed": "No se subió. Revisa tu conexión y vuelve a intentarlo.",
+    "partFailed": "Se añadieron {{done}} de {{count}}. El resto no se subió; vuelve a intentarlo.",
+    "galleryCount": "Fotos del parque · {{current}} / {{total}}",
+    "galleryEmpty": "Aún no hay fotos del parque.",
+    "photoBy": "Foto de {{name}}",
+    "added": "Añadida en {{date}}",
+    "alt": "Foto de {{park}}",
+    "photoOf": "Foto {{current}} de {{total}}",
+    "thumb": "Foto {{n}}",
+    "thumbShowing": "Foto {{n}}, en pantalla",
+    "swipeHint": "Desliza para ver más. Las fotos patinando están en los posts;",
+    "seePosts": "ver posts de {{park}}",
+    "makeHeader": "Usar como foto de portada",
+    "moveEarlier": "Mover antes",
+    "moveLater": "Mover después",
+    "remove": "Quitar foto",
+    "removeTitle": "¿Quitar esta foto?",
+    "removeBody": "Desaparece de la galería para todos.",
+    "removeFailed": "No se pudo quitar la foto. Vuelve a intentarlo.",
+    "reorderFailed": "No se pudo mover la foto. Vuelve a intentarlo."
   }
 }
