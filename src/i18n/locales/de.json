@@ -1,14 +1,110 @@
 {
   "common": {
     "appName": "Grindylocks",
-    "loading": "Wird geladen",
-    "retry": "Erneut versuchen"
+    "loading": "Lädt",
+    "retry": "Erneut versuchen",
+    "continue": "Weiter",
+    "back": "Zurück",
+    "signOut": "Abmelden"
+  },
+  "auth": {
+    "welcome": {
+      "kicker": "Nur mit Einladung · Beta",
+      "tagline": "Parks finden, Clips posten, die Locals kennenlernen.",
+      "email": "Weiter mit E-Mail",
+      "apple": "Weiter mit Apple",
+      "google": "Weiter mit Google",
+      "soon": "Bald verfügbar",
+      "inviteOnly": "Neu hier? Grindylocks geht im Moment nur mit Einladung. Frag jemanden, den du vom Skaten kennst, nach einem Einladungslink."
+    },
+    "email": {
+      "title": "Mit E-Mail anmelden",
+      "body": "Wir schicken dir einen Code per E-Mail. Kein Passwort nötig.",
+      "label": "E-Mail",
+      "placeholder": "du@beispiel.de",
+      "send": "Code senden",
+      "invalid": "Das sieht nicht nach einer E-Mail-Adresse aus.",
+      "notMember": "Zu dieser E-Mail gibt es noch kein Konto. Grindylocks geht im Moment nur mit Einladung, also frag jemanden, den du vom Skaten kennst, nach einem Link.",
+      "rateLimited": "Zu viele Codes in kurzer Zeit. Warte eine Minute und versuch es noch mal."
+    },
+    "code": {
+      "title": "Schau in deine E-Mails",
+      "body": "Wir haben einen Code an {{email}} geschickt. Gib ihn unten ein.",
+      "label": "Code",
+      "verify": "Anmelden",
+      "wrong": "Der Code ist falsch oder abgelaufen. Prüf ihn oder fordere einen neuen an.",
+      "resend": "Neuen Code senden",
+      "resendIn": "Neuen Code senden in {{seconds}} s",
+      "resent": "Neuer Code gesendet.",
+      "otherEmail": "Andere E-Mail verwenden"
+    }
+  },
+  "onboarding": {
+    "step": "Schritt {{current}} von {{total}}",
+    "age": {
+      "title": "Bist du 16 oder älter?",
+      "body": "Grindylocks ist für Skater ab 16. Wir speichern nur, dass du Ja gesagt hast, nie deinen Geburtstag.",
+      "yes": "Ja, ich bin 16 oder älter",
+      "no": "Nein, ich bin unter 16",
+      "tooYoungTitle": "Komm mit 16 wieder",
+      "tooYoungBody": "Grindylocks ist im Moment für Skater ab 16. Wir sind dann noch da.",
+      "otherAccount": "Andere E-Mail verwenden"
+    },
+    "username": {
+      "title": "Wer rollt hier?",
+      "label": "Benutzername",
+      "hint": "2–30 Buchstaben, Zahlen, Punkte oder Unterstriche.",
+      "free": "Frei",
+      "taken": "Der Benutzername ist vergeben.",
+      "checking": "Wird geprüft",
+      "invalid": "Verwende 2–30 Buchstaben, Zahlen, Punkte oder Unterstriche.",
+      "disciplinesLegend": "Was fährst du?",
+      "pickAll": "Alles Passende auswählen",
+      "inline": "Blader",
+      "inlineSub": "Inlineskates",
+      "quad": "Quad-Skater",
+      "quadSub": "Rollschuhe",
+      "skateboard": "Skateboarder",
+      "skateboardSub": "Street- und Parkboards",
+      "pickOne": "Wähle mindestens eins aus."
+    },
+    "city": {
+      "title": "Wo skatest du?",
+      "body": "Deine Stadt bestimmt deinen Feed und wem du folgen kannst. Nur angemeldete Mitglieder sehen sie.",
+      "cityLabel": "Heimatstadt",
+      "searchCity": "Städte suchen",
+      "parks_one": "{{count}} Park",
+      "parks_other": "{{count}} Parks",
+      "noCities": "Noch keine passende Stadt.",
+      "pickCity": "Wähle deine Heimatstadt.",
+      "change": "Stadt ändern",
+      "parkLabel": "Heimpark",
+      "optional": "(optional)",
+      "searchPark": "Parks in {{city}} suchen",
+      "noParks": "Kein passender Park.",
+      "removePark": "Heimpark entfernen",
+      "announceTitle": "Sag Hallo zu {{city}}",
+      "announceBody": "Lass die Skater in {{city}} wissen, dass jemand Neues da ist. Schalte es aus, um still beizutreten."
+    },
+    "regulars": {
+      "title": "Achtung: Du bist Stammgast",
+      "body": "Wenn du mehr als 5 Mal in einem Park postest oder ihn zu deinem Heimpark machst, stehst du auf seiner Stammgäste-Liste. So sehen andere Mitglieder, wo du skatest.",
+      "listLabel": "{{park}} · Stammgäste",
+      "you": "(du)",
+      "point1": "Nur angemeldete Mitglieder sehen Stammgäste-Listen.",
+      "point2": "Private Konten erscheinen nie darauf.",
+      "point3": "Du kannst dich jederzeit in den Einstellungen ausblenden.",
+      "gotIt": "Verstanden",
+      "hideMe": "Mich auf Stammgäste-Listen ausblenden"
+    }
   },
   "home": {
     "title": "Parks",
-    "comingSoon": "Das Parkverzeichnis kommt in M2."
+    "comingSoon": "Das Park-Verzeichnis kommt in M2.",
+    "signedInAs": "Angemeldet als @{{username}}"
   },
   "errors": {
-    "generic": "Etwas ist schiefgelaufen."
+    "generic": "Etwas ist schiefgelaufen.",
+    "network": "Grindylocks ist nicht erreichbar. Prüf deine Verbindung und versuch es noch mal."
   }
 }

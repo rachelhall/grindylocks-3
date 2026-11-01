@@ -1318,6 +1318,7 @@ export type Database = {
       }
     }
     Functions: {
+      confirm_age: { Args: never; Returns: undefined }
       my_account: {
         Args: never
         Returns: {

@@ -2,13 +2,109 @@
   "common": {
     "appName": "Grindylocks",
     "loading": "Cargando",
-    "retry": "Reintentar"
+    "retry": "Reintentar",
+    "continue": "Continuar",
+    "back": "Atrás",
+    "signOut": "Cerrar sesión"
+  },
+  "auth": {
+    "welcome": {
+      "kicker": "Solo con invitación · beta",
+      "tagline": "Encuentra parques, sube clips, conoce a los locales.",
+      "email": "Continuar con email",
+      "apple": "Continuar con Apple",
+      "google": "Continuar con Google",
+      "soon": "Próximamente",
+      "inviteOnly": "¿Eres nuevo? De momento Grindylocks es solo con invitación. Pide a algún patinador que conozcas que te mande un enlace."
+    },
+    "email": {
+      "title": "Entra con tu email",
+      "body": "Te enviamos un código por email. Sin contraseña.",
+      "label": "Email",
+      "placeholder": "tu@ejemplo.com",
+      "send": "Enviar código",
+      "invalid": "Eso no parece un email.",
+      "notMember": "Todavía no hay ninguna cuenta con ese email. De momento Grindylocks es solo con invitación: pide un enlace a algún patinador que conozcas.",
+      "rateLimited": "Demasiados códigos en poco tiempo. Espera un minuto y vuelve a intentarlo."
+    },
+    "code": {
+      "title": "Revisa tu email",
+      "body": "Enviamos un código a {{email}}. Escríbelo abajo.",
+      "label": "Código",
+      "verify": "Entrar",
+      "wrong": "El código no es correcto o ha caducado. Revísalo o pide uno nuevo.",
+      "resend": "Enviar un código nuevo",
+      "resendIn": "Enviar un código nuevo en {{seconds}} s",
+      "resent": "Código nuevo enviado.",
+      "otherEmail": "Usar otro email"
+    }
+  },
+  "onboarding": {
+    "step": "Paso {{current}} de {{total}}",
+    "age": {
+      "title": "¿Tienes 16 años o más?",
+      "body": "Grindylocks es para patinadores de 16 años en adelante. Solo guardamos que dijiste que sí, nunca tu cumpleaños.",
+      "yes": "Sí, tengo 16 o más",
+      "no": "No, tengo menos de 16",
+      "tooYoungTitle": "Vuelve a los 16",
+      "tooYoungBody": "De momento Grindylocks es para patinadores de 16 años en adelante. Aquí seguiremos.",
+      "otherAccount": "Usar otro email"
+    },
+    "username": {
+      "title": "¿Quién rueda?",
+      "label": "Nombre de usuario",
+      "hint": "De 2 a 30 letras, números, puntos o guiones bajos.",
+      "free": "Libre",
+      "taken": "Ese nombre ya está cogido.",
+      "checking": "Comprobando",
+      "invalid": "Usa de 2 a 30 letras, números, puntos o guiones bajos.",
+      "disciplinesLegend": "¿Qué patinas?",
+      "pickAll": "Elige todo lo que aplique",
+      "inline": "Blader",
+      "inlineSub": "Patines en línea",
+      "quad": "Patinador de quads",
+      "quadSub": "Patines de cuatro ruedas",
+      "skateboard": "Skater",
+      "skateboardSub": "Tabla de calle y parque",
+      "pickOne": "Elige al menos uno."
+    },
+    "city": {
+      "title": "¿Dónde patinas?",
+      "body": "Tu ciudad prepara tu feed y a quién seguir. Solo la ven los miembros con sesión iniciada.",
+      "cityLabel": "Ciudad",
+      "searchCity": "Buscar ciudades",
+      "parks_one": "{{count}} parque",
+      "parks_other": "{{count}} parques",
+      "noCities": "Todavía no hay ciudades que coincidan.",
+      "pickCity": "Elige tu ciudad.",
+      "change": "Cambiar ciudad",
+      "parkLabel": "Parque habitual",
+      "optional": "(opcional)",
+      "searchPark": "Buscar parques en {{city}}",
+      "noParks": "No hay parques que coincidan.",
+      "removePark": "Quitar parque habitual",
+      "announceTitle": "Saluda a {{city}}",
+      "announceBody": "Avisa a los patinadores de {{city}} de que ha llegado alguien nuevo. Desactívalo para unirte sin avisar."
+    },
+    "regulars": {
+      "title": "Ojo: eres habitual",
+      "body": "Si publicas en un parque más de 5 veces, o lo eliges como tu parque habitual, apareces en su lista de habituales. Así otros miembros saben dónde patinas.",
+      "listLabel": "{{park}} · habituales",
+      "you": "(tú)",
+      "point1": "Solo los miembros con sesión iniciada ven las listas de habituales.",
+      "point2": "Las cuentas privadas nunca aparecen en ellas.",
+      "point3": "Puedes ocultarte cuando quieras en ajustes.",
+      "gotIt": "Entendido",
+      "hideMe": "Ocultarme de las listas de habituales"
+    }
   },
   "home": {
     "title": "Parques",
-    "comingSoon": "El directorio de parques llega en M2."
+    "comingSoon": "El directorio de parques llega en M2.",
+    "signedInAs": "Sesión iniciada como @{{username}}"
   },
   "errors": {
-    "generic": "Algo salió mal."
+    "generic": "Algo ha fallado.",
+    "network": "No se pudo conectar con Grindylocks. Revisa tu conexión y vuelve a intentarlo."
   }
 }

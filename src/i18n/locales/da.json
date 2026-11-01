@@ -2,13 +2,109 @@
   "common": {
     "appName": "Grindylocks",
     "loading": "Indlæser",
-    "retry": "Prøv igen"
+    "retry": "Prøv igen",
+    "continue": "Fortsæt",
+    "back": "Tilbage",
+    "signOut": "Log ud"
+  },
+  "auth": {
+    "welcome": {
+      "kicker": "Kun med invitation · beta",
+      "tagline": "Find parker, del klip, mød de lokale.",
+      "email": "Fortsæt med e-mail",
+      "apple": "Fortsæt med Apple",
+      "google": "Fortsæt med Google",
+      "soon": "Kommer snart",
+      "inviteOnly": "Ny her? Grindylocks kræver en invitation lige nu. Bed en skater, du kender, om at sende dig et invitationslink."
+    },
+    "email": {
+      "title": "Log ind med e-mail",
+      "body": "Vi sender dig en kode på e-mail. Ingen adgangskode.",
+      "label": "E-mail",
+      "placeholder": "dig@eksempel.dk",
+      "send": "Send kode",
+      "invalid": "Det ligner ikke en e-mailadresse.",
+      "notMember": "Der er ingen konto med den e-mail endnu. Grindylocks kræver en invitation lige nu, så bed en skater, du kender, om et invitationslink.",
+      "rateLimited": "For mange koder på kort tid. Vent et minut, og prøv igen."
+    },
+    "code": {
+      "title": "Tjek din e-mail",
+      "body": "Vi har sendt en kode til {{email}}. Skriv den nedenfor.",
+      "label": "Kode",
+      "verify": "Log ind",
+      "wrong": "Koden er forkert eller udløbet. Tjek den, eller send en ny.",
+      "resend": "Send en ny kode",
+      "resendIn": "Send en ny kode om {{seconds}} s",
+      "resent": "Ny kode sendt.",
+      "otherEmail": "Brug en anden e-mail"
+    }
+  },
+  "onboarding": {
+    "step": "Trin {{current}} af {{total}}",
+    "age": {
+      "title": "Er du 16 eller ældre?",
+      "body": "Grindylocks er for skatere på 16 år og op. Vi gemmer kun, at du sagde ja, aldrig din fødselsdag.",
+      "yes": "Ja, jeg er 16 eller ældre",
+      "no": "Nej, jeg er under 16",
+      "tooYoungTitle": "Kom tilbage, når du er 16",
+      "tooYoungBody": "Grindylocks er for skatere på 16 år og op lige nu. Vi er her stadig.",
+      "otherAccount": "Brug en anden e-mail"
+    },
+    "username": {
+      "title": "Hvem ruller?",
+      "label": "Brugernavn",
+      "hint": "2–30 bogstaver, tal, punktummer eller understreger.",
+      "free": "Ledigt",
+      "taken": "Det brugernavn er taget.",
+      "checking": "Tjekker",
+      "invalid": "Brug 2–30 bogstaver, tal, punktummer eller understreger.",
+      "disciplinesLegend": "Hvad kører du på?",
+      "pickAll": "Vælg alle, der passer",
+      "inline": "Blader",
+      "inlineSub": "Inlineskøjter",
+      "quad": "Quad-skater",
+      "quadSub": "Rulleskøjter",
+      "skateboard": "Skateboarder",
+      "skateboardSub": "Street- og parkboards",
+      "pickOne": "Vælg mindst én."
+    },
+    "city": {
+      "title": "Hvor skater du?",
+      "body": "Din by bestemmer dit feed og hvem du kan følge. Kun indloggede medlemmer kan se den.",
+      "cityLabel": "Hjemby",
+      "searchCity": "Søg efter byer",
+      "parks_one": "{{count}} park",
+      "parks_other": "{{count}} parker",
+      "noCities": "Ingen byer passer endnu.",
+      "pickCity": "Vælg din hjemby.",
+      "change": "Skift by",
+      "parkLabel": "Hjemmepark",
+      "optional": "(valgfri)",
+      "searchPark": "Søg efter parker i {{city}}",
+      "noParks": "Ingen parker passer.",
+      "removePark": "Fjern hjemmepark",
+      "announceTitle": "Sig hej til {{city}}",
+      "announceBody": "Lad skaterne i {{city}} vide, at der er kommet en ny. Slå det fra for at komme ind i stilhed."
+    },
+    "regulars": {
+      "title": "Bemærk: du er stamgæst",
+      "body": "Poster du i en park mere end 5 gange, eller gør den til din hjemmepark, kommer du på dens liste over stamgæster. Så kan andre medlemmer se, hvor du skater.",
+      "listLabel": "{{park}} · stamgæster",
+      "you": "(dig)",
+      "point1": "Kun indloggede medlemmer kan se listerne over stamgæster.",
+      "point2": "Private konti kommer aldrig med på dem.",
+      "point3": "Du kan altid skjule dig under indstillinger.",
+      "gotIt": "Forstået",
+      "hideMe": "Skjul mig fra listerne over stamgæster"
+    }
   },
   "home": {
     "title": "Parker",
-    "comingSoon": "Parkoversigten kommer i M2."
+    "comingSoon": "Parkoversigten kommer i M2.",
+    "signedInAs": "Logget ind som @{{username}}"
   },
   "errors": {
-    "generic": "Noget gik galt."
+    "generic": "Noget gik galt.",
+    "network": "Kunne ikke få forbindelse til Grindylocks. Tjek din forbindelse, og prøv igen."
   }
 }

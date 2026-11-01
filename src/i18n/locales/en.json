@@ -2,13 +2,109 @@
   "common": {
     "appName": "Grindylocks",
     "loading": "Loading",
-    "retry": "Try again"
+    "retry": "Try again",
+    "continue": "Continue",
+    "back": "Back",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "welcome": {
+      "kicker": "Invite only · beta",
+      "tagline": "Find parks, post clips, meet the locals.",
+      "email": "Continue with email",
+      "apple": "Continue with Apple",
+      "google": "Continue with Google",
+      "soon": "Coming soon",
+      "inviteOnly": "New here? Grindylocks is invite only for now. Ask a skater you know to send you an invite link."
+    },
+    "email": {
+      "title": "Sign in with email",
+      "body": "We'll email you a code. No password needed.",
+      "label": "Email",
+      "placeholder": "you@example.com",
+      "send": "Send code",
+      "invalid": "That doesn't look like an email address.",
+      "notMember": "There's no account for that email yet. Grindylocks is invite only for now, so ask a skater you know for an invite link.",
+      "rateLimited": "Too many codes in a short time. Wait a minute and try again."
+    },
+    "code": {
+      "title": "Check your email",
+      "body": "We sent a code to {{email}}. Enter it below.",
+      "label": "Code",
+      "verify": "Sign in",
+      "wrong": "That code is wrong or has expired. Check it, or send a new one.",
+      "resend": "Send a new code",
+      "resendIn": "Send a new code in {{seconds}}s",
+      "resent": "New code sent.",
+      "otherEmail": "Use a different email"
+    }
+  },
+  "onboarding": {
+    "step": "Step {{current}} of {{total}}",
+    "age": {
+      "title": "Are you 16 or older?",
+      "body": "Grindylocks is for skaters 16 and up. We only save that you said yes, never your birthday.",
+      "yes": "Yes, I'm 16 or older",
+      "no": "No, I'm under 16",
+      "tooYoungTitle": "Come back at 16",
+      "tooYoungBody": "Grindylocks is for skaters 16 and older for now. We'll still be here.",
+      "otherAccount": "Use a different email"
+    },
+    "username": {
+      "title": "Who's rolling?",
+      "label": "Username",
+      "hint": "2–30 letters, numbers, dots or underscores.",
+      "free": "Free",
+      "taken": "That username is taken.",
+      "checking": "Checking",
+      "invalid": "Use 2–30 letters, numbers, dots or underscores.",
+      "disciplinesLegend": "What do you ride?",
+      "pickAll": "Pick all that apply",
+      "inline": "Blader",
+      "inlineSub": "Inline skates",
+      "quad": "Quad skater",
+      "quadSub": "Roller skates",
+      "skateboard": "Skateboarder",
+      "skateboardSub": "Street and park boards",
+      "pickOne": "Pick at least one."
+    },
+    "city": {
+      "title": "Where do you skate?",
+      "body": "Your city sets up your feed and who to follow. Only signed-in members see it.",
+      "cityLabel": "Home city",
+      "searchCity": "Search cities",
+      "parks_one": "{{count}} park",
+      "parks_other": "{{count}} parks",
+      "noCities": "No cities match yet.",
+      "pickCity": "Pick your home city.",
+      "change": "Change city",
+      "parkLabel": "Home park",
+      "optional": "(optional)",
+      "searchPark": "Search parks in {{city}}",
+      "noParks": "No parks match.",
+      "removePark": "Remove home park",
+      "announceTitle": "Say hi to {{city}}",
+      "announceBody": "Let skaters in {{city}} know someone new joined. Turn it off to join quietly."
+    },
+    "regulars": {
+      "title": "Heads up: you're a regular",
+      "body": "Post at a park more than 5 times, or make it your home park, and you show up in its regulars list. That tells other members where you skate.",
+      "listLabel": "{{park}} · regulars",
+      "you": "(you)",
+      "point1": "Only signed-in members see regulars lists.",
+      "point2": "Private accounts never appear in them.",
+      "point3": "You can hide yourself any time in settings.",
+      "gotIt": "Got it",
+      "hideMe": "Hide me from regulars lists"
+    }
   },
   "home": {
     "title": "Parks",
-    "comingSoon": "Park directory coming in M2."
+    "comingSoon": "Park directory coming in M2.",
+    "signedInAs": "Signed in as @{{username}}"
   },
   "errors": {
-    "generic": "Something went wrong."
+    "generic": "Something went wrong.",
+    "network": "Couldn't reach Grindylocks. Check your connection and try again."
   }
 }
