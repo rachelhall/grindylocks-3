@@ -1,4 +1,3 @@
-import { router } from 'expo-router';
 import { TabList, Tabs, TabSlot, TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import { forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -12,9 +11,10 @@ import { size, space, stroke, useColors } from '@/theme';
 export const unstable_settings = { initialRouteName: '(map)' };
 
 /**
- * Tab bar from the design system: home, map, a pink new-post button,
- * notifications and you. The current tab gets a filled icon and a 3px ink
- * bar under it; the others have no underline.
+ * Tab bar from the design system (Nov 1): home, map, messages, search and
+ * you. The current tab gets a filled icon (a heavier one for search, which
+ * has no filled form) and a 3px ink bar under it; the others have no
+ * underline. New post and notifications live in the home feed's top row.
  */
 export default function TabsLayout() {
   const { t } = useTranslation();
@@ -41,16 +41,11 @@ export default function TabsLayout() {
         <TabTrigger name="(map)" href="/" asChild>
           <TabButton icon="map" iconFocused="mapFill" label={t('tabs.map')} />
         </TabTrigger>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('tabs.newPost')}
-          onPress={() => router.push('/new-post')}
-          style={({ pressed }) => [styles.newPost, { backgroundColor: c.accent }, pressed && styles.pressed]}
-        >
-          <Icon name="add" color={c.onAccent} />
-        </Pressable>
-        <TabTrigger name="notifications" href="/notifications" asChild>
-          <TabButton icon="bell" iconFocused="bellFill" label={t('tabs.notifications')} />
+        <TabTrigger name="messages" href="/messages" asChild>
+          <TabButton icon="chat" iconFocused="chatFill" label={t('tabs.messages')} />
+        </TabTrigger>
+        <TabTrigger name="search" href="/search" asChild>
+          <TabButton icon="search" iconFocused="search" heavyWhenFocused label={t('tabs.search')} />
         </TabTrigger>
         <TabTrigger name="you" href="/you" asChild>
           <TabButton icon="person" iconFocused="personFill" label={t('tabs.you')} />
@@ -60,10 +55,16 @@ export default function TabsLayout() {
   );
 }
 
-type TabButtonProps = TabTriggerSlotProps & { icon: IconName; iconFocused: IconName; label: string };
+type TabButtonProps = TabTriggerSlotProps & {
+  icon: IconName;
+  iconFocused: IconName;
+  /** For icons with no filled form: a heavier weight marks the current tab. */
+  heavyWhenFocused?: boolean;
+  label: string;
+};
 
 const TabButton = forwardRef<View, TabButtonProps>(function TabButton(
-  { icon, iconFocused, label, isFocused, ...props },
+  { icon, iconFocused, heavyWhenFocused, label, isFocused, ...props },
   ref,
 ) {
   const c = useColors();
@@ -76,7 +77,7 @@ const TabButton = forwardRef<View, TabButtonProps>(function TabButton(
       accessibilityState={{ selected: Boolean(isFocused) }}
       style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
     >
-      <Icon name={isFocused ? iconFocused : icon} color={c.text} />
+      <Icon name={isFocused ? iconFocused : icon} heavy={Boolean(isFocused && heavyWhenFocused)} color={c.text} />
       <View style={[styles.underline, { backgroundColor: isFocused ? c.text : 'transparent' }]} />
     </Pressable>
   );
@@ -94,6 +95,5 @@ const styles = StyleSheet.create({
   },
   tab: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
   underline: { position: 'absolute', left: 8, right: 8, bottom: 0, height: 3 },
-  newPost: { width: 52, height: 44, alignItems: 'center', justifyContent: 'center' },
   pressed: { opacity: 0.75 },
 });

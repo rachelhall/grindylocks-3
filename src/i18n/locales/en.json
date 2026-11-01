@@ -158,9 +158,9 @@
   "tabs": {
     "home": "Home",
     "map": "Map",
-    "newPost": "New post",
-    "notifications": "Notifications",
-    "you": "You"
+    "you": "You",
+    "messages": "Messages",
+    "search": "Search"
   },
   "map": {
     "search": "Search a city or park",
@@ -289,5 +289,33 @@
     "credits": "Credits",
     "osm": "Park locations © OpenStreetMap contributors",
     "osmLink": "openstreetmap.org/copyright"
+  },
+  "feed": {
+    "newPost": "New post",
+    "notifications": "Notifications",
+    "notificationsUnread": "Notifications, something new"
+  },
+  "messages": {
+    "title": "Messages",
+    "comingSoon": "Coming soon",
+    "heading": "Direct messages are on the way",
+    "body": "Until then, say hi in the comments, tag people in your posts, or find skaters through a park's regulars.",
+    "findSkaters": "Find skaters"
+  },
+  "find": {
+    "title": "Search",
+    "placeholder": "Search people or parks",
+    "show": "Show",
+    "all": "All",
+    "people": "People",
+    "parks": "Parks",
+    "hint": "Find skaters by username, or parks by name or what locals call them.",
+    "error": "Couldn't search. Check your connection.",
+    "following": "Following",
+    "requested": "Requested",
+    "privateAccount": "Private account"
+  },
+  "profile": {
+    "soon": "Profiles are coming soon."
   }
 }

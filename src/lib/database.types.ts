@@ -1371,6 +1371,18 @@ export type Database = {
           status: Database["public"]["Enums"]["park_status"]
         }[]
       }
+      search_people: {
+        Args: { max_results?: number; q: string }
+        Returns: {
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          follow_status: Database["public"]["Enums"]["follow_status"] | null
+          home_metro_name: string | null
+          home_park_name: string | null
+          id: string
+          is_private: boolean
+          username: string
+        }[]
+      }
     }
     Enums: {
       announcement_kind: "joined" | "visiting"

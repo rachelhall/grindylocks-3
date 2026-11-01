@@ -243,7 +243,7 @@ export default function MapScreen() {
         <Pressable
           accessibilityRole="search"
           accessibilityLabel={t('map.search')}
-          onPress={() => router.push('/search')}
+          onPress={() => router.push('/city-search')}
           style={({ pressed }) => [
             styles.search,
             { backgroundColor: c.surfaceRaised, borderColor: c.border },

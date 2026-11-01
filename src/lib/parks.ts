@@ -77,6 +77,22 @@ export async function searchDirectory(q: string): Promise<SearchResult[]> {
   return data ?? [];
 }
 
+/** Coordinates for a few parks, e.g. to show distances next to search results. */
+export async function parkCoords(ids: string[]): Promise<Map<string, { latitude: number; longitude: number }>> {
+  const out = new Map<string, { latitude: number; longitude: number }>();
+  if (ids.length === 0) return out;
+  const { data, error } = await supabase
+    .from('parks')
+    .select('id, latitude, longitude')
+    .in('id', ids)
+    .not('latitude', 'is', null);
+  if (error) throw error;
+  for (const p of data ?? []) {
+    if (p.latitude !== null && p.longitude !== null) out.set(p.id, { latitude: p.latitude, longitude: p.longitude });
+  }
+  return out;
+}
+
 export type Metro = { id: string; name: string; region: string | null; country: string };
 
 export async function fetchMetro(id: string): Promise<Metro | null> {
