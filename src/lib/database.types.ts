@@ -202,6 +202,7 @@ export type Database = {
           expires_at: string
           id: string
           inviter_id: string
+          returned_at: string | null
           used_at: string | null
           used_by: string | null
         }
@@ -212,6 +213,7 @@ export type Database = {
           expires_at?: string
           id?: string
           inviter_id: string
+          returned_at?: string | null
           used_at?: string | null
           used_by?: string | null
         }
@@ -222,6 +224,7 @@ export type Database = {
           expires_at?: string
           id?: string
           inviter_id?: string
+          returned_at?: string | null
           used_at?: string | null
           used_by?: string | null
         }
@@ -1438,6 +1441,49 @@ export type Database = {
       }
     }
     Functions: {
+      cancel_invite: { Args: { invite: string }; Returns: undefined }
+      create_invite: {
+        Args: never
+        Returns: { code: string; expires_at: string; id: string }[]
+      }
+      invite_preview: {
+        Args: { code: string }
+        Returns: { inviter_username: string }[]
+      }
+      my_blocked_accounts: {
+        Args: never
+        Returns: {
+          avatar_path: string | null
+          blocked_at: string
+          id: string
+          username: string
+        }[]
+      }
+      my_follow_requests: {
+        Args: never
+        Returns: {
+          avatar_path: string | null
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          follower_id: string
+          requested_at: string
+          username: string
+        }[]
+      }
+      my_invite_count: { Args: never; Returns: number }
+      my_invites: {
+        Args: never
+        Returns: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          invites_remaining: number
+          state: string
+          used_at: string | null
+          used_by_username: string | null
+        }[]
+      }
+      redeem_my_invite: { Args: never; Returns: string | null }
       confirm_age: { Args: never; Returns: undefined }
       my_account: {
         Args: never
