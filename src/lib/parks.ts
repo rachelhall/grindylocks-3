@@ -126,6 +126,20 @@ export async function fetchDirectory(): Promise<{ metros: DirectoryMetro[]; park
   return { metros: m.data, parks: p.data };
 }
 
+/**
+ * Metro areas that have parks, most parks first: the welcome screen's city
+ * tape. The one park-related read a signed-out visitor can make (names only).
+ */
+export async function fetchWelcomeMetroAreas(): Promise<string[]> {
+  const { data, error } = await supabase.rpc('welcome_metro_areas');
+  if (error) throw error;
+  return (data ?? []).map((row) => row.name);
+}
+
+export function useWelcomeMetroAreas() {
+  return useQuery({ queryKey: keys.welcomeMetros(), queryFn: fetchWelcomeMetroAreas, staleTime: fresh.parks });
+}
+
 export function useDirectory() {
   return useQuery({ queryKey: keys.directory(), queryFn: fetchDirectory, staleTime: fresh.parks });
 }

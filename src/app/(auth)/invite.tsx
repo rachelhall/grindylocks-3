@@ -3,8 +3,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
+import { CityTape, Wordmark } from '@/components/brand';
+import { HalftoneGround } from '@/components/park-header';
 import { FormScreen } from '@/components/screen';
 import { BackButton, Button, TextField } from '@/components/ui';
 import {
@@ -13,7 +15,7 @@ import {
   normalizeInviteCode,
   previewInvite,
 } from '@/lib/social';
-import { brand, colors, fontFamily, Text } from '@/theme';
+import { brand, colors, space, Text } from '@/theme';
 
 // Brand layer, like the welcome screen: always ink.
 const ink = brand.ink;
@@ -55,6 +57,7 @@ export default function Invite() {
     return (
       <FormScreen
         background={ink}
+        backdrop={<HalftoneGround fromTopRight fadeStart={0.55} fadeEnd={1} />}
         header={<BackButton />}
         footer={
           <>
@@ -66,16 +69,24 @@ export default function Invite() {
         }
       >
         <StatusBar style="light" />
-        <Text variant="label" style={{ color: muted }}>
-          {t('auth.welcome.kicker')}
-        </Text>
-        <Text accessibilityRole="header" style={styles.inviter}>
-          {t('auth.invite.invitedYou', { username: inviter })}
-        </Text>
-        <Text variant="headline" style={{ color: paper }}>
-          {t('auth.welcome.tagline')}
-        </Text>
-        <Text variant="body" style={{ color: muted }}>
+        <View style={styles.top}>
+          <Text variant="label" style={{ color: muted }}>
+            {t('auth.welcome.kicker')}
+          </Text>
+          <Wordmark />
+          <View style={styles.invitedTape}>
+            <Text variant="title" style={{ color: ink }}>
+              {t('auth.invite.invitedYou', { username: inviter })}
+            </Text>
+          </View>
+          <Text variant="headline" style={{ color: paper }}>
+            {t('auth.welcome.tagline')}
+          </Text>
+        </View>
+        <View style={styles.middle}>
+          <CityTape />
+        </View>
+        <Text variant="bodySm" style={{ color: muted }}>
           {t('auth.invite.validFor', { code: formatInviteCode(submitted) })}
         </Text>
       </FormScreen>
@@ -125,15 +136,16 @@ export default function Invite() {
 
 const styles = StyleSheet.create({
   center: { textAlign: 'center' },
-  inviter: {
-    fontFamily: fontFamily.display,
-    fontSize: 40,
-    lineHeight: 42,
-    textTransform: 'uppercase',
-    color: brand.pink,
-    textShadowColor: brand.blue,
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: Platform.OS === 'android' ? 0.01 : 0,
+  top: { gap: space[3] },
+  middle: { flexGrow: 1, justifyContent: 'center' },
+  // "@name invited you" as a strip of pink tape, like the park header's label.
+  invitedTape: {
+    alignSelf: 'flex-start',
+    backgroundColor: brand.pink,
+    paddingHorizontal: space[2],
+    paddingVertical: space[1],
+    marginTop: space[2],
+    transform: [{ rotate: '-2deg' }],
   },
 });
 

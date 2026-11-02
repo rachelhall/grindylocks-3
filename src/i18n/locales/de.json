@@ -19,7 +19,11 @@
       "google": "Weiter mit Google",
       "soon": "Bald verfügbar",
       "inviteOnly": "Neu hier? Grindylocks geht im Moment nur mit Einladung. Frag jemanden, den du vom Skaten kennst, nach einem Einladungslink.",
-      "haveCode": "Ich habe einen Einladungscode"
+      "haveCode": "Ich habe einen Einladungscode",
+      "appleShort": "Apple",
+      "googleShort": "Google",
+      "parksIn": "Parks in",
+      "moreCities": "+{{count}} weitere"
     },
     "email": {
       "title": "Mit E-Mail anmelden",

@@ -15,18 +15,22 @@ export function FormScreen({
   children,
   footer,
   background,
+  backdrop,
   edges,
 }: {
   header?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   background?: string;
+  /** Drawn behind everything, filling the screen (the brand screens' halftone). */
+  backdrop?: ReactNode;
   /** Leave out 'top' when the screen sits in a pageSheet, already below the status bar. */
   edges?: Edge[];
 }) {
   const c = useColors();
   return (
     <SafeAreaView edges={edges} style={[styles.flex, { backgroundColor: background ?? c.surface }]}>
+      {backdrop}
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
