@@ -1,0 +1,189 @@
+@import "tailwindcss";
+/* Generated from design/tokens.json (npm run tokens at the repo root). */
+@import "../styles/tokens.css";
+
+/* next/font self-hosts Archivo and Archivo Black (see layout.tsx) and exposes
+   them as --font-archivo and --font-archivo-black on <html>. Point the token
+   families at those, so every --gl-type-*--font-family picks them up. */
+:root {
+  --gl-font-sans: var(--font-archivo), "Archivo", system-ui, sans-serif;
+  --gl-font-display: var(--font-archivo-black), "Archivo Black", var(--font-archivo), system-ui, sans-serif;
+}
+
+/* Tailwind theme, mapped onto the tokens. Two sets of names:
+   - gl-*: the Grindylocks tokens by their own names (bg-gl-surface, text-gl-text-secondary).
+   - shadcn's names (bg-background, bg-primary, …), so copied shadcn components
+     pick up the design system with no edits. tokens.css maps them. */
+@theme inline {
+  --color-gl-surface: var(--gl-surface);
+  --color-gl-surface-raised: var(--gl-surface-raised);
+  --color-gl-surface-sunk: var(--gl-surface-sunk);
+  --color-gl-text: var(--gl-text);
+  --color-gl-text-secondary: var(--gl-text-secondary);
+  --color-gl-text-muted: var(--gl-text-muted);
+  --color-gl-border: var(--gl-border);
+  --color-gl-border-subtle: var(--gl-border-subtle);
+  --color-gl-accent: var(--gl-accent);
+  --color-gl-on-accent: var(--gl-on-accent);
+  --color-gl-accent-text: var(--gl-accent-text);
+  --color-gl-accent-subtle: var(--gl-accent-subtle);
+  --color-gl-on-accent-subtle: var(--gl-on-accent-subtle);
+  --color-gl-role: var(--gl-role);
+  --color-gl-on-role: var(--gl-on-role);
+  --color-gl-focus: var(--gl-focus);
+  --color-gl-danger: var(--gl-danger);
+  --color-gl-on-danger: var(--gl-on-danger);
+  --color-gl-overlay: var(--gl-overlay);
+  --color-gl-ink: var(--gl-brand-ink);
+  --color-gl-paper: var(--gl-brand-paper);
+  --color-gl-pink: var(--gl-brand-pink);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--gl-font-sans);
+  --font-display: var(--gl-font-display);
+
+  /* No rounded corners anywhere. */
+  --radius-xs: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+
+  --spacing-control: var(--gl-control-web);
+  --spacing-row: var(--gl-row-web);
+  --spacing-sidebar: var(--gl-sidebar-width);
+  --spacing-detail: var(--gl-detail-pane);
+  --container-content: var(--gl-content-max);
+
+  /* Desk breakpoints from design/web.md: under 768px the sidebar becomes a
+     top bar; under split-min the detail pane becomes its own page. */
+  --breakpoint-md: 768px;
+  --breakpoint-split: 1024px;
+}
+
+/* Type styles from the design system. Page titles use `title` (uppercase);
+   `display` is for the sign-in screen only. */
+@utility type-display-xl {
+  font-family: var(--gl-type-display-xl--font-family);
+  font-size: var(--gl-type-display-xl);
+  line-height: var(--gl-type-display-xl--line-height);
+  font-weight: var(--gl-type-display-xl--font-weight);
+  text-transform: uppercase;
+}
+@utility type-display {
+  font-family: var(--gl-type-display--font-family);
+  font-size: var(--gl-type-display);
+  line-height: var(--gl-type-display--line-height);
+  font-weight: var(--gl-type-display--font-weight);
+  text-transform: uppercase;
+}
+@utility type-title {
+  font-family: var(--gl-type-title--font-family);
+  font-size: var(--gl-type-title);
+  line-height: var(--gl-type-title--line-height);
+  font-weight: var(--gl-type-title--font-weight);
+  text-transform: uppercase;
+}
+@utility type-headline {
+  font-family: var(--gl-type-headline--font-family);
+  font-size: var(--gl-type-headline);
+  line-height: var(--gl-type-headline--line-height);
+  font-weight: var(--gl-type-headline--font-weight);
+}
+@utility type-body {
+  font-family: var(--gl-type-body--font-family);
+  font-size: var(--gl-type-body);
+  line-height: var(--gl-type-body--line-height);
+  font-weight: var(--gl-type-body--font-weight);
+}
+@utility type-body-sm {
+  font-family: var(--gl-type-body-sm--font-family);
+  font-size: var(--gl-type-body-sm);
+  line-height: var(--gl-type-body-sm--line-height);
+  font-weight: var(--gl-type-body-sm--font-weight);
+}
+@utility type-label {
+  font-family: var(--gl-type-label--font-family);
+  font-size: var(--gl-type-label);
+  line-height: var(--gl-type-label--line-height);
+  font-weight: var(--gl-type-label--font-weight);
+  letter-spacing: var(--gl-type-label--letter-spacing);
+  text-transform: uppercase;
+}
+@utility type-caption {
+  font-family: var(--gl-type-caption--font-family);
+  font-size: var(--gl-type-caption);
+  line-height: var(--gl-type-caption--line-height);
+  font-weight: var(--gl-type-caption--font-weight);
+}
+
+/* Focus: a solid stroke-rule ring in `focus`, offset 2px, never removed. */
+@utility focus-ring {
+  &:focus-visible {
+    outline: var(--gl-stroke-rule) solid var(--gl-focus);
+    outline-offset: 2px;
+  }
+}
+
+@layer base {
+  html {
+    background: var(--gl-surface);
+    color: var(--gl-text);
+  }
+  body {
+    font-family: var(--gl-type-body--font-family);
+    font-size: var(--gl-type-body);
+    line-height: var(--gl-type-body--line-height);
+    -webkit-font-smoothing: antialiased;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  :focus-visible {
+    outline: var(--gl-stroke-rule) solid var(--gl-focus);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--gl-accent);
+    color: var(--gl-on-accent);
+  }
+}
+
+/* Material Symbols Sharp at weight 600 (loaded in layout.tsx), the app's set. */
+.material-symbols-sharp {
+  font-family: "Material Symbols Sharp";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  display: inline-block;
+  font-variation-settings: "FILL" 0, "wght" 600, "GRAD" 0, "opsz" 24;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+}
