@@ -67,9 +67,11 @@
     "check:i18n": "node scripts/check-translations.mjs",
     "tokens": "node scripts/build-tokens.mjs",
     "check:tokens": "node scripts/build-tokens.mjs --check",
-    "db:types": "supabase gen types typescript --project-id ytfdgacofenkehnbbhsc > src/lib/database.types.ts",
+    "db:types": "supabase gen types typescript --project-id ytfdgacofenkehnbbhsc > src/lib/database.types.ts && node scripts/sync-db-types.mjs",
     "build:ios-sim": "eas build --profile development-simulator --platform ios",
-    "run:ios-sim": "eas build:run --platform ios --latest"
+    "run:ios-sim": "eas build:run --platform ios --latest",
+    "sync:db-types": "node scripts/sync-db-types.mjs",
+    "check:db-types": "node scripts/sync-db-types.mjs --check"
   },
   "private": true
 }

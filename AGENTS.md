@@ -42,6 +42,11 @@ Run lint and typecheck before declaring any task done.
 - `npm run tokens` writes `src/theme/tokens.ts` (the app) and `web/src/styles/tokens.css` (the web admin). Never edit either by hand; `npm run check:tokens` fails if they're stale. Run it with the other checks before a PR.
 - `design/web.md` is a copy of the design system's Web section: the rules for the web admin.
 
+## Web admin (`web/`)
+
+- `web/` is the Next.js web admin for role holders: its own npm project with its own lockfile, so run its commands from `web/` (see `web/AGENTS.md`). The root `tsconfig.json`, ESLint config and Metro all skip it, and `.easignore` keeps it out of EAS uploads (`.easignore` replaces `.gitignore` for EAS, so keep the two in step).
+- `npm run db:types` writes the generated types to both apps; `npm run check:db-types` fails if `web/src/lib/database.types.ts` differs from `src/lib/database.types.ts`. Run it with the other checks before a PR.
+
 ## Data fetching (TanStack Query)
 
 Server data is cached with **TanStack Query** (`@tanstack/react-query`); the client and its React Native wiring live in `src/lib/query.ts`.
