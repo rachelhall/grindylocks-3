@@ -174,7 +174,9 @@ begin
   loop
     n := n + 1;
     insert into role_change_log (assignment_id, actor_id, action, details)
-    values (ra.id, actor, 'ended', jsonb_build_object('reason', reason, 'role', ra.role));
+    values (ra.id, actor,
+            case when reason = 'account_deleted' then 'ended_by_deletion' else 'removed' end,
+            jsonb_build_object('reason', reason, 'role', ra.role));
 
     if ra.accepted_at is null or ra.role = 'owner' then
       continue;
@@ -329,9 +331,12 @@ begin
     raise exception 'cannot_report_yourself' using errcode = '22023';
   end if;
 
+  -- One report per person per post, ever (a unique index already says so);
+  -- comments and people once while a report is open.
   if exists (
     select 1 from reports r
-     where r.reporter_id = me and r.status = 'open'
+     where r.reporter_id = me
+       and (r.status = 'open' or post is not null)
        and r.post_id is not distinct from post
        and r.comment_id is not distinct from comment
        and (post is not null or comment is not null or r.reported_user_id = person)
@@ -1417,7 +1422,6 @@ begin
   delete from follows where follower_id = me or followee_id = me;
   delete from saved_parks where user_id = me;
   delete from blocks where blocker_id = me;
-  delete from park_regulars where user_id = me;
   delete from notifications where recipient_id = me;
   delete from announcements where user_id = me;
   delete from reserved_usernames where user_id = me;

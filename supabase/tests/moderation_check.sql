@@ -182,7 +182,9 @@ begin
   loop
     n := n + 1;
     insert into role_change_log (assignment_id, actor_id, action, details)
-    values (ra.id, actor, 'ended', jsonb_build_object('reason', reason, 'role', ra.role));
+    values (ra.id, actor,
+            case when reason = 'account_deleted' then 'ended_by_deletion' else 'removed' end,
+            jsonb_build_object('reason', reason, 'role', ra.role));
 
     if ra.accepted_at is null or ra.role = 'owner' then
       continue;
@@ -337,9 +339,12 @@ begin
     raise exception 'cannot_report_yourself' using errcode = '22023';
   end if;
 
+  -- One report per person per post, ever (a unique index already says so);
+  -- comments and people once while a report is open.
   if exists (
     select 1 from reports r
-     where r.reporter_id = me and r.status = 'open'
+     where r.reporter_id = me
+       and (r.status = 'open' or post is not null)
        and r.post_id is not distinct from post
        and r.comment_id is not distinct from comment
        and (post is not null or comment is not null or r.reported_user_id = person)
@@ -1425,7 +1430,6 @@ begin
   delete from follows where follower_id = me or followee_id = me;
   delete from saved_parks where user_id = me;
   delete from blocks where blocker_id = me;
-  delete from park_regulars where user_id = me;
   delete from notifications where recipient_id = me;
   delete from announcements where user_id = me;
   delete from reserved_usernames where user_id = me;
@@ -1656,6 +1660,12 @@ select pg_temp.refuses('not at this park is only for posts',
 select pg_temp.check('members can''t read the moderation log', (select count(*) from moderation_actions) = 0);
 reset role;
 
+-- The comment and person reports go in before the post hides (a hidden
+-- post's comments can't be reported).
+select pg_temp.who('bob'); set local role authenticated;
+select public.file_report(comment => pg_temp.id('dan_comment'), reason => 'harassment');
+select public.file_report(person => pg_temp.id('dan'), reason => 'harassment', details => 'follows people around');
+reset role;
 select pg_temp.who('alice'); set local role authenticated;
 select pg_temp.refuses('you can''t report your own post',
   format($$select public.file_report(post => %L, reason => 'spam')$$, pg_temp.id('alice_post')), 'cannot_report_yourself');
@@ -1670,10 +1680,6 @@ reset role;
 select pg_temp.check('three reporters auto-hide the post',
   (select status from posts where id = pg_temp.id('alice_post')) = 'auto_hidden');
 
-select pg_temp.who('bob'); set local role authenticated;
-select public.file_report(comment => pg_temp.id('dan_comment'), reason => 'harassment');
-select public.file_report(person => pg_temp.id('dan'), reason => 'harassment', details => 'follows people around');
-reset role;
 
 /* The queue ----------------------------------------------------------------------------- */
 
@@ -1716,7 +1722,13 @@ select pg_temp.check('dismissing tells nobody',
   not exists (select 1 from notifications where recipient_id = pg_temp.id('alice') and kind = 'post_removed'));
 
 -- Keep hidden.
+-- Someone who hasn't reported it before (one report per person per post, ever).
 select pg_temp.who('cara'); set local role authenticated;
+select public.file_report(post => pg_temp.id('alice_post'), reason => 'spam');
+select pg_temp.check('a second report of the same post by the same person is quiet',
+  (select count(*) from reports where post_id = pg_temp.id('alice_post') and reporter_id = pg_temp.id('cara')) = 1);
+reset role;
+select pg_temp.who('eve'); set local role authenticated;
 select public.file_report(post => pg_temp.id('alice_post'), reason => 'spam');
 reset role;
 select pg_temp.who('pat'); set local role authenticated;
@@ -1809,7 +1821,7 @@ select pg_temp.check('a ban ends the person''s roles',
   and exists (select 1 from role_assignments where user_id = pg_temp.id('pat') and ended_reason = 'banned'));
 select pg_temp.check('the ended role is in the role change log',
   exists (select 1 from role_change_log l join role_assignments r on r.id = l.assignment_id
-          where r.user_id = pg_temp.id('pat') and l.action = 'ended' and l.details ->> 'reason' = 'banned'));
+          where r.user_id = pg_temp.id('pat') and l.action = 'removed' and l.details ->> 'reason' = 'banned'));
 select pg_temp.check('the city admin is told the park admin spot is open',
   exists (select 1 from notifications where recipient_id = pg_temp.id('cam') and kind = 'role_vacated'
           and actor_id = pg_temp.id('pat') and park_id = pg_temp.id('park_p')));
