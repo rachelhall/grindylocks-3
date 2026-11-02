@@ -94,6 +94,7 @@ takes a post's metro area from its park. Additive only.
    error that carries the results (`RESULTS [...]`), so nothing is kept. Every
    row should say `"ok": true`.
 2. Apply the migration.
-3. Regenerate the database types (`npm run db:types`) and put back the three
-   `| null`s on `search_people` (see the main README). The app calls the new
-   functions with loose types until then, so it builds either way.
+3. Regenerate the database types (`npm run db:types`) and put back the
+   `| null`s the generator drops (listed in the main README).
+
+Applied Nov 1 (as `posting_feeds`); types regenerated the same day.

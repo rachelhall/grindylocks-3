@@ -324,12 +324,9 @@ export function useParkRegulars(parkId: string | undefined) {
   return useQuery({
     queryKey: keys.parkRegulars(parkId ?? ''),
     queryFn: async (): Promise<Regular[]> => {
-      const { data, error } = await supabase.rpc('park_regulars_list' as never, {
-        park: parkId,
-        max_results: 30,
-      } as never);
+      const { data, error } = await supabase.rpc('park_regulars_list', { park: parkId!, max_results: 30 });
       if (error) throw error;
-      return (data ?? []) as Regular[];
+      return data ?? [];
     },
     enabled: Boolean(parkId),
     staleTime: fresh.parks,
@@ -410,13 +407,15 @@ export function hasTags(t: SlideTags): boolean {
 
 /** Sets one slide's tags (all of them at once). The database checks them. */
 export async function setSlideTags(slideId: string, tags: SlideTags): Promise<void> {
-  const { error } = await supabase.rpc('set_slide_tags' as never, {
+  // The generated types don't allow null here, but the function takes it
+  // (null clears the obstacle, type or filmer).
+  const { error } = await supabase.rpc('set_slide_tags', {
     slide: slideId,
-    obstacle: tags.obstacleId,
-    obstacle_kind: tags.obstacleId ? null : tags.obstacleType,
-    filmer: tags.filmerId,
+    obstacle: tags.obstacleId as string,
+    obstacle_kind: (tags.obstacleId ? null : tags.obstacleType) as ObstacleType,
+    filmer: tags.filmerId as string,
     people: tags.peopleIds,
-  } as never);
+  });
   if (error) throw error;
 }
 
@@ -504,7 +503,7 @@ export function useRemoveMeFromPost(userId: string | undefined) {
       if (error) throw error;
       for (const s of post.slides) {
         if (s.filmer?.id !== userId) continue;
-        const { error: filmerError } = await supabase.rpc('remove_my_filmer_credit' as never, { slide: s.id } as never);
+        const { error: filmerError } = await supabase.rpc('remove_my_filmer_credit', { slide: s.id });
         if (filmerError) throw filmerError;
       }
       return post.id;

@@ -1,7 +1,8 @@
 -- Rolled-back check for 20261102100000_posting_feeds.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
--- Every row should have ok = true. Run it in the SQL editor before applying.
+-- Every row should have ok = true. Passed in full on Nov 1, before the migration was applied.
+-- It won't run again as is now that the migration is in (the triggers already exist).
 begin;
 -- M4a: the full posting flow and feeds (Nov 1).
 --
@@ -415,7 +416,7 @@ do $$ begin perform set_slide_tags('c0000000-0000-4000-8000-0000000000c2',null,'
 insert into obstacles (id, park_id, name, general_type, status, suggested_by) values ('d0000000-0000-4000-8000-0000000000d1','2b722ed9-f690-4ff5-9320-21d3e64fc126','Test rail','rail','pending','08b422ac-9f87-4c0f-b979-29ecdd41ed5b');
 do $$ begin perform set_slide_tags('c0000000-0000-4000-8000-0000000000c2','d0000000-0000-4000-8000-0000000000d1'); insert into t_results values('own pending suggestion taggable',true,''); exception when others then insert into t_results values('own pending suggestion taggable',false,sqlerrm); end $$;
 do $$ begin perform set_slide_tags('c0000000-0000-4000-8000-0000000000c2',null,'rail'); insert into t_results values('general type only',true,''); exception when others then insert into t_results values('general type only',false,sqlerrm); end $$;
-do $$ begin update posts set metro_area_id='f11b68be-b1c5-4931-8ec6-6ca0b79d9642' where id='a0000000-0000-4000-8000-0000000000a1'; insert into t_results values('direct metro change refused',false,'no error'); exception when others then insert into t_results values('direct metro change refused',true,sqlerrm); end $$;
+-- (The direct metro change check runs as member B below: the test owner can moderate every post.)
 update posts set park_id='fc96a6fb-c726-4012-90c4-5a04a6136fc7' where id='a0000000-0000-4000-8000-0000000000a1';
 insert into t_results select 'park change clears obstacle and moves metro', p.metro_area_id='f11b68be-b1c5-4931-8ec6-6ca0b79d9642' and s.obstacle_id is null, coalesce(s.obstacle_id::text,'null')||' '||p.metro_area_id from posts p join post_slides s on s.post_id=p.id and s.position=0 where p.id='a0000000-0000-4000-8000-0000000000a1';
 insert into t_results select 'general type kept', obstacle_type='rail', coalesce(obstacle_type::text,'null') from post_slides where id='c0000000-0000-4000-8000-0000000000c2';
@@ -423,7 +424,9 @@ insert into t_results select 'general type kept', obstacle_type='rail', coalesce
 reset role;
 select set_config('request.jwt.claims', '', true);
 update post_slides set obstacle_id='251482d1-be1f-4a11-9eda-6a9041766ba0' where id='c0000000-0000-4000-8000-0000000000c1';
-update posts set published_at=now() where id='a0000000-0000-4000-8000-0000000000a1';
+-- Publish the proper way: mark the slides uploaded and let publish_when_ready() do it.
+update post_slides set upload_status='ready' where post_id='a0000000-0000-4000-8000-0000000000a1';
+insert into t_results select 'post publishes when slides are ready', published_at is not null, coalesce(published_at::text,'null') from posts where id='a0000000-0000-4000-8000-0000000000a1';
 
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"08b422ac-9f87-4c0f-b979-29ecdd41ed5b","role":"authenticated"}', true);
@@ -432,6 +435,9 @@ insert into t_results select 'tag edit after publish stamps edited_at', edited_a
 insert into t_results select 'own posts in following feed', count(*)=1, count(*)::text from feed_following();
 
 select set_config('request.jwt.claims', '{"sub":"b0000000-0000-4000-8000-000000000001","role":"authenticated"}', true);
+insert into posts (id, author_id, metro_area_id, slide_count) values ('a0000000-0000-4000-8000-0000000000b1','b0000000-0000-4000-8000-000000000001','f11b68be-b1c5-4931-8ec6-6ca0b79d9642',1);
+insert into t_results select 'no park: home metro used', metro_area_id='93cd132b-dd8b-4bbb-a2ea-9ddf6bab7925', metro_area_id::text from posts where id='a0000000-0000-4000-8000-0000000000b1';
+do $$ begin update posts set metro_area_id='f11b68be-b1c5-4931-8ec6-6ca0b79d9642' where id='a0000000-0000-4000-8000-0000000000b1'; insert into t_results values('member metro change refused',false,'no error'); exception when others then insert into t_results values('member metro change refused',true,sqlerrm); end $$;
 insert into t_results select 'following feed empty before follow', count(*)=0, count(*)::text from feed_following();
 insert into t_results select 'nearby other metro shows unfollowed post', count(*)=1, count(*)::text from feed_nearby('f11b68be-b1c5-4931-8ec6-6ca0b79d9642');
 insert into follows (follower_id, followee_id) values ('b0000000-0000-4000-8000-000000000001','08b422ac-9f87-4c0f-b979-29ecdd41ed5b');
