@@ -97,6 +97,8 @@ export const keys = {
   comments: (postId: string) => ['comments', postId] as const,
   /** The Notifications list (M4b). */
   notifications: (userId: string) => ['notifications', userId] as const,
+  /** First-slide thumbnails for notification rows. Starts with 'posts' so post invalidations cover it. */
+  postCovers: (postIds: string[]) => ['posts', 'covers', ...postIds] as const,
   /** Whether the bell shows its dot. */
   notificationsUnread: (userId: string) => ['notifications-unread', userId] as const,
   /** Your push notification switches (Settings › Push notifications). */
