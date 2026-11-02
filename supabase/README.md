@@ -14,6 +14,9 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
   - `stream-status`: asks Stream where a clip is and saves it on the slide.
   - `stream-webhook`: Stream calls this when a clip is ready or fails.
     Deployed with JWT verification off; it checks Stream's signature.
+  - `push-send`: sends waiting push notifications through Expo's push
+    service. The database pings it (pg_net); JWT verification is off
+    because it only drains the queue. Needs no secrets.
 
 ## Secrets the functions need (Edge Functions → Secrets)
 
@@ -113,3 +116,27 @@ the `comment_count` and `liked_by_me` computed fields on posts,
 2. Apply the migration.
 3. Regenerate the database types and put back the `| null`s the generator
    drops (listed in the main README).
+
+## Push notifications (migration `push`)
+
+Adds pg_net, private tables for phones (`push_devices`), switches
+(`push_settings`) and the outbox, triggers that queue a push for every new
+notification and every "say hi" or visiting announcement (only for members
+with a phone registered), `register_push_device()`,
+`unregister_push_device()`, `my_push_settings()`, `set_push_setting()`,
+and `push_claim()` / `push_done()` for the `push-send` function (service
+role only). Additive only.
+
+1. Run `tests/push_check.sql` first (rolled back). Every row should say
+   `"ok": true`.
+2. Apply the migration, then deploy `push-send` (JWT verification off).
+   Apply before merging: the app calls the new functions as soon as it runs.
+3. The sentences come from the app's translation files. After changing a
+   `notifications.*` string, run `node scripts/build-push-strings.mjs` and
+   redeploy `push-send` (`npm run check:i18n` fails until you do).
+
+Where the database pings `push-send` lives in `private.push_config`.
+Delivery on iOS goes through Expo, which needs the app's APNs key: EAS
+creates one on the first build after `expo-notifications` is added (answer
+yes when it asks to set up push notifications). Android needs FCM
+credentials uploaded to EAS before Android pushes work.

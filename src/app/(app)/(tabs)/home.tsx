@@ -23,6 +23,7 @@ import { useNotificationsUnread } from '@/lib/engagement';
 import { useMetro } from '@/lib/parks';
 import { ActivePostContext } from '@/lib/playback';
 import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
+import { useAskForPushOnce } from '@/lib/push';
 import { keys } from '@/lib/query';
 import { type PostJob, uploads, useUploads } from '@/lib/uploads';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
@@ -48,6 +49,8 @@ export default function Home() {
   const qc = useQueryClient();
   const { width } = useWindowDimensions();
   const { session, profile } = useAuth();
+  // The first Home visit after onboarding asks for notifications, once.
+  useAskForPushOnce(Boolean(session));
   const userId = session?.user.id;
   const metroId = profile?.home_metro_area_id ?? null;
   const metro = useMetro(metroId);

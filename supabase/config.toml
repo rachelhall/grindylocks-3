@@ -11,3 +11,8 @@ verify_jwt = true
 # Called by Cloudflare Stream; it checks the Webhook-Signature header instead.
 [functions.stream-webhook]
 verify_jwt = false
+
+# Pinged by the database (pg_net) when the push outbox gets new rows. It
+# only drains the queue, decided by push_claim(), so it takes no caller.
+[functions.push-send]
+verify_jwt = false

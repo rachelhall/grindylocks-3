@@ -1606,6 +1606,18 @@ export type Database = {
         Args: { park: string }
         Returns: Database["public"]["Enums"]["role_name"]
       }
+      my_push_settings: {
+        Args: never
+        Returns: {
+          comments: boolean
+          filmer_credits: boolean
+          invites: boolean
+          mentions: boolean
+          park_fixes: boolean
+          someone_new: boolean
+          tags: boolean
+        }[]
+      }
       notifications_unread: { Args: never; Returns: boolean }
       obstacle_posts: {
         Args: {
@@ -1675,7 +1687,29 @@ export type Database = {
           username: string | null
         }[]
       }
+      push_claim: {
+        Args: { max_rows?: number }
+        Returns: {
+          actor_username: string | null
+          comment_body: string | null
+          devices: Json
+          kind: string
+          metro_name: string | null
+          outbox_id: number
+          park_name: string | null
+          post_id: string | null
+          send: boolean
+        }[]
+      }
+      push_done: {
+        Args: { dead_tokens?: string[]; outbox_ids: number[] }
+        Returns: undefined
+      }
       redeem_my_invite: { Args: never; Returns: string | null }
+      register_push_device: {
+        Args: { language: string; platform: string; token: string }
+        Returns: undefined
+      }
       remove_my_filmer_credit: { Args: { slide: string }; Returns: undefined }
       reorder_park_photos: {
         Args: { park: string; photo_ids: string[] }
@@ -1708,6 +1742,10 @@ export type Database = {
           is_private: boolean
           username: string
         }[]
+      }
+      set_push_setting: {
+        Args: { enabled: boolean; setting: string }
+        Returns: undefined
       }
       set_slide_tags: {
         Args: {
@@ -1746,6 +1784,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      unregister_push_device: { Args: { token: string }; Returns: undefined }
       username_available: { Args: { name: string }; Returns: boolean }
     }
     Enums: {

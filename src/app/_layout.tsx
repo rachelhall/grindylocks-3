@@ -13,12 +13,14 @@ import { StyleSheet, View } from 'react-native';
 
 import { Button } from '@/components/ui';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { configurePush } from '@/lib/push';
 import { queryClient, startQueryClient } from '@/lib/query';
 import { initSentry, Sentry } from '@/lib/sentry';
 import { colors, space, Text, useColorSchemeName } from '@/theme';
 
 initSentry();
 startQueryClient();
+configurePush();
 SplashScreen.preventAutoHideAsync();
 
 function RootLayout() {

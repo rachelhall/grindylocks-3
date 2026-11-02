@@ -42,6 +42,8 @@ Both need the Apple Developer Program; EAS creates the certificates and profiles
 npx eas-cli@latest build --profile production --platform ios --auto-submit
 ```
 
+**Push notifications** need a build that includes `expo-notifications` (added with push, Nov 1). On that build EAS asks whether to set up push notifications for iOS: say yes, and it creates and stores the APNs key. Pushes reach the phone through Expo's push service, so nothing else is needed on iOS. In the Simulator, permission and Settings work, but pushes only arrive on a real iPhone; to see how one looks, drag a `.apns` file onto the Simulator or run `xcrun simctl push booted com.grindylocks.app push.apns` with a payload like `{"aps":{"alert":{"title":"@ana commented on your post","body":"so clean"}},"body":{"open":"post","id":"<post id>"}}`.
+
 The first run asks for your Apple ID and creates the app in App Store Connect. `usesNonExemptEncryption` is false in `app.json`, so builds skip the export compliance question. Add testers under TestFlight in App Store Connect; internal testers need no review.
 
 ## Checks

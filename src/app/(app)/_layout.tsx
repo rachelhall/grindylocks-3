@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { useEffect } from 'react';
 
 import { useAuth } from '@/lib/auth';
+import { registerThisPhone, usePushTaps } from '@/lib/push';
 import { uploads } from '@/lib/uploads';
 import { brand, useColors } from '@/theme';
 
@@ -21,6 +22,13 @@ export default function AppLayout() {
     void uploads.start(userId);
     return () => uploads.stop();
   }, [userId]);
+
+  // Keep this phone's push token (and language) current for this member,
+  // and open whatever a tapped push points to.
+  useEffect(() => {
+    if (userId) void registerThisPhone();
+  }, [userId]);
+  usePushTaps();
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.surface } }}>
@@ -42,6 +50,7 @@ export default function AppLayout() {
       <Stack.Screen name="settings/email" />
       <Stack.Screen name="settings/credits" />
       <Stack.Screen name="settings/blocked" />
+      <Stack.Screen name="settings/notifications" />
       <Stack.Screen name="invites" />
     </Stack>
   );
