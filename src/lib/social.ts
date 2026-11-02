@@ -154,6 +154,7 @@ export function useFollow(viewerId: string | undefined, target: Profile | null |
       void client.invalidateQueries({ queryKey: keys.profiles() });
       void client.invalidateQueries({ queryKey: ['search'] });
       void client.invalidateQueries({ queryKey: ['posts', 'by'] });
+      void client.invalidateQueries({ queryKey: keys.following(viewerId ?? '') });
     },
   });
 }
@@ -249,6 +250,7 @@ export function useBlock(userId: string | undefined) {
       void client.invalidateQueries({ queryKey: keys.blocked(userId ?? '') });
       void client.invalidateQueries({ queryKey: keys.profiles() });
       void client.invalidateQueries({ queryKey: keys.followRequests(userId ?? '') });
+      void client.invalidateQueries({ queryKey: keys.following(userId ?? '') });
       void client.invalidateQueries({ queryKey: ['search'] });
       void client.invalidateQueries({ queryKey: ['posts'] });
     },

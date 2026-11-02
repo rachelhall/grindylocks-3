@@ -696,7 +696,15 @@
     "replyingTo": "Respondiendo a @{{username}}",
     "replyingToThread": "Respondiendo en este hilo",
     "cancelReply": "Cancelar respuesta",
-    "failed": "No se pudo publicar tu comentario"
+    "failed": "No se pudo publicar tu comentario",
+    "mentionTitle": "Mencionar",
+    "mentionLabel": "Personas para mencionar",
+    "mentionPosted": "Lo publicó",
+    "mentionFilmed": "Grabó esta publicación",
+    "mentionTagged": "Etiquetado en esta publicación",
+    "mentionCommented": "Comentó aquí",
+    "mentionFollowing": "Lo sigues",
+    "mentionRegular": "Habitual en {{park}}"
   },
   "clip": {
     "play": "Reproducir clip",
