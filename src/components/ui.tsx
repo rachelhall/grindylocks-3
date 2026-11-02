@@ -61,6 +61,8 @@ const icons = {
   landscape: { ios: 'mountain.2', android: 'landscape' },
   heart: { ios: 'heart', android: 'favorite_border' },
   heartFill: { ios: 'heart.fill', android: 'favorite' },
+  soundOn: { ios: 'speaker.wave.2.fill', android: 'volume_up' },
+  soundOff: { ios: 'speaker.slash.fill', android: 'volume_off' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

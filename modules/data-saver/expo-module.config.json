@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android"],
+  "apple": {
+    "modules": ["DataSaverModule"]
+  },
+  "android": {
+    "modules": ["expo.modules.datasaver.DataSaverModule"]
+  }
+}

@@ -134,7 +134,7 @@
     "addMore": "Add more photos and clips",
     "selected": "{{count}} of {{max}} selected",
     "limits": "Photos and clips up to 60 s each",
-    "mix": "{{clips}} clips · {{photos}} photos",
+    "mix": "{{clips}} · {{photos}}",
     "remove": "Remove item {{number}}",
     "rejectedTooLong_one": "{{count}} clip is over 60 seconds. Trim it in your Photos app first.",
     "rejectedTooLong_other": "{{count}} clips are over 60 seconds. Trim them in your Photos app first.",
@@ -148,7 +148,11 @@
     "preparing": "Getting your photos and clips ready…",
     "postIt": "Post it",
     "next": "Next",
-    "captionTitle": "Caption"
+    "captionTitle": "Caption",
+    "clipCount_one": "{{count}} clip",
+    "clipCount_other": "{{count}} clips",
+    "photoCount_one": "{{count}} photo",
+    "photoCount_other": "{{count}} photos"
   },
   "uploads": {
     "uploading": "Uploading {{done}} of {{total}}",
@@ -676,5 +680,10 @@
     "replyingToThread": "Replying in this thread",
     "cancelReply": "Cancel reply",
     "failed": "Couldn't post your comment"
+  },
+  "clip": {
+    "play": "Play clip",
+    "unmute": "Turn sound on",
+    "mute": "Turn sound off"
   }
 }

@@ -1,7 +1,8 @@
 /**
  * A post in a feed (Feed-Home mockup), and the pieces post detail shares
  * with it: the obstacle tag on a slide, the credits line, "3 h" times and
- * the post's More menu, and the like and comment row (M4b).
+ * the post's More menu, and the like and comment row (M4b). Only the post
+ * mostly on screen plays its clip (see `@/lib/playback`).
  */
 import { router } from 'expo-router';
 import { type TFunction } from 'i18next';
@@ -15,6 +16,7 @@ import { Icon, type SheetAction, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { credits, isOnPost, type PersonRef, type Post, type PostSlide, useDeletePost, useRemoveMeFromPost } from '@/lib/posts';
 import { useToggleLike } from '@/lib/engagement';
+import { useIsActivePost } from '@/lib/playback';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, size, space, Text, useColors } from '@/theme';
 
@@ -320,6 +322,7 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const menu = usePostMenu(post);
+  const active = useIsActivePost(post.id);
   const username = post.author?.username ?? t('common.deletedUser');
   const openPost = () => router.push({ pathname: '/post/[id]', params: { id: post.id } });
 
@@ -341,6 +344,7 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
         <Carousel
           slides={post.slides}
           width={width}
+          active={active}
           overlay={(i) =>
             post.slides[i] ? (
               <View style={styles.overlayBottomLeft} pointerEvents="box-none">

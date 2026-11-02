@@ -1,11 +1,13 @@
 import { Image } from 'expo-image';
-import { useVideoPlayer, VideoView } from 'expo-video';
+import { useVideoPlayer, type VideoPlayer, type VideoThumbnail, VideoView } from 'expo-video';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
+import { useIsFocused } from 'expo-router';
 
 import { Button, Icon } from '@/components/ui';
 import { carouselHeight, formatDuration, videoPlaybackUrl } from '@/lib/media';
+import { toggleSound, useAutoplayAllowed, useSoundOn } from '@/lib/playback';
 import { postProgress, postState, type PostJob, uploads } from '@/lib/uploads';
 import { brand, space, stroke, Text, useColors } from '@/theme';
 
@@ -35,20 +37,82 @@ export function MediaTag({ label, style }: { label: string; style?: object }) {
   );
 }
 
-function VideoSlide({ videoId }: { videoId: string }) {
+/** The player is a native object; muting it is how its sound is set. */
+function setMuted(player: VideoPlayer, muted: boolean) {
+  player.muted = muted;
+}
+
+/**
+ * A clip in a post. It plays muted and loops while it's the active clip
+ * (its post is the one mostly on screen, and it's the slide showing), and
+ * pauses otherwise. Tapping it turns sound on or off for every clip this
+ * session. When autoplay is off (Low Data Mode, Reduce Motion, the phone's
+ * auto-play setting), it waits for a tap on the play button.
+ */
+function VideoSlide({ videoId, active }: { videoId: string; active: boolean }) {
+  const { t } = useTranslation();
   const url = videoPlaybackUrl(videoId);
+  const soundOn = useSoundOn();
+  const autoplay = useAutoplayAllowed();
+  const focused = useIsFocused();
+  const [started, setStarted] = useState(false);
   const player = useVideoPlayer(url ?? null, (p) => {
     p.loop = true;
+    p.muted = true;
+    // Muted clips don't stop music that's already playing.
+    p.audioMixingMode = 'auto';
   });
+
+  const live = active && focused;
+  const shouldPlay = live && (autoplay || started);
+
+  // Scrolled away: the next time it comes back, autoplay rules apply again.
+  const [wasLive, setWasLive] = useState(live);
+  if (live !== wasLive) {
+    setWasLive(live);
+    if (!live) setStarted(false);
+  }
+
+  useEffect(() => {
+    setMuted(player, !soundOn);
+  }, [player, soundOn]);
+
+  useEffect(() => {
+    if (shouldPlay) player.play();
+    else player.pause();
+  }, [player, shouldPlay]);
+
   if (!url) return null;
-  return <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls />;
+  const waiting = live && !shouldPlay;
+  return (
+    <>
+      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={waiting ? t('clip.play') : soundOn ? t('clip.mute') : t('clip.unmute')}
+        onPress={() => (waiting ? setStarted(true) : toggleSound())}
+        style={StyleSheet.absoluteFill}
+      >
+        {waiting || !live ? (
+          <View style={styles.center} pointerEvents="none">
+            <View style={styles.playButton}>
+              <Icon name="play" color={brand.paper} size={28} />
+            </View>
+          </View>
+        ) : null}
+      </Pressable>
+      <View style={[styles.tag, styles.soundBadge]} pointerEvents="none">
+        <Icon name={soundOn ? 'soundOn' : 'soundOff'} color={brand.paper} size={14} />
+      </View>
+    </>
+  );
 }
 
 /**
  * One slide at its original aspect ratio, letterboxed in an ink frame of
  * the given size. Never cropped.
  */
-function Slide({ slide, width, height }: { slide: ViewSlide; width: number; height: number }) {
+function Slide({ slide, width, height, active }: { slide: ViewSlide; width: number; height: number; active: boolean }) {
   const { t } = useTranslation();
   const ready = slide.status === 'ready';
   return (
@@ -68,7 +132,7 @@ function Slide({ slide, width, height }: { slide: ViewSlide; width: number; heig
           accessibilityIgnoresInvertColors
         />
       ) : slide.kind === 'video' && slide.videoId && videoPlaybackUrl(slide.videoId) ? (
-        <VideoSlide videoId={slide.videoId} />
+        <VideoSlide videoId={slide.videoId} active={active} />
       ) : (
         <View style={styles.center}>
           <Icon name={slide.kind === 'video' ? 'video' : 'photo'} color={brand.paper} />
@@ -94,9 +158,12 @@ export function Carousel({
   width,
   overlay,
   onIndexChange,
+  active = true,
 }: {
   slides: ViewSlide[];
   width: number;
+  /** Whether this post may play its clip (the one mostly on screen in a feed). */
+  active?: boolean;
   /** Tags drawn over the slide that's showing (its obstacle, its people). */
   overlay?: (index: number) => ReactNode;
   onIndexChange?: (index: number) => void;
@@ -106,7 +173,7 @@ export function Carousel({
   if (slides.length === 1) {
     return (
       <View>
-        <Slide slide={slides[0]} width={width} height={height} />
+        <Slide slide={slides[0]} width={width} height={height} active={active} />
         {overlay?.(0)}
       </View>
     );
@@ -124,8 +191,8 @@ export function Carousel({
         }}
         style={{ width, height }}
       >
-        {slides.map((s) => (
-          <Slide key={s.id} slide={s} width={width} height={height} />
+        {slides.map((s, i) => (
+          <Slide key={s.id} slide={s} width={width} height={height} active={active && i === index} />
         ))}
       </ScrollView>
       <MediaTag label={`${index + 1} / ${slides.length}`} style={styles.tagTopRight} />
@@ -208,6 +275,39 @@ export function UploadCard({ job, onDiscard }: { job: PostJob; onDiscard: () => 
   );
 }
 
+/**
+ * A frame from a picked clip, for its tile in the new post screen. Made on
+ * the phone from the clip itself; until it's ready the tile shows the clip
+ * icon.
+ */
+function ClipThumb({ uri }: { uri: string }) {
+  const c = useColors();
+  const player = useVideoPlayer(uri);
+  const [frame, setFrame] = useState<VideoThumbnail | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    player
+      .generateThumbnailsAsync(0.5, { maxWidth: 360, maxHeight: 360 })
+      .then(([thumb]) => {
+        if (alive && thumb) setFrame(thumb);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [player]);
+
+  if (!frame) {
+    return (
+      <View style={styles.center}>
+        <Icon name="video" color={c.textSecondary} />
+      </View>
+    );
+  }
+  return <Image source={frame} style={StyleSheet.absoluteFill} contentFit="cover" />;
+}
+
 /** A picked item in the new post screen: thumbnail, order number, remove. */
 export function PickedTile({
   uri,
@@ -232,9 +332,7 @@ export function PickedTile({
       {kind === 'photo' ? (
         <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
       ) : (
-        <View style={styles.center}>
-          <Icon name="video" color={c.textSecondary} />
-        </View>
+        <ClipThumb uri={uri} />
       )}
       <View style={[styles.number, { backgroundColor: c.accent, borderColor: c.onAccent }]}>
         <Text variant="label" style={{ color: c.onAccent }}>
@@ -265,6 +363,8 @@ const styles = StyleSheet.create({
   tagBottomLeft: { left: 6, bottom: 6 },
   tagBottomRight: { right: 8, bottom: 8 },
   tagTopRight: { right: 8, top: 8 },
+  soundBadge: { right: 8, bottom: 36, paddingVertical: 4 },
+  playButton: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: brand.ink, borderWidth: stroke.rule, borderColor: brand.paper },
   card: { borderWidth: stroke.rule, padding: space[4], gap: space[3] },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   bar: { height: 6, alignSelf: 'stretch', overflow: 'hidden' },
