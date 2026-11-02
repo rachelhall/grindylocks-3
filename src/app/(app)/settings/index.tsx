@@ -12,6 +12,7 @@ import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { appConfig } from '@/lib/config';
 import { useMyProfile, useProfileSetting } from '@/lib/profiles';
+import { usePushPermission, usePushSettings } from '@/lib/push';
 import { space, Text, useColors } from '@/theme';
 
 /** Opens the mail app; if there isn't one, shows the address instead. */
@@ -26,8 +27,8 @@ async function openMail(subject?: string) {
 
 /**
  * Settings. Rows arrive with their features: blocked accounts came with
- * blocking; push notifications come with notifications (M4) and delete
- * account with M5, never as disabled placeholders.
+ * blocking, push notifications with push (M4b), and delete account comes
+ * with M5, never as disabled placeholders.
  */
 export default function Settings() {
   const { t } = useTranslation();
@@ -37,10 +38,28 @@ export default function Settings() {
   const { data: profile } = useMyProfile(userId);
   const setting = useProfileSetting(userId);
   const roleLabel = useRoleLabel();
+  const pushPermission = usePushPermission();
+  const pushSettings = usePushSettings(userId);
 
   const role = profile?.roles[0] ?? null;
   const pendingEmail = session?.user.new_email;
   const version = Constants.expoConfig?.version ?? '';
+
+  // "All on", "Some on" or "All off", or "Off" when the phone blocks them.
+  // (Park fixes isn't shown until M5, so it doesn't count yet.)
+  const pushValues = pushSettings.data
+    ? [pushSettings.data.comments, pushSettings.data.mentions, pushSettings.data.tags, pushSettings.data.filmer_credits, pushSettings.data.invites, pushSettings.data.someone_new]
+    : null;
+  const pushSummary =
+    pushPermission.data === 'denied'
+      ? t('push.phoneOff')
+      : !pushValues
+        ? undefined
+        : pushValues.every(Boolean)
+          ? t('push.allOn')
+          : pushValues.some(Boolean)
+            ? t('push.someOn')
+            : t('push.allOff');
 
   const flip = (name: 'is_private' | 'hide_from_regulars' | 'badge_hidden', value: boolean) =>
     setting.mutate(
@@ -120,6 +139,17 @@ export default function Settings() {
             title={t('block.listTitle')}
             trailing="chevron"
             onPress={() => router.push('/settings/blocked')}
+          />
+        </SettingsSection>
+
+        <SettingsSection title={t('push.settingsSection')}>
+          <SettingsRow
+            first
+            title={t('push.row')}
+            subtitle={t('push.rowBody')}
+            value={pushSummary}
+            trailing="chevron"
+            onPress={() => router.push('/settings/notifications')}
           />
         </SettingsSection>
 

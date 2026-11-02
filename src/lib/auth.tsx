@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
 import type { Database } from './database.types';
+import { forgetThisPhone } from './push';
 import { supabase } from './supabase';
 
 type Discipline = Database['public']['Enums']['discipline'];
@@ -118,6 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [userId, applyLoaded]);
 
   const signOut = useCallback(async () => {
+    // While still signed in: stop pushes for this member reaching this phone.
+    await forgetThisPhone().catch(() => undefined);
     await supabase.auth.signOut();
   }, []);
 

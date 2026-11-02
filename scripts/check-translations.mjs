@@ -25,5 +25,18 @@ for (const lang of ['es', 'da', 'de']) {
   }
 }
 
+// The push sender keeps its own copy of the notification sentences.
+const { pushStrings, pushStringsPath } = await import('./build-push-strings.mjs');
+let pushCopy = '';
+try {
+  pushCopy = readFileSync(pushStringsPath, 'utf8');
+} catch {
+  // reported below
+}
+if (pushCopy !== pushStrings()) {
+  failed = true;
+  console.error('push-send/strings.json is out of date: run node scripts/build-push-strings.mjs');
+}
+
 if (failed) process.exit(1);
 console.log(`Translations OK: ${source.size} keys in en, es, da and de.`);

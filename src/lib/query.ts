@@ -97,6 +97,10 @@ export const keys = {
   notifications: (userId: string) => ['notifications', userId] as const,
   /** Whether the bell shows its dot. */
   notificationsUnread: (userId: string) => ['notifications-unread', userId] as const,
+  /** Your push notification switches (Settings › Push notifications). */
+  pushSettings: (userId: string) => ['push-settings', userId] as const,
+  /** Whether the phone lets Grindylocks notify. Per phone, not per member. */
+  pushPermission: () => ['push-permission'] as const,
   /** Home feed, people you follow. Every feed key starts with 'feed'. */
   feedFollowing: (userId: string) => ['feed', 'following', userId] as const,
   /** Home feed, near you (a metro area, minus people you follow). */
