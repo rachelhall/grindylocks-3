@@ -3,7 +3,9 @@ import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { SafeAreaView } from '@/components/safe-area';
 
 import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
 import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';

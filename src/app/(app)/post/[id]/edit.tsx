@@ -3,7 +3,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { type PickedPark, ParkButton, ParkPickerModal, SlideTagEditor, TagSectionTitle } from '@/components/tagging';
 import { Button, Icon } from '@/components/ui';

@@ -8,7 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { Avatar } from '@/components/profile';
 import { Button, Icon, TextField } from '@/components/ui';
@@ -170,7 +170,7 @@ export function ParkPickerModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView style={[styles.flex, { backgroundColor: c.surface }]}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
         <ModalHeader title={t('tagging.parkTitle')} onClose={onClose} />
         <View style={styles.modalBody}>
           <TextField
@@ -289,7 +289,7 @@ export function PersonPickerModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView style={[styles.flex, { backgroundColor: c.surface }]}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
         <ModalHeader title={title} onClose={onClose} />
         <View style={styles.modalBody}>
           <TextField
@@ -382,7 +382,7 @@ function TypeOrSuggestModal({
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView style={[styles.flex, { backgroundColor: c.surface }]}>
+      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
         <ModalHeader title={t('tagging.typeTitle')} onClose={onClose} />
         <ScrollView contentContainerStyle={styles.modalScroll} keyboardShouldPersistTaps="handled">
           <Text variant="bodySm" color="textSecondary">

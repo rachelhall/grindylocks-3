@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { Linking, Pressable, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { BackButton } from '@/components/ui';
 import { appConfig } from '@/lib/config';

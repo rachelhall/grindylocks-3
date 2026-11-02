@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { Carousel } from '@/components/media';
 import { AuthorName, CreditsLine, MoreButton, ObstacleChip, PlaceLine, usePostMenu } from '@/components/post-card';
