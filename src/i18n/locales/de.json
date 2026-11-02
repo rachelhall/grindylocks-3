@@ -114,7 +114,14 @@
   },
   "home": {
     "title": "Start",
-    "feedSoon": "Dein Feed kommt bald. Bis dahin findest du hier deine eigenen Posts."
+    "followingLabel": "Gefolgt · neueste zuerst",
+    "nearLabel": "In deiner Nähe · {{metro}}",
+    "caughtUp": "Du hast alles von Leuten gesehen, denen du folgst",
+    "emptyTitle": "Noch nichts hier",
+    "emptyBody": "Folge Skater, die du kennst, oder poste als Erster aus deiner Stadt.",
+    "emptyPost": "Clip posten",
+    "emptyFind": "Skater finden",
+    "loadError": "Der Feed konnte nicht geladen werden. Prüf deine Verbindung."
   },
   "errors": {
     "generic": "Etwas ist schiefgelaufen.",
@@ -139,7 +146,9 @@
     "captionPlaceholder": "Was ist passiert?",
     "backgroundNote": "Uploads laufen im Hintergrund weiter, auch bei schlechtem Empfang.",
     "preparing": "Deine Fotos und Clips werden vorbereitet …",
-    "postIt": "Posten"
+    "postIt": "Posten",
+    "next": "Weiter",
+    "captionTitle": "Text"
   },
   "uploads": {
     "uploading": "Lädt {{done}} von {{total}} hoch",
@@ -151,14 +160,6 @@
     "discard": "Post löschen",
     "discardTitle": "Diesen Post löschen?",
     "discardBody": "Er ist noch nicht gepostet. Er wird samt Uploads entfernt."
-  },
-  "myPosts": {
-    "title": "Deine Posts",
-    "empty": "Noch nichts gepostet.",
-    "noCaption": "Keine Bildunterschrift",
-    "posted_one": "Gepostet am {{date}} · {{count}} Slide",
-    "posted_other": "Gepostet am {{date}} · {{count}} Slides",
-    "notPosted": "Noch nicht gepostet: lädt noch hoch"
   },
   "viewer": {
     "title": "Post",
@@ -254,7 +255,15 @@
     "disciplineYours": "{{discipline}}, fährst du",
     "missing": "Dieser Skatepark ist nicht verfügbar.",
     "fees": "Preise",
-    "more": "Mehr"
+    "more": "Mehr",
+    "regulars": "Stammgäste",
+    "noRegulars": "Noch keine Stammgäste. Skater erscheinen hier, wenn sie ein paar Mal von hier gepostet oder ihn zu ihrem Homepark gemacht haben.",
+    "latestPosts": "Neueste Posts",
+    "nothingPosted": "Noch nichts gepostet",
+    "nothingPostedBody": "Schon in {{park}} geskatet? Tagge ihn in deinem nächsten Post, dann erscheint er hier.",
+    "postHere": "Hier einen Clip posten",
+    "postHereToo": "Poste auch einen Clip von hier",
+    "morePosts": "Mehr Posts"
   },
   "disciplines": {
     "inline": "Inline",
@@ -536,5 +545,98 @@
     "listBody": "Wen du blockiert hast, sieht dein Profil, deine Beiträge und Kommentare nicht, und du siehst ihre nicht.",
     "none": "Du hast niemanden blockiert.",
     "since": "Blockiert am {{date}}"
+  },
+  "time": {
+    "now": "jetzt",
+    "minutes": "{{count}} Min.",
+    "hours": "{{count}} Std.",
+    "yesterday": "gestern",
+    "days": "{{count}} T."
+  },
+  "tagging": {
+    "title": "Taggen",
+    "park": "Park",
+    "parkPick": "Park wählen",
+    "parkChange": "Park: {{park}}. Park ändern",
+    "parkNone": "Kein Park",
+    "parkEverySlide": "Park für alle Slides · tippen zum Ändern",
+    "parkEncourage": "Tagge den Park, damit der Post auf seiner Seite erscheint",
+    "parkTitle": "Park wählen",
+    "parkSearch": "Parks suchen",
+    "parkSearchPlaceholder": "Parkname oder wie ihn die Locals nennen",
+    "homePark": "Dein Homepark",
+    "noPark": "Kein Park",
+    "noParkLine": "Garagen-Sessions, Street-Spots, alles andere",
+    "slides": "Slides",
+    "slide": "Slide {{number}}",
+    "slideClip": "Slide {{number}} · {{duration}}",
+    "slideTagged": "Slide {{number}}, getaggt",
+    "optional": "Tags sind freiwillig. Jede Slide kann eigene haben.",
+    "sameAs": "Gleiche Tags wie Slide {{number}}",
+    "obstacle": "Obstacle",
+    "more": "Mehr",
+    "pending": "wartet auf Freigabe",
+    "typeOnly": "nur Typ",
+    "noObstacles": "Für diesen Park sind noch keine Obstacles eingetragen.",
+    "notListed": "Nicht dabei? Typ wählen oder vorschlagen",
+    "pickType": "Obstacle-Typ wählen",
+    "typeTitle": "Obstacle-Typ",
+    "typeBody": "Wähl den Typ, oder schlag das Obstacle vor, damit es zum Park hinzugefügt wird. Vorschläge werden geprüft, bevor andere sie sehen.",
+    "typeBodyNoPark": "Ohne Park wählst du den Typ des Obstacles.",
+    "useType": "Diesen Typ nehmen",
+    "suggestTitle": "Oder für diesen Park vorschlagen",
+    "suggestName": "Wie nennen es die Locals?",
+    "suggestHint": "Zum Beispiel „die lange Kinked Rail am Bowl“. Typ oben wählen.",
+    "suggestPlaceholder": "Name des Obstacles",
+    "suggestSend": "Vorschlagen und taggen",
+    "people": "Leute",
+    "tagSomeone": "+ Jemanden taggen",
+    "addFilmer": "+ Filmer hinzufügen",
+    "filmer": "Filmer",
+    "skating": "Skatet",
+    "filmerOn": "{{username}} als Filmer nennen",
+    "filmerOff": "{{username}} ist Filmer. Stattdessen als skatend taggen",
+    "removePerson": "{{username}} entfernen",
+    "personTitle": "Jemanden taggen",
+    "filmerTitle": "Wer hat gefilmt?",
+    "personSearch": "Benutzername",
+    "personHint": "Gib mindestens zwei Buchstaben des Benutzernamens ein.",
+    "whatsTagged": "Was getaggt ist",
+    "noTags": "Keine Tags",
+    "filmedBy": "gefilmt von {{username}}",
+    "editLater": "Text und Tags kannst du nach dem Posten noch ändern."
+  },
+  "postCard": {
+    "open": "Post von {{username}} öffnen",
+    "more": "Mehr",
+    "noPark": "Kein Park",
+    "noParkIn": "Kein Park · {{metro}}",
+    "obstacleLink": "{{obstacle}}: alle Posts hier ansehen",
+    "filmedBy": "Gefilmt von",
+    "with": "mit",
+    "edit": "Post bearbeiten",
+    "delete": "Post löschen",
+    "deleteTitle": "Diesen Post löschen?",
+    "deleteBody": "Er verschwindet von deinem Profil, aus dem Park und aus allen Feeds.",
+    "removeMe": "Mich aus dem Post entfernen",
+    "removeMeTitle": "Dich aus diesem Post entfernen?",
+    "removeMeBody": "Dein Tag und deine Filmer-Nennung werden entfernt, also verschwindet er aus deinen Tabs Markiert und Gefilmt. Der Post bleibt online.",
+    "removeMeConfirm": "Mich entfernen"
+  },
+  "postDetail": {
+    "edited": "bearbeitet",
+    "peopleButton": "{{count}} Leute in dieser Slide",
+    "peopleTitle": "In Slide {{number}}",
+    "filmerRow": "{{username}} · Filmer",
+    "slideOf": "Slide {{number}} von {{total}}"
+  },
+  "editPost": {
+    "title": "Post bearbeiten",
+    "save": "Speichern"
+  },
+  "obstacle": {
+    "kicker": "Obstacle · {{type}}",
+    "empty": "Hier ist noch nichts getaggt. Tagge dieses Obstacle in einem Post, dann erscheint er hier.",
+    "missing": "Dieses Obstacle ist nicht verfügbar."
   }
 }

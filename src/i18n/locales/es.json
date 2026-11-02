@@ -114,7 +114,14 @@
   },
   "home": {
     "title": "Inicio",
-    "feedSoon": "Tu feed llegará pronto. Por ahora, aquí están tus publicaciones."
+    "followingLabel": "Siguiendo · lo más nuevo primero",
+    "nearLabel": "Cerca de ti · {{metro}}",
+    "caughtUp": "Ya viste todo de la gente que sigues",
+    "emptyTitle": "Aún no hay nada",
+    "emptyBody": "Sigue a patinadores que conozcas, o sé el primero en publicar desde tu ciudad.",
+    "emptyPost": "Publicar un clip",
+    "emptyFind": "Buscar patinadores",
+    "loadError": "No se pudo cargar el feed. Revisa tu conexión."
   },
   "errors": {
     "generic": "Algo ha fallado.",
@@ -139,7 +146,9 @@
     "captionPlaceholder": "¿Qué pasó?",
     "backgroundNote": "Las subidas siguen en segundo plano, incluso con mala señal.",
     "preparing": "Preparando tus fotos y clips…",
-    "postIt": "Publicar"
+    "postIt": "Publicar",
+    "next": "Siguiente",
+    "captionTitle": "Texto"
   },
   "uploads": {
     "uploading": "Subiendo {{done}} de {{total}}",
@@ -151,14 +160,6 @@
     "discard": "Borrar publicación",
     "discardTitle": "¿Borrar esta publicación?",
     "discardBody": "Aún no se ha publicado. Esto la elimina junto con sus subidas."
-  },
-  "myPosts": {
-    "title": "Tus publicaciones",
-    "empty": "Aún no has publicado nada.",
-    "noCaption": "Sin descripción",
-    "posted_one": "Publicado el {{date}} · {{count}} diapositiva",
-    "posted_other": "Publicado el {{date}} · {{count}} diapositivas",
-    "notPosted": "Aún sin publicar: se está subiendo"
   },
   "viewer": {
     "title": "Publicación",
@@ -254,7 +255,15 @@
     "disciplineYours": "{{discipline}}, lo practicas tú",
     "missing": "Este skatepark no está disponible.",
     "fees": "Precios",
-    "more": "Más"
+    "more": "Más",
+    "regulars": "Habituales",
+    "noRegulars": "Aún no hay habituales. Aparecen aquí cuando han publicado varias veces aquí o lo han elegido como su parque.",
+    "latestPosts": "Últimas publicaciones",
+    "nothingPosted": "Aún no hay publicaciones",
+    "nothingPostedBody": "¿Has patinado en {{park}}? Etiquétalo en tu próxima publicación y saldrá aquí.",
+    "postHere": "Publicar un clip aquí",
+    "postHereToo": "Publica un clip aquí tú también",
+    "morePosts": "Más publicaciones"
   },
   "disciplines": {
     "inline": "Inline",
@@ -536,5 +545,98 @@
     "listBody": "Las personas que has bloqueado no ven tu perfil, publicaciones ni comentarios, y tú no ves los suyos.",
     "none": "No has bloqueado a nadie.",
     "since": "Bloqueado el {{date}}"
+  },
+  "time": {
+    "now": "ahora",
+    "minutes": "{{count}} min",
+    "hours": "{{count}} h",
+    "yesterday": "ayer",
+    "days": "{{count}} d"
+  },
+  "tagging": {
+    "title": "Etiquetar",
+    "park": "Parque",
+    "parkPick": "Elige un parque",
+    "parkChange": "Parque: {{park}}. Cambiar parque",
+    "parkNone": "Sin parque",
+    "parkEverySlide": "Parque para todas las diapositivas · toca para cambiar",
+    "parkEncourage": "Etiqueta el parque para que salga en su página",
+    "parkTitle": "Elige un parque",
+    "parkSearch": "Buscar parques",
+    "parkSearchPlaceholder": "Nombre del parque o cómo lo llaman",
+    "homePark": "Tu parque",
+    "noPark": "Sin parque",
+    "noParkLine": "Sesiones en el garaje, spots de calle, cualquier otro sitio",
+    "slides": "Diapositivas",
+    "slide": "Diapositiva {{number}}",
+    "slideClip": "Diapositiva {{number}} · {{duration}}",
+    "slideTagged": "Diapositiva {{number}}, etiquetada",
+    "optional": "Las etiquetas son opcionales. Cada diapositiva puede tener las suyas.",
+    "sameAs": "Mismas etiquetas que la diapositiva {{number}}",
+    "obstacle": "Obstáculo",
+    "more": "Más",
+    "pending": "pendiente de aprobación",
+    "typeOnly": "solo el tipo",
+    "noObstacles": "Este parque aún no tiene obstáculos.",
+    "notListed": "¿No está? Elige un tipo o sugiérelo",
+    "pickType": "Elige un tipo de obstáculo",
+    "typeTitle": "Tipo de obstáculo",
+    "typeBody": "Elige el tipo de obstáculo, o sugiérelo para añadirlo al parque. Las sugerencias se revisan antes de que otros las vean.",
+    "typeBodyNoPark": "Sin parque, elige el tipo de obstáculo.",
+    "useType": "Usar este tipo",
+    "suggestTitle": "O sugiérelo para este parque",
+    "suggestName": "¿Cómo lo llaman los locales?",
+    "suggestHint": "Por ejemplo, \"el rail largo con quiebre junto al bowl\". Elige su tipo arriba.",
+    "suggestPlaceholder": "Nombre del obstáculo",
+    "suggestSend": "Sugerir y etiquetar",
+    "people": "Personas",
+    "tagSomeone": "+ Etiquetar a alguien",
+    "addFilmer": "+ Añadir filmer",
+    "filmer": "Filmer",
+    "skating": "Patinando",
+    "filmerOn": "Dar crédito a {{username}} como filmer",
+    "filmerOff": "{{username}} es el filmer. Etiquetar como patinando",
+    "removePerson": "Quitar a {{username}}",
+    "personTitle": "Etiquetar a alguien",
+    "filmerTitle": "¿Quién lo grabó?",
+    "personSearch": "Usuario",
+    "personHint": "Escribe al menos dos letras de su usuario.",
+    "whatsTagged": "Qué está etiquetado",
+    "noTags": "Sin etiquetas",
+    "filmedBy": "grabado por {{username}}",
+    "editLater": "Puedes editar el texto y las etiquetas después de publicar."
+  },
+  "postCard": {
+    "open": "Abrir la publicación de {{username}}",
+    "more": "Más",
+    "noPark": "Sin parque",
+    "noParkIn": "Sin parque · {{metro}}",
+    "obstacleLink": "{{obstacle}}: ver todas las publicaciones aquí",
+    "filmedBy": "Grabado por",
+    "with": "con",
+    "edit": "Editar publicación",
+    "delete": "Eliminar publicación",
+    "deleteTitle": "¿Eliminar esta publicación?",
+    "deleteBody": "Se quita de tu perfil, del parque y de todos los feeds.",
+    "removeMe": "Quitarme de esta publicación",
+    "removeMeTitle": "¿Quitarte de esta publicación?",
+    "removeMeBody": "Se quitan tu etiqueta y tu crédito de filmer, así que sale de tus pestañas Etiquetado y Grabado. La publicación sigue visible.",
+    "removeMeConfirm": "Quitarme"
+  },
+  "postDetail": {
+    "edited": "editado",
+    "peopleButton": "{{count}} personas en esta diapositiva",
+    "peopleTitle": "En la diapositiva {{number}}",
+    "filmerRow": "{{username}} · filmer",
+    "slideOf": "Diapositiva {{number}} de {{total}}"
+  },
+  "editPost": {
+    "title": "Editar publicación",
+    "save": "Guardar"
+  },
+  "obstacle": {
+    "kicker": "Obstáculo · {{type}}",
+    "empty": "Aún no hay nada etiquetado aquí. Etiqueta este obstáculo en una publicación y saldrá aquí.",
+    "missing": "Este obstáculo no está disponible."
   }
 }

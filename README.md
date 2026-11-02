@@ -69,7 +69,11 @@ src/
     park-photos.ts  park photos: gallery reads, uploads, reorder and remove
     supabase.ts   Supabase client, session encrypted with a SecureStore key
     database.types.ts  generated; refresh with `npm run db:types` after migrations,
-                       then put back `| null` on search_people's follow_status, home_metro_name and home_park_name (the generator drops it)
+                       then put back the `| null`s the generator drops: search_people's follow_status,
+                       home_metro_name and home_park_name; avatar_path on my_blocked_accounts and
+                       my_follow_requests; my_invites' used_at and used_by_username; redeem_my_invite's return
+    posts.ts      feeds, post detail, profile Tagged/Filmed tabs, regulars, tagging and post edits
+    post-draft.tsx  the New post flow's shared draft (media, park, per-slide tags, caption)
     env.ts        public EXPO_PUBLIC_ config
     sentry.ts     crash reporting (off until EXPO_PUBLIC_SENTRY_DSN is set)
   theme/          design system tokens and the <Text> component

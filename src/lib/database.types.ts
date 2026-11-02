@@ -1441,14 +1441,107 @@ export type Database = {
       }
     }
     Functions: {
+      before_user_created: { Args: { event: Json }; Returns: Json }
       cancel_invite: { Args: { invite: string }; Returns: undefined }
+      confirm_age: { Args: never; Returns: undefined }
       create_invite: {
         Args: never
-        Returns: { code: string; expires_at: string; id: string }[]
+        Returns: {
+          code: string
+          expires_at: string
+          id: string
+        }[]
+      }
+      feed_following: {
+        Args: { before_at?: string; before_id?: string; max_results?: number }
+        Returns: {
+          anonymized: boolean
+          author_id: string
+          caption: string | null
+          created_at: string
+          edited_at: string | null
+          id: string
+          metro_area_id: string
+          park_id: string | null
+          published_at: string | null
+          slide_count: number
+          status: Database["public"]["Enums"]["post_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      feed_nearby: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          metro?: string
+        }
+        Returns: {
+          anonymized: boolean
+          author_id: string
+          caption: string | null
+          created_at: string
+          edited_at: string | null
+          id: string
+          metro_area_id: string
+          park_id: string | null
+          published_at: string | null
+          slide_count: number
+          status: Database["public"]["Enums"]["post_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      filmed_posts: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          person: string
+        }
+        Returns: {
+          anonymized: boolean
+          author_id: string
+          caption: string | null
+          created_at: string
+          edited_at: string | null
+          id: string
+          metro_area_id: string
+          park_id: string | null
+          published_at: string | null
+          slide_count: number
+          status: Database["public"]["Enums"]["post_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       invite_preview: {
         Args: { code: string }
-        Returns: { inviter_username: string }[]
+        Returns: {
+          inviter_username: string
+        }[]
+      }
+      my_account: {
+        Args: never
+        Returns: {
+          age_confirmed_at: string
+          banned_at: string
+          invites_remaining: number
+          suspended_until: string
+        }[]
       }
       my_blocked_accounts: {
         Args: never
@@ -1483,20 +1576,46 @@ export type Database = {
           used_by_username: string | null
         }[]
       }
-      redeem_my_invite: { Args: never; Returns: string | null }
-      confirm_age: { Args: never; Returns: undefined }
-      my_account: {
-        Args: never
-        Returns: {
-          age_confirmed_at: string
-          banned_at: string
-          invites_remaining: number
-          suspended_until: string
-        }[]
-      }
       my_park_role: {
         Args: { park: string }
         Returns: Database["public"]["Enums"]["role_name"]
+      }
+      obstacle_posts: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          obstacle: string
+        }
+        Returns: {
+          anonymized: boolean
+          author_id: string
+          caption: string | null
+          created_at: string
+          edited_at: string | null
+          id: string
+          metro_area_id: string
+          park_id: string | null
+          published_at: string | null
+          slide_count: number
+          status: Database["public"]["Enums"]["post_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      park_regulars_list: {
+        Args: { max_results?: number; park: string }
+        Returns: {
+          avatar_path: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          id: string
+          last_active_at: string
+          username: string
+        }[]
       }
       parks_near: {
         Args: { lat: number; lng: number; max_results?: number }
@@ -1514,6 +1633,8 @@ export type Database = {
           status: Database["public"]["Enums"]["park_status"]
         }[]
       }
+      redeem_my_invite: { Args: never; Returns: string | null }
+      remove_my_filmer_credit: { Args: { slide: string }; Returns: undefined }
       reorder_park_photos: {
         Args: { park: string; photo_ids: string[] }
         Returns: undefined
@@ -1545,6 +1666,43 @@ export type Database = {
           is_private: boolean
           username: string
         }[]
+      }
+      set_slide_tags: {
+        Args: {
+          filmer?: string
+          obstacle?: string
+          obstacle_kind?: Database["public"]["Enums"]["obstacle_type"]
+          people?: string[]
+          slide: string
+        }
+        Returns: undefined
+      }
+      tagged_posts: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          person: string
+        }
+        Returns: {
+          anonymized: boolean
+          author_id: string
+          caption: string | null
+          created_at: string
+          edited_at: string | null
+          id: string
+          metro_area_id: string
+          park_id: string | null
+          published_at: string | null
+          slide_count: number
+          status: Database["public"]["Enums"]["post_status"]
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       username_available: { Args: { name: string }; Returns: boolean }
     }

@@ -91,6 +91,21 @@ export const keys = {
   blocked: (userId: string) => ['blocked', userId] as const,
   /** "Joined with your invite" notices. */
   inviteNotices: (userId: string) => ['notices', 'invite-used', userId] as const,
+  /** Home feed, people you follow. Every feed key starts with 'feed'. */
+  feedFollowing: (userId: string) => ['feed', 'following', userId] as const,
+  /** Home feed, near you (a metro area, minus people you follow). */
+  feedNearby: (userId: string, metroId: string) => ['feed', 'nearby', userId, metroId] as const,
+  /** A park's posts. Post lists start with 'posts', so one invalidation covers them. */
+  parkPosts: (parkId: string) => ['posts', 'park', parkId] as const,
+  obstaclePosts: (obstacleId: string) => ['posts', 'obstacle', obstacleId] as const,
+  taggedPosts: (userId: string) => ['posts', 'tagged', userId] as const,
+  filmedPosts: (userId: string) => ['posts', 'filmed', userId] as const,
+  /** A park's regulars list. */
+  parkRegulars: (parkId: string) => ['regulars', parkId] as const,
+  /** Obstacles you can tag at a park (includes your own pending suggestions). */
+  taggableObstacles: (parkId: string, userId: string) => ['obstacles', 'taggable', parkId, userId] as const,
+  /** One obstacle, for its feed page. */
+  obstacle: (id: string) => ['obstacle', id] as const,
 };
 
 let started = false;

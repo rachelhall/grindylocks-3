@@ -22,6 +22,7 @@ import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { formatDuration, videoThumbnailUrl } from '@/lib/media';
 import { useParksByIds, useSavedParks } from '@/lib/parks';
+import { toGridPost, useFilmedPosts, useTaggedPosts } from '@/lib/posts';
 import {
   type GridPost,
   type Profile,
@@ -291,7 +292,11 @@ const GRID_GAP = 3;
  * Three columns, each post at its first slide's stored aspect ratio (never
  * cropped), placed in whichever column is shortest so far.
  */
-function MasonryGrid({ posts, width }: { posts: GridPost[]; width: number }) {
+/**
+ * Three-column masonry grid of posts, each tile at its first slide's shape
+ * (never cropped to a square). Used by profiles, park pages and obstacle feeds.
+ */
+export function MasonryGrid({ posts, width }: { posts: GridPost[]; width: number }) {
   const columnWidth = (width - GRID_GAP * 2) / 3;
   const columns = useMemo(() => {
     const cols: { post: GridPost; height: number }[][] = [[], [], []];
@@ -352,6 +357,7 @@ function GridTile({ post, width, height }: { post: GridPost; width: number; heig
         </View>
       )}
       {tag ? <MediaTag label={tag} style={styles.tileTag} /> : null}
+      {post.byline ? <MediaTag label={post.byline} style={styles.tileByline} /> : null}
     </Pressable>
   );
 }
@@ -402,6 +408,42 @@ function SavedParks({ userId }: { userId: string }) {
   );
 }
 
+/** A tab of posts in a masonry grid, with loading, error and empty states. */
+function GridTab({
+  query,
+  posts,
+  width,
+  empty,
+}: {
+  query: { isPending: boolean; isError: boolean; isFetchingNextPage: boolean; refetch: () => unknown };
+  posts: GridPost[];
+  width: number;
+  empty: string;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  if (query.isPending) {
+    return <ActivityIndicator style={styles.loading} color={c.text} accessibilityLabel={t('common.loading')} />;
+  }
+  if (query.isError && posts.length === 0) {
+    return (
+      <View style={styles.empty}>
+        <Text variant="body" color="statusClosed">
+          {t('errors.network')}
+        </Text>
+        <Button label={t('common.retry')} variant="secondary" onPress={() => void query.refetch()} />
+      </View>
+    );
+  }
+  if (posts.length === 0) return <EmptyTab text={empty} />;
+  return (
+    <>
+      <MasonryGrid posts={posts} width={width} />
+      {query.isFetchingNextPage ? <ActivityIndicator style={styles.more} color={c.text} /> : null}
+    </>
+  );
+}
+
 function EmptyTab({ text, icon }: { text: string; icon?: 'lock' }) {
   const c = useColors();
   return (
@@ -437,8 +479,16 @@ export function ProfileView({ username }: { username?: string }) {
   const canSeePosts = Boolean(
     profile && (isMe || !profile.isPrivate || profile.followStatus === 'accepted'),
   );
-  const posts = useProfilePosts(profile?.id, canSeePosts);
   const [tab, setTab] = useState<Tab>('posts');
+  const posts = useProfilePosts(profile?.id, canSeePosts);
+  // Tagged and Filmed load when their tab is first opened.
+  const [opened, setOpened] = useState<Set<Tab>>(() => new Set(['posts']));
+  const tagged = useTaggedPosts(profile?.id, canSeePosts && opened.has('tagged'));
+  const filmed = useFilmedPosts(profile?.id, canSeePosts && opened.has('filmed'));
+  function openTab(next: Tab) {
+    setTab(next);
+    setOpened((prev) => (prev.has(next) ? prev : new Set([...prev, next])));
+  }
   const tabs: Tab[] = isMe ? ['posts', 'tagged', 'filmed', 'saved'] : ['posts', 'tagged', 'filmed'];
 
   // Your own data is checked again whenever the screen comes back into view.
@@ -458,17 +508,34 @@ export function ProfileView({ username }: { username?: string }) {
   const [refreshing, setRefreshing] = useState(false);
   async function refresh() {
     setRefreshing(true);
-    await Promise.all([query.refetch(), canSeePosts ? posts.refetch() : null]);
+    await Promise.all([
+      query.refetch(),
+      canSeePosts ? posts.refetch() : null,
+      canSeePosts && opened.has('tagged') ? tagged.refetch() : null,
+      canSeePosts && opened.has('filmed') ? filmed.refetch() : null,
+    ]);
     setRefreshing(false);
   }
 
   function onScroll(e: NativeSyntheticEvent<NativeScrollEvent>) {
     const { layoutMeasurement, contentOffset, contentSize } = e.nativeEvent;
     const nearEnd = layoutMeasurement.height + contentOffset.y >= contentSize.height - 600;
-    if (nearEnd && tab === 'posts' && posts.hasNextPage && !posts.isFetchingNextPage) void posts.fetchNextPage();
+    if (!nearEnd) return;
+    const active = tab === 'posts' ? posts : tab === 'tagged' ? tagged : tab === 'filmed' ? filmed : null;
+    if (active?.hasNextPage && !active.isFetchingNextPage) void active.fetchNextPage();
   }
 
   const gridPosts = useMemo(() => posts.data?.pages.flat() ?? [], [posts.data]);
+  const taggedPosts = useMemo(() => (tagged.data?.pages.flat() ?? []).map(toGridPost), [tagged.data]);
+  // Filmed tiles name the poster, since the filmer isn't the one who posted.
+  const filmedPosts = useMemo(
+    () =>
+      (filmed.data?.pages.flat() ?? []).map((p) => ({
+        ...toGridPost(p),
+        byline: p.author?.username ?? null,
+      })),
+    [filmed.data],
+  );
 
   const { sheet, show } = useActionSheet();
   const block = useBlock(myId);
@@ -549,7 +616,7 @@ export function ProfileView({ username }: { username?: string }) {
           <EmptyTab icon="lock" text={t('profile.privateBody')} />
         ) : (
           <>
-            <ProfileTabs tabs={tabs} current={tab} onChange={setTab} />
+            <ProfileTabs tabs={tabs} current={tab} onChange={openTab} />
             {tab === 'posts' ? (
               posts.isPending ? (
                 <ActivityIndicator style={styles.loading} color={c.text} accessibilityLabel={t('common.loading')} />
@@ -569,9 +636,19 @@ export function ProfileView({ username }: { username?: string }) {
                 </>
               )
             ) : tab === 'tagged' ? (
-              <EmptyTab text={isMe ? t('profile.emptyTaggedOwn') : t('profile.emptyTagged', { username: name })} />
+              <GridTab
+                query={tagged}
+                posts={taggedPosts}
+                width={width}
+                empty={isMe ? t('profile.emptyTaggedOwn') : t('profile.emptyTagged', { username: name })}
+              />
             ) : tab === 'filmed' ? (
-              <EmptyTab text={isMe ? t('profile.emptyFilmedOwn') : t('profile.emptyFilmed', { username: name })} />
+              <GridTab
+                query={filmed}
+                posts={filmedPosts}
+                width={width}
+                empty={isMe ? t('profile.emptyFilmedOwn') : t('profile.emptyFilmed', { username: name })}
+              />
             ) : myId ? (
               <SavedParks userId={myId} />
             ) : null}
@@ -633,6 +710,7 @@ const styles = StyleSheet.create({
   column: { gap: GRID_GAP },
   tileEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   tileTag: { left: 6, bottom: 6 },
+  tileByline: { left: 6, top: 6, maxWidth: '85%' },
   empty: { alignItems: 'center', gap: space[3], paddingHorizontal: space[6], paddingTop: space[8] },
   center: { textAlign: 'center' },
   savedList: { gap: 6, padding: space[4] },
