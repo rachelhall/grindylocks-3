@@ -696,7 +696,15 @@
     "replyingTo": "Svarer @{{username}}",
     "replyingToThread": "Svarer i denne tråd",
     "cancelReply": "Annullér svar",
-    "failed": "Din kommentar kunne ikke sendes"
+    "failed": "Din kommentar kunne ikke sendes",
+    "mentionTitle": "Nævn",
+    "mentionLabel": "Personer du kan nævne",
+    "mentionPosted": "Lagde det op",
+    "mentionFilmed": "Filmede dette opslag",
+    "mentionTagged": "Tagget i dette opslag",
+    "mentionCommented": "Har kommenteret her",
+    "mentionFollowing": "Du følger",
+    "mentionRegular": "Fast gæst i {{park}}"
   },
   "clip": {
     "play": "Afspil klip",

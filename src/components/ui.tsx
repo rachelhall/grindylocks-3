@@ -67,6 +67,14 @@ const icons = {
   people: { ios: 'person.2', android: 'group' },
   copy: { ios: 'doc.on.doc', android: 'content_copy' },
   chevronLeft: { ios: 'chevron.left', android: 'chevron_left' },
+  // Notification type badges (Nov 2 mockup).
+  badgeComment: { ios: 'bubble.left.fill', android: 'chat_bubble' },
+  badgeReply: { ios: 'arrowshape.turn.up.left.fill', android: 'reply' },
+  badgeMention: { ios: 'at', android: 'alternate_email' },
+  badgeTag: { ios: 'tag.fill', android: 'sell' },
+  badgeInvite: { ios: 'envelope.fill', android: 'mail' },
+  badgeWave: { ios: 'hand.wave.fill', android: 'waving_hand' },
+  badgePlane: { ios: 'airplane.arrival', android: 'flight_land' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

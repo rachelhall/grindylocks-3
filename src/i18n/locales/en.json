@@ -696,7 +696,15 @@
     "replyingTo": "Replying to @{{username}}",
     "replyingToThread": "Replying in this thread",
     "cancelReply": "Cancel reply",
-    "failed": "Couldn't post your comment"
+    "failed": "Couldn't post your comment",
+    "mentionTitle": "Mention",
+    "mentionLabel": "People to mention",
+    "mentionPosted": "Posted this",
+    "mentionFilmed": "Filmed this post",
+    "mentionTagged": "Tagged in this post",
+    "mentionCommented": "Commented here",
+    "mentionFollowing": "Following",
+    "mentionRegular": "Regular at {{park}}"
   },
   "clip": {
     "play": "Play clip",

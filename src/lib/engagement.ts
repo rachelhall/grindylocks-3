@@ -14,6 +14,7 @@
  */
 import { type InfiniteData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
+import { photoUrls, videoThumbnailUrl } from './media';
 import type { Post } from './posts';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
@@ -221,6 +222,45 @@ export function useNotifications(userId: string | undefined) {
     },
     enabled: Boolean(userId),
     staleTime: fresh.mine,
+  });
+}
+
+/** A post's first slide, as a small square thumbnail on a notification row. */
+export type PostCover = { kind: 'photo' | 'video'; uri: string | null };
+
+/**
+ * First-slide thumbnails for the posts in a list of notifications. The
+ * posts read rules apply, so a post you can no longer see has no cover.
+ * Photo URLs are signed for an hour, so these follow `fresh.posts`.
+ */
+export function usePostCovers(postIds: string[]) {
+  const ids = [...new Set(postIds)].sort();
+  return useQuery({
+    queryKey: keys.postCovers(ids),
+    queryFn: async (): Promise<Record<string, PostCover>> => {
+      const { data, error } = await supabase
+        .from('post_slides')
+        .select('post_id, position, kind, upload_status, storage_path, stream_video_id')
+        .in('post_id', ids)
+        .order('position');
+      if (error) throw error;
+      const first = new Map<string, (typeof data)[number]>();
+      for (const s of data ?? []) if (!first.has(s.post_id)) first.set(s.post_id, s);
+      const paths = [...first.values()]
+        .filter((s) => s.kind === 'photo' && s.upload_status === 'ready' && s.storage_path)
+        .map((s) => s.storage_path!);
+      const urls = await photoUrls(paths);
+      const out: Record<string, PostCover> = {};
+      for (const [postId, s] of first) {
+        out[postId] =
+          s.kind === 'photo'
+            ? { kind: 'photo', uri: s.storage_path ? (urls[s.storage_path] ?? null) : null }
+            : { kind: 'video', uri: s.stream_video_id ? videoThumbnailUrl(s.stream_video_id, 120) : null };
+      }
+      return out;
+    },
+    enabled: ids.length > 0,
+    staleTime: fresh.posts,
   });
 }
 

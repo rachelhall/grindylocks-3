@@ -91,12 +91,16 @@ export const keys = {
   myInvites: (userId: string) => ['invites', userId] as const,
   /** People waiting for you to accept their follow request. */
   followRequests: (userId: string) => ['follow-requests', userId] as const,
+  /** The people you follow (accepted), for the person picker and @mention suggestions. */
+  following: (userId: string) => ['following', userId] as const,
   /** The people you blocked (Settings › Blocked accounts). */
   blocked: (userId: string) => ['blocked', userId] as const,
   /** A post's comments, oldest first. */
   comments: (postId: string) => ['comments', postId] as const,
   /** The Notifications list (M4b). */
   notifications: (userId: string) => ['notifications', userId] as const,
+  /** First-slide thumbnails for notification rows. Starts with 'posts' so post invalidations cover it. */
+  postCovers: (postIds: string[]) => ['posts', 'covers', ...postIds] as const,
   /** Whether the bell shows its dot. */
   notificationsUnread: (userId: string) => ['notifications-unread', userId] as const,
   /** Your push notification switches (Settings › Push notifications). */

@@ -1,3 +1,4 @@
+import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -6,20 +7,57 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
-import { BackButton, Button } from '@/components/ui';
+import { BackButton, Button, Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { type AppNotification, useMarkNotificationsSeen, useNotifications } from '@/lib/engagement';
-import { useAnswerFollowRequest, useFollowRequests } from '@/lib/social';
-import { fontFamily, space, stroke, Text, useColors } from '@/theme';
+import {
+  type AppNotification,
+  type NotificationKind,
+  type PostCover,
+  useMarkNotificationsSeen,
+  useNotifications,
+  usePostCovers,
+} from '@/lib/engagement';
+import { type FollowRequest, useAnswerFollowRequest, useFollowRequests } from '@/lib/social';
+import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
 /**
- * Opened from the bell on the Home feed (Nov 1), not a tab. Follow requests
- * (for private accounts) sit at the top with Accept and Decline. Below them,
- * newest first: comments on your posts (grouped by post), replies, mentions,
- * tags, filmer credit, "joined with your invite" and "someone new" in your
- * city (M4b). Opening it clears the bell's dot; what arrived since the last
- * visit is marked New for this visit.
+ * Opened from the bell on the Home feed (Nov 1), not a tab. Laid out from
+ * the "Notifications" mockup (Built from the brief, Nov 2):
+ *
+ * - Follow requests (private accounts) in a box at the top, Accept in pink
+ *   and Decline outlined.
+ * - What arrived since the last visit under New, on the pale pink; the rest
+ *   under Earlier. Opening the screen clears the bell's dot.
+ * - Each avatar carries a small ink type badge, so the list scans without
+ *   relying on color. Post notifications show the post's first slide on the
+ *   right and open the post; people notifications (invite used, says hi,
+ *   visiting) have no thumbnail and open the profile.
  */
+
+const BADGES: Record<NotificationKind, IconName> = {
+  comment: 'badgeComment',
+  reply: 'badgeReply',
+  mention: 'badgeMention',
+  tag: 'badgeTag',
+  filmer_credit: 'video',
+  invite_used: 'badgeInvite',
+  someone_new: 'badgeWave',
+  visiting: 'badgePlane',
+};
+
+const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'tag', 'filmer_credit']);
+
+/** Splits a sentence so the usernames in it can be set in bold. */
+function withBoldNames(text: string, names: string[]): { text: string; bold: boolean }[] {
+  const wanted = names.filter(Boolean).sort((a, b) => b.length - a.length);
+  if (wanted.length === 0) return [{ text, bold: false }];
+  const escaped = wanted.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return text
+    .split(new RegExp(`(@?(?:${escaped.join('|')}))`, 'g'))
+    .filter((part) => part.length > 0)
+    .map((part) => ({ text: part, bold: wanted.includes(part.replace(/^@/, '')) }));
+}
+
 export default function Notifications() {
   const { t, i18n } = useTranslation();
   const c = useColors();
@@ -40,18 +78,18 @@ export default function Notifications() {
     mark();
   }, [loaded, mark]);
 
-  const openProfile = (username: string) => router.push({ pathname: '/profile/[username]', params: { username } });
-  const reply = (followerId: string, accept: boolean) =>
-    answer.mutate({ followerId, accept }, { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) });
-
   const pending = requests.data ?? [];
   const items = list.data ?? [];
+  const covers = usePostCovers(items.filter((n) => POST_KINDS.has(n.kind) && n.postId).map((n) => n.postId!));
   const fresh = items.filter((n) => n.unread);
   const older = items.filter((n) => !n.unread);
   const empty = !requests.isPending && !list.isPending && pending.length === 0 && items.length === 0;
 
+  const openProfile = (username: string) => router.push({ pathname: '/profile/[username]', params: { username } });
+  const reply = (followerId: string, accept: boolean) =>
+    answer.mutate({ followerId, accept }, { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) });
+
   function open(n: AppNotification) {
-    const first = n.people[0]?.username;
     switch (n.kind) {
       case 'comment':
       case 'reply':
@@ -62,8 +100,10 @@ export default function Notifications() {
       case 'filmer_credit':
         if (n.postId) router.push({ pathname: '/post/[id]', params: { id: n.postId } });
         return;
-      default:
+      default: {
+        const first = n.people[0]?.username;
         if (first) openProfile(first);
+      }
     }
   }
 
@@ -96,51 +136,99 @@ export default function Notifications() {
     }
   }
 
-  function Row({ n, first }: { n: AppNotification; first: boolean }) {
+  function Row({ n }: { n: AppNotification }) {
     const text = describe(n);
     const person = n.people[0];
+    const when = timeAgo(n.createdAt, t, i18n.language);
+    const isPost = POST_KINDS.has(n.kind);
+    const cover: PostCover | undefined = isPost && n.postId ? covers.data?.[n.postId] : undefined;
+    // On the pale pink the text is always ink, even in dark mode.
+    const ink = n.unread ? c.onAccentSubtle : c.text;
+    const secondary = n.unread ? c.onAccentSubtle : c.textSecondary;
+    // The badge is ink on the pale pink; elsewhere it follows the text color.
+    const badgeFill = n.unread ? brand.ink : c.text;
+    const badgeIcon = n.unread ? brand.paper : c.surface;
     return (
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={`${n.unread ? t('notifications.unreadLabel', { text }) : text}, ${timeAgo(n.createdAt, t, i18n.language)}`}
+        accessibilityLabel={`${n.unread ? t('notifications.unreadLabel', { text }) : text}, ${when}`}
         onPress={() => open(n)}
-        style={({ pressed }) => [
-          styles.row,
-          styles.rowLine,
-          {
-            backgroundColor: n.unread ? c.accentSubtle : c.surfaceRaised,
-            borderColor: c.borderSubtle,
-            borderTopWidth: first ? stroke.hairline : 0,
-          },
-          pressed && styles.pressed,
-        ]}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       >
-        <View style={styles.avatars}>
+        <View style={styles.avatar}>
           <Avatar path={person?.avatarPath ?? null} username={person?.username ?? '?'} size={40} />
-          {n.kind === 'comment' && n.people[1] ? (
-            <View style={[styles.second, { borderColor: n.unread ? c.accentSubtle : c.surfaceRaised }]}>
-              <Avatar path={n.people[1].avatarPath} username={n.people[1].username ?? '?'} size={24} />
-            </View>
-          ) : null}
+          <View style={[styles.badge, { backgroundColor: badgeFill }]}>
+            <Icon name={BADGES[n.kind]} color={badgeIcon} size={12} />
+          </View>
         </View>
         <View style={styles.rowText}>
-          <Text variant="bodySm" style={n.unread ? { color: c.onAccentSubtle, fontFamily: fontFamily.sansSemiBold } : undefined}>
-            {text}
+          <Text variant="bodySm" style={{ color: ink }}>
+            {withBoldNames(
+              text,
+              n.people.map((p) => p.username ?? ''),
+            ).map((part, i) =>
+              part.bold ? (
+                <Text key={i} variant="bodySm" style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
+                  {part.text}
+                </Text>
+              ) : (
+                part.text
+              ),
+            )}
           </Text>
           {n.excerpt ? (
-            <Text
-              variant="bodySm"
-              numberOfLines={2}
-              style={{ color: n.unread ? c.onAccentSubtleSecondary : c.textSecondary }}
-            >
+            <Text variant="bodySm" numberOfLines={2} style={{ color: secondary }}>
               “{n.excerpt}”
             </Text>
           ) : null}
-          <Text variant="caption" style={{ color: n.unread ? c.onAccentSubtleSecondary : c.textMuted }}>
-            {timeAgo(n.createdAt, t, i18n.language)}
+          <Text variant="caption" style={{ color: secondary }}>
+            {when}
           </Text>
         </View>
+        {isPost && n.postId ? (
+          <View style={[styles.thumb, { backgroundColor: c.surfaceSunk }]}>
+            {cover?.uri ? (
+              <Image source={{ uri: cover.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+            ) : null}
+          </View>
+        ) : null}
       </Pressable>
+    );
+  }
+
+  function RequestRow({ r, last }: { r: FollowRequest; last: boolean }) {
+    const disciplines = (r.disciplines ?? []).map((d) => t(`disciplines.${d}`)).join(' · ');
+    return (
+      <View style={[styles.request, last && styles.requestLast]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={r.username}
+          onPress={() => openProfile(r.username)}
+          style={styles.person}
+        >
+          <Avatar path={r.avatar_path} username={r.username} size={40} />
+          <View style={styles.rowText}>
+            <Text variant="body" numberOfLines={1} style={{ fontFamily: fontFamily.sansSemiBold }}>
+              {r.username}
+            </Text>
+            <Text variant="caption" color="textSecondary" numberOfLines={1}>
+              {disciplines || t('follow.wantsToFollow')}
+            </Text>
+          </View>
+        </Pressable>
+        <Button
+          label={t('follow.accept')}
+          onPress={() => reply(r.follower_id, true)}
+          palette={{ fill: c.accent, text: c.onAccent, border: c.border }}
+          style={styles.small}
+        />
+        <Button
+          label={t('follow.decline')}
+          variant="secondary"
+          onPress={() => reply(r.follower_id, false)}
+          style={styles.small}
+        />
+      </View>
     );
   }
 
@@ -148,7 +236,7 @@ export default function Notifications() {
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
       <View style={styles.header}>
         <BackButton />
-        <Text variant="display" accessibilityRole="header" style={styles.title}>
+        <Text variant="title" accessibilityRole="header" style={styles.title}>
           {t('notifications.title')}
         </Text>
       </View>
@@ -173,55 +261,27 @@ export default function Notifications() {
         ) : null}
 
         {pending.length > 0 ? (
-          <View>
-            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.section}>
-              {t('notifications.requests')}
+          <View style={[styles.requests, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.requestsTitle}>
+              {`${t('notifications.requests')} · ${pending.length}`}
             </Text>
             {pending.map((r, i) => (
-              <View
-                key={r.follower_id}
-                style={[
-                  styles.row,
-                  { backgroundColor: c.surfaceRaised, borderColor: c.borderSubtle, borderTopWidth: i === 0 ? stroke.hairline : 0 },
-                ]}
-              >
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={r.username}
-                  onPress={() => openProfile(r.username)}
-                  style={styles.person}
-                >
-                  <Avatar path={r.avatar_path} username={r.username} size={40} />
-                  <View style={styles.rowText}>
-                    <Text variant="body" numberOfLines={1}>
-                      {r.username}
-                    </Text>
-                    <Text variant="bodySm" color="textSecondary">
-                      {t('follow.wantsToFollow')}
-                    </Text>
-                  </View>
-                </Pressable>
-                <View style={styles.actions}>
-                  <Button label={t('follow.accept')} onPress={() => reply(r.follower_id, true)} style={styles.small} />
-                  <Button
-                    label={t('follow.decline')}
-                    variant="secondary"
-                    onPress={() => reply(r.follower_id, false)}
-                    style={styles.small}
-                  />
-                </View>
-              </View>
+              <RequestRow key={r.follower_id} r={r} last={i === pending.length - 1} />
             ))}
           </View>
         ) : null}
 
         {fresh.length > 0 ? (
-          <View>
-            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.section}>
+          <View style={[styles.newBlock, { backgroundColor: c.accentSubtle, borderColor: c.border }]}>
+            <Text
+              variant="label"
+              accessibilityRole="header"
+              style={[styles.section, styles.newTitle, { color: c.onAccentSubtle }]}
+            >
               {t('notifications.new')}
             </Text>
-            {fresh.map((n, i) => (
-              <Row key={n.id} n={n} first={i === 0} />
+            {fresh.map((n) => (
+              <Row key={n.id} n={n} />
             ))}
           </View>
         ) : null}
@@ -231,8 +291,8 @@ export default function Notifications() {
             <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.section}>
               {t('notifications.older')}
             </Text>
-            {older.map((n, i) => (
-              <Row key={n.id} n={n} first={i === 0} />
+            {older.map((n) => (
+              <Row key={n.id} n={n} />
             ))}
           </View>
         ) : null}
@@ -249,18 +309,23 @@ export default function Notifications() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
-  header: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[3], paddingTop: space[3] },
-  title: { fontSize: 28, lineHeight: 30 },
+  header: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[2] },
+  title: { flex: 1 },
   content: { paddingBottom: space[12] },
-  pad: { paddingHorizontal: 20, paddingTop: space[6] },
-  section: { paddingHorizontal: 20, paddingTop: space[6], paddingBottom: space[2] },
-  row: { paddingHorizontal: 20, paddingVertical: 10, borderBottomWidth: stroke.hairline, gap: space[2] },
-  rowLine: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3], minHeight: 56 },
-  avatars: { width: 44, height: 44 },
-  second: { position: 'absolute', right: -2, bottom: -2, borderWidth: 2 },
-  person: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: 48 },
+  pad: { paddingHorizontal: space[4], paddingTop: space[6] },
+  requests: { marginHorizontal: space[4], marginTop: space[2], borderWidth: stroke.rule },
+  requestsTitle: { paddingHorizontal: space[3], paddingTop: 10, paddingBottom: space[1] },
+  request: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: space[3], paddingVertical: space[2] },
+  requestLast: { paddingBottom: space[3] },
+  person: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 },
+  small: { minHeight: 48, height: 48, paddingHorizontal: space[3], borderWidth: stroke.rule },
+  newBlock: { marginTop: space[4], borderTopWidth: stroke.rule, borderBottomWidth: stroke.rule, paddingBottom: 2 },
+  newTitle: { paddingTop: space[3] },
+  section: { paddingHorizontal: space[4], paddingTop: 14, paddingBottom: 2 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3], paddingHorizontal: space[4], paddingVertical: space[3], minHeight: 56 },
+  avatar: { width: 40, height: 40 },
+  badge: { position: 'absolute', right: -4, bottom: -4, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
   rowText: { flex: 1, minWidth: 0, gap: 2 },
-  actions: { flexDirection: 'row', gap: space[2] },
-  small: { flex: 1, minHeight: 48 },
+  thumb: { width: 44, height: 44, overflow: 'hidden' },
   pressed: { opacity: 0.75 },
 });

@@ -22,7 +22,17 @@ import {
   useComments,
   useDeleteComment,
 } from '@/lib/engagement';
+import {
+  activeMention,
+  buildCandidates,
+  insertMention,
+  type MentionCandidate,
+  type MentionReason,
+  useMentionSearch,
+} from '@/lib/mentions';
+import { useParkRegulars, usePost } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
+import { useBlockedAccounts, useFollowing } from '@/lib/social';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 const COLLAPSE_AFTER = 2;
@@ -281,6 +291,97 @@ export function CommentList({
   );
 }
 
+/** A username with the letters typed so far underlined. */
+function MatchedName({ username, typed, color }: { username: string; typed: number; color: string }) {
+  return (
+    <Text variant="body" numberOfLines={1} style={{ color, fontFamily: fontFamily.sansSemiBold }}>
+      {typed > 0 ? (
+        <Text variant="body" style={[styles.typed, { color, fontFamily: fontFamily.sansSemiBold }]}>
+          {username.slice(0, typed)}
+        </Text>
+      ) : null}
+      {username.slice(typed)}
+    </Text>
+  );
+}
+
+/**
+ * The list that opens above the composer when you type @ (Comment box
+ * mockup): people on the post, then people you follow, then regulars at
+ * the post's park. The first row is highlighted as the likely pick.
+ */
+function MentionList({
+  candidates,
+  typed,
+  parkName,
+  onPick,
+}: {
+  candidates: MentionCandidate[];
+  typed: number;
+  parkName: string | null;
+  onPick: (username: string) => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const reasonText = (reason: MentionReason) => {
+    switch (reason) {
+      case 'posted':
+        return t('comments.mentionPosted');
+      case 'filmed':
+        return t('comments.mentionFilmed');
+      case 'tagged':
+        return t('comments.mentionTagged');
+      case 'commented':
+        return t('comments.mentionCommented');
+      case 'following':
+        return t('comments.mentionFollowing');
+      case 'regular':
+        return parkName ? t('comments.mentionRegular', { park: parkName }) : null;
+      default:
+        return null;
+    }
+  };
+  return (
+    <View
+      accessibilityRole="list"
+      accessibilityLabel={t('comments.mentionLabel')}
+      style={[styles.mentions, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}
+    >
+      <Text variant="label" color="textSecondary" style={styles.mentionsTitle}>
+        {t('comments.mentionTitle')}
+      </Text>
+      {candidates.map((p, i) => {
+        const first = i === 0;
+        const reason = reasonText(p.reason);
+        const ink = first ? c.onAccentSubtle : c.text;
+        return (
+          <Pressable
+            key={p.id}
+            accessibilityRole="button"
+            accessibilityLabel={reason ? `${p.username}, ${reason}` : p.username}
+            onPress={() => onPick(p.username)}
+            style={({ pressed }) => [
+              styles.mentionRow,
+              first && { backgroundColor: c.accentSubtle },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Avatar path={p.avatarPath} username={p.username} size={32} />
+            <View style={styles.flex}>
+              <MatchedName username={p.username} typed={typed} color={ink} />
+              {reason ? (
+                <Text variant="caption" numberOfLines={1} style={{ color: first ? c.onAccentSubtle : c.textSecondary }}>
+                  {reason}
+                </Text>
+              ) : null}
+            </View>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 /** The bar at the bottom of post detail: a text box, "Replying to", and Post. */
 export function CommentComposer({
   postId,
@@ -301,7 +402,39 @@ export function CommentComposer({
   const c = useColors();
   const add = useAddComment(postId, userId);
   const [text, setText] = useState('');
+  const [cursor, setCursor] = useState(0);
   const ready = text.trim().length > 0 && !add.isPending;
+
+  // Typing @ opens the mention list. Everything it reads is already cached
+  // by post detail except who you follow and search matches.
+  const mention = activeMention(text, cursor);
+  const typing = mention !== null;
+  const post = usePost(postId);
+  const comments = useComments(postId);
+  const following = useFollowing(userId, typing);
+  const regulars = useParkRegulars(typing ? post.data?.park?.id : undefined);
+  const blocked = useBlockedAccounts(typing ? userId : undefined);
+  const search = useMentionSearch(mention?.query ?? '', typing);
+  const candidates = mention
+    ? buildCandidates({
+        query: mention.query,
+        me: userId,
+        post: post.data,
+        threads: comments.data ?? [],
+        following: following.data ?? [],
+        regulars: (regulars.data ?? []).map((r) => ({ id: r.id, username: r.username, avatarPath: r.avatar_path })),
+        others: (search.data ?? []).map((p) => ({ id: p.id, username: p.username, avatarPath: null })),
+        blockedIds: new Set((blocked.data ?? []).map((b) => b.id)),
+      })
+    : [];
+
+  function pick(username: string) {
+    if (!mention) return;
+    const next = insertMention(text, cursor, mention.start, username);
+    setText(next.text);
+    setCursor(next.cursor);
+    inputRef.current?.setSelection?.(next.cursor, next.cursor);
+  }
 
   function send() {
     if (!ready) return;
@@ -323,60 +456,71 @@ export function CommentComposer({
   }
 
   return (
-    <View style={[styles.composer, { backgroundColor: c.surfaceRaised, borderTopColor: c.border }]}>
-      {replyTo ? (
-        <View style={[styles.replying, { backgroundColor: c.accentSubtle }]}>
-          <Text variant="caption" style={[styles.flex, { color: c.onAccentSubtle }]} numberOfLines={1}>
-            {replyTo.username
-              ? t('comments.replyingTo', { username: replyTo.username })
-              : t('comments.replyingToThread')}
-          </Text>
+    <>
+      {candidates.length > 0 ? (
+        <MentionList
+          candidates={candidates}
+          typed={mention?.query.length ?? 0}
+          parkName={post.data?.park?.name ?? null}
+          onPick={pick}
+        />
+      ) : null}
+      <View style={[styles.composer, { backgroundColor: c.surfaceRaised, borderTopColor: c.border }]}>
+        {replyTo ? (
+          <View style={[styles.replying, { backgroundColor: c.accentSubtle }]}>
+            <Text variant="caption" style={[styles.flex, { color: c.onAccentSubtle }]} numberOfLines={1}>
+              {replyTo.username
+                ? t('comments.replyingTo', { username: replyTo.username })
+                : t('comments.replyingToThread')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('comments.cancelReply')}
+              onPress={onClearReply}
+              hitSlop={10}
+            >
+              <Icon name="close" color={c.onAccentSubtle} size={16} />
+            </Pressable>
+          </View>
+        ) : null}
+        <View style={styles.inputRow}>
+          <TextInput
+            ref={inputRef}
+            value={text}
+            onChangeText={setText}
+            onSelectionChange={(e) => setCursor(e.nativeEvent.selection.end)}
+            placeholder={t('comments.placeholder')}
+            placeholderTextColor={c.textMuted}
+            accessibilityLabel={t('comments.placeholder')}
+            selectionColor={c.accent}
+            cursorColor={c.text}
+            multiline
+            maxLength={MAX_COMMENT}
+            style={[styles.input, { color: c.text, borderColor: c.border, backgroundColor: c.surface }]}
+          />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={t('comments.cancelReply')}
-            onPress={onClearReply}
-            hitSlop={10}
+            accessibilityLabel={t('comments.post')}
+            accessibilityState={{ disabled: !ready }}
+            disabled={!ready}
+            onPress={send}
+            style={({ pressed }) => [
+              styles.send,
+              { backgroundColor: ready ? c.accent : c.surfaceSunk, borderColor: ready ? c.onAccent : c.borderSubtle },
+              pressed && styles.pressed,
+            ]}
           >
-            <Icon name="close" color={c.onAccentSubtle} size={16} />
+            {add.isPending ? (
+              <ActivityIndicator color={c.onAccent} />
+            ) : (
+              <Text variant="label" style={{ color: ready ? c.onAccent : c.textMuted }}>
+                {t('comments.post')}
+              </Text>
+            )}
           </Pressable>
         </View>
-      ) : null}
-      <View style={styles.inputRow}>
-        <TextInput
-          ref={inputRef}
-          value={text}
-          onChangeText={setText}
-          placeholder={t('comments.placeholder')}
-          placeholderTextColor={c.textMuted}
-          accessibilityLabel={t('comments.placeholder')}
-          selectionColor={c.accent}
-          cursorColor={c.text}
-          multiline
-          maxLength={MAX_COMMENT}
-          style={[styles.input, { color: c.text, borderColor: c.border, backgroundColor: c.surface }]}
-        />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('comments.post')}
-          accessibilityState={{ disabled: !ready }}
-          disabled={!ready}
-          onPress={send}
-          style={({ pressed }) => [
-            styles.send,
-            { backgroundColor: ready ? c.accent : c.surfaceSunk, borderColor: ready ? c.onAccent : c.borderSubtle },
-            pressed && styles.pressed,
-          ]}
-        >
-          {add.isPending ? (
-            <ActivityIndicator color={c.onAccent} />
-          ) : (
-            <Text variant="label" style={{ color: ready ? c.onAccent : c.textMuted }}>
-              {t('comments.post')}
-            </Text>
-          )}
-        </Pressable>
       </View>
-    </View>
+    </>
   );
 }
 
@@ -401,14 +545,21 @@ const styles = StyleSheet.create({
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space[2] },
   input: {
     flex: 1,
-    minHeight: size.tapMin,
-    maxHeight: 120,
+    // Two lines tall to start (Nov 2 mockup); grows to about five.
+    minHeight: 68,
+    maxHeight: 136,
     borderWidth: stroke.rule,
     paddingHorizontal: space[3],
-    paddingTop: 12,
-    paddingBottom: 12,
+    paddingTop: 10,
+    paddingBottom: 10,
     fontFamily: fontFamily.sans,
     fontSize: 16,
+    lineHeight: 22,
+    textAlignVertical: 'top',
   },
+  mentions: { marginHorizontal: space[4], borderWidth: stroke.rule, borderBottomWidth: 0 },
+  mentionsTitle: { paddingHorizontal: space[3], paddingTop: space[2], paddingBottom: 2 },
+  mentionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52, paddingHorizontal: space[3] },
+  typed: { textDecorationLine: 'underline' },
   send: { minWidth: 64, height: size.tapMin, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space[3] },
 });

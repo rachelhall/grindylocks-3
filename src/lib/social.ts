@@ -154,6 +154,7 @@ export function useFollow(viewerId: string | undefined, target: Profile | null |
       void client.invalidateQueries({ queryKey: keys.profiles() });
       void client.invalidateQueries({ queryKey: ['search'] });
       void client.invalidateQueries({ queryKey: ['posts', 'by'] });
+      void client.invalidateQueries({ queryKey: keys.following(viewerId ?? '') });
     },
   });
 }
@@ -171,6 +172,48 @@ export function useFollowRequests(userId: string | undefined) {
     },
     enabled: Boolean(userId),
     staleTime: fresh.mine,
+  });
+}
+
+/** Someone you follow, for the person picker and @mention suggestions. */
+export type FollowedPerson = {
+  id: string;
+  username: string;
+  avatarPath: string | null;
+  disciplines: Database['public']['Enums']['discipline'][];
+};
+
+/**
+ * The people you follow (accepted follows only). Blocks end follows, so
+ * nobody blocked either way is in here.
+ */
+export function useFollowing(userId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: keys.following(userId ?? ''),
+    queryFn: async (): Promise<FollowedPerson[]> => {
+      const { data, error } = await supabase
+        .from('follows')
+        .select('followee:profiles!follows_followee_id_fkey(id, username, avatar_path, disciplines, deleted_at)')
+        .eq('follower_id', userId!)
+        .eq('status', 'accepted');
+      if (error) throw error;
+      return (data ?? [])
+        .flatMap((row) => {
+          const p = row.followee as {
+            id: string;
+            username: string | null;
+            avatar_path: string | null;
+            disciplines: FollowedPerson['disciplines'] | null;
+            deleted_at: string | null;
+          } | null;
+          return p && p.username && !p.deleted_at
+            ? [{ id: p.id, username: p.username, avatarPath: p.avatar_path, disciplines: p.disciplines ?? [] }]
+            : [];
+        })
+        .sort((a, b) => a.username.localeCompare(b.username));
+    },
+    enabled: Boolean(userId) && enabled,
+    staleTime: fresh.social,
   });
 }
 
@@ -249,6 +292,7 @@ export function useBlock(userId: string | undefined) {
       void client.invalidateQueries({ queryKey: keys.blocked(userId ?? '') });
       void client.invalidateQueries({ queryKey: keys.profiles() });
       void client.invalidateQueries({ queryKey: keys.followRequests(userId ?? '') });
+      void client.invalidateQueries({ queryKey: keys.following(userId ?? '') });
       void client.invalidateQueries({ queryKey: ['search'] });
       void client.invalidateQueries({ queryKey: ['posts'] });
     },
