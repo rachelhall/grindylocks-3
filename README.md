@@ -30,6 +30,20 @@ Day to day, just start the dev server and open the installed app:
 npm start
 ```
 
+## Real iPhone and TestFlight
+
+Both need the Apple Developer Program; EAS creates the certificates and profiles on the first build.
+
+**Development build on your phone:** register the phone once (`npx eas-cli@latest device:create`, then open the link on the phone and install the profile), turn on Developer Mode (Settings › Privacy & Security), then build with `--profile development` and install from the build page. `npm start` serves the JS as usual; the phone needs to be on the same Wi-Fi. Registering another phone means a new development build.
+
+**TestFlight:** the `production` profile builds in the cloud, where `.env` isn't uploaded (it's git-ignored), so every `EXPO_PUBLIC_` value must also be an EAS environment variable in the `production` environment, plus `SENTRY_AUTH_TOKEN` (sensitive) for source maps. Then:
+
+```sh
+npx eas-cli@latest build --profile production --platform ios --auto-submit
+```
+
+The first run asks for your Apple ID and creates the app in App Store Connect. `usesNonExemptEncryption` is false in `app.json`, so builds skip the export compliance question. Add testers under TestFlight in App Store Connect; internal testers need no review.
+
 ## Checks
 
 ```sh
