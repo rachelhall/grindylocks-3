@@ -696,7 +696,15 @@
     "replyingTo": "Antwort an @{{username}}",
     "replyingToThread": "Antwort in diesem Thread",
     "cancelReply": "Antwort abbrechen",
-    "failed": "Dein Kommentar konnte nicht gepostet werden"
+    "failed": "Dein Kommentar konnte nicht gepostet werden",
+    "mentionTitle": "Erwähnen",
+    "mentionLabel": "Personen zum Erwähnen",
+    "mentionPosted": "Hat es gepostet",
+    "mentionFilmed": "Hat diesen Post gefilmt",
+    "mentionTagged": "In diesem Post markiert",
+    "mentionCommented": "Hat hier kommentiert",
+    "mentionFollowing": "Du folgst",
+    "mentionRegular": "Stammgast in {{park}}"
   },
   "clip": {
     "play": "Clip abspielen",
