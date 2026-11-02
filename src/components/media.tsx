@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useVideoPlayer, type VideoPlayer, type VideoThumbnail, VideoView } from 'expo-video';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { type ReactNode, useEffect, useState } from 'react';
+import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useIsFocused } from 'expo-router';
 
 import { Button, Icon } from '@/components/ui';
@@ -308,48 +308,251 @@ function ClipThumb({ uri }: { uri: string }) {
   return <Image source={frame} style={StyleSheet.absoluteFill} contentFit="cover" />;
 }
 
-/** A picked item in the new post screen: thumbnail, order number, remove. */
-export function PickedTile({
+/** A picked photo or clip as a cropped thumbnail, filling its parent. */
+export function MediaThumb({ uri, kind }: { uri: string; kind: 'photo' | 'video' }) {
+  return kind === 'photo' ? (
+    <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+  ) : (
+    <ClipThumb uri={uri} />
+  );
+}
+
+/* Previews while posting ------------------------------------------------------ */
+
+type DraftMedia = { key: string; uri: string; kind: 'photo' | 'video'; width: number; height: number };
+
+/** The size posts use for a slide, even when the picker didn't report one. */
+function shapeOf(m: DraftMedia): { width: number; height: number } {
+  return m.width > 0 && m.height > 0 ? m : { width: 1, height: 1 };
+}
+
+/**
+ * A picked clip playing from the phone: muted and looping while it's the
+ * slide showing. Tapping it turns its sound on or off. When autoplay is off
+ * it waits for a tap on the play button.
+ */
+function LocalClip({ uri, active }: { uri: string; active: boolean }) {
+  const { t } = useTranslation();
+  const autoplay = useAutoplayAllowed();
+  const focused = useIsFocused();
+  const [started, setStarted] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.audioMixingMode = 'auto';
+  });
+
+  const live = active && focused;
+  const shouldPlay = live && (autoplay || started);
+
+  useEffect(() => {
+    setMuted(player, !soundOn);
+  }, [player, soundOn]);
+
+  useEffect(() => {
+    if (shouldPlay) player.play();
+    else player.pause();
+  }, [player, shouldPlay]);
+
+  const waiting = live && !shouldPlay;
+  return (
+    <>
+      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={waiting ? t('clip.play') : soundOn ? t('clip.mute') : t('clip.unmute')}
+        onPress={() => (waiting ? setStarted(true) : setSoundOn((on) => !on))}
+        style={StyleSheet.absoluteFill}
+      >
+        {waiting ? (
+          <View style={styles.center} pointerEvents="none">
+            <View style={styles.playButton}>
+              <Icon name="play" color={brand.paper} size={28} />
+            </View>
+          </View>
+        ) : null}
+      </Pressable>
+      <View style={[styles.tag, styles.previewSound]} pointerEvents="none">
+        <Icon name={soundOn ? 'soundOn' : 'soundOff'} color={brand.paper} size={14} />
+      </View>
+    </>
+  );
+}
+
+/** One picked item at the shape it will post at, letterboxed in ink. */
+function DraftSlide({
+  item,
+  width,
+  height,
+  active,
+  near,
+}: {
+  item: DraftMedia;
+  width: number;
+  height: number;
+  active: boolean;
+  /** Clips only load a player when they're the slide showing or next to it. */
+  near: boolean;
+}) {
+  return (
+    <View style={[styles.frame, { width, height }]}>
+      {item.kind === 'photo' ? (
+        <Image source={{ uri: item.uri }} style={StyleSheet.absoluteFill} contentFit="contain" />
+      ) : near ? (
+        <LocalClip uri={item.uri} active={active} />
+      ) : (
+        <View style={styles.center}>
+          <Icon name="video" color={brand.paper} />
+        </View>
+      )}
+    </View>
+  );
+}
+
+/**
+ * The picked slides, full width and swipeable, the way the post will look.
+ * The slide showing is controlled by the screen, so a strip of thumbnails or
+ * a tag editor can follow it.
+ */
+export function DraftPager({
+  items,
+  width,
+  index,
+  onIndexChange,
+  label,
+}: {
+  items: DraftMedia[];
+  width: number;
+  index: number;
+  onIndexChange: (index: number) => void;
+  /** Tag in the bottom left of the slide showing ("SLIDE 1 · 0:15"). */
+  label?: string;
+}) {
+  const ref = useRef<ScrollView>(null);
+  const height = carouselHeight(width, items.map(shapeOf));
+
+  // A thumbnail tap moves the pager; a swipe tells the screen.
+  useEffect(() => {
+    ref.current?.scrollTo({ x: index * width, animated: true });
+  }, [index, width]);
+
+  return (
+    <View style={{ width, height }}>
+      <ScrollView
+        ref={ref}
+        horizontal
+        pagingEnabled
+        scrollEnabled={items.length > 1}
+        showsHorizontalScrollIndicator={false}
+        onMomentumScrollEnd={(e) => {
+          const next = Math.round(e.nativeEvent.contentOffset.x / width);
+          if (next !== index) onIndexChange(next);
+        }}
+        style={{ width, height }}
+      >
+        {items.map((m, i) => (
+          <DraftSlide
+            key={m.key}
+            item={m}
+            width={width}
+            height={height}
+            active={i === index}
+            near={Math.abs(i - index) <= 1}
+          />
+        ))}
+      </ScrollView>
+      {label ? <MediaTag label={label} style={styles.previewLabel} /> : null}
+    </View>
+  );
+}
+
+/** Square dots under a pager; the current slide's is wide and ink. */
+export function PagerDots({ count, index }: { count: number; index: number }) {
+  const c = useColors();
+  if (count < 2) return null;
+  return (
+    <View style={styles.dots} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+      {Array.from({ length: count }, (_, i) => (
+        <View
+          key={i}
+          style={[styles.dot, i === index ? { width: 20, backgroundColor: c.text } : { backgroundColor: c.border }]}
+        />
+      ))}
+    </View>
+  );
+}
+
+/**
+ * A picked item in the slide strip: thumbnail at its own shape, order
+ * number, and remove on the one that's showing. Tapping it shows it above.
+ */
+export function StripThumb({
   uri,
   kind,
-  durationS,
+  width,
+  height,
   number,
-  size,
+  selected,
+  onPress,
   onRemove,
+  label,
   removeLabel,
+  actions,
 }: {
   uri: string;
   kind: 'photo' | 'video';
-  durationS?: number;
+  width: number;
+  height: number;
   number: number;
-  size: number;
+  selected: boolean;
+  onPress: () => void;
   onRemove: () => void;
+  label: string;
   removeLabel: string;
+  /** Screen reader actions, e.g. moving the slide. */
+  actions?: { name: string; label: string; run: () => void }[];
 }) {
   const c = useColors();
   return (
-    <View style={[styles.tile, { width: size, height: size, backgroundColor: c.surfaceSunk }]}>
-      {kind === 'photo' ? (
-        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
-      ) : (
-        <ClipThumb uri={uri} />
-      )}
-      <View style={[styles.number, { backgroundColor: c.accent, borderColor: c.onAccent }]}>
-        <Text variant="label" style={{ color: c.onAccent }}>
-          {number}
-        </Text>
-      </View>
+    <View style={[styles.stripItem, { width, height }]}>
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={removeLabel}
-        onPress={onRemove}
-        hitSlop={8}
-        style={({ pressed }) => [styles.remove, { backgroundColor: c.surfaceRaised }, pressed && { opacity: 0.75 }]}
+        accessibilityState={{ selected }}
+        accessibilityLabel={label}
+        accessibilityActions={actions?.map((a) => ({ name: a.name, label: a.label }))}
+        onAccessibilityAction={(e) => actions?.find((a) => a.name === e.nativeEvent.actionName)?.run()}
+        onPress={onPress}
+        style={({ pressed }) => [
+          styles.stripThumb,
+          { backgroundColor: c.surfaceSunk, borderColor: selected ? c.text : 'transparent' },
+          pressed && { opacity: 0.75 },
+        ]}
       >
-        <Icon name="close" color={c.text} size={16} />
+        <MediaThumb uri={uri} kind={kind} />
+        <View
+          style={[
+            styles.number,
+            selected
+              ? { backgroundColor: c.accent, borderColor: c.onAccent }
+              : { backgroundColor: c.surfaceRaised, borderColor: c.text },
+          ]}
+        >
+          <Text variant="label" style={{ color: selected ? c.onAccent : c.text }}>
+            {number}
+          </Text>
+        </View>
       </Pressable>
-      {kind === 'video' && durationS ? (
-        <MediaTag label={formatDuration(durationS)} style={styles.tagBottomLeft} />
+      {selected ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={removeLabel}
+          onPress={onRemove}
+          hitSlop={10}
+          style={({ pressed }) => [styles.stripRemove, { backgroundColor: c.text }, pressed && { opacity: 0.75 }]}
+        >
+          <Icon name="close" color={c.surface} size={14} />
+        </Pressable>
       ) : null}
     </View>
   );
@@ -360,25 +563,29 @@ const styles = StyleSheet.create({
   frame: { backgroundColor: brand.ink, overflow: 'hidden' },
   center: { position: 'absolute', top: 0, right: 0, bottom: 0, left: 0, alignItems: 'center', justifyContent: 'center', gap: space[2], padding: space[4] },
   tag: { position: 'absolute', backgroundColor: brand.ink, paddingHorizontal: 5, paddingVertical: 2 },
-  tagBottomLeft: { left: 6, bottom: 6 },
   tagBottomRight: { right: 8, bottom: 8 },
   tagTopRight: { right: 8, top: 8 },
   soundBadge: { right: 8, bottom: 36, paddingVertical: 4 },
+  previewSound: { right: 12, bottom: 12, paddingVertical: 4 },
+  previewLabel: { left: 12, bottom: 12 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
+  dot: { width: 8, height: 8 },
   playButton: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: brand.ink, borderWidth: stroke.rule, borderColor: brand.paper },
   card: { borderWidth: stroke.rule, padding: space[4], gap: space[3] },
   cardRow: { flexDirection: 'row', alignItems: 'center', gap: space[3] },
   bar: { height: 6, alignSelf: 'stretch', overflow: 'hidden' },
   barFill: { height: 6 },
-  tile: { overflow: 'hidden' },
+  stripItem: { position: 'relative' },
+  stripThumb: { flex: 1, overflow: 'hidden', borderWidth: 3 },
+  stripRemove: { position: 'absolute', right: -8, top: -8, width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
   number: {
     position: 'absolute',
-    left: 6,
-    top: 6,
-    width: 26,
-    height: 26,
+    left: 3,
+    top: 3,
+    width: 22,
+    height: 22,
     borderWidth: stroke.rule,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  remove: { position: 'absolute', right: 4, top: 4, width: 32, height: 32, alignItems: 'center', justifyContent: 'center' },
 });

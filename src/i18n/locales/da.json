@@ -152,7 +152,12 @@
     "clipCount_one": "{{count}} klip",
     "clipCount_other": "{{count}} klip",
     "photoCount_one": "{{count}} billede",
-    "photoCount_other": "{{count}} billeder"
+    "photoCount_other": "{{count}} billeder",
+    "tapToPreview": "Tryk på en slide for at se den",
+    "moveEarlier": "Flyt frem",
+    "moveLater": "Flyt tilbage",
+    "slideItem": "Slide {{number}}",
+    "limitsShort": "Op til 10 · klip op til 60 s"
   },
   "uploads": {
     "uploading": "Uploader {{done}} af {{total}}",
@@ -623,7 +628,15 @@
     "whatsTagged": "Det er tagget",
     "noTags": "Ingen tags",
     "filmedBy": "filmet af {{username}}",
-    "editLater": "Du kan rette teksten og tags, efter du har delt opslaget."
+    "editLater": "Du kan rette teksten og tags, efter du har delt opslaget.",
+    "parkLine": "Park · alle slides",
+    "noObstacle": "Vælg en",
+    "noPeople": "Tag nogen",
+    "noFilmer": "Tilføj filmer",
+    "sameAsShort": "Samme som slide {{number}}",
+    "slideTagsTitle": "Tags på slide {{number}}",
+    "done": "Færdig",
+    "peopleMore": "{{first}} +{{count}}"
   },
   "postCard": {
     "open": "Åbn opslaget fra {{username}}",
