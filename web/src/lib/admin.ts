@@ -53,12 +53,14 @@ export async function fetchAdmin(supabase: SupabaseClient<Database>): Promise<Ad
       .in("role", ADMIN_ROLES)
       .not("accepted_at", "is", null)
       .is("ended_at", null),
-    supabase.from("profiles").select("username, banned_at, deleted_at").eq("id", userId).maybeSingle(),
+    // Only columns members may read: profiles has column-level grants, and
+    // banned_at isn't one of them (bans will end roles in the M5 functions).
+    supabase.from("profiles").select("username, deleted_at").eq("id", userId).maybeSingle(),
   ]);
 
   if (roles.error) throw roles.error;
   if (profile.error) throw profile.error;
-  if (!roles.data.length || profile.data?.banned_at || profile.data?.deleted_at) return null;
+  if (!roles.data.length || profile.data?.deleted_at) return null;
 
   const scopes: AdminScope[] = roles.data
     .map((r) => ({ role: r.role as AdminRole, metroAreaId: r.metro_area_id, parkId: r.park_id }))
