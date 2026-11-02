@@ -11,8 +11,8 @@ begin;
 -- 1. Comment checks: comments can't be edited (only deleted), a comment is
 --    1–1000 characters, a reply must be to a live comment on the same post,
 --    and "replying to @name" must name someone in that thread.
--- 2. Deleted comments: their text is never readable again (a restrictive
---    read rule), and their notifications are removed. A deleted comment
+-- 2. Deleted comments: their text is erased (replaced with "[deleted]"),
+--    and their notifications are removed. A deleted comment
 --    with live replies shows as "Comment deleted" through post_comments().
 -- 3. Notifications, written by triggers (members can't write them):
 --      comment        to the post's author, the comment being replied to,
@@ -39,8 +39,8 @@ begin;
 --    Like counts and who liked a post stay hidden (only the owner can read
 --    likes, as before).
 --
--- Additive: a private table, functions, triggers and one restrictive read
--- rule. No existing rule, trigger or function is replaced or dropped.
+-- Additive: a private table, functions and triggers. No existing rule,
+-- trigger or function is replaced or dropped.
 
 /* 1. Comment checks ------------------------------------------------------------ */
 
@@ -54,7 +54,12 @@ declare
   parent comments%rowtype;
 begin
   if tg_op = 'UPDATE' then
-    -- Only deleting (setting deleted_at) is allowed; nothing else changes.
+    -- Deleting erases the text for good, so it can't be read again.
+    if old.deleted_at is null and new.deleted_at is not null then
+      new.body := '[deleted]';
+      return new;
+    end if;
+    -- Otherwise nothing changes: comments can't be edited.
     if new.body is distinct from old.body
        or new.post_id is distinct from old.post_id
        or new.author_id is distinct from old.author_id
@@ -97,15 +102,6 @@ end $$;
 create trigger comments_guard_write
   before insert or update on public.comments
   for each row execute function private.guard_comment_write();
-
-/* 2. Deleted comments stay unreadable ----------------------------------------- */
-
-create policy "deleted comments are not readable"
-  on public.comments
-  as restrictive
-  for select
-  to authenticated
-  using (deleted_at is null or private.can_moderate_post(post_id));
 
 /* 3. Notifications ------------------------------------------------------------- */
 
@@ -688,7 +684,7 @@ insert into t_results select 'nobody sees likes of others', count(*)=0, count(*)
 update comments set deleted_at = now() where id='e0000000-0000-4000-8000-0000000000e1';
 select set_config('request.jwt.claims', '{"sub":"b0000000-0000-4000-8000-0000000000b0","role":"authenticated"}', true);
 insert into t_results select 'deleted comment is a placeholder', count(*)=2 and bool_or(deleted and body is null and username is null), string_agg(coalesce(body,'<deleted>'), ',') from post_comments('a0000000-0000-4000-8000-0000000000f1');
-insert into t_results select 'deleted comment text unreadable', count(*)=0, count(*)::text from comments where id='e0000000-0000-4000-8000-0000000000e1';
+insert into t_results select 'deleted comment text erased', count(*)=1 and min(body)='[deleted]', min(body) from comments where id='e0000000-0000-4000-8000-0000000000e1';
 insert into t_results select 'deleted comment not counted', comment_count(p)=1, comment_count(p)::text from posts p where id='a0000000-0000-4000-8000-0000000000f1';
 reset role;
 select set_config('request.jwt.claims', '', true);
@@ -701,7 +697,8 @@ select set_config('request.jwt.claims', '{"sub":"b0000000-0000-4000-8000-0000000
 insert into comments (post_id, author_id, body) values ('a0000000-0000-4000-8000-0000000000f1','b0000000-0000-4000-8000-0000000000b0','@m4b_dee you should come');
 reset role;
 select set_config('request.jwt.claims', '', true);
-insert into t_results select 'no notice about a post you cannot see', count(*)=1, count(*)::text from notifications where recipient_id='b0000000-0000-4000-8000-0000000000d0';
+-- (D's earlier mention went with the deleted comment, so D should have nothing.)
+insert into t_results select 'no notice about a post you cannot see', count(*)=0, count(*)::text from notifications where recipient_id='b0000000-0000-4000-8000-0000000000d0';
 
 -- Blocks: once C blocks B, nothing from B reaches C (C already has one
 -- notice for B's reply, from before the block; no second one is added).
@@ -711,6 +708,8 @@ insert into t_results select 'no notice between blocked people', count(*)=1, cou
 
 -- Taking yourself off a post removes the tag notice.
 delete from blocks where blocker_id='b0000000-0000-4000-8000-0000000000c0';
+-- B goes public again, so C can see (and remove) their tag.
+update profiles set is_private = false where id='b0000000-0000-4000-8000-0000000000b0';
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"b0000000-0000-4000-8000-0000000000c0","role":"authenticated"}', true);
 delete from slide_people_tags where slide_id='c0000000-0000-4000-8000-0000000000f1' and user_id='b0000000-0000-4000-8000-0000000000c0';

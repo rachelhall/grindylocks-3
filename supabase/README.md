@@ -101,8 +101,8 @@ Applied Nov 1 (as `posting_feeds`); types regenerated the same day.
 
 ## Likes, comments and notifications (migration `engagement`)
 
-Adds comment checks (no editing, 1–1000 characters, valid replies), a rule
-that keeps deleted comments' text unreadable, the notification triggers
+Adds comment checks (no editing, 1–1000 characters, valid replies),
+erasing a deleted comment's text, the notification triggers
 (comments, replies, @mentions, tags and filmer credit), `post_comments()`,
 the `comment_count` and `liked_by_me` computed fields on posts,
 `my_notifications()`, `notifications_unread()` and

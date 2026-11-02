@@ -6,7 +6,8 @@
  * - Comments are one level deep, oldest first. A reply to a reply stays in
  *   the same thread with an @mention of the person you're answering. You
  *   can delete your own comments (and any on your own post); nobody can
- *   edit one. Deleted comments with replies show as "Comment deleted".
+ *   edit one. Deleting erases the text; deleted comments with replies show
+ *   as "Comment deleted".
  * - Notifications are written by the database (comments, replies, mentions,
  *   tags, filmer credit, invites, "someone new"); the app reads them, and
  *   opening Notifications clears the bell's dot.

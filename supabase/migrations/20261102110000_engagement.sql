@@ -4,8 +4,8 @@
 -- 1. Comment checks: comments can't be edited (only deleted), a comment is
 --    1–1000 characters, a reply must be to a live comment on the same post,
 --    and "replying to @name" must name someone in that thread.
--- 2. Deleted comments: their text is never readable again (a restrictive
---    read rule), and their notifications are removed. A deleted comment
+-- 2. Deleted comments: their text is erased (replaced with "[deleted]"),
+--    and their notifications are removed. A deleted comment
 --    with live replies shows as "Comment deleted" through post_comments().
 -- 3. Notifications, written by triggers (members can't write them):
 --      comment        to the post's author, the comment being replied to,
@@ -32,8 +32,8 @@
 --    Like counts and who liked a post stay hidden (only the owner can read
 --    likes, as before).
 --
--- Additive: a private table, functions, triggers and one restrictive read
--- rule. No existing rule, trigger or function is replaced or dropped.
+-- Additive: a private table, functions and triggers. No existing rule,
+-- trigger or function is replaced or dropped.
 
 /* 1. Comment checks ------------------------------------------------------------ */
 
@@ -47,7 +47,12 @@ declare
   parent comments%rowtype;
 begin
   if tg_op = 'UPDATE' then
-    -- Only deleting (setting deleted_at) is allowed; nothing else changes.
+    -- Deleting erases the text for good, so it can't be read again.
+    if old.deleted_at is null and new.deleted_at is not null then
+      new.body := '[deleted]';
+      return new;
+    end if;
+    -- Otherwise nothing changes: comments can't be edited.
     if new.body is distinct from old.body
        or new.post_id is distinct from old.post_id
        or new.author_id is distinct from old.author_id
@@ -90,15 +95,6 @@ end $$;
 create trigger comments_guard_write
   before insert or update on public.comments
   for each row execute function private.guard_comment_write();
-
-/* 2. Deleted comments stay unreadable ----------------------------------------- */
-
-create policy "deleted comments are not readable"
-  on public.comments
-  as restrictive
-  for select
-  to authenticated
-  using (deleted_at is null or private.can_moderate_post(post_id));
 
 /* 3. Notifications ------------------------------------------------------------- */
 
