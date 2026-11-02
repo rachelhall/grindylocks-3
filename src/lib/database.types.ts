@@ -41,6 +41,32 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_seen: {
+        Row: {
+          page: string
+          seen_at: string
+          user_id: string
+        }
+        Insert: {
+          page: string
+          seen_at?: string
+          user_id: string
+        }
+        Update: {
+          page?: string
+          seen_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_seen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           created_at: string
@@ -1569,6 +1595,7 @@ export type Database = {
         Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
         Returns: boolean
       }
+      mark_admin_page_seen: { Args: { page: string }; Returns: undefined }
       mark_notifications_seen: { Args: never; Returns: undefined }
       my_account: {
         Args: never

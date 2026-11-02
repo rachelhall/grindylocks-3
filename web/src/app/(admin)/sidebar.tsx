@@ -2,6 +2,7 @@ import { Suspense } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
+import { countNotInvited, isOwner } from "@/lib/access-requests";
 import { getAdmin, roleLabel } from "@/lib/admin";
 
 import { signOut } from "../sign-in/actions";
@@ -11,6 +12,8 @@ import { NavLink } from "./nav-link";
  * The sidebar from design/web.md: wordmark with the ADMIN tape, one item per
  * section that exists (only Queue for now; Parks and Roles come later), and
  * the signed-in admin with Sign out at the bottom. Under 768px it's a top bar.
+ * Requests (invite requests from grindylocks.com) shows for the owner only,
+ * with the count of requests not yet invited.
  */
 export function Sidebar() {
   return (
@@ -25,11 +28,25 @@ export function Sidebar() {
         <NavLink href="/queue" icon="inbox">
           Queue
         </NavLink>
+        <Suspense fallback={null}>
+          <OwnerLinks />
+        </Suspense>
       </nav>
       <Suspense fallback={<div className="ml-auto h-10 md:ml-0 md:h-[102px]" />}>
         <SignedIn />
       </Suspense>
     </aside>
+  );
+}
+
+async function OwnerLinks() {
+  if (!isOwner(await getAdmin())) return null;
+  const waiting = await countNotInvited();
+
+  return (
+    <NavLink href="/requests" icon="person_add" badge={waiting} badgeLabel="not invited">
+      Requests
+    </NavLink>
   );
 }
 
