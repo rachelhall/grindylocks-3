@@ -175,6 +175,48 @@ export function useFollowRequests(userId: string | undefined) {
   });
 }
 
+/** Someone you follow, for the person picker and @mention suggestions. */
+export type FollowedPerson = {
+  id: string;
+  username: string;
+  avatarPath: string | null;
+  disciplines: Database['public']['Enums']['discipline'][];
+};
+
+/**
+ * The people you follow (accepted follows only). Blocks end follows, so
+ * nobody blocked either way is in here.
+ */
+export function useFollowing(userId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: keys.following(userId ?? ''),
+    queryFn: async (): Promise<FollowedPerson[]> => {
+      const { data, error } = await supabase
+        .from('follows')
+        .select('followee:profiles!follows_followee_id_fkey(id, username, avatar_path, disciplines, deleted_at)')
+        .eq('follower_id', userId!)
+        .eq('status', 'accepted');
+      if (error) throw error;
+      return (data ?? [])
+        .flatMap((row) => {
+          const p = row.followee as {
+            id: string;
+            username: string | null;
+            avatar_path: string | null;
+            disciplines: FollowedPerson['disciplines'] | null;
+            deleted_at: string | null;
+          } | null;
+          return p && p.username && !p.deleted_at
+            ? [{ id: p.id, username: p.username, avatarPath: p.avatar_path, disciplines: p.disciplines ?? [] }]
+            : [];
+        })
+        .sort((a, b) => a.username.localeCompare(b.username));
+    },
+    enabled: Boolean(userId) && enabled,
+    staleTime: fresh.social,
+  });
+}
+
 /** Accept or decline a request. Declining deletes it; they can ask again. */
 export function useAnswerFollowRequest(userId: string | undefined) {
   const client = useQueryClient();

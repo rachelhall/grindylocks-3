@@ -91,7 +91,7 @@ export const keys = {
   myInvites: (userId: string) => ['invites', userId] as const,
   /** People waiting for you to accept their follow request. */
   followRequests: (userId: string) => ['follow-requests', userId] as const,
-  /** The people you follow (accepted), for @mention suggestions. */
+  /** The people you follow (accepted), for the person picker and @mention suggestions. */
   following: (userId: string) => ['following', userId] as const,
   /** The people you blocked (Settings › Blocked accounts). */
   blocked: (userId: string) => ['blocked', userId] as const,
