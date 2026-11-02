@@ -1,6 +1,7 @@
 import { Canvas, Fill, ImageShader, Shader, Skia, type SkRuntimeEffect, useImage } from '@shopify/react-native-skia';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { type LayoutChangeEvent, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Icon, type IconName } from '@/components/ui';
@@ -130,6 +131,50 @@ function HeaderArt({ photoUrl, width }: { photoUrl: string | null; width: number
         )}
       </Fill>
     </Canvas>
+  );
+}
+
+/**
+ * The park header's ink and pink halftone, filling its parent, for other
+ * brand screens (the welcome and invite screens). The fade runs along the
+ * diagonal like the header's; `fromTopRight` flips it so the dots gather in
+ * the top-right corner instead of the bottom-right.
+ */
+export function HalftoneGround({
+  fadeStart = HALFTONE.fadeStart,
+  fadeEnd = HALFTONE.fadeEnd,
+  fromTopRight = false,
+}: {
+  fadeStart?: number;
+  fadeEnd?: number;
+  fromTopRight?: boolean;
+}) {
+  const [box, setBox] = useState<{ width: number; height: number } | null>(null);
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width, height } = e.nativeEvent.layout;
+    if (!box || box.width !== width || box.height !== height) setBox({ width, height });
+  };
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none" onLayout={onLayout}>
+      {box ? (
+        <Canvas style={[StyleSheet.absoluteFill, fromTopRight && styles.flipY]}>
+          <Fill>
+            <Shader
+              source={getEffects().ink}
+              uniforms={{
+                size: [box.width, box.height],
+                cell: HALFTONE.cell,
+                dotRadius: HALFTONE.dotRadius,
+                fadeStart,
+                fadeEnd,
+                pink: rgba(brand.pink),
+                ink: rgba(brand.ink),
+              }}
+            />
+          </Fill>
+        </Canvas>
+      ) : null}
+    </View>
   );
 }
 
@@ -282,4 +327,5 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   pressed: { opacity: 0.75 },
+  flipY: { transform: [{ scaleY: -1 }] },
 });

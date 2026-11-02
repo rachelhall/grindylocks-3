@@ -1786,6 +1786,7 @@ export type Database = {
       }
       unregister_push_device: { Args: { token: string }; Returns: undefined }
       username_available: { Args: { name: string }; Returns: boolean }
+      welcome_metro_areas: { Args: never; Returns: { name: string }[] }
     }
     Enums: {
       announcement_kind: "joined" | "visiting"

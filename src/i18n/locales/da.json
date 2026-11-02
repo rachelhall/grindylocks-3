@@ -19,7 +19,11 @@
       "google": "Fortsæt med Google",
       "soon": "Kommer snart",
       "inviteOnly": "Ny her? Grindylocks kræver en invitation lige nu. Bed en skater, du kender, om at sende dig et invitationslink.",
-      "haveCode": "Jeg har en invitationskode"
+      "haveCode": "Jeg har en invitationskode",
+      "appleShort": "Apple",
+      "googleShort": "Google",
+      "parksIn": "Parker i",
+      "moreCities": "+{{count}} flere"
     },
     "email": {
       "title": "Log ind med e-mail",

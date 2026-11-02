@@ -19,7 +19,11 @@
       "google": "Continue with Google",
       "soon": "Coming soon",
       "inviteOnly": "New here? Grindylocks is invite only for now. Ask a skater you know to send you an invite link.",
-      "haveCode": "I have an invite code"
+      "haveCode": "I have an invite code",
+      "appleShort": "Apple",
+      "googleShort": "Google",
+      "parksIn": "Parks in",
+      "moreCities": "+{{count}} more"
     },
     "email": {
       "title": "Sign in with email",

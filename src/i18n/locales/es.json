@@ -19,7 +19,11 @@
       "google": "Continuar con Google",
       "soon": "Próximamente",
       "inviteOnly": "¿Eres nuevo? De momento Grindylocks es solo con invitación. Pide a algún patinador que conozcas que te mande un enlace.",
-      "haveCode": "Tengo un código de invitación"
+      "haveCode": "Tengo un código de invitación",
+      "appleShort": "Apple",
+      "googleShort": "Google",
+      "parksIn": "Parques en",
+      "moreCities": "+{{count}} más"
     },
     "email": {
       "title": "Entra con tu email",

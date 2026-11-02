@@ -67,6 +67,8 @@ export const keys = {
   parksInMetro: (metroId: string) => ['parks', 'metro', metroId] as const,
   metro: (id: string) => ['metro', id] as const,
   directory: () => ['directory'] as const,
+  /** Metro area names for the signed-out welcome screen's city tape. */
+  welcomeMetros: () => ['welcome-metros'] as const,
   search: (q: string) => ['search', q] as const,
   savedParks: (userId: string) => ['saved-parks', userId] as const,
   myPosts: (userId: string) => ['posts', 'mine', userId] as const,
