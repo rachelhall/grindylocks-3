@@ -12,6 +12,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 The web admin for role holders (Rachel, city admins, park admins). It's its own npm project inside the app's repo, with its own lockfile: run npm commands from `web/`. The repo root's AGENTS.md (branches, pull requests, tokens) applies here too.
 
+- **Two sites, one app (Nov 2):** `src/proxy.ts` serves the public marketing page (`src/app/site`) at `/` on grindylocks.com, sends www to the bare domain and any other path there to admin.grindylocks.com. Every other host is the admin, where `/site` stays public so previews can show it. Host rules live in `src/lib/hosts.ts`. Only grindylocks.com is indexable (`next.config.ts`).
+- **The request form** calls `request_access()` through a cookie-less client (`src/lib/supabase/public.ts`), so it always asks as a signed-out visitor. Requests are readable only by the owner (table `access_requests`).
+- **Local builds without Google Fonts** (sandboxes): `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=<mock.js> npx next build --webpack`. Vercel fetches the real fonts.
+
 - **Stack:** Next.js 16 (App Router, Cache Components), Tailwind v4, shadcn/ui on Base UI. shadcn components are copied into `src/components/ui/` and restyled to `design/web.md`; swap their Lucide icons for `<Icon>` (Material Symbols Sharp).
 - **Design tokens:** `src/styles/tokens.css` is generated from `design/tokens.json` by `npm run tokens` at the repo root. Never edit it by hand. `src/app/globals.css` maps the tokens into Tailwind (`bg-gl-surface`, `type-title`) and shadcn's names.
 - **Database types:** `src/lib/database.types.ts` is a copy of the app's, written by `npm run db:types` (or `npm run sync:db-types`) at the repo root; `npm run check:db-types` fails if they differ. Never edit it here.

@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      access_requests: {
+        Row: {
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          email: string
+          home_city: string | null
+          id: string
+          invited_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          email: string
+          home_city?: string | null
+          id?: string
+          invited_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          email?: string
+          home_city?: string | null
+          id?: string
+          invited_at?: string | null
+        }
+        Relationships: []
+      }
       announcements: {
         Row: {
           created_at: string
@@ -1713,6 +1740,14 @@ export type Database = {
       remove_my_filmer_credit: { Args: { slide: string }; Returns: undefined }
       reorder_park_photos: {
         Args: { park: string; photo_ids: string[] }
+        Returns: undefined
+      }
+      request_access: {
+        Args: {
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          email: string
+          home_city?: string
+        }
         Returns: undefined
       }
       search_directory: {

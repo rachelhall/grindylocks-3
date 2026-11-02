@@ -17,9 +17,16 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  // The admin is for a handful of signed-in role holders; keep it out of search.
+  // The admin is for a handful of signed-in role holders; keep it out of
+  // search. The marketing page on grindylocks.com is the one public page.
   async headers() {
-    return [{ source: "/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }];
+    return [
+      {
+        source: "/:path*",
+        missing: [{ type: "host", value: "(www\\.)?grindylocks\\.com" }],
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
+    ];
   },
 };
 
