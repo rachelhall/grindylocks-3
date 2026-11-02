@@ -196,7 +196,12 @@
     "directions": "Route",
     "noParksHere": "In diesem Kartenausschnitt gibt es noch keine Skateparks.",
     "pinSelected": "{{park}}, ausgewählt",
-    "loadError": "Skateparks konnten nicht geladen werden. Prüf deine Verbindung."
+    "loadError": "Skateparks konnten nicht geladen werden. Prüf deine Verbindung.",
+    "noParksNear": "Noch keine Skateparks in deiner Nähe",
+    "closest": "Am nächsten: {{park}}, {{distance}}",
+    "closestNoDistance": "Am nächsten: {{park}}",
+    "goToClosest": "Zum nächsten",
+    "goToCity": "Nach {{city}}"
   },
   "search": {
     "back": "Zurück zur Karte",

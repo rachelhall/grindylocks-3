@@ -196,7 +196,12 @@
     "directions": "Rutevejledning",
     "noParksHere": "Ingen skateparks på denne del af kortet endnu.",
     "pinSelected": "{{park}}, valgt",
-    "loadError": "Kunne ikke hente skateparks. Tjek din forbindelse."
+    "loadError": "Kunne ikke hente skateparks. Tjek din forbindelse.",
+    "noParksNear": "Ingen skateparks i nærheden endnu",
+    "closest": "Nærmeste: {{park}}, {{distance}}",
+    "closestNoDistance": "Nærmeste: {{park}}",
+    "goToClosest": "Gå til nærmeste",
+    "goToCity": "Gå til {{city}}"
   },
   "search": {
     "back": "Tilbage til kortet",

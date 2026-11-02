@@ -196,7 +196,12 @@
     "directions": "Directions",
     "noParksHere": "No parks on this part of the map yet.",
     "pinSelected": "{{park}}, selected",
-    "loadError": "Couldn't load parks. Check your connection."
+    "loadError": "Couldn't load parks. Check your connection.",
+    "noParksNear": "No parks near you yet",
+    "closest": "Closest: {{park}}, {{distance}}",
+    "closestNoDistance": "Closest: {{park}}",
+    "goToClosest": "Go to closest",
+    "goToCity": "Go to {{city}}"
   },
   "search": {
     "back": "Back to map",

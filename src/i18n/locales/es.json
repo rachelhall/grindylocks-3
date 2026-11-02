@@ -196,7 +196,12 @@
     "directions": "Cómo llegar",
     "noParksHere": "Aún no hay skateparks en esta parte del mapa.",
     "pinSelected": "{{park}}, seleccionado",
-    "loadError": "No se pudieron cargar los skateparks. Revisa tu conexión."
+    "loadError": "No se pudieron cargar los skateparks. Revisa tu conexión.",
+    "noParksNear": "Aún no hay skateparks cerca de ti",
+    "closest": "El más cercano: {{park}}, a {{distance}}",
+    "closestNoDistance": "El más cercano: {{park}}",
+    "goToClosest": "Ir al más cercano",
+    "goToCity": "Ir a {{city}}"
   },
   "search": {
     "back": "Volver al mapa",
