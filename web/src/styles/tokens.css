@@ -1,0 +1,149 @@
+/* Grindylocks design tokens. GENERATED from design/tokens.json by
+   scripts/build-tokens.mjs: don't edit this file. Change the value in the
+   design system, copy its tokens.json to design/tokens.json and run
+   `npm run tokens` from the repo root. */
+
+:root {
+  color-scheme: light dark;
+
+  /* Colors (light) */
+  --gl-brand-pink: #FF48B0;
+  --gl-brand-blue: #0078BF;
+  --gl-brand-ink: #111111;
+  --gl-brand-paper: #F2EFE6;
+  --gl-surface: #F2EFE6;
+  --gl-surface-raised: #FAF8F2;
+  --gl-surface-sunk: #E6E2D6;
+  --gl-text: #111111;
+  --gl-text-secondary: #4A4740;
+  --gl-text-muted: #6E6A60;
+  --gl-border: #111111;
+  --gl-border-subtle: #CFCABB;
+  --gl-accent: #FF48B0;
+  --gl-on-accent: #111111;
+  --gl-accent-text: #C2006F;
+  --gl-accent-subtle: #FBE3EA;
+  --gl-on-accent-subtle: #111111;
+  --gl-on-accent-subtle-secondary: #4A4740;
+  --gl-role: #005F99;
+  --gl-on-role: #F2EFE6;
+  --gl-focus: #111111;
+  --gl-status-open: #1E7A3E;
+  --gl-status-seasonal: #8A5A00;
+  --gl-status-closed: #B3261E;
+  --gl-status-soon: #4A4740;
+  --gl-danger: #B3261E;
+  --gl-on-danger: #F2EFE6;
+  --gl-overlay: rgba(17, 17, 17, 0.6);
+  --gl-map-pin: #FF48B0;
+  --gl-map-pin-outline: #111111;
+
+  /* Type */
+  --gl-font-display: "Archivo Black", "Archivo", system-ui, sans-serif;
+  --gl-font-sans: "Archivo", system-ui, sans-serif;
+  --gl-type-display-xl: 48px;
+  --gl-type-display-xl--line-height: 46px;
+  --gl-type-display-xl--font-weight: 400;
+  --gl-type-display-xl--font-family: var(--gl-font-display);
+  --gl-type-display: 32px;
+  --gl-type-display--line-height: 32px;
+  --gl-type-display--font-weight: 400;
+  --gl-type-display--font-family: var(--gl-font-display);
+  --gl-type-title: 22px;
+  --gl-type-title--line-height: 24px;
+  --gl-type-title--font-weight: 400;
+  --gl-type-title--font-family: var(--gl-font-display);
+  --gl-type-headline: 18px;
+  --gl-type-headline--line-height: 24px;
+  --gl-type-headline--font-weight: 600;
+  --gl-type-headline--font-family: var(--gl-font-sans);
+  --gl-type-body: 16px;
+  --gl-type-body--line-height: 24px;
+  --gl-type-body--font-weight: 400;
+  --gl-type-body--font-family: var(--gl-font-sans);
+  --gl-type-body-sm: 14px;
+  --gl-type-body-sm--line-height: 20px;
+  --gl-type-body-sm--font-weight: 400;
+  --gl-type-body-sm--font-family: var(--gl-font-sans);
+  --gl-type-label: 12px;
+  --gl-type-label--line-height: 16px;
+  --gl-type-label--font-weight: 600;
+  --gl-type-label--font-family: var(--gl-font-sans);
+  --gl-type-label--letter-spacing: 0.06em;
+  --gl-type-caption: 12px;
+  --gl-type-caption--line-height: 16px;
+  --gl-type-caption--font-weight: 400;
+  --gl-type-caption--font-family: var(--gl-font-sans);
+
+  /* Spacing, radius, stroke, size and layout */
+  --gl-space-1: 4px;
+  --gl-space-2: 8px;
+  --gl-space-3: 12px;
+  --gl-space-4: 16px;
+  --gl-space-6: 24px;
+  --gl-space-8: 32px;
+  --gl-space-12: 48px;
+  --gl-radius-none: 0px;
+  --gl-stroke-hairline: 1px;
+  --gl-stroke-rule: 2px;
+  --gl-tap-min: 48px;
+  --gl-icon: 24px;
+  --gl-control-web: 40px;
+  --gl-row-web: 44px;
+  --gl-sidebar-width: 240px;
+  --gl-content-max: 1200px;
+  --gl-detail-pane: 480px;
+  --gl-split-min: 1024px;
+
+  /* shadcn/ui, mapped onto the tokens above */
+  --radius: var(--gl-radius-none);
+  --background: var(--gl-surface);
+  --foreground: var(--gl-text);
+  --card: var(--gl-surface-raised);
+  --card-foreground: var(--gl-text);
+  --popover: var(--gl-surface-raised);
+  --popover-foreground: var(--gl-text);
+  --primary: var(--gl-accent);
+  --primary-foreground: var(--gl-on-accent);
+  --secondary: var(--gl-surface);
+  --secondary-foreground: var(--gl-text);
+  --muted: var(--gl-surface-sunk);
+  --muted-foreground: var(--gl-text-secondary);
+  --accent: var(--gl-surface-raised);
+  --accent-foreground: var(--gl-text);
+  --destructive: var(--gl-danger);
+  --destructive-foreground: var(--gl-on-danger);
+  --border: var(--gl-border);
+  --input: var(--gl-border);
+  --ring: var(--gl-focus);
+  --sidebar: var(--gl-surface);
+  --sidebar-foreground: var(--gl-text);
+  --sidebar-primary: var(--gl-accent);
+  --sidebar-primary-foreground: var(--gl-on-accent);
+  --sidebar-accent: var(--gl-surface-raised);
+  --sidebar-accent-foreground: var(--gl-text);
+  --sidebar-border: var(--gl-border);
+  --sidebar-ring: var(--gl-focus);
+}
+
+/* Colors (dark), following the device setting */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gl-surface: #111111;
+    --gl-surface-raised: #1C1C1C;
+    --gl-surface-sunk: #0A0A0A;
+    --gl-text: #F2EFE6;
+    --gl-text-secondary: #B8B4AA;
+    --gl-text-muted: #8C887E;
+    --gl-border: #F2EFE6;
+    --gl-border-subtle: #333333;
+    --gl-accent-text: #FF48B0;
+    --gl-focus: #F2EFE6;
+    --gl-status-open: #4CC27A;
+    --gl-status-seasonal: #F2B233;
+    --gl-status-closed: #FF8A5C;
+    --gl-status-soon: #B8B4AA;
+    --gl-danger: #FF8A5C;
+    --gl-on-danger: #111111;
+  }
+}

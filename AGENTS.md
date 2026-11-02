@@ -36,6 +36,12 @@ Run lint and typecheck before declaring any task done.
 - **Rachel reviews, tests and merges.** A PR is marked ready once its migrations are applied and it's been tried in the simulator. Merge with a merge commit, not squash, so the feature's commits stay separate. Delete the branch after merging.
 - Before pushing, fetch `main` and rebase the branch on it if `main` has moved.
 
+## Design tokens
+
+- **`design/tokens.json` is a copy of the Grindylocks design system's `tokens.json`,** and the design system is the source of truth. Change a value there first, copy the file into `design/`, then run `npm run tokens`.
+- `npm run tokens` writes `src/theme/tokens.ts` (the app) and `web/src/styles/tokens.css` (the web admin). Never edit either by hand; `npm run check:tokens` fails if they're stale. Run it with the other checks before a PR.
+- `design/web.md` is a copy of the design system's Web section: the rules for the web admin.
+
 ## Data fetching (TanStack Query)
 
 Server data is cached with **TanStack Query** (`@tanstack/react-query`); the client and its React Native wiring live in `src/lib/query.ts`.

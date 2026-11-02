@@ -65,6 +65,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "check:i18n": "node scripts/check-translations.mjs",
+    "tokens": "node scripts/build-tokens.mjs",
+    "check:tokens": "node scripts/build-tokens.mjs --check",
     "db:types": "supabase gen types typescript --project-id ytfdgacofenkehnbbhsc > src/lib/database.types.ts",
     "build:ios-sim": "eas build --profile development-simulator --platform ios",
     "run:ios-sim": "eas build:run --platform ios --latest"
