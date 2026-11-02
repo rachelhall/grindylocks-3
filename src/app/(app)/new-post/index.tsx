@@ -135,7 +135,10 @@ export default function NewPostMedia() {
         </View>
         {items.length > 0 ? (
           <Text variant="label" color="textSecondary">
-            {t('post.mix', { clips, photos: items.length - clips })}
+            {t('post.mix', {
+              clips: t('post.clipCount', { count: clips }),
+              photos: t('post.photoCount', { count: items.length - clips }),
+            })}
           </Text>
         ) : null}
       </View>

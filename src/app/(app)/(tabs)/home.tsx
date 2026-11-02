@@ -2,7 +2,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+  type ViewToken,
+} from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
 import { FeedHeader } from '@/components/feed';
@@ -12,6 +21,7 @@ import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useNotificationsUnread } from '@/lib/engagement';
 import { useMetro } from '@/lib/parks';
+import { ActivePostContext } from '@/lib/playback';
 import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
 import { keys } from '@/lib/query';
 import { type PostJob, uploads, useUploads } from '@/lib/uploads';
@@ -56,6 +66,15 @@ export default function Home() {
       void refetchUnread();
     }, [refetchUnread]),
   );
+
+  // The post mostly on screen (60%) is the one whose clip plays; the first
+  // one wins when two are.
+  const [activePost, setActivePost] = useState<string | null>(null);
+  const [viewability] = useState({ itemVisiblePercentThreshold: 60 });
+  const onViewable = useCallback(({ viewableItems }: { viewableItems: ViewToken<Item>[] }) => {
+    const first = viewableItems.find((v) => v.isViewable && v.item?.kind === 'post');
+    setActivePost(first?.item?.kind === 'post' ? first.item.post.id : null);
+  }, []);
 
   // A post that finished uploading shows up in the feed.
   const queuedIds = queued.map((q) => q.postId).join(',');
@@ -115,8 +134,11 @@ export default function Home() {
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
       <FeedHeader title={t('home.title')} hasUnread={Boolean(unread.data)} />
+      <ActivePostContext.Provider value={activePost}>
       <FlatList
         data={items}
+        viewabilityConfig={viewability}
+        onViewableItemsChanged={onViewable}
         keyExtractor={(item, i) =>
           item.kind === 'post'
             ? `${item.section}-${item.post.id}`
@@ -175,6 +197,7 @@ export default function Home() {
           ) : null
         }
       />
+      </ActivePostContext.Provider>
     </SafeAreaView>
   );
 }

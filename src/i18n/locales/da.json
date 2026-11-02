@@ -134,7 +134,7 @@
     "addMore": "Tilføj flere billeder og klip",
     "selected": "{{count}} af {{max}} valgt",
     "limits": "Billeder og klip på op til 60 sek. hver",
-    "mix": "{{clips}} klip · {{photos}} billeder",
+    "mix": "{{clips}} · {{photos}}",
     "remove": "Fjern nr. {{number}}",
     "rejectedTooLong_one": "{{count}} klip er længere end 60 sekunder. Klip det til i din Fotos-app først.",
     "rejectedTooLong_other": "{{count}} klip er længere end 60 sekunder. Klip dem til i din Fotos-app først.",
@@ -148,7 +148,11 @@
     "preparing": "Gør dine billeder og klip klar …",
     "postIt": "Del det",
     "next": "Næste",
-    "captionTitle": "Tekst"
+    "captionTitle": "Tekst",
+    "clipCount_one": "{{count}} klip",
+    "clipCount_other": "{{count}} klip",
+    "photoCount_one": "{{count}} billede",
+    "photoCount_other": "{{count}} billeder"
   },
   "uploads": {
     "uploading": "Uploader {{done}} af {{total}}",
@@ -676,5 +680,10 @@
     "replyingToThread": "Svarer i denne tråd",
     "cancelReply": "Annullér svar",
     "failed": "Din kommentar kunne ikke sendes"
+  },
+  "clip": {
+    "play": "Afspil klip",
+    "unmute": "Slå lyd til",
+    "mute": "Slå lyd fra"
   }
 }
