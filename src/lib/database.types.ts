@@ -358,6 +358,107 @@ export type Database = {
         }
         Relationships: []
       }
+      moderation_actions: {
+        Row: {
+          action: string
+          actor_id: string
+          comment_id: string | null
+          created_at: string
+          id: string
+          message: string | null
+          obstacle_id: string | null
+          park_id: string | null
+          park_info_report_id: string | null
+          post_id: string | null
+          report_ids: string[]
+          snapshot: Json | null
+          suspended_until: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          obstacle_id?: string | null
+          park_id?: string | null
+          park_info_report_id?: string | null
+          post_id?: string | null
+          report_ids?: string[]
+          snapshot?: Json | null
+          suspended_until?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          comment_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string | null
+          obstacle_id?: string | null
+          park_id?: string | null
+          park_info_report_id?: string | null
+          post_id?: string | null
+          report_ids?: string[]
+          snapshot?: Json | null
+          suspended_until?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_actions_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_obstacle_id_fkey"
+            columns: ["obstacle_id"]
+            isOneToOne: false
+            referencedRelation: "obstacles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_park_info_report_id_fkey"
+            columns: ["park_info_report_id"]
+            isOneToOne: false
+            referencedRelation: "park_info_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_actions_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -365,6 +466,7 @@ export type Database = {
           created_at: string
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          message: string | null
           park_id: string | null
           post_id: string | null
           read_at: string | null
@@ -376,6 +478,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
+          message?: string | null
           park_id?: string | null
           post_id?: string | null
           read_at?: string | null
@@ -387,6 +490,7 @@ export type Database = {
           created_at?: string
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
+          message?: string | null
           park_id?: string | null
           post_id?: string | null
           read_at?: string | null
@@ -1051,6 +1155,8 @@ export type Database = {
           published_at: string | null
           slide_count: number
           status: Database["public"]["Enums"]["post_status"]
+          comment_count: number | null
+          liked_by_me: boolean | null
         }
         Insert: {
           anonymized?: boolean
@@ -1509,6 +1615,8 @@ export type Database = {
           id: string
         }[]
       }
+      delete_my_account: { Args: { keep_posts?: boolean }; Returns: undefined }
+      export_my_data: { Args: never; Returns: Json }
       feed_following: {
         Args: { before_at?: string; before_id?: string; max_results?: number }
         Returns: {
@@ -1558,6 +1666,16 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      file_report: {
+        Args: {
+          comment?: string
+          details?: string
+          person?: string
+          post?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+        }
+        Returns: undefined
+      }
       filmed_posts: {
         Args: {
           before_at?: string
@@ -1597,6 +1715,41 @@ export type Database = {
       }
       mark_admin_page_seen: { Args: { page: string }; Returns: undefined }
       mark_notifications_seen: { Args: never; Returns: undefined }
+      moderate_reports: {
+        Args: {
+          days?: number
+          decision: string
+          hide?: boolean
+          message?: string
+          target: string
+          target_kind: string
+        }
+        Returns: undefined
+      }
+      moderation_queue: {
+        Args: { metro?: string }
+        Returns: {
+          id: string
+          kind: string
+          label: string | null
+          latest_at: string
+          metro_area_id: string | null
+          metro_name: string | null
+          park_id: string | null
+          park_name: string | null
+          park_slug: string | null
+          reason: string | null
+          report_count: number
+          state: string
+          target: string
+          username: string | null
+          waiting_since: string
+        }[]
+      }
+      moderation_report_detail: {
+        Args: { target: string; target_kind: string }
+        Returns: Json
+      }
       my_account: {
         Args: never
         Returns: {
@@ -1672,6 +1825,14 @@ export type Database = {
           tags: boolean
         }[]
       }
+      my_restriction: {
+        Args: never
+        Returns: {
+          banned: boolean
+          message: string | null
+          suspended_until: string | null
+        }[]
+      }
       notifications_unread: { Args: never; Returns: boolean }
       obstacle_posts: {
         Args: {
@@ -1700,6 +1861,8 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      obstacle_review_detail: { Args: { obstacle: string }; Returns: Json }
+      park_info_review_detail: { Args: { report: string }; Returns: Json }
       park_regulars_list: {
         Args: { max_results?: number; park: string }
         Returns: {
@@ -1769,11 +1932,41 @@ export type Database = {
         Args: { park: string; photo_ids: string[] }
         Returns: undefined
       }
+      report_park_info: {
+        Args: {
+          field: Database["public"]["Enums"]["park_field"]
+          note?: string
+          obstacle?: string
+          park: string
+          photo_path?: string
+          suggested?: Json
+        }
+        Returns: string
+      }
       request_access: {
         Args: {
           disciplines?: Database["public"]["Enums"]["discipline"][]
           email: string
           home_city?: string
+        }
+        Returns: undefined
+      }
+      review_obstacle: {
+        Args: {
+          decision: string
+          general_type?: Database["public"]["Enums"]["obstacle_type"]
+          merge_into?: string
+          name?: string
+          obstacle: string
+        }
+        Returns: undefined
+      }
+      review_park_info: {
+        Args: {
+          approve: boolean
+          mark_verified?: boolean
+          report: string
+          value?: Json
         }
         Returns: undefined
       }
@@ -1805,6 +1998,7 @@ export type Database = {
           username: string
         }[]
       }
+      set_park_verified: { Args: { park: string }; Returns: undefined }
       set_push_setting: {
         Args: { enabled: boolean; setting: string }
         Returns: undefined
@@ -1862,6 +2056,11 @@ export type Database = {
         | "invite_used"
         | "park_report_accepted"
         | "role_invite"
+        | "post_removed"
+        | "comment_removed"
+        | "warning"
+        | "suspension"
+        | "role_vacated"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -1925,6 +2124,7 @@ export type Database = {
         | "spam"
         | "inappropriate"
         | "other"
+        | "wrong_park"
       report_status: "open" | "dismissed" | "actioned" | "escalated"
       review_status: "open" | "accepted" | "rejected"
       role_name: "owner" | "city_admin" | "park_admin" | "park_contributor"
@@ -2069,6 +2269,11 @@ export const Constants = {
         "invite_used",
         "park_report_accepted",
         "role_invite",
+        "post_removed",
+        "comment_removed",
+        "warning",
+        "suspension",
+        "role_vacated",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [
@@ -2137,6 +2342,7 @@ export const Constants = {
         "spam",
         "inappropriate",
         "other",
+        "wrong_park",
       ],
       report_status: ["open", "dismissed", "actioned", "escalated"],
       review_status: ["open", "accepted", "rejected"],

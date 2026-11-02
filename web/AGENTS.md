@@ -13,6 +13,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 The web admin for role holders (Rachel, city admins, park admins). It's its own npm project inside the app's repo, with its own lockfile: run npm commands from `web/`. The repo root's AGENTS.md (branches, pull requests, tokens) applies here too.
 
 - **Two sites, one app (Nov 2):** `src/proxy.ts` serves the public marketing page (`src/app/site`) at `/` on grindylocks.com, sends www to the bare domain and any other path there to admin.grindylocks.com. Every other host is the admin, where `/site` stays public so previews can show it. Host rules live in `src/lib/hosts.ts`. Only grindylocks.com is indexable (`next.config.ts`).
+- **The queue** (`src/app/(admin)/queue`, Nov 2): the URL holds the state (`?tab=`, `?area=`, `?item=`), the list and detail pane share one page, and every action is a Server Function in `actions.ts` that calls a moderation function (`moderate_reports`, `review_park_info`, `review_obstacle`). Reads live in `src/lib/queue.ts`. Keyboard: j/k, Enter, Esc, ?, and per-pane d/h/e/a/x, each opening its confirmation.
 - **The request form** calls `request_access()` through a cookie-less client (`src/lib/supabase/public.ts`), so it always asks as a signed-out visitor. Requests are readable only by the owner (table `access_requests`).
 - **Local builds without Google Fonts** (sandboxes): `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=<mock.js> npx next build --webpack`. Vercel fetches the real fonts.
 
