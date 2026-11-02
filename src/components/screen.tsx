@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import type { Edge } from 'react-native-safe-area-context';
+
+import { SafeAreaView } from '@/components/safe-area';
 
 import { space, useColors } from '@/theme';
 
@@ -13,15 +15,18 @@ export function FormScreen({
   children,
   footer,
   background,
+  edges,
 }: {
   header?: ReactNode;
   children: ReactNode;
   footer?: ReactNode;
   background?: string;
+  /** Leave out 'top' when the screen sits in a pageSheet, already below the status bar. */
+  edges?: Edge[];
 }) {
   const c = useColors();
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: background ?? c.surface }]}>
+    <SafeAreaView edges={edges} style={[styles.flex, { backgroundColor: background ?? c.surface }]}>
       <KeyboardAvoidingView
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}

@@ -2,7 +2,7 @@ import { Image } from 'expo-image';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { Button, Icon, SelectRow, TextField } from '@/components/ui';
 import type { PickedMedia } from '@/lib/media';
@@ -178,7 +178,7 @@ function SheetContent({
   };
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: c.surface }]}>
+    <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.sheetHead}>
           <Text variant="title" accessibilityRole="header" style={styles.flex}>

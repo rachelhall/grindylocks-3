@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView } from '@/components/safe-area';
 
 import { Icon, type IconName, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
