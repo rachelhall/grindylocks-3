@@ -13,13 +13,16 @@ import { useAuth } from '@/lib/auth';
 import { openState } from '@/lib/hours';
 import {
   type Bounds,
+  busiestMetroId,
   distanceMeters,
   fetchParksInMetroCached,
   fetchParksNearCached,
   formatDistance,
   type ParkPin,
   usePark,
+  useMetro,
   useParksInBounds,
+  useParksInMetro,
   useSavedParks,
 } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
@@ -28,6 +31,16 @@ type LatLng = { latitude: number; longitude: number };
 
 /** Roughly a neighbourhood: enough to see a few nearby parks. */
 const NEAR_DELTA = 0.12;
+
+/** Beyond this, the nearest park isn't "near you", and the map says so. */
+const FAR_M = 100_000;
+
+/** You, framed about 100 km out each way, so an empty map reads as "nothing nearby". */
+function farRegion(here: LatLng): Region {
+  const latitudeDelta = (FAR_M * 2) / 111_000;
+  const shrink = Math.max(Math.cos((here.latitude * Math.PI) / 180), 0.2);
+  return { ...here, latitudeDelta, longitudeDelta: latitudeDelta / shrink };
+}
 
 function toBounds(r: Region): Bounds {
   return {
@@ -59,6 +72,9 @@ export default function MapScreen() {
   const [me, setMe] = useState<LatLng | null>(null);
   const [locationOn, setLocationOn] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  /** The closest park, when it's more than FAR_M away: shows the "no parks near you" card. */
+  const [far, setFar] = useState<ParkPin | null>(null);
+  const [farCardHeight, setFarCardHeight] = useState(180);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Where to start ------------------------------------------------------- */
@@ -75,8 +91,9 @@ export default function MapScreen() {
     });
   }, []);
 
+  // Your home city, or the metro area with the most parks if you haven't set one.
   const showHomeCity = useCallback(async () => {
-    const metroId = profile?.home_metro_area_id;
+    const metroId = profile?.home_metro_area_id ?? (await busiestMetroId().catch(() => null));
     if (!metroId) return;
     const parks = await fetchParksInMetroCached(metroId).catch(() => []);
     const located = parks.filter((p) => p.latitude !== null);
@@ -127,7 +144,11 @@ export default function MapScreen() {
       }
       const near = await fetchParksNearCached(here.latitude, here.longitude, 5).catch(() => []);
       if (cancelled) return;
-      if (near[0]) {
+      const closest = near[0];
+      if (closest && (closest.distance_m ?? distanceMeters(here, closest)) > FAR_M) {
+        setFar(closest);
+        mapRef.current?.animateToRegion(farRegion(here), 400);
+      } else if (closest) {
         setSelected(near[0]);
         // Frame you and the nearest park together.
         fitTo([here, { latitude: near[0].latitude, longitude: near[0].longitude }]);
@@ -164,13 +185,33 @@ export default function MapScreen() {
   // same cache entry the park page reads, so a park seen once shows at once.
   const { data: detail } = usePark(selected?.slug);
 
+  // Far from every park, the button goes back to the ~100 km view and its card.
   async function recenter() {
     const here = me ?? (await locate(true));
-    if (here) {
+    if (here && far) {
+      setSelected(null);
+      mapRef.current?.animateToRegion(farRegion(here), 400);
+    } else if (here) {
       mapRef.current?.animateToRegion({ ...here, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA }, 400);
     } else {
       await showHomeCity();
     }
+  }
+
+  /* Far from every park ------------------------------------------------------ */
+
+  const homeId = profile?.home_metro_area_id;
+  const { data: homeMetro } = useMetro(homeId);
+  const { data: homeParks } = useParksInMetro(homeId);
+  const homeHasParks = Boolean(homeParks?.some((p) => p.latitude !== null));
+
+  function goToClosest() {
+    if (!far) return;
+    setSelected(far);
+    mapRef.current?.animateToRegion(
+      { latitude: far.latitude, longitude: far.longitude, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA },
+      400,
+    );
   }
 
   /* Card ----------------------------------------------------------------------- */
@@ -184,6 +225,8 @@ export default function MapScreen() {
         timeZone: cardDetail.metro?.timezone ?? null,
       })
     : null;
+  const farDistance = far && me ? formatDistance(far.distance_m ?? distanceMeters(me, far), metric, i18n.language) : null;
+  const showFar = far !== null && selected === null;
   const distance =
     selected && me
       ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language)
@@ -265,7 +308,7 @@ export default function MapScreen() {
       </View>
 
       {/* Locate me */}
-      <View style={[styles.locate, { bottom: (selected ? 228 : 24) }]}>
+      <View style={[styles.locate, { bottom: selected ? 228 : showFar ? space[3] + farCardHeight + space[3] : 24 }]}>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('map.locate')}
@@ -279,6 +322,34 @@ export default function MapScreen() {
           <Icon name="locate" color={c.text} size={22} />
         </Pressable>
       </View>
+
+      {/* No parks near you yet */}
+      {far && !selected ? (
+        <View
+          accessibilityRole="summary"
+          onLayout={(e) => setFarCardHeight(e.nativeEvent.layout.height)}
+          style={[styles.card, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}
+        >
+          <View style={styles.cardMain}>
+            <Text variant="title">{t('map.noParksNear')}</Text>
+            <Text variant="bodySm" color="textSecondary" numberOfLines={2}>
+              {farDistance
+                ? t('map.closest', { park: far.display_name, distance: farDistance })
+                : t('map.closestNoDistance', { park: far.display_name })}
+            </Text>
+          </View>
+          <View style={styles.farActions}>
+            <Button label={t('map.goToClosest')} onPress={goToClosest} />
+            {homeHasParks && homeMetro ? (
+              <Button
+                variant="secondary"
+                label={t('map.goToCity', { city: homeMetro.name })}
+                onPress={() => void showHomeCity()}
+              />
+            ) : null}
+          </View>
+        </View>
+      ) : null}
 
       {/* Preview card */}
       {selected ? (
@@ -357,4 +428,5 @@ const styles = StyleSheet.create({
   },
   cardMain: { gap: space[1] },
   cardActions: { flexDirection: 'row', gap: space[2], alignItems: 'center' },
+  farActions: { gap: space[2] },
 });

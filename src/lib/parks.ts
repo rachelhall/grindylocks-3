@@ -318,7 +318,24 @@ export const fetchParksInMetroCached = (metroId: string) =>
     staleTime: fresh.parks,
   });
 
-export const fetchParksNearCached = (lat: number, lng: number, max: number) =>
+/**
+ * The metro area with the most parks: where the map opens when it knows
+ * neither your location nor your home city. Reads the directory cache.
+ */
+export async function busiestMetroId(): Promise<string | null> {
+  const { parks } = await queryClient.fetchQuery({
+    queryKey: keys.directory(),
+    queryFn: fetchDirectory,
+    staleTime: fresh.parks,
+  });
+  const counts = new Map<string, number>();
+  for (const p of parks) counts.set(p.metro_area_id, (counts.get(p.metro_area_id) ?? 0) + 1);
+  let best: string | null = null;
+  for (const [id, n] of counts) if (best === null || n > counts.get(best)!) best = id;
+  return best;
+}
+
+export const fetchParksNearCached =(lat: number, lng: number, max: number) =>
   queryClient.fetchQuery({
     queryKey: keys.parksNear(lat, lng, max),
     queryFn: () => parksNear(lat, lng, max),
