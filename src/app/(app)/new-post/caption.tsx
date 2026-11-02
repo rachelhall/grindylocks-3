@@ -1,23 +1,29 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
-import { MediaTag } from '@/components/media';
+import { MediaTag, MediaThumb } from '@/components/media';
 import { TagSectionTitle, useTagSummary } from '@/components/tagging';
 import { BackButton, Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { prepareForUpload } from '@/lib/media';
-import { usePostDraft } from '@/lib/post-draft';
+import { type DraftItem, usePostDraft } from '@/lib/post-draft';
 import { Sentry } from '@/lib/sentry';
 import { createPost } from '@/lib/uploads';
 import { uuid } from '@/lib/uuid';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
 
 const CAPTION_MAX = 2200;
+const THUMB_H = 160;
+
+/** Slides keep their shape here, between 3:4 and 4:3. */
+function thumbWidth(m: DraftItem): number {
+  const ratio = m.width > 0 && m.height > 0 ? m.width / m.height : 1;
+  return Math.round(THUMB_H * Math.min(4 / 3, Math.max(3 / 4, ratio)));
+}
 
 /**
  * New post, step 3 of 3 (Post-Caption mockup): the caption, a summary of
@@ -34,7 +40,7 @@ export default function NewPostCaption() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const first = items[0];
+  const clips = items.filter((m) => m.kind === 'video').length;
 
   async function post() {
     const metroAreaId = profile?.home_metro_area_id;
@@ -74,36 +80,41 @@ export default function NewPostCaption() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <View style={styles.captionRow}>
-          {first ? (
-            <View style={[styles.thumb, { backgroundColor: c.surfaceSunk }]}>
-              {first.kind === 'photo' ? (
-                <Image source={{ uri: first.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
-              ) : (
-                <View style={styles.center}>
-                  <Icon name="video" color={c.textSecondary} size={20} />
-                </View>
-              )}
-              {items.length > 1 ? <MediaTag label={`1 / ${items.length}`} style={styles.thumbTag} /> : null}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.slides}
+          accessibilityLabel={t('post.mix', {
+            clips: t('post.clipCount', { count: clips }),
+            photos: t('post.photoCount', { count: items.length - clips }),
+          })}
+        >
+          {items.map((m, i) => (
+            <View
+              key={m.key}
+              style={[styles.slide, { width: thumbWidth(m), backgroundColor: c.surfaceSunk }]}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            >
+              <MediaThumb uri={m.uri} kind={m.kind} />
+              {items.length > 1 ? <MediaTag label={String(i + 1)} style={styles.slideTag} /> : null}
             </View>
-          ) : null}
-          <View style={styles.field}>
-            <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
-              {t('post.captionLabel')}
-            </Text>
-            <TextInput
-              accessibilityLabel={t('post.captionLabel')}
-              value={caption}
-              onChangeText={setCaption}
-              placeholder={t('post.captionPlaceholder')}
-              placeholderTextColor={c.textMuted}
-              selectionColor={c.accent}
-              cursorColor={c.text}
-              multiline
-              maxLength={CAPTION_MAX}
-              style={[styles.caption, { color: c.text, backgroundColor: c.surfaceRaised, borderColor: c.border }]}
-            />
-          </View>
+          ))}
+        </ScrollView>
+
+        <View style={styles.field}>
+          <TextInput
+            accessibilityLabel={t('post.captionLabel')}
+            value={caption}
+            onChangeText={setCaption}
+            placeholder={t('post.captionPlaceholder')}
+            placeholderTextColor={c.textMuted}
+            selectionColor={c.accent}
+            cursorColor={c.text}
+            multiline
+            maxLength={CAPTION_MAX}
+            style={[styles.caption, { color: c.text, borderBottomColor: c.text }]}
+          />
         </View>
 
         <View style={styles.tagged}>
@@ -178,23 +189,23 @@ const styles = StyleSheet.create({
     paddingTop: space[2],
   },
   spacer: { width: 48 },
-  content: { padding: space[4], gap: space[6] },
-  captionRow: { flexDirection: 'row', gap: space[3], alignItems: 'flex-start' },
-  thumb: { width: 72, height: 92, overflow: 'hidden' },
-  thumbTag: { left: 4, bottom: 4 },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  field: { flex: 1, gap: 6 },
+  content: { paddingTop: space[4], paddingBottom: space[6], gap: space[6] },
+  slides: { paddingHorizontal: space[4], gap: space[2], alignItems: 'flex-end' },
+  slide: { height: THUMB_H, overflow: 'hidden' },
+  slideTag: { left: 6, top: 6 },
+  field: { paddingHorizontal: space[4] },
   caption: {
-    minHeight: 96,
-    borderWidth: stroke.rule,
-    paddingHorizontal: space[3],
-    paddingVertical: space[3],
+    minHeight: 72,
+    borderBottomWidth: stroke.rule,
+    paddingHorizontal: 0,
+    paddingTop: space[1],
+    paddingBottom: space[3],
     fontFamily: fontFamily.sans,
     fontSize: 16,
     lineHeight: 22,
     textAlignVertical: 'top',
   },
-  tagged: { gap: space[2] },
+  tagged: { gap: space[2], paddingHorizontal: space[4] },
   summaryRow: {
     flexDirection: 'row',
     gap: space[3],

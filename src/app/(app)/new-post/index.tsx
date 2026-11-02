@@ -4,20 +4,27 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
-import { PickedTile } from '@/components/media';
+import { DraftPager, StripThumb } from '@/components/media';
 import { Button, Icon } from '@/components/ui';
-import { MAX_SLIDES, pickFromLibrary, type Rejection } from '@/lib/media';
-import { usePostDraft } from '@/lib/post-draft';
+import { formatDuration, MAX_SLIDES, pickFromLibrary, type Rejection } from '@/lib/media';
+import { type DraftItem, usePostDraft } from '@/lib/post-draft';
 import { Sentry } from '@/lib/sentry';
-import { space, stroke, Text, useColors } from '@/theme';
+import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
-const GRID_GAP = 3;
+const STRIP_H = 80;
+
+/** Strip thumbnails keep their shape, between 3:4 and 4:3. */
+function stripWidth(m: DraftItem): number {
+  const ratio = m.width > 0 && m.height > 0 ? m.width / m.height : 1;
+  return Math.round(STRIP_H * Math.min(4 / 3, Math.max(3 / 4, ratio)));
+}
 
 /**
- * New post, step 1 of 3 (Post-Media mockup): pick up to 10 photos and clips
- * from the camera roll, in order. Clips over 60 seconds are turned down with
- * a note to trim them in Photos first (no in-app trimming or Files source
- * yet). Next goes to tagging.
+ * New post, step 1 of 3 (Post-Media mockup): the picked photos and clips,
+ * big and at the shape they'll post at, with a strip below to switch,
+ * reorder and remove them. The system picker adds media (up to 10; clips
+ * over 60 seconds are turned down with a note to trim them in Photos first).
+ * Next goes to tagging.
  */
 export default function NewPostMedia() {
   const { t } = useTranslation();
@@ -25,13 +32,15 @@ export default function NewPostMedia() {
   const { width } = useWindowDimensions();
   const { items, setItems, addMedia } = usePostDraft();
 
+  const [selected, setSelected] = useState(0);
   const [rejected, setRejected] = useState<Record<Rejection, number>>({ tooLong: 0, tooBig: 0, unsupported: 0 });
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const remaining = MAX_SLIDES - items.length;
-  const tile = (width - space[6] * 2 - GRID_GAP * 2) / 3;
   const clips = items.filter((m) => m.kind === 'video').length;
+  const index = Math.min(selected, Math.max(items.length - 1, 0));
+  const current = items[index];
 
   async function pick() {
     setPicking(true);
@@ -41,13 +50,32 @@ export default function NewPostMedia() {
       const counts: Record<Rejection, number> = { tooLong: 0, tooBig: 0, unsupported: 0 };
       for (const r of result.rejected) counts[r.reason] += 1;
       setRejected(counts);
-      addMedia(result.picked, MAX_SLIDES);
+      if (result.picked.length > 0) {
+        // Show the first new one.
+        setSelected(items.length);
+        addMedia(result.picked, MAX_SLIDES);
+      }
     } catch (err) {
       Sentry.captureException(err);
       setError(t('errors.generic'));
     } finally {
       setPicking(false);
     }
+  }
+
+  function remove(key: string) {
+    setItems((prev) => prev.filter((x) => x.key !== key));
+  }
+
+  function move(from: number, to: number) {
+    if (to < 0 || to >= items.length) return;
+    setItems((prev) => {
+      const next = [...prev];
+      const [m] = next.splice(from, 1);
+      next.splice(to, 0, m);
+      return next;
+    });
+    setSelected(to);
   }
 
   const rejectionLines = (
@@ -59,6 +87,12 @@ export default function NewPostMedia() {
   )
     .filter(([key]) => rejected[key] > 0)
     .map(([key, msg]) => t(msg, { count: rejected[key] }));
+
+  const label = current
+    ? current.kind === 'video' && current.durationS
+      ? t('tagging.slideClip', { number: index + 1, duration: formatDuration(current.durationS) })
+      : t('tagging.slide', { number: index + 1 })
+    : '';
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
@@ -75,64 +109,107 @@ export default function NewPostMedia() {
         />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content}>
-        {items.length > 0 ? (
-          <View style={styles.grid}>
-            {items.map((m, i) => (
-              <PickedTile
-                key={m.key}
-                uri={m.uri}
-                kind={m.kind}
-                durationS={m.durationS}
-                number={i + 1}
-                size={tile}
-                removeLabel={t('post.remove', { number: i + 1 })}
-                onRemove={() => setItems((prev) => prev.filter((x) => x.key !== m.key))}
-              />
-            ))}
-            {remaining > 0 ? (
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={t('post.addMore')}
-                onPress={pick}
-                disabled={picking}
-                style={({ pressed }) => [
-                  styles.addTile,
-                  { width: tile, height: tile, borderColor: c.border },
-                  pressed && { opacity: 0.75 },
-                ]}
-              >
-                <Icon name="add" color={c.text} />
-              </Pressable>
-            ) : null}
+      {items.length === 0 ? (
+        <View style={styles.empty}>
+          <View style={[styles.emptyIcon, { backgroundColor: c.surfaceRaised }]}>
+            <Icon name="addPhoto" color={c.text} size={32} />
           </View>
-        ) : (
-          <Button label={t('post.addMedia')} onPress={pick} loading={picking} />
-        )}
-
-        {rejectionLines.length > 0 ? (
-          <View style={styles.rejections} accessibilityLiveRegion="polite">
-            {rejectionLines.map((line) => (
-              <Text key={line} variant="bodySm" color="statusClosed">
-                {line}
-              </Text>
-            ))}
-          </View>
-        ) : null}
-        {error ? (
-          <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
-            {error}
-          </Text>
-        ) : null}
-      </ScrollView>
-
-      <View style={[styles.footer, { backgroundColor: c.surfaceRaised, borderTopColor: c.borderSubtle }]}>
-        <View style={styles.counts}>
-          <Text variant="headline">{t('post.selected', { count: items.length, max: MAX_SLIDES })}</Text>
+          <Button label={t('post.addMedia')} onPress={pick} loading={picking} style={styles.emptyButton} />
           <Text variant="bodySm" color="textSecondary">
             {t('post.limits')}
           </Text>
+          <Messages lines={rejectionLines} error={error} />
         </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.content}>
+          <DraftPager
+            items={items}
+            width={width}
+            index={index}
+            onIndexChange={setSelected}
+            label={label.toUpperCase()}
+          />
+
+          <View style={styles.section}>
+            <View style={styles.sectionHead}>
+              <Text variant="bodySm" accessibilityRole="header" style={styles.sectionTitle}>
+                {t('tagging.slides').toUpperCase()}
+              </Text>
+              <Text variant="caption" color="textSecondary">
+                {t('post.tapToPreview')}
+              </Text>
+            </View>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.strip}
+            >
+              {items.map((m, i) => (
+                <StripThumb
+                  key={m.key}
+                  uri={m.uri}
+                  kind={m.kind}
+                  width={stripWidth(m)}
+                  height={STRIP_H}
+                  number={i + 1}
+                  selected={i === index}
+                  onPress={() => setSelected(i)}
+                  onRemove={() => remove(m.key)}
+                  label={t('post.slideItem', { number: i + 1 })}
+                  removeLabel={t('post.remove', { number: i + 1 })}
+                  actions={[
+                    ...(i > 0 ? [{ name: 'earlier', label: t('post.moveEarlier'), run: () => move(i, i - 1) }] : []),
+                    ...(i < items.length - 1
+                      ? [{ name: 'later', label: t('post.moveLater'), run: () => move(i, i + 1) }]
+                      : []),
+                  ]}
+                />
+              ))}
+              {remaining > 0 ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('post.addMore')}
+                  onPress={pick}
+                  disabled={picking}
+                  style={({ pressed }) => [
+                    styles.addTile,
+                    { borderColor: c.textSecondary },
+                    (pressed || picking) && { opacity: 0.6 },
+                  ]}
+                >
+                  <Icon name="add" color={c.text} />
+                </Pressable>
+              ) : null}
+            </ScrollView>
+
+            {items.length > 1 ? (
+              <View style={styles.moveRow}>
+                <MoveButton
+                  label={t('post.moveEarlier')}
+                  icon="chevronLeft"
+                  disabled={index === 0}
+                  onPress={() => move(index, index - 1)}
+                />
+                <MoveButton
+                  label={t('post.moveLater')}
+                  icon="chevron"
+                  trailing
+                  disabled={index === items.length - 1}
+                  onPress={() => move(index, index + 1)}
+                />
+              </View>
+            ) : null}
+
+            <Messages lines={rejectionLines} error={error} />
+          </View>
+        </ScrollView>
+      )}
+
+      <View style={[styles.footer, { borderTopColor: c.borderSubtle }]}>
+        <Text variant="bodySm" color="textSecondary" style={styles.flex}>
+          {items.length > 0 ? t('post.selected', { count: items.length, max: MAX_SLIDES }) : t('post.limitsShort')}
+        </Text>
         {items.length > 0 ? (
           <Text variant="label" color="textSecondary">
             {t('post.mix', {
@@ -146,8 +223,59 @@ export default function NewPostMedia() {
   );
 }
 
+function MoveButton({
+  label,
+  icon,
+  trailing,
+  disabled,
+  onPress,
+}: {
+  label: string;
+  icon: 'chevron' | 'chevronLeft';
+  trailing?: boolean;
+  disabled: boolean;
+  onPress: () => void;
+}) {
+  const c = useColors();
+  const color = disabled ? c.textMuted : c.text;
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [styles.moveButton, pressed && { opacity: 0.6 }]}
+    >
+      {!trailing ? <Icon name={icon} color={color} size={14} /> : null}
+      <Text variant="bodySm" style={{ color, fontFamily: fontFamily.sansSemiBold }}>
+        {label}
+      </Text>
+      {trailing ? <Icon name={icon} color={color} size={14} /> : null}
+    </Pressable>
+  );
+}
+
+function Messages({ lines, error }: { lines: string[]; error: string | null }) {
+  if (lines.length === 0 && !error) return null;
+  return (
+    <View style={styles.messages} accessibilityLiveRegion="polite">
+      {lines.map((line) => (
+        <Text key={line} variant="bodySm" color="statusClosed">
+          {line}
+        </Text>
+      ))}
+      {error ? (
+        <Text variant="bodySm" color="statusClosed">
+          {error}
+        </Text>
+      ) : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  flex: { flex: 1 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -155,19 +283,35 @@ const styles = StyleSheet.create({
     gap: space[2],
     paddingHorizontal: space[4],
     paddingTop: space[2],
+    paddingBottom: space[3],
   },
   headerButton: { minWidth: 88, minHeight: 48 },
-  content: { padding: space[6], gap: space[6] },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: GRID_GAP },
-  addTile: { borderWidth: stroke.rule, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
-  rejections: { gap: space[1] },
-  counts: { flex: 1, gap: 2 },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space[4], padding: space[6] },
+  emptyIcon: { width: 88, height: 88, alignItems: 'center', justifyContent: 'center' },
+  emptyButton: { alignSelf: 'stretch' },
+  content: { paddingBottom: space[6] },
+  section: { paddingHorizontal: space[4], paddingTop: space[4], gap: space[3] },
+  sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: space[3] },
+  sectionTitle: { fontFamily: fontFamily.sansSemiBold, letterSpacing: 0.5 },
+  // Room above and right for the remove button that sits on a thumbnail's corner.
+  strip: { gap: space[2], alignItems: 'flex-end', paddingTop: 8, paddingRight: 8 },
+  addTile: {
+    width: 64,
+    height: STRIP_H,
+    borderWidth: stroke.rule,
+    borderStyle: 'dashed',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moveRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  moveButton: { minHeight: size.tapMin, flexDirection: 'row', alignItems: 'center', gap: space[1] },
+  messages: { gap: space[1] },
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[3],
-    paddingHorizontal: space[6],
-    paddingVertical: space[4],
+    paddingHorizontal: space[4],
+    paddingVertical: space[3],
     borderTopWidth: stroke.hairline,
   },
 });

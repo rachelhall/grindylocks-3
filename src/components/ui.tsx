@@ -63,6 +63,10 @@ const icons = {
   heartFill: { ios: 'heart.fill', android: 'favorite' },
   soundOn: { ios: 'speaker.wave.2.fill', android: 'volume_up' },
   soundOff: { ios: 'speaker.slash.fill', android: 'volume_off' },
+  obstacle: { ios: 'square.stack.3d.up', android: 'stacks' },
+  people: { ios: 'person.2', android: 'group' },
+  copy: { ios: 'doc.on.doc', android: 'content_copy' },
+  chevronLeft: { ios: 'chevron.left', android: 'chevron_left' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

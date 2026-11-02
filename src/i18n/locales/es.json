@@ -152,7 +152,12 @@
     "clipCount_one": "{{count}} clip",
     "clipCount_other": "{{count}} clips",
     "photoCount_one": "{{count}} foto",
-    "photoCount_other": "{{count}} fotos"
+    "photoCount_other": "{{count}} fotos",
+    "tapToPreview": "Toca una diapositiva para verla",
+    "moveEarlier": "Mover antes",
+    "moveLater": "Mover después",
+    "slideItem": "Diapositiva {{number}}",
+    "limitsShort": "Hasta 10 · clips de hasta 60 s"
   },
   "uploads": {
     "uploading": "Subiendo {{done}} de {{total}}",
@@ -623,7 +628,15 @@
     "whatsTagged": "Qué está etiquetado",
     "noTags": "Sin etiquetas",
     "filmedBy": "grabado por {{username}}",
-    "editLater": "Puedes editar el texto y las etiquetas después de publicar."
+    "editLater": "Puedes editar el texto y las etiquetas después de publicar.",
+    "parkLine": "Parque · todas las diapositivas",
+    "noObstacle": "Elige uno",
+    "noPeople": "Etiquetar a alguien",
+    "noFilmer": "Añadir filmer",
+    "sameAsShort": "Igual que la diapositiva {{number}}",
+    "slideTagsTitle": "Etiquetas de la diapositiva {{number}}",
+    "done": "Listo",
+    "peopleMore": "{{first}} +{{count}}"
   },
   "postCard": {
     "open": "Abrir la publicación de {{username}}",

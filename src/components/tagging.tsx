@@ -11,7 +11,7 @@ import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-
 import { SafeAreaView } from '@/components/safe-area';
 
 import { Avatar } from '@/components/profile';
-import { Button, Icon, TextField } from '@/components/ui';
+import { Button, Icon, type IconName, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { type ObstacleType, useDirectorySearch, useParksByIds } from '@/lib/parks';
 import { type PersonResult, searchPeople } from '@/lib/people';
@@ -632,6 +632,176 @@ function PersonRow({
   );
 }
 
+/* Rows for Tag it ------------------------------------------------------------------- */
+
+/** A row with an icon, a name, its value and a chevron. */
+function TagRow({
+  icon,
+  title,
+  value,
+  placeholder,
+  onPress,
+  line,
+}: {
+  icon: IconName;
+  title: string;
+  value: string | null;
+  placeholder: string;
+  onPress: () => void;
+  line?: string;
+}) {
+  const c = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, ${value ?? placeholder}`}
+      onPress={onPress}
+      style={({ pressed }) => [styles.tagRow, { borderBottomColor: c.borderSubtle }, pressed && styles.pressed]}
+    >
+      <Icon name={icon} color={c.text} size={22} />
+      {line ? (
+        <View style={styles.flex}>
+          <Text variant="headline" numberOfLines={1}>
+            {value ?? placeholder}
+          </Text>
+          <Text variant="caption" color="textSecondary">
+            {line}
+          </Text>
+        </View>
+      ) : (
+        <>
+          <Text variant="body" style={styles.tagRowTitle}>
+            {title}
+          </Text>
+          <Text
+            variant="body"
+            numberOfLines={1}
+            color={value ? 'text' : 'textSecondary'}
+            style={[styles.flex, value ? { fontFamily: fontFamily.sansSemiBold } : null]}
+          >
+            {value ?? placeholder}
+          </Text>
+        </>
+      )}
+      <Icon name="chevron" color={c.textSecondary} size={18} />
+    </Pressable>
+  );
+}
+
+/** The park as a light row at the top of Tag it: "City Heights · Park · every slide". */
+export function ParkRow({ park, onPress }: { park: PickedPark | null; onPress: () => void }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <View style={[styles.parkRow, { backgroundColor: c.surfaceRaised, borderTopColor: c.borderSubtle }]}>
+      <TagRow
+        icon="pin"
+        title={t('tagging.park')}
+        value={park?.name ?? null}
+        placeholder={t('tagging.parkNone')}
+        line={park ? t('tagging.parkLine') : t('tagging.parkEncourage')}
+        onPress={onPress}
+      />
+    </View>
+  );
+}
+
+/**
+ * One slide's tags as three short rows: Obstacle, People, Filmer. An empty
+ * People or Filmer row goes straight to the person search; anything else
+ * opens the full tag editor for the slide in a sheet.
+ */
+export function SlideTagRows({
+  slideNumber,
+  parkId,
+  tags,
+  names,
+  onChange,
+  onName,
+}: {
+  slideNumber: number;
+  parkId: string | null;
+  tags: SlideTags;
+  names: Record<string, string>;
+  onChange: (next: SlideTags) => void;
+  onName: (id: string, username: string) => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const { session } = useAuth();
+  const obstacles = useTaggableObstacles(parkId, session?.user.id);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const [personOpen, setPersonOpen] = useState<'person' | 'filmer' | null>(null);
+
+  const obstacle = obstacles.data?.find((o) => o.id === tags.obstacleId);
+  const obstacleValue = obstacle
+    ? obstacle.name
+    : tags.obstacleType
+      ? t(`obstacleTypes.${tags.obstacleType}`)
+      : null;
+  const people = tags.peopleIds.map((id) => names[id] ?? '…');
+  const peopleValue =
+    people.length === 0
+      ? null
+      : people.length === 1
+        ? people[0]
+        : t('tagging.peopleMore', { first: people[0], count: people.length - 1 });
+  const filmerValue = tags.filmerId ? (names[tags.filmerId] ?? '…') : null;
+  const everyone = [...(tags.filmerId ? [tags.filmerId] : []), ...tags.peopleIds];
+
+  return (
+    <View>
+      <TagRow
+        icon="obstacle"
+        title={t('tagging.obstacle')}
+        value={obstacleValue}
+        placeholder={t('tagging.noObstacle')}
+        onPress={() => setSheetOpen(true)}
+      />
+      <TagRow
+        icon="people"
+        title={t('tagging.people')}
+        value={peopleValue}
+        placeholder={t('tagging.noPeople')}
+        onPress={() => (peopleValue ? setSheetOpen(true) : setPersonOpen('person'))}
+      />
+      <TagRow
+        icon="video"
+        title={t('tagging.filmer')}
+        value={filmerValue}
+        placeholder={t('tagging.noFilmer')}
+        onPress={() => (filmerValue ? setSheetOpen(true) : setPersonOpen('filmer'))}
+      />
+
+      <Modal visible={sheetOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSheetOpen(false)}>
+        <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
+          <View style={styles.modalHeader}>
+            <Text variant="title" accessibilityRole="header" style={styles.flex}>
+              {t('tagging.slideTagsTitle', { number: slideNumber })}
+            </Text>
+            <Button label={t('tagging.done')} onPress={() => setSheetOpen(false)} style={styles.doneButton} />
+          </View>
+          <ScrollView contentContainerStyle={styles.modalScroll} keyboardShouldPersistTaps="handled">
+            <SlideTagEditor parkId={parkId} tags={tags} names={names} onChange={onChange} onName={onName} />
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      <PersonPickerModal
+        visible={personOpen !== null}
+        title={personOpen === 'filmer' ? t('tagging.filmerTitle') : t('tagging.personTitle')}
+        exclude={everyone}
+        onClose={() => setPersonOpen(null)}
+        onPick={(p) => {
+          onName(p.id, p.username);
+          if (personOpen === 'filmer') onChange({ ...tags, filmerId: p.id });
+          else if (tags.peopleIds.length < 20) onChange({ ...tags, peopleIds: [...tags.peopleIds, p.id] });
+        }}
+      />
+    </View>
+  );
+}
+
 /* Summary --------------------------------------------------------------------------- */
 
 /** "Backyard pool · kaito.rolls · filmed by soulsofi", or null for no tags. */
@@ -677,6 +847,18 @@ const styles = StyleSheet.create({
     borderWidth: stroke.rule,
   },
   sectionTitle: { fontFamily: fontFamily.sansSemiBold, letterSpacing: 0.5 },
+  tagRow: {
+    minHeight: 56,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    paddingHorizontal: space[4],
+    paddingVertical: space[2],
+    borderBottomWidth: stroke.hairline,
+  },
+  tagRowTitle: { width: 84, fontFamily: fontFamily.sansSemiBold },
+  parkRow: { borderTopWidth: stroke.hairline },
+  doneButton: { minWidth: 88, minHeight: 48 },
   parkButton: {
     minHeight: 56,
     flexDirection: 'row',

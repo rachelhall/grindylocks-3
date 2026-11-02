@@ -152,7 +152,12 @@
     "clipCount_one": "{{count}} Clip",
     "clipCount_other": "{{count}} Clips",
     "photoCount_one": "{{count}} Foto",
-    "photoCount_other": "{{count}} Fotos"
+    "photoCount_other": "{{count}} Fotos",
+    "tapToPreview": "Tippe auf eine Slide, um sie zu sehen",
+    "moveEarlier": "Nach vorne",
+    "moveLater": "Nach hinten",
+    "slideItem": "Slide {{number}}",
+    "limitsShort": "Bis zu 10 · Clips bis 60 s"
   },
   "uploads": {
     "uploading": "Lädt {{done}} von {{total}} hoch",
@@ -623,7 +628,15 @@
     "whatsTagged": "Was getaggt ist",
     "noTags": "Keine Tags",
     "filmedBy": "gefilmt von {{username}}",
-    "editLater": "Text und Tags kannst du nach dem Posten noch ändern."
+    "editLater": "Text und Tags kannst du nach dem Posten noch ändern.",
+    "parkLine": "Park · jede Slide",
+    "noObstacle": "Eins wählen",
+    "noPeople": "Jemanden taggen",
+    "noFilmer": "Filmer hinzufügen",
+    "sameAsShort": "Wie Slide {{number}}",
+    "slideTagsTitle": "Tags für Slide {{number}}",
+    "done": "Fertig",
+    "peopleMore": "{{first}} +{{count}}"
   },
   "postCard": {
     "open": "Post von {{username}} öffnen",
