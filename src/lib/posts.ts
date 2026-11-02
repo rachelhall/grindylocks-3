@@ -342,6 +342,37 @@ export function useParkRegulars(parkId: string | undefined) {
   });
 }
 
+/* Parks you've posted at ---------------------------------------------------------------- */
+
+export type RecentPark = { id: string; name: string; type: Enums['park_type']; city: string };
+
+/** Up to five parks you've posted at, most recent first (the park picker's Recent). */
+export function useRecentParks(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.recentParks(userId ?? ''),
+    queryFn: async (): Promise<RecentPark[]> => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('park:parks!posts_park_id_fkey(id, display_name, park_type, city)')
+        .eq('author_id', userId!)
+        .not('park_id', 'is', null)
+        .neq('status', 'deleted')
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      const out: RecentPark[] = [];
+      for (const row of data ?? []) {
+        const p = row.park as { id: string; display_name: string; park_type: Enums['park_type']; city: string } | null;
+        if (p && !out.some((r) => r.id === p.id)) out.push({ id: p.id, name: p.display_name, type: p.park_type, city: p.city });
+        if (out.length === 5) break;
+      }
+      return out;
+    },
+    enabled: Boolean(userId),
+    staleTime: fresh.mine,
+  });
+}
+
 /* Obstacles for tagging ---------------------------------------------------------------- */
 
 export type TagObstacle = { id: string; name: string; type: ObstacleType; pending: boolean };

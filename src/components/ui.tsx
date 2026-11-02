@@ -45,6 +45,13 @@ const icons = {
   bookmark: { ios: 'bookmark', android: 'bookmark' },
   bookmarkFill: { ios: 'bookmark.fill', android: 'bookmark' },
   pin: { ios: 'mappin', android: 'location_on' },
+  // Tagging sheets (Nov 2 mockups).
+  chevronDown: { ios: 'chevron.down', android: 'expand_more' },
+  homePin: { ios: 'house.circle', android: 'home_pin' },
+  pinOff: { ios: 'mappin.slash', android: 'location_off' },
+  addPin: { ios: 'mappin.and.ellipse', android: 'add_location_alt' },
+  category: { ios: 'square.grid.2x2', android: 'category' },
+  info: { ios: 'info.circle', android: 'info' },
   directions: { ios: 'arrow.triangle.turn.up.right.diamond', android: 'directions' },
   locate: { ios: 'location', android: 'my_location' },
   list: { ios: 'list.bullet', android: 'list' },

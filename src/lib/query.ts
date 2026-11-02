@@ -120,6 +120,8 @@ export const keys = {
   parkRegulars: (parkId: string) => ['regulars', parkId] as const,
   /** Obstacles you can tag at a park (includes your own pending suggestions). */
   taggableObstacles: (parkId: string, userId: string) => ['obstacles', 'taggable', parkId, userId] as const,
+  /** Parks you've posted at, newest first (the park picker's Recent). */
+  recentParks: (userId: string) => ['recent-parks', userId] as const,
   /** One obstacle, for its feed page. */
   obstacle: (id: string) => ['obstacle', id] as const,
 };
