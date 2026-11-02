@@ -13,7 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { HomePicker } from '@/components/home-picker';
 import { Avatar } from '@/components/profile';
@@ -43,11 +43,12 @@ export default function EditProfile() {
   const { t } = useTranslation();
   const c = useColors();
   const { session } = useAuth();
+  const insets = useSafeAreaInsets();
   const { data: profile, isError, refetch } = useMyProfile(session?.user.id);
 
   if (profile) return <EditForm profile={profile} />;
   return (
-    <SafeAreaView style={[styles.flex, styles.centered, { backgroundColor: c.surface }]}>
+    <View style={[styles.flex, styles.centered, insetPadding(insets), { backgroundColor: c.surface }]}>
       {isError ? (
         <>
           <Text variant="body" color="statusClosed">
@@ -59,13 +60,23 @@ export default function EditProfile() {
       ) : (
         <ActivityIndicator color={c.text} accessibilityLabel={t('common.loading')} />
       )}
-    </SafeAreaView>
+    </View>
   );
+}
+
+/**
+ * Pads a full-screen modal clear of the notch and home indicator. Uses the
+ * root provider's insets: the native SafeAreaView can measure zero insets
+ * inside a fullScreenModal on iOS, which put Save under the status bar.
+ */
+function insetPadding(insets: { top: number; bottom: number; left: number; right: number }) {
+  return { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right };
 }
 
 function EditForm({ profile }: { profile: Profile }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
+  const insets = useSafeAreaInsets();
   const { session, refreshProfile } = useAuth();
   const userId = session?.user.id;
   const directory = useDirectory();
@@ -183,7 +194,7 @@ function EditForm({ profile }: { profile: Profile }) {
     ) : null;
 
   return (
-    <SafeAreaView style={[styles.flex, { backgroundColor: c.surface }]}>
+    <View style={[styles.flex, insetPadding(insets), { backgroundColor: c.surface }]}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.bar}>
           <Pressable
@@ -390,7 +401,7 @@ function EditForm({ profile }: { profile: Profile }) {
           <HomePicker metroId={home.metroId} parkId={home.parkId} onChange={setHome} showErrors />
         </FormScreen>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }
 
