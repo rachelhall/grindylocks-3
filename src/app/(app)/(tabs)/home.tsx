@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
@@ -10,6 +10,7 @@ import { UploadCard } from '@/components/media';
 import { PostCard } from '@/components/post-card';
 import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { useNotificationsUnread } from '@/lib/engagement';
 import { useMetro } from '@/lib/parks';
 import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
 import { keys } from '@/lib/query';
@@ -46,6 +47,15 @@ export default function Home() {
   const followingDone = following.isSuccess && !following.hasNextPage;
   const nearby = useNearbyFeed(userId, metroId, followingDone);
   const [refreshing, setRefreshing] = useState(false);
+
+  // The bell's dot: checked whenever Home comes back into view.
+  const unread = useNotificationsUnread(userId);
+  const refetchUnread = unread.refetch;
+  useFocusEffect(
+    useCallback(() => {
+      void refetchUnread();
+    }, [refetchUnread]),
+  );
 
   // A post that finished uploading shows up in the feed.
   const queuedIds = queued.map((q) => q.postId).join(',');
@@ -104,8 +114,7 @@ export default function Home() {
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
-      {/* TODO(M4b): pass hasUnread once notifications exist. */}
-      <FeedHeader title={t('home.title')} />
+      <FeedHeader title={t('home.title')} hasUnread={Boolean(unread.data)} />
       <FlatList
         data={items}
         keyExtractor={(item, i) =>

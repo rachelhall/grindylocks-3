@@ -308,7 +308,22 @@
     "empty": "Intet endnu. Kommentarer, tags, anmodninger om at følge dig og invitationer dukker op her.",
     "earlier": "Invitationer",
     "inviteUsed": "@{{username}} er med via din invitation",
-    "inviteUsedSomeone": "En er med via din invitation"
+    "inviteUsedSomeone": "En er med via din invitation",
+    "new": "Nye",
+    "older": "Tidligere",
+    "requests": "Anmodninger om at følge dig",
+    "commentOne": "{{a}} kommenterede dit opslag",
+    "commentTwo": "{{a}} og {{b}} kommenterede dit opslag",
+    "commentMany_one": "{{a}}, {{b}} og {{count}} anden kommenterede dit opslag",
+    "commentMany_other": "{{a}}, {{b}} og {{count}} andre kommenterede dit opslag",
+    "reply": "{{a}} svarede dig",
+    "mention": "{{a}} nævnte dig i en kommentar",
+    "tag": "{{a}} taggede dig i et opslag",
+    "filmer": "{{a}} krediterede dig som filmer",
+    "someoneNew": "{{a}} er lige startet på Grindylocks i {{metro}}. Sig hej!",
+    "visiting": "{{a}} er på besøg i {{metro}}",
+    "visitingPark": "{{a}} er på besøg i {{metro}} og kommer forbi {{park}}",
+    "unreadLabel": "Ny: {{text}}"
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -621,7 +636,10 @@
     "removeMe": "Fjern mig fra opslaget",
     "removeMeTitle": "Fjern dig selv fra opslaget?",
     "removeMeBody": "Dit tag og eventuel filmer-kredit fjernes, så det forsvinder fra dine faner Tagget og Filmet. Opslaget bliver liggende.",
-    "removeMeConfirm": "Fjern mig"
+    "removeMeConfirm": "Fjern mig",
+    "like": "Synes godt om",
+    "comments_one": "{{count}} kommentar",
+    "comments_other": "{{count}} kommentarer"
   },
   "postDetail": {
     "edited": "rettet",
@@ -638,5 +656,25 @@
     "kicker": "Obstacle · {{type}}",
     "empty": "Intet tagget her endnu. Tag dette obstacle i et opslag, så vises det her.",
     "missing": "Dette obstacle er ikke tilgængeligt."
+  },
+  "comments": {
+    "title": "Kommentarer",
+    "none": "Ingen kommentarer endnu",
+    "poster": "Opslag",
+    "reply": "Svar",
+    "replyTo": "Svar {{username}}",
+    "delete": "Slet",
+    "deleteLabel": "Slet kommentar",
+    "deleteTitle": "Slet denne kommentar?",
+    "deleteBody": "Den kan ikke hentes tilbage. Svar på den bliver stående.",
+    "deleted": "Kommentaren er slettet",
+    "viewReplies_one": "Se {{count}} svar",
+    "viewReplies_other": "Se {{count}} svar",
+    "placeholder": "Skriv en kommentar",
+    "post": "Send",
+    "replyingTo": "Svarer @{{username}}",
+    "replyingToThread": "Svarer i denne tråd",
+    "cancelReply": "Annullér svar",
+    "failed": "Din kommentar kunne ikke sendes"
   }
 }

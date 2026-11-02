@@ -308,7 +308,22 @@
     "empty": "Nothing yet. Comments, tags, follow requests and invites will show up here.",
     "earlier": "Invites",
     "inviteUsed": "@{{username}} joined with your invite",
-    "inviteUsedSomeone": "Someone joined with your invite"
+    "inviteUsedSomeone": "Someone joined with your invite",
+    "new": "New",
+    "older": "Earlier",
+    "requests": "Follow requests",
+    "commentOne": "{{a}} commented on your post",
+    "commentTwo": "{{a}} and {{b}} commented on your post",
+    "commentMany_one": "{{a}}, {{b}} and {{count}} other commented on your post",
+    "commentMany_other": "{{a}}, {{b}} and {{count}} others commented on your post",
+    "reply": "{{a}} replied to you",
+    "mention": "{{a}} mentioned you in a comment",
+    "tag": "{{a}} tagged you in a post",
+    "filmer": "{{a}} credited you as the filmer",
+    "someoneNew": "{{a}} just joined Grindylocks in {{metro}}. Say hi!",
+    "visiting": "{{a}} is visiting {{metro}}",
+    "visitingPark": "{{a}} is visiting {{metro}} and will be at {{park}}",
+    "unreadLabel": "New: {{text}}"
   },
   "feed": {
     "newPost": "New post",
@@ -621,7 +636,10 @@
     "removeMe": "Take me off this post",
     "removeMeTitle": "Take yourself off this post?",
     "removeMeBody": "Your tag and any filmer credit are removed, so it leaves your Tagged and Filmed tabs. The post stays up.",
-    "removeMeConfirm": "Take me off"
+    "removeMeConfirm": "Take me off",
+    "like": "Like",
+    "comments_one": "{{count}} comment",
+    "comments_other": "{{count}} comments"
   },
   "postDetail": {
     "edited": "edited",
@@ -638,5 +656,25 @@
     "kicker": "Obstacle · {{type}}",
     "empty": "Nothing tagged here yet. Tag this obstacle in a post and it shows up here.",
     "missing": "This obstacle isn't available."
+  },
+  "comments": {
+    "title": "Comments",
+    "none": "No comments yet",
+    "poster": "Poster",
+    "reply": "Reply",
+    "replyTo": "Reply to {{username}}",
+    "delete": "Delete",
+    "deleteLabel": "Delete comment",
+    "deleteTitle": "Delete this comment?",
+    "deleteBody": "It can't be brought back. Replies to it stay up.",
+    "deleted": "Comment deleted",
+    "viewReplies_one": "View {{count}} reply",
+    "viewReplies_other": "View {{count}} replies",
+    "placeholder": "Add a comment",
+    "post": "Post",
+    "replyingTo": "Replying to @{{username}}",
+    "replyingToThread": "Replying in this thread",
+    "cancelReply": "Cancel reply",
+    "failed": "Couldn't post your comment"
   }
 }

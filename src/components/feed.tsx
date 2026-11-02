@@ -40,8 +40,7 @@ export function FeedHeader({ title, hasUnread = false }: { title: string; hasUnr
 
 /**
  * The bell. `hasUnread` shows a small pink square with an ink outline, never
- * a count, and is announced in the label. It's wired up with notifications
- * in M4; until then it stays off.
+ * a count, and is announced in the label (M4b).
  */
 export function NotificationsBell({ hasUnread = false }: { hasUnread?: boolean }) {
   const { t } = useTranslation();

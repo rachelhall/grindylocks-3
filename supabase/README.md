@@ -98,3 +98,18 @@ takes a post's metro area from its park. Additive only.
    `| null`s the generator drops (listed in the main README).
 
 Applied Nov 1 (as `posting_feeds`); types regenerated the same day.
+
+## Likes, comments and notifications (migration `engagement`)
+
+Adds comment checks (no editing, 1–1000 characters, valid replies),
+erasing a deleted comment's text, the notification triggers
+(comments, replies, @mentions, tags and filmer credit), `post_comments()`,
+the `comment_count` and `liked_by_me` computed fields on posts,
+`my_notifications()`, `notifications_unread()` and
+`mark_notifications_seen()`. Additive only.
+
+1. Run `tests/engagement_check.sql` in the SQL editor first (rolled back,
+   like the posting check). Every row should say `"ok": true`.
+2. Apply the migration.
+3. Regenerate the database types and put back the `| null`s the generator
+   drops (listed in the main README).
