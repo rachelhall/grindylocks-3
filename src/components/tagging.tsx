@@ -1,24 +1,37 @@
 /**
- * Tagging, shared by the posting flow and Edit post: the park picker, the
- * person picker, and one slide's obstacle and people tags (Post-Tag mockup).
+ * Tagging, shared by the posting flow (Tag it) and Edit post: the park row,
+ * one slide's Obstacle / People / Filmer rows, and the sheets they open.
+ * Laid out from the "Built from the brief" mockups (Nov 2): Park picker,
+ * Person picker, Obstacle sheet · pick one and Obstacle sheet · suggest one.
  *
- * Tags are always optional. Nothing here blocks posting.
+ * Every picker is a sheet over a dimmed screen, with a grab bar, a title and
+ * a close or Done button; the current choice sits on the pale pink with a
+ * pink check box. Tags are always optional. Nothing here blocks posting.
  */
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { type ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
-import { SafeAreaView } from '@/components/safe-area';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/profile';
-import { Button, Icon, type IconName, TextField } from '@/components/ui';
+import { CheckBox, Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { type ObstacleType, useDirectorySearch, useParksByIds } from '@/lib/parks';
-import { type PersonResult, searchPeople } from '@/lib/people';
-import { type SlideTags, type TagObstacle, useSuggestObstacle, useTaggableObstacles } from '@/lib/posts';
+import { type ObstacleType, useDirectorySearch, useMetro, useParksByIds } from '@/lib/parks';
+import { searchPeople } from '@/lib/people';
+import {
+  type SlideTags,
+  type TagObstacle,
+  useParkRegulars,
+  useRecentParks,
+  useSuggestObstacle,
+  useTaggableObstacles,
+} from '@/lib/posts';
+import type { Discipline } from '@/lib/profiles';
 import { fresh } from '@/lib/query';
 import { Sentry } from '@/lib/sentry';
-import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
+import { useFollowing } from '@/lib/social';
+import { fontFamily, size, space, stroke, Text, type ThemeColors, useColors } from '@/theme';
 
 /** Obstacle types in the picker: every type except the street plaza placeholder. */
 export const PICKABLE_TYPES: ObstacleType[] = [
@@ -27,33 +40,15 @@ export const PICKABLE_TYPES: ObstacleType[] = [
   'pool', 'snake_run', 'ditch', 'full_pipe', 'pump_track', 'pole_jam', 'rainbow_bench', 'other',
 ];
 
-/** How many of a park's obstacles show before "More". */
-const OBSTACLES_SHOWN = 6;
+/** The eight common types shown first when suggesting an obstacle. */
+const COMMON_TYPES: ObstacleType[] = ['rail', 'ledge', 'hubba', 'stairs', 'box', 'bank', 'quarter_pipe', 'bowl'];
+
 const NAME_MAX = 60;
+const PEOPLE_MAX = 20;
 
 export type PickedPark = { id: string; name: string };
 
 /* Small pieces --------------------------------------------------------------------- */
-
-function ModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
-  const { t } = useTranslation();
-  const c = useColors();
-  return (
-    <View style={styles.modalHeader}>
-      <Text variant="title" accessibilityRole="header" style={styles.flex}>
-        {title}
-      </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('common.close')}
-        onPress={onClose}
-        style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
-      >
-        <Icon name="close" color={c.text} />
-      </Pressable>
-    </View>
-  );
-}
 
 /** A choice chip: pink with a check when picked, outlined otherwise. */
 export function Chip({
@@ -61,11 +56,15 @@ export function Chip({
   picked,
   onPress,
   note,
+  dashed,
+  trailing,
 }: {
   label: string;
   picked: boolean;
   onPress: () => void;
   note?: string;
+  dashed?: boolean;
+  trailing?: IconName;
 }) {
   const c = useColors();
   return (
@@ -76,17 +75,13 @@ export function Chip({
       onPress={onPress}
       style={({ pressed }) => [
         styles.chip,
-        picked
-          ? { backgroundColor: c.accent, borderColor: c.accent }
-          : { backgroundColor: c.surfaceRaised, borderColor: c.textMuted },
+        { borderColor: c.border, backgroundColor: picked ? c.accent : dashed ? 'transparent' : c.surfaceRaised },
+        dashed && styles.dashedBorder,
         pressed && styles.pressed,
       ]}
     >
       {picked ? <Icon name="check" color={c.onAccent} size={14} /> : null}
-      <Text
-        variant="bodySm"
-        style={{ fontFamily: fontFamily.sansSemiBold, color: picked ? c.onAccent : c.text }}
-      >
+      <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold, color: picked ? c.onAccent : c.text }}>
         {label}
       </Text>
       {note ? (
@@ -94,6 +89,7 @@ export function Chip({
           {note}
         </Text>
       ) : null}
+      {trailing ? <Icon name={trailing} color={c.text} size={14} /> : null}
     </Pressable>
   );
 }
@@ -107,35 +103,190 @@ export function TagSectionTitle({ children }: { children: string }) {
   );
 }
 
-/* Park ------------------------------------------------------------------------------- */
+/** Small uppercase caption above a group in a sheet ("YOUR HOME PARK"). */
+function Caption({ children }: { children: string }) {
+  return (
+    <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.caption}>
+      {children}
+    </Text>
+  );
+}
 
-/** The ink park row at the top of Tag it: "City Heights · Park for every slide". */
-export function ParkButton({ park, onPress }: { park: PickedPark | null; onPress: () => void }) {
+/** The pink check box on the current choice, or nothing. */
+function Picked({ on, c }: { on: boolean; c: ThemeColors }) {
+  return on ? <CheckBox checked c={c} /> : null;
+}
+
+/**
+ * A sheet over a dimmed screen (Nov 2 mockups): grab bar, an Archivo Black
+ * title, and Close (✕) or a Done button. Tapping the dimmed strip closes it.
+ */
+function Sheet({
+  visible,
+  title,
+  onClose,
+  done,
+  onBack,
+  children,
+}: {
+  visible: boolean;
+  title: string;
+  onClose: () => void;
+  /** Shows an ink Done button instead of ✕. */
+  done?: boolean;
+  /** Shows a back arrow before the title (a second step). */
+  onBack?: () => void;
+  children: ReactNode;
+}) {
   const { t } = useTranslation();
+  const c = useColors();
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} transparent animationType="slide" statusBarTranslucent onRequestClose={onBack ?? onClose}>
+      <View style={[styles.flex, { backgroundColor: c.overlay }]}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('common.close')}
+          onPress={onClose}
+          style={{ height: insets.top + 52 }}
+        />
+        <View
+          accessibilityViewIsModal
+          style={[styles.sheet, { backgroundColor: c.surface, borderTopColor: c.border, paddingBottom: insets.bottom }]}
+        >
+          <View style={styles.grab} accessibilityElementsHidden importantForAccessibility="no">
+            <View style={[styles.grabBar, { backgroundColor: c.text }]} />
+          </View>
+          <View style={styles.sheetHeader}>
+            {onBack ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.back')}
+                onPress={onBack}
+                style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
+              >
+                <Icon name="back" color={c.text} size={22} />
+              </Pressable>
+            ) : null}
+            <Text variant="title" accessibilityRole="header" numberOfLines={2} style={styles.flex}>
+              {title}
+            </Text>
+            {done ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={onClose}
+                style={({ pressed }) => [styles.doneButton, { backgroundColor: c.text }, pressed && styles.pressed]}
+              >
+                <Text variant="body" style={{ color: c.surface, fontFamily: fontFamily.sansSemiBold }}>
+                  {t('tagging.done')}
+                </Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.close')}
+                onPress={onClose}
+                style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
+              >
+                <Icon name="close" color={c.text} size={22} />
+              </Pressable>
+            )}
+          </View>
+          <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+            {children}
+          </KeyboardAvoidingView>
+        </View>
+      </View>
+    </Modal>
+  );
+}
+
+/** The search box at the top of a sheet: a 2px outline with a search icon. */
+function SearchBox({ value, onChangeText, placeholder }: { value: string; onChangeText: (v: string) => void; placeholder: string }) {
+  const c = useColors();
+  return (
+    <View style={styles.searchWrap}>
+      <View style={styles.searchIcon}>
+        <Icon name="search" color={c.textSecondary} size={20} />
+      </View>
+      <TextInput
+        accessibilityLabel={placeholder}
+        value={value}
+        onChangeText={onChangeText}
+        placeholder={placeholder}
+        placeholderTextColor={c.textMuted}
+        autoCorrect={false}
+        autoCapitalize="none"
+        selectionColor={c.accent}
+        cursorColor={c.text}
+        style={[styles.search, { color: c.text, borderColor: c.border, backgroundColor: c.surfaceRaised }]}
+      />
+    </View>
+  );
+}
+
+/** One choice in a sheet: icon or avatar, a name and a line, and the check. */
+function Option({
+  leading,
+  title,
+  line,
+  picked,
+  disabled,
+  trailing,
+  onPress,
+  first,
+  accessibilityRole = 'button',
+}: {
+  leading?: ReactNode;
+  title: string;
+  line?: string | null;
+  picked?: boolean;
+  disabled?: boolean;
+  trailing?: ReactNode;
+  onPress?: () => void;
+  first?: boolean;
+  accessibilityRole?: 'button' | 'radio' | 'checkbox';
+}) {
+  const c = useColors();
+  const ink = picked ? c.onAccentSubtle : disabled ? c.textSecondary : c.text;
+  const sub = picked ? c.onAccentSubtle : c.textSecondary;
   return (
     <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={park ? t('tagging.parkChange', { park: park.name }) : t('tagging.parkPick')}
+      accessibilityRole={accessibilityRole}
+      accessibilityState={{ checked: accessibilityRole === 'button' ? undefined : Boolean(picked), disabled }}
+      accessibilityLabel={line ? `${title}, ${line}` : title}
+      disabled={disabled}
       onPress={onPress}
-      style={({ pressed }) => [styles.parkButton, pressed && styles.pressed]}
+      style={({ pressed }) => [
+        styles.option,
+        { borderBottomColor: c.borderSubtle },
+        first && { borderTopWidth: stroke.hairline, borderTopColor: c.borderSubtle },
+        picked && { backgroundColor: c.accentSubtle },
+        pressed && styles.pressed,
+      ]}
     >
-      <Icon name="pin" color={brand.paper} size={20} />
+      {leading}
       <View style={styles.flex}>
-        <Text variant="headline" style={{ color: brand.paper }}>
-          {park ? park.name : t('tagging.parkNone')}
+        <Text variant="body" numberOfLines={1} style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
+          {title}
         </Text>
-        <Text variant="caption" style={{ color: '#B8B4AA' }}>
-          {park ? t('tagging.parkEverySlide') : t('tagging.parkEncourage')}
-        </Text>
+        {line ? (
+          <Text variant="caption" numberOfLines={2} style={{ color: sub }}>
+            {line}
+          </Text>
+        ) : null}
       </View>
-      <Icon name="chevron" color={brand.paper} size={18} />
+      {trailing ?? <Picked on={Boolean(picked)} c={c} />}
     </Pressable>
   );
 }
 
+/* Park ------------------------------------------------------------------------------- */
+
 /**
- * Picks the post's park: your home park first, then search by name. "No
- * park" is always there, for garage sessions and street spots.
+ * The park picker sheet (Park picker mockup): search by name, then your
+ * home park, then Recent (parks you've posted at), then No park, which
+ * says the post shows under your home city and not on a park page.
  */
 export function ParkPickerModal({
   visible,
@@ -150,17 +301,18 @@ export function ParkPickerModal({
 }) {
   const { t } = useTranslation();
   const c = useColors();
-  const { profile } = useAuth();
+  const { profile, session } = useAuth();
   const [q, setQ] = useState('');
+  const searching = q.trim().length >= 2;
   const search = useDirectorySearch(q);
-  const homeIds = profile?.home_park_id ? [profile.home_park_id] : [];
-  const home = useParksByIds(homeIds);
+  const home = useParksByIds(profile?.home_park_id ? [profile.home_park_id] : []);
+  const recent = useRecentParks(visible ? session?.user.id : undefined);
+  const metro = useMetro(profile?.home_metro_area_id);
 
-  const results = q.trim().length >= 2 ? (search.data ?? []).filter((r) => r.kind === 'park') : [];
-  const suggestions: { id: string; name: string; line: string }[] =
-    q.trim().length >= 2
-      ? results.map((r) => ({ id: r.id, name: r.name, line: r.detail }))
-      : (home.data ?? []).map((p) => ({ id: p.id, name: p.display_name, line: t('tagging.homePark') }));
+  const homePark = (home.data ?? [])[0];
+  const recentParks = (recent.data ?? []).filter((p) => p.id !== homePark?.id);
+  const results = searching ? (search.data ?? []).filter((r) => r.kind === 'park') : [];
+  const line = (type: string, city: string) => `${t(`park.type.${type}` as 'park.type.skatepark')} · ${city}`;
 
   function pick(park: PickedPark | null) {
     onPick(park);
@@ -168,471 +320,535 @@ export function ParkPickerModal({
     onClose();
   }
 
+  const pin = (name: IconName) => <Icon name={name} color={c.text} size={22} />;
+
   return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
-        <ModalHeader title={t('tagging.parkTitle')} onClose={onClose} />
-        <View style={styles.modalBody}>
-          <TextField
-            label={t('tagging.parkSearch')}
-            icon="search"
-            value={q}
-            onChangeText={setQ}
-            autoCorrect={false}
-            autoCapitalize="none"
-            placeholder={t('tagging.parkSearchPlaceholder')}
-          />
-        </View>
-        <FlatList
-          data={suggestions}
-          keyExtractor={(p) => p.id}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.list}
-          ListHeaderComponent={
-            <Row
-              title={t('tagging.noPark')}
-              line={t('tagging.noParkLine')}
-              picked={current === null}
-              onPress={() => pick(null)}
-            />
-          }
-          renderItem={({ item }) => (
-            <Row
-              title={item.name}
-              line={item.line}
-              picked={current?.id === item.id}
-              onPress={() => pick({ id: item.id, name: item.name })}
-            />
-          )}
-          ListEmptyComponent={
-            q.trim().length >= 2 && !search.isFetching ? (
+    <Sheet visible={visible} title={t('tagging.parkTitle')} onClose={onClose}>
+      <SearchBox value={q} onChangeText={setQ} placeholder={t('tagging.parkSearchPlaceholder')} />
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.sheetList}>
+        {searching ? (
+          <>
+            <Caption>{t('tagging.results')}</Caption>
+            {results.map((r, i) => (
+              <Option
+                key={r.id}
+                first={i === 0}
+                accessibilityRole="radio"
+                leading={pin('pin')}
+                title={r.name}
+                line={r.detail}
+                picked={current?.id === r.id}
+                onPress={() => pick({ id: r.id, name: r.name })}
+              />
+            ))}
+            {results.length === 0 && !search.isFetching ? (
               <Text variant="bodySm" color="textSecondary" style={styles.empty}>
                 {t('search.noResults', { q: q.trim() })}
               </Text>
-            ) : null
-          }
+            ) : null}
+          </>
+        ) : (
+          <>
+            {homePark ? (
+              <>
+                <Caption>{t('tagging.homePark')}</Caption>
+                <Option
+                  first
+                  accessibilityRole="radio"
+                  leading={pin('homePin')}
+                  title={homePark.display_name}
+                  line={line(homePark.park_type, homePark.city)}
+                  picked={current?.id === homePark.id}
+                  onPress={() => pick({ id: homePark.id, name: homePark.display_name })}
+                />
+              </>
+            ) : null}
+            {recentParks.length > 0 ? (
+              <>
+                <Caption>{t('tagging.recent')}</Caption>
+                {recentParks.map((p, i) => (
+                  <Option
+                    key={p.id}
+                    first={i === 0}
+                    accessibilityRole="radio"
+                    leading={pin('pin')}
+                    title={p.name}
+                    line={line(p.type, p.city)}
+                    picked={current?.id === p.id}
+                    onPress={() => pick({ id: p.id, name: p.name })}
+                  />
+                ))}
+              </>
+            ) : null}
+            {current && current.id !== homePark?.id && !recentParks.some((p) => p.id === current.id) ? (
+              <>
+                <Caption>{t('tagging.currentPark')}</Caption>
+                <Option first accessibilityRole="radio" leading={pin('pin')} title={current.name} picked onPress={() => pick(current)} />
+              </>
+            ) : null}
+          </>
+        )}
+        <Caption>{t('tagging.notAtPark')}</Caption>
+        <Option
+          first
+          accessibilityRole="radio"
+          leading={pin('pinOff')}
+          title={t('tagging.noPark')}
+          line={metro.data ? t('tagging.noParkLineMetro', { metro: metro.data.name }) : t('tagging.noParkLineHome')}
+          picked={current === null}
+          onPress={() => pick(null)}
         />
-      </SafeAreaView>
-    </Modal>
-  );
-}
-
-function Row({
-  title,
-  line,
-  picked,
-  onPress,
-  leading,
-}: {
-  title: string;
-  line?: string;
-  picked?: boolean;
-  onPress: () => void;
-  leading?: React.ReactNode;
-}) {
-  const c = useColors();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityState={{ selected: Boolean(picked) }}
-      accessibilityLabel={line ? `${title}, ${line}` : title}
-      onPress={onPress}
-      style={({ pressed }) => [styles.row, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
-    >
-      {leading}
-      <View style={styles.flex}>
-        <Text variant="headline">{title}</Text>
-        {line ? (
-          <Text variant="bodySm" color="textSecondary">
-            {line}
-          </Text>
-        ) : null}
-      </View>
-      {picked ? <Icon name="check" color={c.text} /> : null}
-    </Pressable>
+      </ScrollView>
+    </Sheet>
   );
 }
 
 /* People ------------------------------------------------------------------------------- */
 
-/** Finds a member by username to tag or credit. */
-export function PersonPickerModal({
-  visible,
-  title,
-  exclude,
-  onClose,
-  onPick,
-}: {
-  visible: boolean;
-  title: string;
-  exclude: string[];
-  onClose: () => void;
-  onPick: (person: { id: string; username: string }) => void;
-}) {
-  const { t } = useTranslation();
-  const c = useColors();
-  const [q, setQ] = useState('');
-  const query = q.trim().replace(/^@+/, '');
-  const { data, isFetching, isError } = useQuery({
-    queryKey: ['people-search', query],
-    queryFn: () => searchPeople(query),
-    enabled: query.length >= 2,
-    staleTime: fresh.search,
-  });
-  const results: PersonResult[] = (data ?? []).filter((p) => !exclude.includes(p.id));
-
-  function pick(p: PersonResult) {
-    onPick({ id: p.id, username: p.username });
-    setQ('');
-    onClose();
-  }
-
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
-        <ModalHeader title={title} onClose={onClose} />
-        <View style={styles.modalBody}>
-          <TextField
-            label={t('tagging.personSearch')}
-            prefix="@"
-            value={q}
-            onChangeText={setQ}
-            autoCorrect={false}
-            autoCapitalize="none"
-            autoFocus
-          />
-        </View>
-        <FlatList
-          data={query.length >= 2 ? results : []}
-          keyExtractor={(p) => p.id}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <Row
-              title={item.username}
-              line={item.home_park_name ?? item.home_metro_name ?? undefined}
-              onPress={() => pick(item)}
-              leading={<Avatar path={null} username={item.username} size={36} />}
-            />
-          )}
-          ListEmptyComponent={
-            query.length < 2 ? (
-              <Text variant="bodySm" color="textSecondary" style={styles.empty}>
-                {t('tagging.personHint')}
-              </Text>
-            ) : isError ? (
-              <Text variant="bodySm" color="statusClosed" style={styles.empty}>
-                {t('find.error')}
-              </Text>
-            ) : !isFetching ? (
-              <Text variant="bodySm" color="textSecondary" style={styles.empty}>
-                {t('search.noResults', { q: query })}
-              </Text>
-            ) : null
-          }
-        />
-      </SafeAreaView>
-    </Modal>
-  );
-}
-
-/* Obstacle type or suggestion ------------------------------------------------------- */
+type PickerPerson = { id: string; username: string; avatarPath: string | null; line: string | null };
 
 /**
- * "Not listed?": pick just a general type, or suggest the obstacle so a
- * park contributor can add it. A suggestion is tagged right away; others
- * see it once it's approved.
+ * The person picker sheet (Person picker mockup), for one slide's people or
+ * its filmer: search, chips for who's already on the slide, then You follow
+ * and Regulars at this park. The filmer can't also be a people tag, so in
+ * People the slide's filmer shows greyed as "Filmer on this slide" (and in
+ * Filmer, people tags show greyed as "Tagged on this slide"). Blocked
+ * people never appear: search, follows and regulars all leave them out.
  */
-function TypeOrSuggestModal({
+function PersonPickerSheet({
   visible,
+  mode,
+  slideNumber,
   parkId,
-  current,
+  parkName,
+  tags,
+  names,
+  onChange,
+  onName,
   onClose,
-  onPickType,
-  onSuggested,
 }: {
   visible: boolean;
+  mode: 'people' | 'filmer';
+  slideNumber: number;
   parkId: string | null;
-  current: ObstacleType | null;
+  parkName: string | null;
+  tags: SlideTags;
+  names: Record<string, string>;
+  onChange: (next: SlideTags) => void;
+  onName: (id: string, username: string) => void;
   onClose: () => void;
-  onPickType: (type: ObstacleType) => void;
-  onSuggested: (o: TagObstacle) => void;
 }) {
   const { t } = useTranslation();
   const c = useColors();
   const { session } = useAuth();
+  const [q, setQ] = useState('');
+  const query = q.trim().replace(/^@+/, '');
+  const searching = query.length >= 2;
+  const search = useQuery({
+    queryKey: ['people-search', query],
+    queryFn: () => searchPeople(query),
+    enabled: visible && searching,
+    staleTime: fresh.search,
+  });
+  const following = useFollowing(session?.user.id, visible);
+  const regulars = useParkRegulars(visible ? (parkId ?? undefined) : undefined);
+
+  const disciplineLine = (ds: Discipline[] | null | undefined, place?: string | null) =>
+    [...(ds ?? []).map((d) => t(`disciplines.${d}`)), ...(place ? [place] : [])].join(' · ') || null;
+
+  const followed: PickerPerson[] = (following.data ?? []).map((p) => ({
+    id: p.id,
+    username: p.username,
+    avatarPath: p.avatarPath,
+    line: disciplineLine(p.disciplines),
+  }));
+  const followedIds = new Set(followed.map((p) => p.id));
+  const locals: PickerPerson[] = (regulars.data ?? [])
+    .filter((r) => !followedIds.has(r.id))
+    .map((r) => ({ id: r.id, username: r.username, avatarPath: r.avatar_path, line: disciplineLine(r.disciplines, parkName) }));
+  const found: PickerPerson[] = (search.data ?? []).map((p) => ({
+    id: p.id,
+    username: p.username,
+    avatarPath: null,
+    line: disciplineLine(p.disciplines, p.home_park_name ?? p.home_metro_name),
+  }));
+
+  const chosen = mode === 'people' ? tags.peopleIds : tags.filmerId ? [tags.filmerId] : [];
+  const blockedBy = (id: string) =>
+    mode === 'people' ? (tags.filmerId === id ? 'filmer' : null) : tags.peopleIds.includes(id) ? 'tagged' : null;
+
+  function toggle(p: PickerPerson) {
+    onName(p.id, p.username);
+    if (mode === 'people') {
+      const on = tags.peopleIds.includes(p.id);
+      if (!on && tags.peopleIds.length >= PEOPLE_MAX) return;
+      onChange({ ...tags, peopleIds: on ? tags.peopleIds.filter((x) => x !== p.id) : [...tags.peopleIds, p.id] });
+    } else {
+      onChange({ ...tags, filmerId: tags.filmerId === p.id ? null : p.id });
+    }
+  }
+
+  function close() {
+    setQ('');
+    onClose();
+  }
+
+  const renderPerson = (p: PickerPerson, i: number) => {
+    const reason = blockedBy(p.id);
+    const on = chosen.includes(p.id);
+    return (
+      <Option
+        key={p.id}
+        first={i === 0}
+        accessibilityRole="checkbox"
+        leading={<Avatar path={p.avatarPath} username={p.username} size={36} />}
+        title={p.username}
+        line={reason === 'filmer' ? t('tagging.filmerOnSlide') : reason === 'tagged' ? t('tagging.taggedOnSlide') : p.line}
+        picked={on}
+        disabled={reason !== null}
+        trailing={
+          reason === 'filmer' ? (
+            <Icon name="video" color={c.textSecondary} size={20} />
+          ) : reason === 'tagged' ? (
+            <Icon name="people" color={c.textSecondary} size={20} />
+          ) : (
+            <CheckBox checked={on} c={c} />
+          )
+        }
+        onPress={() => toggle(p)}
+      />
+    );
+  };
+
+  const title =
+    mode === 'people'
+      ? t('tagging.peopleTitle', { number: slideNumber })
+      : t('tagging.filmerSheetTitle', { number: slideNumber });
+
+  return (
+    <Sheet visible={visible} title={title} onClose={close} done>
+      <SearchBox value={q} onChangeText={setQ} placeholder={t('tagging.personSearchPlaceholder')} />
+      {chosen.length > 0 ? (
+        <View style={styles.chosen} accessibilityLabel={t('tagging.onThisSlide')}>
+          {chosen.map((id) => {
+            const username = names[id] ?? '…';
+            return (
+              <Pressable
+                key={id}
+                accessibilityRole="button"
+                accessibilityLabel={t('tagging.removePerson', { username })}
+                onPress={() =>
+                  onChange(
+                    mode === 'people'
+                      ? { ...tags, peopleIds: tags.peopleIds.filter((x) => x !== id) }
+                      : { ...tags, filmerId: null },
+                  )
+                }
+                style={({ pressed }) => [
+                  styles.chosenChip,
+                  { backgroundColor: c.accentSubtle, borderColor: c.border },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text variant="bodySm" style={{ color: c.onAccentSubtle, fontFamily: fontFamily.sansSemiBold }}>
+                  {username}
+                </Text>
+                <Icon name="close" color={c.onAccentSubtle} size={16} />
+              </Pressable>
+            );
+          })}
+        </View>
+      ) : null}
+      <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.sheetList}>
+        {searching ? (
+          <>
+            <Caption>{t('tagging.results')}</Caption>
+            {found.map(renderPerson)}
+            {search.isError ? (
+              <Text variant="bodySm" color="statusClosed" style={styles.empty}>
+                {t('find.error')}
+              </Text>
+            ) : found.length === 0 && !search.isFetching ? (
+              <Text variant="bodySm" color="textSecondary" style={styles.empty}>
+                {t('search.noResults', { q: query })}
+              </Text>
+            ) : null}
+          </>
+        ) : (
+          <>
+            {followed.length > 0 ? (
+              <>
+                <Caption>{t('tagging.youFollow')}</Caption>
+                {followed.map(renderPerson)}
+              </>
+            ) : null}
+            {locals.length > 0 && parkName ? (
+              <>
+                <Caption>{t('tagging.regularsAt', { park: parkName })}</Caption>
+                {locals.map(renderPerson)}
+              </>
+            ) : null}
+            {followed.length === 0 && locals.length === 0 && !following.isPending ? (
+              <Text variant="bodySm" color="textSecondary" style={styles.empty}>
+                {t('tagging.personHint')}
+              </Text>
+            ) : null}
+          </>
+        )}
+      </ScrollView>
+    </Sheet>
+  );
+}
+
+/* Obstacle ------------------------------------------------------------------------------ */
+
+/**
+ * The obstacle sheet (Obstacle sheet mockups). Step one lists the park's
+ * obstacles with their type (street plaza placeholders can't be tagged, so
+ * they're left out), then "Not listed?" with Just the type and Suggest an
+ * obstacle, and No obstacle on this slide at the bottom. Suggesting asks
+ * what locals call it and its type; the clip is tagged right away and
+ * others see the tag once a contributor at the park approves it.
+ */
+function ObstacleSheet({
+  visible,
+  slideNumber,
+  parkId,
+  parkName,
+  tags,
+  onChange,
+  onClose,
+}: {
+  visible: boolean;
+  slideNumber: number;
+  parkId: string | null;
+  parkName: string | null;
+  tags: SlideTags;
+  onChange: (next: SlideTags) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const { session } = useAuth();
+  const obstacles = useTaggableObstacles(visible ? parkId : null, session?.user.id);
   const suggest = useSuggestObstacle(session?.user.id);
-  const [type, setType] = useState<ObstacleType | null>(current);
+  const [step, setStep] = useState<'list' | 'type' | 'suggest'>('list');
   const [name, setName] = useState('');
+  const [type, setType] = useState<ObstacleType | null>(null);
+  const [allTypes, setAllTypes] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  function close() {
+    setStep('list');
+    setName('');
+    setType(null);
+    setAllTypes(false);
+    setError(null);
+    onClose();
+  }
+
+  function choose(next: SlideTags) {
+    onChange(next);
+    close();
+  }
 
   async function submit() {
     if (!parkId || !type || !name.trim()) return;
     setError(null);
     try {
-      const o = await suggest.mutateAsync({ parkId, name, type });
-      onSuggested(o);
-      setName('');
-      onClose();
+      const o: TagObstacle = await suggest.mutateAsync({ parkId, name, type });
+      choose({ ...tags, obstacleId: o.id, obstacleType: null });
     } catch (err) {
       Sentry.captureException(err);
       setError(t('errors.generic'));
     }
   }
 
-  return (
-    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
-        <ModalHeader title={t('tagging.typeTitle')} onClose={onClose} />
-        <ScrollView contentContainerStyle={styles.modalScroll} keyboardShouldPersistTaps="handled">
-          <Text variant="bodySm" color="textSecondary">
-            {parkId ? t('tagging.typeBody') : t('tagging.typeBodyNoPark')}
-          </Text>
+  const list = obstacles.data ?? [];
+  const typeLabel = (ty: ObstacleType) => t(`obstacleTypes.${ty}`);
+
+  // One sheet for all three steps, so moving between them doesn't re-open it.
+  const sheet = (title: string, body: ReactNode, back?: boolean) => (
+    <Sheet visible={visible} title={title} onClose={close} onBack={back ? () => setStep('list') : undefined}>
+      {body}
+    </Sheet>
+  );
+
+  if (step === 'type') {
+    return sheet(
+      t('tagging.typeTitle'),
+      <>
+        <ScrollView contentContainerStyle={styles.sheetBody}>
           <View style={styles.chips}>
             {PICKABLE_TYPES.map((ty) => (
-              <Chip key={ty} label={t(`obstacleTypes.${ty}`)} picked={type === ty} onPress={() => setType(ty)} />
+              <Chip
+                key={ty}
+                label={typeLabel(ty)}
+                picked={!tags.obstacleId && tags.obstacleType === ty}
+                onPress={() => choose({ ...tags, obstacleId: null, obstacleType: ty })}
+              />
             ))}
           </View>
-          <Button
-            label={t('tagging.useType')}
-            disabled={!type}
-            onPress={() => {
-              if (!type) return;
-              onPickType(type);
-              onClose();
-            }}
-          />
-          {parkId ? (
-            <View style={[styles.suggest, { borderTopColor: c.text }]}>
-              <TagSectionTitle>{t('tagging.suggestTitle')}</TagSectionTitle>
-              <TextField
-                label={t('tagging.suggestName')}
-                hint={t('tagging.suggestHint')}
-                value={name}
-                onChangeText={(v) => setName(v.slice(0, NAME_MAX))}
-                placeholder={t('tagging.suggestPlaceholder')}
-                error={error}
-              />
-              <Button
-                label={t('tagging.suggestSend')}
-                variant="secondary"
-                loading={suggest.isPending}
-                disabled={!type || !name.trim()}
-                onPress={submit}
+        </ScrollView>
+      </>,
+      true,
+    );
+  }
+
+  if (step === 'suggest' && parkId) {
+    const shownTypes = allTypes ? PICKABLE_TYPES : COMMON_TYPES;
+    return sheet(
+      t('tagging.suggestRow'),
+      <>
+        <ScrollView contentContainerStyle={styles.sheetBody} keyboardShouldPersistTaps="handled">
+          {parkName ? (
+            <Text variant="bodySm" color="textSecondary">
+              {t('tagging.atPark', { park: parkName })}
+            </Text>
+          ) : null}
+          <View style={styles.field}>
+            <Text variant="label" color="textSecondary">
+              {t('tagging.suggestName')}
+            </Text>
+            <TextInput
+              accessibilityLabel={t('tagging.suggestName')}
+              value={name}
+              onChangeText={(v) => setName(v.slice(0, NAME_MAX))}
+              placeholder={t('tagging.suggestPlaceholder')}
+              placeholderTextColor={c.textMuted}
+              selectionColor={c.accent}
+              cursorColor={c.text}
+              style={[styles.input, { color: c.text, borderColor: c.border, backgroundColor: c.surfaceRaised }]}
+            />
+          </View>
+          <View style={styles.field}>
+            <Text variant="label" color="textSecondary">
+              {t('tagging.suggestType')}
+            </Text>
+            <View style={styles.chips}>
+              {shownTypes.map((ty) => (
+                <Chip key={ty} label={typeLabel(ty)} picked={type === ty} onPress={() => setType(ty)} />
+              ))}
+              {/* A picked type stays visible when the list is short again. */}
+              {!allTypes && type && !COMMON_TYPES.includes(type) ? (
+                <Chip label={typeLabel(type)} picked onPress={() => setType(null)} />
+              ) : null}
+              <Chip
+                label={allTypes ? t('tagging.fewerTypes') : t('tagging.allTypes', { count: PICKABLE_TYPES.length })}
+                picked={false}
+                dashed
+                trailing={allTypes ? undefined : 'chevronDown'}
+                onPress={() => setAllTypes((v) => !v)}
               />
             </View>
+          </View>
+          <View style={[styles.note, { backgroundColor: c.surfaceRaised, borderColor: c.borderSubtle }]}>
+            <Icon name="info" color={c.text} size={20} />
+            <Text variant="bodySm" style={styles.flex}>
+              {t('tagging.suggestNote')}
+            </Text>
+          </View>
+          {error ? (
+            <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
+              {error}
+            </Text>
           ) : null}
         </ScrollView>
-      </SafeAreaView>
-    </Modal>
-  );
-}
-
-/* One slide's tags ------------------------------------------------------------------- */
-
-/**
- * The obstacle chips and people list for one slide. With a park, the park's
- * obstacles come first; without one, only general types can be picked.
- */
-export function SlideTagEditor({
-  parkId,
-  tags,
-  names,
-  onChange,
-  onName,
-}: {
-  parkId: string | null;
-  tags: SlideTags;
-  /** Usernames for the IDs in `tags`. */
-  names: Record<string, string>;
-  onChange: (next: SlideTags) => void;
-  /** Remembers a username picked in the person picker. */
-  onName: (id: string, username: string) => void;
-}) {
-  const { t } = useTranslation();
-  const c = useColors();
-  const { session } = useAuth();
-  const obstacles = useTaggableObstacles(parkId, session?.user.id);
-  const [showAll, setShowAll] = useState(false);
-  const [typeOpen, setTypeOpen] = useState(false);
-  const [personOpen, setPersonOpen] = useState<'person' | 'filmer' | null>(null);
-
-  const list = obstacles.data ?? [];
-  const picked = list.find((o) => o.id === tags.obstacleId);
-  // The picked obstacle always shows, even past the cut-off.
-  const shown = showAll
-    ? list
-    : [...list.slice(0, OBSTACLES_SHOWN), ...(picked && !list.slice(0, OBSTACLES_SHOWN).includes(picked) ? [picked] : [])];
-
-  const everyone = [...(tags.filmerId ? [tags.filmerId] : []), ...tags.peopleIds];
-
-  return (
-    <View style={styles.editor}>
-      <View style={styles.section}>
-        <TagSectionTitle>{t('tagging.obstacle')}</TagSectionTitle>
-        <View style={styles.chips}>
-          {shown.map((o) => (
-            <Chip
-              key={o.id}
-              label={o.name}
-              note={o.pending ? t('tagging.pending') : undefined}
-              picked={tags.obstacleId === o.id}
-              onPress={() =>
-                onChange({ ...tags, obstacleId: tags.obstacleId === o.id ? null : o.id, obstacleType: null })
-              }
-            />
-          ))}
-          {!showAll && list.length > shown.length ? (
-            <Chip label={t('tagging.more')} picked={false} onPress={() => setShowAll(true)} />
-          ) : null}
-          {tags.obstacleType && !tags.obstacleId ? (
-            <Chip
-              label={t(`obstacleTypes.${tags.obstacleType}`)}
-              note={t('tagging.typeOnly')}
-              picked
-              onPress={() => onChange({ ...tags, obstacleType: null })}
-            />
-          ) : null}
+        <View style={styles.sheetFooter}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ disabled: !type || !name.trim() || suggest.isPending, busy: suggest.isPending }}
+            disabled={!type || !name.trim() || suggest.isPending}
+            onPress={submit}
+            style={({ pressed }) => [
+              styles.bigButton,
+              { backgroundColor: c.accent, borderColor: c.border },
+              (!type || !name.trim()) && styles.disabled,
+              pressed && styles.pressed,
+            ]}
+          >
+            <Text variant="body" style={{ color: c.onAccent, fontFamily: fontFamily.sansSemiBold }}>
+              {t('tagging.suggestSend')}
+            </Text>
+          </Pressable>
         </View>
-        {parkId && list.length === 0 && !obstacles.isLoading ? (
-          <Text variant="bodySm" color="textSecondary">
-            {t('tagging.noObstacles')}
-          </Text>
+      </>,
+      true,
+    );
+  }
+
+  return sheet(
+    t('tagging.obstacleTitle', { number: slideNumber }),
+    <>
+      <ScrollView contentContainerStyle={styles.sheetList}>
+        {parkId && parkName ? (
+          <>
+            <Caption>{t('tagging.atPark', { park: parkName })}</Caption>
+            {list.map((o, i) => (
+              <Option
+                key={o.id}
+                first={i === 0}
+                accessibilityRole="radio"
+                title={o.name}
+                line={o.pending ? t('tagging.pending') : null}
+                picked={tags.obstacleId === o.id}
+                trailing={
+                  <View style={styles.optionEnd}>
+                    <View style={[styles.typeTag, { borderColor: tags.obstacleId === o.id ? c.onAccentSubtle : c.border }]}>
+                      <Text variant="label" style={{ color: tags.obstacleId === o.id ? c.onAccentSubtle : c.text, fontSize: 11 }}>
+                        {typeLabel(o.type)}
+                      </Text>
+                    </View>
+                    <Picked on={tags.obstacleId === o.id} c={c} />
+                  </View>
+                }
+                onPress={() => choose({ ...tags, obstacleId: o.id, obstacleType: null })}
+              />
+            ))}
+            {list.length === 0 && !obstacles.isLoading ? (
+              <Text variant="bodySm" color="textSecondary" style={styles.empty}>
+                {t('tagging.noObstacles')}
+              </Text>
+            ) : null}
+          </>
         ) : null}
-        <Pressable accessibilityRole="button" onPress={() => setTypeOpen(true)} hitSlop={8}>
-          <Text variant="bodySm" color="accentText" style={styles.link}>
-            {parkId ? t('tagging.notListed') : t('tagging.pickType')}
+
+        <Caption>{parkId ? t('tagging.notListedTitle') : t('tagging.pickType')}</Caption>
+        <Option
+          first
+          leading={<Icon name="category" color={c.text} size={22} />}
+          title={tags.obstacleType && !tags.obstacleId ? typeLabel(tags.obstacleType) : t('tagging.justType')}
+          line={tags.obstacleType && !tags.obstacleId ? t('tagging.typeOnly') : t('tagging.justTypeLine')}
+          picked={Boolean(tags.obstacleType && !tags.obstacleId)}
+          trailing={<Icon name="chevron" color={c.textSecondary} size={20} />}
+          onPress={() => setStep('type')}
+        />
+        {parkId ? (
+          <Option
+            leading={<Icon name="addPin" color={c.text} size={22} />}
+            title={t('tagging.suggestRow')}
+            line={t('tagging.suggestRowLine')}
+            trailing={<Icon name="chevron" color={c.textSecondary} size={20} />}
+            onPress={() => setStep('suggest')}
+          />
+        ) : null}
+      </ScrollView>
+      <View style={styles.sheetFooter}>
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => choose({ ...tags, obstacleId: null, obstacleType: null })}
+          style={({ pressed }) => [styles.bigButton, { borderColor: c.border }, pressed && styles.pressed]}
+        >
+          <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
+            {t('tagging.noObstacleSlide')}
           </Text>
         </Pressable>
       </View>
-
-      <View style={styles.section}>
-        <TagSectionTitle>{t('tagging.people')}</TagSectionTitle>
-        {tags.filmerId ? (
-          <PersonRow
-            username={names[tags.filmerId] ?? '…'}
-            filmer
-            onToggleFilmer={() =>
-              onChange({
-                ...tags,
-                filmerId: null,
-                peopleIds: tags.peopleIds.includes(tags.filmerId!) ? tags.peopleIds : [...tags.peopleIds, tags.filmerId!],
-              })
-            }
-            onRemove={() => onChange({ ...tags, filmerId: null })}
-          />
-        ) : null}
-        {tags.peopleIds.map((id) => (
-          <PersonRow
-            key={id}
-            username={names[id] ?? '…'}
-            filmer={false}
-            onToggleFilmer={() =>
-              onChange({
-                ...tags,
-                // One filmer per slide: the old filmer goes back to the people list.
-                filmerId: id,
-                peopleIds: [...tags.peopleIds.filter((p) => p !== id), ...(tags.filmerId ? [tags.filmerId] : [])],
-              })
-            }
-            onRemove={() => onChange({ ...tags, peopleIds: tags.peopleIds.filter((p) => p !== id) })}
-          />
-        ))}
-        <View style={styles.addRow}>
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => setPersonOpen('person')}
-            style={({ pressed }) => [styles.dashed, { borderColor: c.textSecondary }, pressed && styles.pressed]}
-          >
-            <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
-              {t('tagging.tagSomeone')}
-            </Text>
-          </Pressable>
-          {!tags.filmerId ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => setPersonOpen('filmer')}
-              style={({ pressed }) => [styles.dashed, { borderColor: c.textSecondary }, pressed && styles.pressed]}
-            >
-              <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
-                {t('tagging.addFilmer')}
-              </Text>
-            </Pressable>
-          ) : null}
-        </View>
-      </View>
-
-      <TypeOrSuggestModal
-        visible={typeOpen}
-        parkId={parkId}
-        current={tags.obstacleType}
-        onClose={() => setTypeOpen(false)}
-        onPickType={(type) => onChange({ ...tags, obstacleId: null, obstacleType: type })}
-        onSuggested={(o) => onChange({ ...tags, obstacleId: o.id, obstacleType: null })}
-      />
-      <PersonPickerModal
-        visible={personOpen !== null}
-        title={personOpen === 'filmer' ? t('tagging.filmerTitle') : t('tagging.personTitle')}
-        exclude={everyone}
-        onClose={() => setPersonOpen(null)}
-        onPick={(p) => {
-          onName(p.id, p.username);
-          if (personOpen === 'filmer') onChange({ ...tags, filmerId: p.id });
-          else if (tags.peopleIds.length < 20) onChange({ ...tags, peopleIds: [...tags.peopleIds, p.id] });
-        }}
-      />
-    </View>
+    </>,
   );
 }
 
-function PersonRow({
-  username,
-  filmer,
-  onToggleFilmer,
-  onRemove,
-}: {
-  username: string;
-  filmer: boolean;
-  onToggleFilmer: () => void;
-  onRemove: () => void;
-}) {
-  const { t } = useTranslation();
-  const c = useColors();
-  return (
-    <View style={[styles.person, { backgroundColor: c.surfaceRaised }]}>
-      <Avatar path={null} username={username} size={30} />
-      <Text variant="body" numberOfLines={1} style={[styles.flex, { fontFamily: fontFamily.sansSemiBold }]}>
-        {username}
-      </Text>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityState={{ selected: filmer }}
-        accessibilityLabel={filmer ? t('tagging.filmerOff', { username }) : t('tagging.filmerOn', { username })}
-        onPress={onToggleFilmer}
-        hitSlop={6}
-        style={({ pressed }) => [
-          styles.filmerTag,
-          filmer ? { backgroundColor: c.text } : { borderColor: c.textSecondary, borderWidth: stroke.hairline },
-          pressed && styles.pressed,
-        ]}
-      >
-        <Text variant="label" style={{ color: filmer ? c.surface : c.textSecondary }}>
-          {filmer ? t('tagging.filmer') : t('tagging.skating')}
-        </Text>
-      </Pressable>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={t('tagging.removePerson', { username })}
-        onPress={onRemove}
-        style={({ pressed }) => [styles.removeButton, pressed && styles.pressed]}
-      >
-        <Icon name="close" color={c.text} size={18} />
-      </Pressable>
-    </View>
-  );
-}
-
-/* Rows for Tag it ------------------------------------------------------------------- */
+/* Rows ------------------------------------------------------------------------------- */
 
 /** A row with an icon, a name, its value and a chevron. */
 function TagRow({
@@ -688,8 +904,11 @@ function TagRow({
   );
 }
 
-/** The park as a light row at the top of Tag it: "City Heights · Park · every slide". */
-export function ParkRow({ park, onPress }: { park: PickedPark | null; onPress: () => void }) {
+/**
+ * The park as a light row: "City Heights · Park · every slide". Edit post
+ * passes its own line, warning that changing it clears obstacle tags.
+ */
+export function ParkRow({ park, onPress, line }: { park: PickedPark | null; onPress: () => void; line?: string }) {
   const { t } = useTranslation();
   const c = useColors();
   return (
@@ -699,7 +918,7 @@ export function ParkRow({ park, onPress }: { park: PickedPark | null; onPress: (
         title={t('tagging.park')}
         value={park?.name ?? null}
         placeholder={t('tagging.parkNone')}
-        line={park ? t('tagging.parkLine') : t('tagging.parkEncourage')}
+        line={park ? (line ?? t('tagging.parkLine')) : t('tagging.parkEncourage')}
         onPress={onPress}
       />
     </View>
@@ -707,13 +926,13 @@ export function ParkRow({ park, onPress }: { park: PickedPark | null; onPress: (
 }
 
 /**
- * One slide's tags as three short rows: Obstacle, People, Filmer. An empty
- * People or Filmer row goes straight to the person search; anything else
- * opens the full tag editor for the slide in a sheet.
+ * One slide's tags as three rows: Obstacle opens the obstacle sheet; People
+ * and Filmer open the person picker for that slide.
  */
 export function SlideTagRows({
   slideNumber,
   parkId,
+  parkName,
   tags,
   names,
   onChange,
@@ -721,17 +940,16 @@ export function SlideTagRows({
 }: {
   slideNumber: number;
   parkId: string | null;
+  parkName: string | null;
   tags: SlideTags;
   names: Record<string, string>;
   onChange: (next: SlideTags) => void;
   onName: (id: string, username: string) => void;
 }) {
   const { t } = useTranslation();
-  const c = useColors();
   const { session } = useAuth();
   const obstacles = useTaggableObstacles(parkId, session?.user.id);
-  const [sheetOpen, setSheetOpen] = useState(false);
-  const [personOpen, setPersonOpen] = useState<'person' | 'filmer' | null>(null);
+  const [open, setOpen] = useState<'obstacle' | 'people' | 'filmer' | null>(null);
 
   const obstacle = obstacles.data?.find((o) => o.id === tags.obstacleId);
   const obstacleValue = obstacle
@@ -747,7 +965,6 @@ export function SlideTagRows({
         ? people[0]
         : t('tagging.peopleMore', { first: people[0], count: people.length - 1 });
   const filmerValue = tags.filmerId ? (names[tags.filmerId] ?? '…') : null;
-  const everyone = [...(tags.filmerId ? [tags.filmerId] : []), ...tags.peopleIds];
 
   return (
     <View>
@@ -756,47 +973,43 @@ export function SlideTagRows({
         title={t('tagging.obstacle')}
         value={obstacleValue}
         placeholder={t('tagging.noObstacle')}
-        onPress={() => setSheetOpen(true)}
+        onPress={() => setOpen('obstacle')}
       />
       <TagRow
         icon="people"
         title={t('tagging.people')}
         value={peopleValue}
         placeholder={t('tagging.noPeople')}
-        onPress={() => (peopleValue ? setSheetOpen(true) : setPersonOpen('person'))}
+        onPress={() => setOpen('people')}
       />
       <TagRow
         icon="video"
         title={t('tagging.filmer')}
         value={filmerValue}
         placeholder={t('tagging.noFilmer')}
-        onPress={() => (filmerValue ? setSheetOpen(true) : setPersonOpen('filmer'))}
+        onPress={() => setOpen('filmer')}
       />
 
-      <Modal visible={sheetOpen} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setSheetOpen(false)}>
-        <SafeAreaView edges={['bottom', 'left', 'right']} style={[styles.flex, { backgroundColor: c.surface }]}>
-          <View style={styles.modalHeader}>
-            <Text variant="title" accessibilityRole="header" style={styles.flex}>
-              {t('tagging.slideTagsTitle', { number: slideNumber })}
-            </Text>
-            <Button label={t('tagging.done')} onPress={() => setSheetOpen(false)} style={styles.doneButton} />
-          </View>
-          <ScrollView contentContainerStyle={styles.modalScroll} keyboardShouldPersistTaps="handled">
-            <SlideTagEditor parkId={parkId} tags={tags} names={names} onChange={onChange} onName={onName} />
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-
-      <PersonPickerModal
-        visible={personOpen !== null}
-        title={personOpen === 'filmer' ? t('tagging.filmerTitle') : t('tagging.personTitle')}
-        exclude={everyone}
-        onClose={() => setPersonOpen(null)}
-        onPick={(p) => {
-          onName(p.id, p.username);
-          if (personOpen === 'filmer') onChange({ ...tags, filmerId: p.id });
-          else if (tags.peopleIds.length < 20) onChange({ ...tags, peopleIds: [...tags.peopleIds, p.id] });
-        }}
+      <ObstacleSheet
+        visible={open === 'obstacle'}
+        slideNumber={slideNumber}
+        parkId={parkId}
+        parkName={parkName}
+        tags={tags}
+        onChange={onChange}
+        onClose={() => setOpen(null)}
+      />
+      <PersonPickerSheet
+        visible={open === 'people' || open === 'filmer'}
+        mode={open === 'filmer' ? 'filmer' : 'people'}
+        slideNumber={slideNumber}
+        parkId={parkId}
+        parkName={parkName}
+        tags={tags}
+        names={names}
+        onChange={onChange}
+        onName={onName}
+        onClose={() => setOpen(null)}
       />
     </View>
   );
@@ -821,31 +1034,43 @@ export function useTagSummary(parkId: string | null) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
+  flex: { flex: 1, minWidth: 0 },
   pressed: { opacity: 0.75 },
+  disabled: { opacity: 0.5 },
   square: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
-  modalHeader: {
+  sheet: { flex: 1, borderTopWidth: stroke.rule },
+  grab: { alignItems: 'center', paddingTop: space[2] },
+  grabBar: { width: 40, height: 4 },
+  sheetHeader: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: space[2] },
+  doneButton: { minHeight: size.tapMin, paddingHorizontal: space[4], alignItems: 'center', justifyContent: 'center' },
+  sheetList: { paddingBottom: space[12] },
+  sheetBody: { padding: space[4], gap: space[4], paddingBottom: space[12] },
+  sheetFooter: { paddingHorizontal: space[4], paddingTop: space[3], paddingBottom: space[4] },
+  bigButton: { minHeight: 52, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space[4] },
+  caption: { paddingHorizontal: 20, paddingTop: space[4], paddingBottom: 6 },
+  empty: { paddingHorizontal: 20, paddingVertical: space[4] },
+  searchWrap: { paddingHorizontal: space[4], justifyContent: 'center' },
+  searchIcon: { position: 'absolute', left: space[4] + 12, zIndex: 1 },
+  search: { height: size.tapMin, borderWidth: stroke.rule, paddingLeft: 42, paddingRight: space[3], fontFamily: fontFamily.sans, fontSize: 16 },
+  option: {
+    minHeight: 60,
     flexDirection: 'row',
     alignItems: 'center',
     gap: space[3],
-    paddingHorizontal: space[4],
-    paddingTop: space[4],
-    paddingBottom: space[2],
+    paddingHorizontal: 20,
+    paddingVertical: space[2],
+    borderBottomWidth: stroke.hairline,
   },
-  modalBody: { paddingHorizontal: space[4], paddingBottom: space[3] },
-  modalScroll: { padding: space[4], gap: space[4], paddingBottom: space[12] },
-  list: { paddingHorizontal: space[4], paddingBottom: space[12], gap: 6 },
-  empty: { paddingVertical: space[4] },
-  row: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], paddingVertical: space[2] },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  chip: {
-    minHeight: 40,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: space[3],
-    borderWidth: stroke.rule,
-  },
+  optionEnd: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  typeTag: { borderWidth: stroke.hairline, paddingHorizontal: 6, paddingVertical: 2 },
+  chosen: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2], paddingHorizontal: space[4], paddingTop: space[3] },
+  chosenChip: { minHeight: 36, flexDirection: 'row', alignItems: 'center', gap: 4, paddingLeft: space[3], paddingRight: 6, borderWidth: stroke.rule },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  chip: { minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 14, borderWidth: stroke.rule },
+  dashedBorder: { borderStyle: 'dashed' },
+  field: { gap: 6 },
+  input: { height: size.tapMin, borderWidth: stroke.rule, paddingHorizontal: space[3], fontFamily: fontFamily.sans, fontSize: 16 },
+  note: { flexDirection: 'row', alignItems: 'flex-start', gap: 10, padding: space[3], borderWidth: stroke.hairline },
   sectionTitle: { fontFamily: fontFamily.sansSemiBold, letterSpacing: 0.5 },
   tagRow: {
     minHeight: 56,
@@ -858,31 +1083,4 @@ const styles = StyleSheet.create({
   },
   tagRowTitle: { width: 84, fontFamily: fontFamily.sansSemiBold },
   parkRow: { borderTopWidth: stroke.hairline },
-  doneButton: { minWidth: 88, minHeight: 48 },
-  parkButton: {
-    minHeight: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: space[3],
-    paddingHorizontal: space[3],
-    paddingVertical: space[2],
-    backgroundColor: brand.ink,
-  },
-  editor: { gap: space[6] },
-  section: { gap: space[2] },
-  link: { fontFamily: fontFamily.sansSemiBold, paddingVertical: space[1] },
-  suggest: { borderTopWidth: stroke.rule, paddingTop: space[4], gap: space[3] },
-  person: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingLeft: space[3] },
-  filmerTag: { paddingHorizontal: 6, paddingVertical: 3 },
-  removeButton: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
-  addRow: { flexDirection: 'row', gap: space[2] },
-  dashed: {
-    flex: 1,
-    minHeight: size.tapMin,
-    borderWidth: stroke.rule,
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: space[2],
-  },
 });

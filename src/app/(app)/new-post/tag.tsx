@@ -92,6 +92,7 @@ export default function NewPostTag() {
           key={current.key}
           slideNumber={index + 1}
           parkId={park?.id ?? null}
+          parkName={park?.name ?? null}
           tags={current.tags}
           names={names}
           onChange={(next) => setTags(current.key, next)}
