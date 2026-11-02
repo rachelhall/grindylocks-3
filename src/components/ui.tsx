@@ -59,6 +59,8 @@ const icons = {
   more: { ios: 'ellipsis', android: 'more_horiz' },
   addPhoto: { ios: 'photo.badge.plus', android: 'add_a_photo' },
   landscape: { ios: 'mountain.2', android: 'landscape' },
+  heart: { ios: 'heart', android: 'favorite_border' },
+  heartFill: { ios: 'heart.fill', android: 'favorite' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

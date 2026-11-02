@@ -308,7 +308,22 @@
     "empty": "Noch nichts. Kommentare, Markierungen, Follower-Anfragen und Einladungen erscheinen hier.",
     "earlier": "Einladungen",
     "inviteUsed": "@{{username}} ist über deine Einladung dabei",
-    "inviteUsedSomeone": "Jemand ist über deine Einladung dabei"
+    "inviteUsedSomeone": "Jemand ist über deine Einladung dabei",
+    "new": "Neu",
+    "older": "Früher",
+    "requests": "Follower-Anfragen",
+    "commentOne": "{{a}} hat deinen Post kommentiert",
+    "commentTwo": "{{a}} und {{b}} haben deinen Post kommentiert",
+    "commentMany_one": "{{a}}, {{b}} und {{count}} weitere Person haben deinen Post kommentiert",
+    "commentMany_other": "{{a}}, {{b}} und {{count}} weitere haben deinen Post kommentiert",
+    "reply": "{{a}} hat dir geantwortet",
+    "mention": "{{a}} hat dich in einem Kommentar erwähnt",
+    "tag": "{{a}} hat dich in einem Post markiert",
+    "filmer": "{{a}} hat dich als Filmer genannt",
+    "someoneNew": "{{a}} ist neu bei Grindylocks in {{metro}}. Sag hallo!",
+    "visiting": "{{a}} ist zu Besuch in {{metro}}",
+    "visitingPark": "{{a}} ist zu Besuch in {{metro}} und kommt zu {{park}}",
+    "unreadLabel": "Neu: {{text}}"
   },
   "feed": {
     "newPost": "Neuer Beitrag",
@@ -621,7 +636,10 @@
     "removeMe": "Mich aus dem Post entfernen",
     "removeMeTitle": "Dich aus diesem Post entfernen?",
     "removeMeBody": "Dein Tag und deine Filmer-Nennung werden entfernt, also verschwindet er aus deinen Tabs Markiert und Gefilmt. Der Post bleibt online.",
-    "removeMeConfirm": "Mich entfernen"
+    "removeMeConfirm": "Mich entfernen",
+    "like": "Gefällt mir",
+    "comments_one": "{{count}} Kommentar",
+    "comments_other": "{{count}} Kommentare"
   },
   "postDetail": {
     "edited": "bearbeitet",
@@ -638,5 +656,25 @@
     "kicker": "Obstacle · {{type}}",
     "empty": "Hier ist noch nichts getaggt. Tagge dieses Obstacle in einem Post, dann erscheint er hier.",
     "missing": "Dieses Obstacle ist nicht verfügbar."
+  },
+  "comments": {
+    "title": "Kommentare",
+    "none": "Noch keine Kommentare",
+    "poster": "Autor",
+    "reply": "Antworten",
+    "replyTo": "{{username}} antworten",
+    "delete": "Löschen",
+    "deleteLabel": "Kommentar löschen",
+    "deleteTitle": "Diesen Kommentar löschen?",
+    "deleteBody": "Er lässt sich nicht wiederherstellen. Antworten darauf bleiben stehen.",
+    "deleted": "Kommentar gelöscht",
+    "viewReplies_one": "{{count}} Antwort ansehen",
+    "viewReplies_other": "{{count}} Antworten ansehen",
+    "placeholder": "Kommentar schreiben",
+    "post": "Posten",
+    "replyingTo": "Antwort an @{{username}}",
+    "replyingToThread": "Antwort in diesem Thread",
+    "cancelReply": "Antwort abbrechen",
+    "failed": "Dein Kommentar konnte nicht gepostet werden"
   }
 }

@@ -1,0 +1,252 @@
+/**
+ * Likes, comments and notifications (M4b, Nov 1).
+ *
+ * - Likes are hidden: you see whether you liked a post, never a count or who
+ *   else did. Liking flips at once and rolls back if it fails.
+ * - Comments are one level deep, oldest first. A reply to a reply stays in
+ *   the same thread with an @mention of the person you're answering. You
+ *   can delete your own comments (and any on your own post); nobody can
+ *   edit one. Deleted comments with replies show as "Comment deleted".
+ * - Notifications are written by the database (comments, replies, mentions,
+ *   tags, filmer credit, invites, "someone new"); the app reads them, and
+ *   opening Notifications clears the bell's dot.
+ */
+import { type InfiniteData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+
+import type { Post } from './posts';
+import { fresh, keys } from './query';
+import { supabase } from './supabase';
+
+/* Keeping counts in step everywhere a post is cached --------------------------------- */
+
+/**
+ * Applies a change to one post in every cached copy: post detail, the feeds,
+ * and the post lists (park, obstacle, tagged, filmed), so a like or a new
+ * comment shows on Home and in detail at once.
+ */
+function patchPost(qc: QueryClient, postId: string, change: (post: Post) => Post) {
+  qc.setQueryData<Post | null>(keys.post(postId), (old) => (old ? change(old) : old));
+  for (const root of [['feed'], ['posts']]) {
+    qc.setQueriesData<InfiniteData<Post[]>>({ queryKey: root }, (old) =>
+      old?.pages
+        ? { ...old, pages: old.pages.map((page) => page.map((p) => (p.id === postId ? change(p) : p))) }
+        : old,
+    );
+  }
+}
+
+/* Likes ------------------------------------------------------------------------------- */
+
+export function useToggleLike(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ postId, like }: { postId: string; like: boolean }) => {
+      if (like) {
+        const { error } = await supabase.from('likes').insert({ post_id: postId, user_id: userId! });
+        // Already liked (a double tap) is fine.
+        if (error && error.code !== '23505') throw error;
+      } else {
+        const { error } = await supabase.from('likes').delete().eq('post_id', postId).eq('user_id', userId!);
+        if (error) throw error;
+      }
+    },
+    onMutate: ({ postId, like }) => patchPost(qc, postId, (p) => ({ ...p, likedByMe: like })),
+    onError: (_err, { postId, like }) => patchPost(qc, postId, (p) => ({ ...p, likedByMe: !like })),
+  });
+}
+
+/* Comments ------------------------------------------------------------------------------- */
+
+export type Comment = {
+  id: string;
+  parentId: string | null;
+  /** Null when the comment was deleted. */
+  authorId: string | null;
+  /** Null for a deleted comment or a deleted account. */
+  username: string | null;
+  avatarPath: string | null;
+  body: string | null;
+  replyToUsername: string | null;
+  isPoster: boolean;
+  deleted: boolean;
+  createdAt: string;
+};
+
+/** A top-level comment and its replies, oldest first. */
+export type Thread = { comment: Comment; replies: Comment[] };
+
+export const MAX_COMMENT = 1000;
+
+async function fetchComments(postId: string): Promise<Thread[]> {
+  const { data, error } = await supabase.rpc('post_comments', { post: postId });
+  if (error) throw error;
+  const rows: Comment[] = (data ?? []).map((r) => ({
+    id: r.id,
+    parentId: r.parent_id,
+    authorId: r.author_id,
+    username: r.username,
+    avatarPath: r.avatar_path,
+    body: r.body,
+    replyToUsername: r.reply_to_username,
+    isPoster: r.is_poster,
+    deleted: r.deleted,
+    createdAt: r.created_at,
+  }));
+  const threads = new Map<string, Thread>();
+  for (const c of rows) if (!c.parentId) threads.set(c.id, { comment: c, replies: [] });
+  // Replies whose thread isn't shown (its first comment is by someone
+  // you've blocked) are left out with it.
+  for (const c of rows) if (c.parentId) threads.get(c.parentId)?.replies.push(c);
+  return [...threads.values()];
+}
+
+export function useComments(postId: string | undefined) {
+  return useQuery({
+    queryKey: keys.comments(postId ?? ''),
+    queryFn: () => fetchComments(postId!),
+    enabled: Boolean(postId),
+    staleTime: fresh.social,
+  });
+}
+
+/** Who you're answering: the thread, and the person to @mention. */
+export type ReplyTarget = { threadId: string; username: string | null; userId: string | null };
+
+export function useAddComment(postId: string | undefined, userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ body, replyTo }: { body: string; replyTo: ReplyTarget | null }) => {
+      const { error } = await supabase.from('comments').insert({
+        post_id: postId!,
+        author_id: userId!,
+        body: body.trim(),
+        parent_id: replyTo?.threadId ?? null,
+        reply_to_user_id: replyTo?.userId ?? null,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      if (!postId) return;
+      patchPost(qc, postId, (p) => ({ ...p, commentCount: p.commentCount + 1 }));
+      void qc.invalidateQueries({ queryKey: keys.comments(postId) });
+    },
+  });
+}
+
+export function useDeleteComment(postId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (commentId: string) => {
+      const { error } = await supabase
+        .from('comments')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('id', commentId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      if (!postId) return;
+      patchPost(qc, postId, (p) => ({ ...p, commentCount: Math.max(0, p.commentCount - 1) }));
+      void qc.invalidateQueries({ queryKey: keys.comments(postId) });
+    },
+  });
+}
+
+/* Notifications ------------------------------------------------------------------------- */
+
+export type NotificationKind =
+  | 'comment'
+  | 'reply'
+  | 'mention'
+  | 'tag'
+  | 'filmer_credit'
+  | 'invite_used'
+  | 'someone_new'
+  | 'visiting';
+
+export type NotificationPerson = { id: string; username: string | null; avatarPath: string | null };
+
+export type AppNotification = {
+  id: string;
+  kind: NotificationKind;
+  createdAt: string;
+  /** Newest first; for comments on your post, up to two people. */
+  people: NotificationPerson[];
+  /** How many different people (comments on your post). */
+  peopleCount: number;
+  postId: string | null;
+  commentId: string | null;
+  /** The start of the comment, for comments, replies and mentions. */
+  excerpt: string | null;
+  /** "Someone new" visiting: the park they'll be at. */
+  park: { slug: string; name: string } | null;
+  metroName: string | null;
+  unread: boolean;
+};
+
+const KINDS = new Set<NotificationKind>([
+  'comment',
+  'reply',
+  'mention',
+  'tag',
+  'filmer_credit',
+  'invite_used',
+  'someone_new',
+  'visiting',
+]);
+
+export function useNotifications(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.notifications(userId ?? ''),
+    queryFn: async (): Promise<AppNotification[]> => {
+      const { data, error } = await supabase.rpc('my_notifications');
+      if (error) throw error;
+      return (data ?? [])
+        .filter((n) => KINDS.has(n.kind as NotificationKind))
+        .map((n) => ({
+          id: n.id,
+          kind: n.kind as NotificationKind,
+          createdAt: n.created_at,
+          people: ((n.actors as { id: string; username: string | null; avatar_path: string | null }[] | null) ?? []).map(
+            (a) => ({ id: a.id, username: a.username, avatarPath: a.avatar_path }),
+          ),
+          peopleCount: n.actor_count,
+          postId: n.post_id,
+          commentId: n.comment_id,
+          excerpt: n.comment_body,
+          park: n.park_slug && n.park_name ? { slug: n.park_slug, name: n.park_name } : null,
+          metroName: n.metro_name,
+          unread: n.unread,
+        }));
+    },
+    enabled: Boolean(userId),
+    staleTime: fresh.mine,
+  });
+}
+
+/** Whether the bell gets its pink dot. */
+export function useNotificationsUnread(userId: string | undefined) {
+  return useQuery({
+    queryKey: keys.notificationsUnread(userId ?? ''),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('notifications_unread');
+      if (error) throw error;
+      return Boolean(data);
+    },
+    enabled: Boolean(userId),
+    staleTime: fresh.social,
+  });
+}
+
+/** Opening Notifications clears the dot. The list keeps its "new" marks until it's refetched. */
+export function useMarkNotificationsSeen(userId: string | undefined) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('mark_notifications_seen');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      if (userId) qc.setQueryData(keys.notificationsUnread(userId), false);
+    },
+  });
+}

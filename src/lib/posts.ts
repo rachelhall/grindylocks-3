@@ -9,7 +9,8 @@
  *   private accounts and blocks are handled in the database.
  * - Paging is keyset on (published_at, id), newest first.
  * - Photo URLs are signed for an hour, so post queries use `fresh.posts`.
- * - Likes and comments are M4b.
+ * - Each post carries its comment count and whether you liked it (M4b);
+ *   comments and likes themselves live in `./engagement`.
  */
 import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -24,6 +25,7 @@ type Enums = Database['public']['Enums'];
 
 /** Everything a post card or post detail shows, in one select. */
 export const POST_SELECT = `id, author_id, caption, created_at, published_at, edited_at, park_id, slide_count, anonymized,
+  comment_count, liked_by_me,
   author:profiles!posts_author_id_fkey(id, username, avatar_path, deleted_at),
   park:parks!posts_park_id_fkey(id, slug, display_name),
   metro:metro_areas!posts_metro_area_id_fkey(id, name),
@@ -67,6 +69,9 @@ export type Post = {
   publishedAt: string | null;
   editedAt: string | null;
   slides: PostSlide[];
+  /** Live comments you can see. Like counts are never shown. */
+  commentCount: number;
+  likedByMe: boolean;
 };
 
 /** The shape PostgREST hands back for POST_SELECT. */
@@ -80,6 +85,8 @@ type Row = {
   park_id: string | null;
   slide_count: number;
   anonymized: boolean;
+  comment_count: number | null;
+  liked_by_me: boolean | null;
   author: { id: string; username: string | null; avatar_path: string | null; deleted_at: string | null } | null;
   park: { id: string; slug: string; display_name: string } | null;
   metro: { id: string; name: string } | null;
@@ -122,6 +129,8 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
     createdAt: r.created_at,
     publishedAt: r.published_at,
     editedAt: r.edited_at,
+    commentCount: r.comment_count ?? 0,
+    likedByMe: Boolean(r.liked_by_me),
     slides: [...r.post_slides]
       .sort((a, b) => a.position - b.position)
       .map((s) => ({

@@ -1443,6 +1443,10 @@ export type Database = {
     Functions: {
       before_user_created: { Args: { event: Json }; Returns: Json }
       cancel_invite: { Args: { invite: string }; Returns: undefined }
+      comment_count: {
+        Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
+        Returns: number
+      }
       confirm_age: { Args: never; Returns: undefined }
       create_invite: {
         Args: never
@@ -1534,6 +1538,11 @@ export type Database = {
           inviter_username: string
         }[]
       }
+      liked_by_me: {
+        Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
+        Returns: boolean
+      }
+      mark_notifications_seen: { Args: never; Returns: undefined }
       my_account: {
         Args: never
         Returns: {
@@ -1576,10 +1585,28 @@ export type Database = {
           used_by_username: string | null
         }[]
       }
+      my_notifications: {
+        Args: never
+        Returns: {
+          actor_count: number
+          actors: Json
+          comment_body: string | null
+          comment_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          metro_name: string | null
+          park_name: string | null
+          park_slug: string | null
+          post_id: string | null
+          unread: boolean
+        }[]
+      }
       my_park_role: {
         Args: { park: string }
         Returns: Database["public"]["Enums"]["role_name"]
       }
+      notifications_unread: { Args: never; Returns: boolean }
       obstacle_posts: {
         Args: {
           before_at?: string
@@ -1631,6 +1658,21 @@ export type Database = {
           setting: Database["public"]["Enums"]["park_setting"]
           slug: string
           status: Database["public"]["Enums"]["park_status"]
+        }[]
+      }
+      post_comments: {
+        Args: { post: string }
+        Returns: {
+          author_id: string | null
+          avatar_path: string | null
+          body: string | null
+          created_at: string
+          deleted: boolean
+          id: string
+          is_poster: boolean
+          parent_id: string | null
+          reply_to_username: string | null
+          username: string | null
         }[]
       }
       redeem_my_invite: { Args: never; Returns: string | null }

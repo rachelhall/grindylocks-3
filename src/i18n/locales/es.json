@@ -308,7 +308,22 @@
     "empty": "Nada todavía. Aquí aparecerán comentarios, etiquetas, solicitudes para seguirte e invitaciones.",
     "earlier": "Invitaciones",
     "inviteUsed": "@{{username}} se unió con tu invitación",
-    "inviteUsedSomeone": "Alguien se unió con tu invitación"
+    "inviteUsedSomeone": "Alguien se unió con tu invitación",
+    "new": "Nuevo",
+    "older": "Antes",
+    "requests": "Solicitudes para seguirte",
+    "commentOne": "{{a}} comentó tu publicación",
+    "commentTwo": "{{a}} y {{b}} comentaron tu publicación",
+    "commentMany_one": "{{a}}, {{b}} y {{count}} persona más comentaron tu publicación",
+    "commentMany_other": "{{a}}, {{b}} y {{count}} personas más comentaron tu publicación",
+    "reply": "{{a}} te respondió",
+    "mention": "{{a}} te mencionó en un comentario",
+    "tag": "{{a}} te etiquetó en una publicación",
+    "filmer": "{{a}} te dio el crédito de filmer",
+    "someoneNew": "{{a}} acaba de unirse a Grindylocks en {{metro}}. ¡Salúdale!",
+    "visiting": "{{a}} está de visita en {{metro}}",
+    "visitingPark": "{{a}} está de visita en {{metro}} y estará en {{park}}",
+    "unreadLabel": "Nuevo: {{text}}"
   },
   "feed": {
     "newPost": "Nueva publicación",
@@ -621,7 +636,10 @@
     "removeMe": "Quitarme de esta publicación",
     "removeMeTitle": "¿Quitarte de esta publicación?",
     "removeMeBody": "Se quitan tu etiqueta y tu crédito de filmer, así que sale de tus pestañas Etiquetado y Grabado. La publicación sigue visible.",
-    "removeMeConfirm": "Quitarme"
+    "removeMeConfirm": "Quitarme",
+    "like": "Me gusta",
+    "comments_one": "{{count}} comentario",
+    "comments_other": "{{count}} comentarios"
   },
   "postDetail": {
     "edited": "editado",
@@ -638,5 +656,25 @@
     "kicker": "Obstáculo · {{type}}",
     "empty": "Aún no hay nada etiquetado aquí. Etiqueta este obstáculo en una publicación y saldrá aquí.",
     "missing": "Este obstáculo no está disponible."
+  },
+  "comments": {
+    "title": "Comentarios",
+    "none": "Todavía no hay comentarios",
+    "poster": "Autor",
+    "reply": "Responder",
+    "replyTo": "Responder a {{username}}",
+    "delete": "Eliminar",
+    "deleteLabel": "Eliminar comentario",
+    "deleteTitle": "¿Eliminar este comentario?",
+    "deleteBody": "No se puede recuperar. Las respuestas siguen visibles.",
+    "deleted": "Comentario eliminado",
+    "viewReplies_one": "Ver {{count}} respuesta",
+    "viewReplies_other": "Ver {{count}} respuestas",
+    "placeholder": "Añade un comentario",
+    "post": "Publicar",
+    "replyingTo": "Respondiendo a @{{username}}",
+    "replyingToThread": "Respondiendo en este hilo",
+    "cancelReply": "Cancelar respuesta",
+    "failed": "No se pudo publicar tu comentario"
   }
 }

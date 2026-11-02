@@ -1,7 +1,7 @@
 /**
  * A post in a feed (Feed-Home mockup), and the pieces post detail shares
  * with it: the obstacle tag on a slide, the credits line, "3 h" times and
- * the post's More menu. Likes and comments come with M4b.
+ * the post's More menu, and the like and comment row (M4b).
  */
 import { router } from 'expo-router';
 import { type TFunction } from 'i18next';
@@ -14,6 +14,7 @@ import { Avatar } from '@/components/profile';
 import { Icon, type SheetAction, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { credits, isOnPost, type PersonRef, type Post, type PostSlide, useDeletePost, useRemoveMeFromPost } from '@/lib/posts';
+import { useToggleLike } from '@/lib/engagement';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, size, space, Text, useColors } from '@/theme';
 
@@ -213,6 +214,58 @@ export function MoreButton({ onPress, label }: { onPress: () => void; label: str
   );
 }
 
+/* Like and comment ----------------------------------------------------------------------- */
+
+/**
+ * The row under a post's slides: Like (a heart, never a count, since like
+ * counts are hidden from everyone) and Comment with the comment count.
+ * `onComment` opens the comments (post detail) or focuses the box there.
+ */
+export function PostActions({ post, onComment }: { post: Post; onComment: () => void }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const { session } = useAuth();
+  const like = useToggleLike(session?.user.id);
+  const liked = post.likedByMe;
+  const published = Boolean(post.publishedAt);
+
+  return (
+    <View style={styles.actions}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('postCard.like')}
+        accessibilityState={{ selected: liked, disabled: !published }}
+        disabled={!published}
+        onPress={() =>
+          like.mutate(
+            { postId: post.id, like: !liked },
+            {
+              onError: (err: unknown) => Sentry.captureException(err),
+            },
+          )
+        }
+        style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+      >
+        <Icon name={liked ? 'heartFill' : 'heart'} color={liked ? c.accentText : c.text} size={24} />
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('postCard.comments', { count: post.commentCount })}
+        disabled={!published}
+        onPress={onComment}
+        style={({ pressed }) => [styles.action, pressed && styles.pressed]}
+      >
+        <Icon name="chat" color={c.text} size={24} />
+        {post.commentCount > 0 ? (
+          <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
+            {post.commentCount}
+          </Text>
+        ) : null}
+      </Pressable>
+    </View>
+  );
+}
+
 /* The card ------------------------------------------------------------------------------- */
 
 /** Where a post was: its park (a link), or "No park · San Diego". */
@@ -298,6 +351,11 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
         />
       </Pressable>
 
+      <PostActions
+        post={post}
+        onComment={() => router.push({ pathname: '/post/[id]', params: { id: post.id, comments: '1' } })}
+      />
+
       <View style={styles.body}>
         {post.caption ? (
           <Text variant="body" onPress={openPost}>
@@ -319,7 +377,9 @@ const styles = StyleSheet.create({
   head: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[3], paddingVertical: space[2] },
   headText: { flex: 1, minWidth: 0, marginLeft: 2 },
   more: { width: 40, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
-  body: { paddingHorizontal: space[3], paddingTop: space[3], paddingBottom: space[3], gap: space[2] },
+  body: { paddingHorizontal: space[3], paddingBottom: space[3], gap: space[2] },
+  actions: { flexDirection: 'row', alignItems: 'center', gap: space[1], paddingHorizontal: space[1], paddingTop: space[1] },
+  action: { minWidth: size.tapMin, height: size.tapMin, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 4, paddingHorizontal: space[2] },
   obstacleChip: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 8, paddingVertical: 4, alignSelf: 'flex-start' },
   overlayBottomLeft: { position: 'absolute', left: 10, bottom: 10 },
   credits: { flexDirection: 'row', alignItems: 'flex-start', gap: space[1] },

@@ -46,6 +46,8 @@ export const fresh = {
    * post must never outlive them: refetched after 5 minutes, dropped after 30.
    */
   posts: 5 * MINUTE,
+  /** Comments under a post, and the bell's dot: checked again after 30 s. */
+  social: 30_000,
   /** Profile photo URLs are signed for an hour too; re-signed after 50 minutes. */
   avatars: 50 * MINUTE,
 } as const;
@@ -89,8 +91,12 @@ export const keys = {
   followRequests: (userId: string) => ['follow-requests', userId] as const,
   /** The people you blocked (Settings › Blocked accounts). */
   blocked: (userId: string) => ['blocked', userId] as const,
-  /** "Joined with your invite" notices. */
-  inviteNotices: (userId: string) => ['notices', 'invite-used', userId] as const,
+  /** A post's comments, oldest first. */
+  comments: (postId: string) => ['comments', postId] as const,
+  /** The Notifications list (M4b). */
+  notifications: (userId: string) => ['notifications', userId] as const,
+  /** Whether the bell shows its dot. */
+  notificationsUnread: (userId: string) => ['notifications-unread', userId] as const,
   /** Home feed, people you follow. Every feed key starts with 'feed'. */
   feedFollowing: (userId: string) => ['feed', 'following', userId] as const,
   /** Home feed, near you (a metro area, minus people you follow). */

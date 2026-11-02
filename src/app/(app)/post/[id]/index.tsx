@@ -1,24 +1,46 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  type TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { CommentComposer, CommentList } from '@/components/comments';
 import { Carousel } from '@/components/media';
-import { AuthorName, CreditsLine, MoreButton, ObstacleChip, PlaceLine, usePostMenu } from '@/components/post-card';
+import { AuthorName, CreditsLine, MoreButton, ObstacleChip, PlaceLine, PostActions, usePostMenu } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
+import type { ReplyTarget } from '@/lib/engagement';
 import { usePost } from '@/lib/posts';
 import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
 /**
- * Post detail (Post-Detail mockup, without likes and comments, which come
- * with M4b): the author and park, the slides with each one's obstacle and
- * people, the caption, credits and date. The More menu has Edit and Delete
- * for the author, and "take me off this post" for people on it.
+ * Post detail (Post-Detail mockup): the author and park, the slides with
+ * each one's obstacle and people, like and comment, the caption, credits and
+ * date, then the comments, with the comment box at the bottom (M4b). The More
+ * menu has Edit and Delete for the author, and "take me off this post" for
+ * people on it. Opened with `comments=1` (the comment button, a comment
+ * notification), it scrolls to the comments.
  */
 export default function PostScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, comments: toComments } = useLocalSearchParams<{ id: string; comments?: string }>();
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const scroll = useRef<ScrollView>(null);
+  const input = useRef<TextInput>(null);
+  const [commentsY, setCommentsY] = useState<number | null>(null);
+  const [replyTo, setReplyTo] = useState<ReplyTarget | null>(null);
+  const [openThread, setOpenThread] = useState<string | null>(null);
   const { t, i18n } = useTranslation();
   const c = useColors();
   const { width } = useWindowDimensions();
@@ -28,6 +50,19 @@ export default function PostScreen() {
   const menu = usePostMenu(post, { afterDelete: () => router.back() });
   const people = useActionSheet();
   const [index, setIndex] = useState(0);
+
+  // Opened for its comments: jump there once they're laid out.
+  const jumped = useRef(false);
+  useEffect(() => {
+    if (toComments !== '1' || jumped.current || commentsY === null) return;
+    jumped.current = true;
+    scroll.current?.scrollTo({ y: Math.max(0, commentsY - 8), animated: false });
+  }, [toComments, commentsY]);
+
+  function reply(target: ReplyTarget) {
+    setReplyTo(target);
+    input.current?.focus();
+  }
 
   const date = post
     ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(post.publishedAt ?? post.createdAt))
@@ -50,7 +85,7 @@ export default function PostScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]} edges={['top', 'left', 'right', 'bottom']}>
       <View style={styles.header}>
         <BackButton />
         <Text variant="title" accessibilityRole="header" style={styles.flex}>
@@ -68,7 +103,11 @@ export default function PostScreen() {
           <Button label={t('common.back')} variant="secondary" onPress={() => router.back()} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
+        <KeyboardAvoidingView
+          style={styles.flexFill}
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        >
+        <ScrollView ref={scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.author}>
             <Avatar path={post.author?.avatarPath ?? null} username={username} size={40} />
             <View style={styles.flex}>
@@ -126,6 +165,14 @@ export default function PostScreen() {
             </View>
           ) : null}
 
+          <PostActions
+            post={post}
+            onComment={() => {
+              if (commentsY !== null) scroll.current?.scrollTo({ y: Math.max(0, commentsY - 8), animated: true });
+              input.current?.focus();
+            }}
+          />
+
           <View style={styles.text}>
             {post.caption ? (
               <Text variant="body">
@@ -141,7 +188,32 @@ export default function PostScreen() {
               {post.editedAt && post.publishedAt ? ` · ${t('postDetail.edited')}` : ''}
             </Text>
           </View>
+
+          {post.publishedAt ? (
+            <View onLayout={(e) => setCommentsY(e.nativeEvent.layout.y)}>
+              <CommentList
+                postId={post.id}
+                postAuthorId={post.authorId}
+                userId={userId}
+                onReply={reply}
+                expandThread={openThread}
+              />
+            </View>
+          ) : null}
         </ScrollView>
+        {post.publishedAt ? (
+          <CommentComposer
+            postId={post.id}
+            userId={userId}
+            replyTo={replyTo}
+            onClearReply={() => setReplyTo(null)}
+            onPosted={(threadId) => {
+              if (threadId) setOpenThread(threadId);
+            }}
+            inputRef={input}
+          />
+        ) : null}
+        </KeyboardAvoidingView>
       )}
       {menu.sheet}
       {people.sheet}
@@ -152,6 +224,7 @@ export default function PostScreen() {
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   flex: { flex: 1, minWidth: 0 },
+  flexFill: { flex: 1 },
   pressed: { opacity: 0.75 },
   header: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[4], paddingVertical: space[2] },
   loading: { marginTop: space[12] },
@@ -172,5 +245,5 @@ const styles = StyleSheet.create({
   },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6, paddingTop: space[3] },
   dot: { width: 8, height: 8 },
-  text: { padding: space[4], gap: space[2] },
+  text: { paddingHorizontal: space[4], paddingBottom: space[4], gap: space[2] },
 });

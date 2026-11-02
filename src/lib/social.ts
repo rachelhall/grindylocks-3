@@ -254,34 +254,3 @@ export function useBlock(userId: string | undefined) {
     },
   });
 }
-
-/* Notifications (the part that exists so far) ------------------------------------------- */
-
-export type InviteUsedNotice = { id: string; createdAt: string; username: string | null };
-
-/**
- * "Joined with your invite" notices, newest first. The rest of the bell
- * (comments, tags, filmer credit, someone new) comes with M4.
- */
-export function useInviteNotices(userId: string | undefined) {
-  return useQuery({
-    queryKey: keys.inviteNotices(userId ?? ''),
-    queryFn: async (): Promise<InviteUsedNotice[]> => {
-      const { data, error } = await supabase
-        .from('notifications')
-        .select('id, created_at, profiles!notifications_actor_id_fkey(username, deleted_at)')
-        .eq('recipient_id', userId!)
-        .eq('kind', 'invite_used')
-        .order('created_at', { ascending: false })
-        .limit(30);
-      if (error) throw error;
-      return (data ?? []).map((n) => ({
-        id: n.id,
-        createdAt: n.created_at,
-        username: n.profiles && !n.profiles.deleted_at ? n.profiles.username : null,
-      }));
-    },
-    enabled: Boolean(userId),
-    staleTime: fresh.mine,
-  });
-}
