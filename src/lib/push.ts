@@ -12,11 +12,17 @@
  * - refreshes the bell when a push arrives while the app is open.
  *
  * Pushes never set the app icon's badge: no counts anywhere.
+ *
+ * expo-notifications is native code. A build made before it was added
+ * (an old development build picking up new JS) doesn't have it, so it's
+ * loaded only when its native side is there; otherwise push quietly does
+ * nothing and Settings says notifications are off.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { requireOptionalNativeModule } from 'expo';
 import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
+import type * as NotificationsModule from 'expo-notifications';
 import { router } from 'expo-router';
 import { useEffect } from 'react';
 import { Platform } from 'react-native';
@@ -27,6 +33,14 @@ import { fresh, keys, queryClient } from './query';
 import { Sentry } from './sentry';
 import { supabase } from './supabase';
 
+/** expo-notifications, or null in a build that doesn't include it (and on web). */
+const Notifications: typeof NotificationsModule | null =
+  Platform.OS !== 'web' && requireOptionalNativeModule('ExpoPushTokenManager')
+    ? // Loaded lazily: importing it in a build without its native side throws.
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      (require('expo-notifications') as typeof NotificationsModule)
+    : null;
+
 const TOKEN_KEY = 'push.token';
 const ASKED_KEY = 'push.asked';
 
@@ -36,7 +50,7 @@ let configured = false;
 
 /** How pushes behave while the app is open. Call once at startup. */
 export function configurePush() {
-  if (configured || Platform.OS === 'web') return;
+  if (configured || !Notifications) return;
   configured = true;
 
   Notifications.setNotificationHandler({
@@ -69,6 +83,7 @@ export function configurePush() {
 export type PushPermission = 'granted' | 'denied' | 'undetermined';
 
 async function readPermission(): Promise<PushPermission> {
+  if (!Notifications) return 'denied';
   const status = await Notifications.getPermissionsAsync();
   if (status.granted) return 'granted';
   const ios = status.ios?.status;
@@ -84,13 +99,14 @@ export function usePushPermission() {
     queryKey: keys.pushPermission(),
     queryFn: readPermission,
     staleTime: fresh.mine,
-    enabled: Platform.OS !== 'web',
+    enabled: Notifications !== null,
   });
 }
 
 /* This phone ---------------------------------------------------------------------- */
 
 async function expoToken(): Promise<string | null> {
+  if (!Notifications) return null;
   const projectId = Constants.expoConfig?.extra?.eas?.projectId as string | undefined;
   try {
     const { data } = await Notifications.getExpoPushTokenAsync(projectId ? { projectId } : undefined);
@@ -107,7 +123,7 @@ async function expoToken(): Promise<string | null> {
  * allowed. Safe to call on every launch.
  */
 export async function registerThisPhone(): Promise<void> {
-  if (Platform.OS === 'web') return;
+  if (!Notifications) return;
   if ((await readPermission()) !== 'granted') return;
   const token = await expoToken();
   if (!token) return;
@@ -140,13 +156,14 @@ export async function forgetThisPhone(): Promise<void> {
 export function useAskForPushOnce(enabled: boolean) {
   const client = useQueryClient();
   useEffect(() => {
-    if (!enabled || Platform.OS === 'web') return;
+    const notifications = Notifications;
+    if (!enabled || !notifications) return;
     let cancelled = false;
     void (async () => {
       const asked = await AsyncStorage.getItem(ASKED_KEY).catch(() => null);
       if (asked || cancelled) return;
       if ((await readPermission()) === 'undetermined') {
-        await Notifications.requestPermissionsAsync();
+        await notifications.requestPermissionsAsync();
       }
       await AsyncStorage.setItem(ASKED_KEY, '1').catch(() => undefined);
       await registerThisPhone();
@@ -160,6 +177,7 @@ export function useAskForPushOnce(enabled: boolean) {
 
 /** Asks again from Settings when the phone still allows a prompt. */
 export async function requestPushPermission(): Promise<PushPermission> {
+  if (!Notifications) return 'denied';
   await Notifications.requestPermissionsAsync();
   await AsyncStorage.setItem(ASKED_KEY, '1').catch(() => undefined);
   await registerThisPhone();
@@ -195,13 +213,24 @@ function open(data: Record<string, unknown> | undefined) {
  * launched the app. Mount once inside the signed-in app.
  */
 export function usePushTaps() {
-  const last = Notifications.useLastNotificationResponse();
-
   useEffect(() => {
-    if (!last || last.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
-    open(last.notification.request.content.data);
-    void Notifications.clearLastNotificationResponseAsync();
-  }, [last]);
+    const notifications = Notifications;
+    if (!notifications) return;
+    let handled: string | null = null;
+    const handle = (response: NotificationsModule.NotificationResponse | null) => {
+      if (!response || response.actionIdentifier !== notifications.DEFAULT_ACTION_IDENTIFIER) return;
+      // The push that launched the app can also reach the listener; open it once.
+      const id = response.notification.request.identifier;
+      if (id === handled) return;
+      handled = id;
+      open(response.notification.request.content.data);
+      void notifications.clearLastNotificationResponseAsync();
+    };
+
+    void notifications.getLastNotificationResponseAsync().then(handle);
+    const sub = notifications.addNotificationResponseReceivedListener(handle);
+    return () => sub.remove();
+  }, []);
 }
 
 /* Switches ------------------------------------------------------------------------- */
