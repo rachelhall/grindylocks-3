@@ -1399,6 +1399,8 @@ insert into profiles (id, username, onboarded_at, home_metro_area_id, discipline
 insert into follows (follower_id, followee_id, status) values
  ('d1000000-0000-4000-8000-0000000000a4','d1000000-0000-4000-8000-0000000000a1','accepted'),
  ('d1000000-0000-4000-8000-0000000000a4','d1000000-0000-4000-8000-0000000000a3','accepted');
+-- A follow to a private account always starts as a request; P accepts F.
+update follows set status = 'accepted' where follower_id = 'd1000000-0000-4000-8000-0000000000a4' and followee_id = 'd1000000-0000-4000-8000-0000000000a3';
 insert into blocks (blocker_id, blocked_id) values ('d1000000-0000-4000-8000-0000000000a1','d1000000-0000-4000-8000-0000000000a7');
 
 -- Memo 8dc45317-…, City Heights ff7f5301-…, Fælledparken 27eb94af-…, Xhall 6c91f4f3-…
