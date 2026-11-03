@@ -6,7 +6,6 @@
  * Comments can be deleted (your own, or any on your post), never edited.
  * Anyone else's comment can be reported (M5), from the same line as Reply.
  */
-import { router } from 'expo-router';
 import { Fragment, type RefObject, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
@@ -24,29 +23,19 @@ import {
   useComments,
   useDeleteComment,
 } from '@/lib/engagement';
-import {
-  activeMention,
-  buildCandidates,
-  insertMention,
-  type MentionCandidate,
-  type MentionReason,
-  useMentionSearch,
-} from '@/lib/mentions';
+import { MentionedText, MentionList, openProfile } from '@/components/mentions';
+import { activeMention, buildCandidates, insertMention, useMentionSearch } from '@/lib/mentions';
 import { useParkRegulars, usePost } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
 import { useBlockedAccounts, useFollowing } from '@/lib/social';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 const COLLAPSE_AFTER = 2;
-const MENTION = /(@[A-Za-z0-9._]{2,30})/g;
-
-const openProfile = (username: string) => router.push({ pathname: '/profile/[username]', params: { username } });
 
 /** Comment text, with @mentions as links to profiles. */
 function Body({ comment }: { comment: Comment }) {
   const c = useColors();
   const link = { color: c.accentText, fontFamily: fontFamily.sansSemiBold };
-  const parts = (comment.body ?? '').split(MENTION);
   return (
     <Text variant="bodySm">
       {comment.replyToUsername ? (
@@ -56,15 +45,7 @@ function Body({ comment }: { comment: Comment }) {
           </Text>{' '}
         </>
       ) : null}
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <Text key={i} variant="bodySm" accessibilityRole="link" onPress={() => openProfile(part.slice(1))} style={link}>
-            {part}
-          </Text>
-        ) : (
-          <Fragment key={i}>{part}</Fragment>
-        ),
-      )}
+      <MentionedText text={comment.body ?? ''} variant="bodySm" />
     </Text>
   );
 }
@@ -322,97 +303,6 @@ export function CommentList({
   );
 }
 
-/** A username with the letters typed so far underlined. */
-function MatchedName({ username, typed, color }: { username: string; typed: number; color: string }) {
-  return (
-    <Text variant="body" numberOfLines={1} style={{ color, fontFamily: fontFamily.sansSemiBold }}>
-      {typed > 0 ? (
-        <Text variant="body" style={[styles.typed, { color, fontFamily: fontFamily.sansSemiBold }]}>
-          {username.slice(0, typed)}
-        </Text>
-      ) : null}
-      {username.slice(typed)}
-    </Text>
-  );
-}
-
-/**
- * The list that opens above the composer when you type @ (Comment box
- * mockup): people on the post, then people you follow, then regulars at
- * the post's park. The first row is highlighted as the likely pick.
- */
-function MentionList({
-  candidates,
-  typed,
-  parkName,
-  onPick,
-}: {
-  candidates: MentionCandidate[];
-  typed: number;
-  parkName: string | null;
-  onPick: (username: string) => void;
-}) {
-  const { t } = useTranslation();
-  const c = useColors();
-  const reasonText = (reason: MentionReason) => {
-    switch (reason) {
-      case 'posted':
-        return t('comments.mentionPosted');
-      case 'filmed':
-        return t('comments.mentionFilmed');
-      case 'tagged':
-        return t('comments.mentionTagged');
-      case 'commented':
-        return t('comments.mentionCommented');
-      case 'following':
-        return t('comments.mentionFollowing');
-      case 'regular':
-        return parkName ? t('comments.mentionRegular', { park: parkName }) : null;
-      default:
-        return null;
-    }
-  };
-  return (
-    <View
-      accessibilityRole="list"
-      accessibilityLabel={t('comments.mentionLabel')}
-      style={[styles.mentions, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}
-    >
-      <Text variant="label" color="textSecondary" style={styles.mentionsTitle}>
-        {t('comments.mentionTitle')}
-      </Text>
-      {candidates.map((p, i) => {
-        const first = i === 0;
-        const reason = reasonText(p.reason);
-        const ink = first ? c.onAccentSubtle : c.text;
-        return (
-          <Pressable
-            key={p.id}
-            accessibilityRole="button"
-            accessibilityLabel={reason ? `${p.username}, ${reason}` : p.username}
-            onPress={() => onPick(p.username)}
-            style={({ pressed }) => [
-              styles.mentionRow,
-              first && { backgroundColor: c.accentSubtle },
-              pressed && styles.pressed,
-            ]}
-          >
-            <Avatar path={p.avatarPath} username={p.username} size={32} />
-            <View style={styles.flex}>
-              <MatchedName username={p.username} typed={typed} color={ink} />
-              {reason ? (
-                <Text variant="caption" numberOfLines={1} style={{ color: first ? c.onAccentSubtle : c.textSecondary }}>
-                  {reason}
-                </Text>
-              ) : null}
-            </View>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 /** The bar at the bottom of post detail: a text box, "Replying to", and Post. */
 export function CommentComposer({
   postId,
@@ -590,9 +480,5 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlignVertical: 'top',
   },
-  mentions: { marginHorizontal: space[4], borderWidth: stroke.rule, borderBottomWidth: 0 },
-  mentionsTitle: { paddingHorizontal: space[3], paddingTop: space[2], paddingBottom: 2 },
-  mentionRow: { flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 52, paddingHorizontal: space[3] },
-  typed: { textDecorationLine: 'underline' },
   send: { minWidth: 64, height: size.tapMin, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center', paddingHorizontal: space[3] },
 });

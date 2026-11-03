@@ -46,6 +46,7 @@ const BADGES: Record<NotificationKind, IconName> = {
   comment: 'badgeComment',
   reply: 'badgeReply',
   mention: 'badgeMention',
+  caption_mention: 'badgeMention',
   tag: 'badgeTag',
   filmer_credit: 'video',
   invite_used: 'badgeInvite',
@@ -59,7 +60,7 @@ const BADGES: Record<NotificationKind, IconName> = {
   role_vacated: 'badgeRole',
 };
 
-const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'tag', 'filmer_credit']);
+const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'caption_mention', 'tag', 'filmer_credit']);
 
 /** Notices from the admins or about a park: no person, so no avatar. */
 const NOTICE_KINDS = new Set<NotificationKind>(['park_fix_live', 'post_removed', 'comment_removed', 'warning', 'suspension']);
@@ -114,6 +115,7 @@ export default function Notifications() {
       case 'mention':
         if (n.postId) router.push({ pathname: '/post/[id]', params: { id: n.postId, comments: '1' } });
         return;
+      case 'caption_mention':
       case 'tag':
       case 'filmer_credit':
       case 'post_removed':
@@ -146,6 +148,8 @@ export default function Notifications() {
         return t('notifications.reply', { a });
       case 'mention':
         return t('notifications.mention', { a });
+      case 'caption_mention':
+        return t('notifications.captionMention', { a });
       case 'tag':
         return t('notifications.tag', { a });
       case 'filmer_credit':

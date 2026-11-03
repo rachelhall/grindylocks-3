@@ -1,9 +1,11 @@
 /**
  * Who to suggest when someone types @ in a comment (Comment box mockup,
- * Built from the brief, Nov 2). The list is ordered:
+ * Built from the brief, Nov 2) or a caption (Mentions (v2), Nov 2). The
+ * list is ordered:
  *
  * 1. People on the post: the poster, filmers, people tagged on a slide, and
- *    people who've commented.
+ *    people who've commented. A new post isn't saved yet, so its filmers
+ *    and tagged people come from the draft (`onPost`).
  * 2. People you follow.
  * 3. Regulars at the post's park.
  * 4. Anyone else whose username starts with what you typed (search).
@@ -50,7 +52,7 @@ export function insertMention(text: string, cursor: number, start: number, usern
   return { text: next, cursor: start + username.length + 2 };
 }
 
-type Person = { id: string; username: string; avatarPath: string | null };
+export type Person = { id: string; username: string; avatarPath: string | null };
 
 /** Search matches, once two letters are typed (the search function's minimum). */
 export function useMentionSearch(q: string, enabled: boolean) {
@@ -66,6 +68,7 @@ export function buildCandidates({
   query,
   me,
   post,
+  onPost = [],
   threads,
   following,
   regulars,
@@ -75,6 +78,8 @@ export function buildCandidates({
   query: string;
   me: string | undefined;
   post: Post | null | undefined;
+  /** Filmers and tagged people on a post that isn't saved yet. */
+  onPost?: { person: Person; reason: 'filmed' | 'tagged' }[];
   threads: Thread[];
   following: Person[];
   regulars: Person[];
@@ -96,6 +101,7 @@ export function buildCandidates({
     for (const s of post.slides) if (s.filmer) add(s.filmer, 'filmed');
     for (const s of post.slides) for (const p of s.people) add(p, 'tagged');
   }
+  for (const { person, reason } of onPost) add(person, reason);
   for (const thread of threads) {
     for (const c of [thread.comment, ...thread.replies]) {
       if (!c.deleted && c.authorId) add({ id: c.authorId, username: c.username, avatarPath: c.avatarPath }, 'commented');

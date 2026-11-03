@@ -1,10 +1,11 @@
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { MentionList, useCaptionMentions } from '@/components/mentions';
 import { type PickedPark, ParkPickerModal, ParkRow, SlideTagRows } from '@/components/tagging';
 import { Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -74,8 +75,10 @@ function EditForm({ post }: { post: Post }) {
   const { t } = useTranslation();
   const c = useColors();
   const save = useEditPost(post);
+  const { session } = useAuth();
 
   const [caption, setCaption] = useState(post.caption ?? '');
+  const captionInput = useRef<TextInput>(null);
   const [park, setPark] = useState<PickedPark | null>(post.park ? { id: post.park.id, name: post.park.name } : null);
   const [tags, setTags] = useState<Record<string, SlideTags>>(() =>
     Object.fromEntries(post.slides.map((s) => [s.id, tagsOf(s)])),
@@ -91,6 +94,18 @@ function EditForm({ post }: { post: Post }) {
   const [index, setIndex] = useState(0);
   const [parkOpen, setParkOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Typing @ in the caption opens the mention list above the keyboard
+  // (Mentions (v2) mockup, Nov 2).
+  const mentions = useCaptionMentions({
+    userId: session?.user.id,
+    text: caption,
+    setText: setCaption,
+    inputRef: captionInput,
+    post,
+    parkId: park?.id,
+  });
+  const hasMention = /(^|\s)@[A-Za-z0-9._]{2,30}/.test(caption);
 
   const at = Math.min(index, post.slides.length - 1);
   const slide = post.slides[at];
@@ -135,103 +150,120 @@ function EditForm({ post }: { post: Post }) {
         }
       />
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        {error ? (
-          <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite" style={styles.pad}>
-            {error}
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          {error ? (
+            <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite" style={styles.pad}>
+              {error}
+            </Text>
+          ) : null}
+
+          <ParkRow park={park} onPress={() => setParkOpen(true)} line={t('tagging.parkLineEdit')} />
+
+          <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.caption}>
+            {t('editPost.slides')}
           </Text>
-        ) : null}
-
-        <ParkRow park={park} onPress={() => setParkOpen(true)} line={t('tagging.parkLineEdit')} />
-
-        <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.caption}>
-          {t('editPost.slides')}
-        </Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs} accessibilityRole="tablist">
-          {post.slides.map((s, i) => {
-            const on = i === at;
-            const uri = s.kind === 'photo' ? s.photoUrl : s.videoKey ? videoThumbnailUrl(s.videoKey, 200) : null;
-            const tagged = tags[s.id] ? hasTags(tags[s.id]) : false;
-            return (
-              <Pressable
-                key={s.id}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: on }}
-                accessibilityLabel={
-                  (s.kind === 'video' ? t('editPost.slideClip', { number: i + 1 }) : t('editPost.slidePhoto', { number: i + 1 })) +
-                  (tagged ? `, ${t('tagging.slideTagged', { number: i + 1 })}` : '')
-                }
-                onPress={() => setIndex(i)}
-                style={[
-                  styles.thumb,
-                  { backgroundColor: c.surfaceSunk },
-                  on ? { borderWidth: 3, borderColor: c.border } : { borderWidth: stroke.hairline, borderColor: c.borderSubtle },
-                ]}
-              >
-                {uri ? (
-                  <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
-                ) : (
-                  <View style={styles.center}>
-                    <Icon name={s.kind === 'video' ? 'video' : 'photo'} color={c.textSecondary} size={20} />
-                  </View>
-                )}
-                <View style={[styles.badge, styles.badgeNumber]}>
-                  <Text variant="caption" style={styles.badgeText}>
-                    {i + 1}
-                  </Text>
-                </View>
-                {s.kind === 'video' && s.durationS ? (
-                  <View style={[styles.badge, styles.badgeDuration]}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs} accessibilityRole="tablist">
+            {post.slides.map((s, i) => {
+              const on = i === at;
+              const uri = s.kind === 'photo' ? s.photoUrl : s.videoKey ? videoThumbnailUrl(s.videoKey, 200) : null;
+              const tagged = tags[s.id] ? hasTags(tags[s.id]) : false;
+              return (
+                <Pressable
+                  key={s.id}
+                  accessibilityRole="tab"
+                  accessibilityState={{ selected: on }}
+                  accessibilityLabel={
+                    (s.kind === 'video' ? t('editPost.slideClip', { number: i + 1 }) : t('editPost.slidePhoto', { number: i + 1 })) +
+                    (tagged ? `, ${t('tagging.slideTagged', { number: i + 1 })}` : '')
+                  }
+                  onPress={() => setIndex(i)}
+                  style={[
+                    styles.thumb,
+                    { backgroundColor: c.surfaceSunk },
+                    on ? { borderWidth: 3, borderColor: c.border } : { borderWidth: stroke.hairline, borderColor: c.borderSubtle },
+                  ]}
+                >
+                  {uri ? (
+                    <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
+                  ) : (
+                    <View style={styles.center}>
+                      <Icon name={s.kind === 'video' ? 'video' : 'photo'} color={c.textSecondary} size={20} />
+                    </View>
+                  )}
+                  <View style={[styles.badge, styles.badgeNumber]}>
                     <Text variant="caption" style={styles.badgeText}>
-                      {formatDuration(s.durationS)}
+                      {i + 1}
                     </Text>
                   </View>
-                ) : null}
-              </Pressable>
-            );
-          })}
-        </ScrollView>
+                  {s.kind === 'video' && s.durationS ? (
+                    <View style={[styles.badge, styles.badgeDuration]}>
+                      <Text variant="caption" style={styles.badgeText}>
+                        {formatDuration(s.durationS)}
+                      </Text>
+                    </View>
+                  ) : null}
+                </Pressable>
+              );
+            })}
+          </ScrollView>
 
-        <Text variant="label" color="textSecondary" accessibilityRole="header" style={[styles.caption, styles.tagsCaption]}>
-          {t('tagging.slideTagsTitle', { number: at + 1 })}
-        </Text>
-        {slide && tags[slide.id] ? (
-          <View style={[styles.rows, { borderTopColor: c.borderSubtle }]}>
-            <SlideTagRows
-              key={slide.id}
-              slideNumber={at + 1}
-              parkId={park?.id ?? null}
-              parkName={park?.name ?? null}
-              tags={tags[slide.id]}
-              names={names}
-              onChange={(next) => setTags((prev) => ({ ...prev, [slide.id]: next }))}
-              onName={(pid, username) => setNames((prev) => ({ ...prev, [pid]: username }))}
-            />
-          </View>
-        ) : null}
-
-        <View style={styles.field}>
-          <Text variant="label" color="textSecondary">
-            {t('post.captionLabel')}
+          <Text variant="label" color="textSecondary" accessibilityRole="header" style={[styles.caption, styles.tagsCaption]}>
+            {t('tagging.slideTagsTitle', { number: at + 1 })}
           </Text>
-          <TextInput
-            accessibilityLabel={t('post.captionLabel')}
-            value={caption}
-            onChangeText={setCaption}
-            placeholder={t('post.captionPlaceholder')}
-            placeholderTextColor={c.textMuted}
-            selectionColor={c.accent}
-            cursorColor={c.text}
-            multiline
-            maxLength={CAPTION_MAX}
-            style={[styles.captionInput, { color: c.text, backgroundColor: c.surfaceRaised, borderColor: c.border }]}
-          />
-        </View>
+          {slide && tags[slide.id] ? (
+            <View style={[styles.rows, { borderTopColor: c.borderSubtle }]}>
+              <SlideTagRows
+                key={slide.id}
+                slideNumber={at + 1}
+                parkId={park?.id ?? null}
+                parkName={park?.name ?? null}
+                tags={tags[slide.id]}
+                names={names}
+                onChange={(next) => setTags((prev) => ({ ...prev, [slide.id]: next }))}
+                onName={(pid, username) => setNames((prev) => ({ ...prev, [pid]: username }))}
+              />
+            </View>
+          ) : null}
 
-        <Text variant="bodySm" color="textSecondary" style={styles.footnote}>
-          {t('editPost.footnote')}
-        </Text>
-      </ScrollView>
+          <View style={styles.field}>
+            <Text variant="label" color="textSecondary">
+              {t('post.captionLabel')}
+            </Text>
+            <TextInput
+              ref={captionInput}
+              accessibilityLabel={t('post.captionLabel')}
+              value={caption}
+              onChangeText={setCaption}
+              onSelectionChange={mentions.onSelectionChange}
+              placeholder={t('post.captionPlaceholder')}
+              placeholderTextColor={c.textMuted}
+              selectionColor={c.accent}
+              cursorColor={c.text}
+              multiline
+              maxLength={CAPTION_MAX}
+              style={[styles.captionInput, { color: c.text, backgroundColor: c.surfaceRaised, borderColor: c.border }]}
+            />
+            {hasMention ? (
+              <Text variant="bodySm" color="textSecondary">
+                {t('editPost.mentionNote')}
+              </Text>
+            ) : null}
+          </View>
+
+          <Text variant="bodySm" color="textSecondary" style={styles.footnote}>
+            {t('editPost.footnote')}
+          </Text>
+        </ScrollView>
+        {mentions.candidates.length > 0 ? (
+          <MentionList
+            candidates={mentions.candidates}
+            typed={mentions.typed}
+            parkName={park?.name ?? null}
+            onPick={mentions.pick}
+          />
+        ) : null}
+      </KeyboardAvoidingView>
 
       <ParkPickerModal visible={parkOpen} current={park} onClose={() => setParkOpen(false)} onPick={pickPark} />
     </SafeAreaView>
@@ -240,6 +272,7 @@ function EditForm({ post }: { post: Post }) {
 
 const styles = StyleSheet.create({
   screen: { flex: 1 },
+  flex: { flex: 1 },
   pressed: { opacity: 0.75 },
   header: {
     flexDirection: 'row',

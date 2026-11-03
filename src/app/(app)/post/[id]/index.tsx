@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { MentionedText } from '@/components/mentions';
 import { SafeAreaView } from '@/components/safe-area';
 
 import { CommentComposer, CommentList } from '@/components/comments';
@@ -179,7 +180,7 @@ export default function PostScreen() {
                 <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
                   {username}
                 </Text>{' '}
-                {post.caption}
+                <MentionedText text={post.caption} variant="body" />
               </Text>
             ) : null}
             <CreditsLine slides={post.slides} />

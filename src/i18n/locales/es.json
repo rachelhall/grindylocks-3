@@ -162,7 +162,8 @@
     "moveEarlier": "Mover antes",
     "moveLater": "Mover después",
     "slideItem": "Diapositiva {{number}}",
-    "limitsShort": "Hasta 10 · clips de hasta 60 s"
+    "limitsShort": "Hasta 10 · clips de hasta 60 s",
+    "mentionHint": "Las personas que menciones recibirán un aviso cuando publiques."
   },
   "uploads": {
     "uploading": "Subiendo {{done}} de {{total}}",
@@ -337,6 +338,7 @@
     "commentMany_other": "{{a}}, {{b}} y {{count}} personas más comentaron tu publicación",
     "reply": "{{a}} te respondió",
     "mention": "{{a}} te mencionó en un comentario",
+    "captionMention": "{{a}} te mencionó en la descripción de una publicación",
     "tag": "{{a}} te etiquetó en una publicación",
     "filmer": "{{a}} te dio el crédito de filmer",
     "someoneNew": "{{a}} acaba de unirse a Grindylocks en {{metro}}. ¡Salúdale!",
@@ -719,7 +721,8 @@
     "slides": "Diapositivas · el contenido no cambia después de publicar",
     "slideClip": "Diapositiva {{number}}, clip",
     "slidePhoto": "Diapositiva {{number}}, foto",
-    "footnote": "Los cambios guardados muestran “editado” en la publicación. Las personas que añades reciben aviso; las que quitas, no."
+    "footnote": "Los cambios guardados muestran “editado” en la publicación. Las personas que añades reciben aviso; las que quitas, no.",
+    "mentionNote": "Solo reciben aviso las personas que añadas ahora. Quienes ya estaban mencionados no reciben otro aviso, y a quienes quites no se les dice nada."
   },
   "obstacle": {
     "kicker": "Obstáculo · {{type}}",
@@ -773,7 +776,7 @@
     "comments": "Comentarios",
     "commentsBody": "En tus publicaciones y respuestas a tus comentarios",
     "mentions": "Menciones",
-    "mentionsBody": "Cuando alguien te @menciona en un comentario",
+    "mentionsBody": "Cuando alguien te @menciona en un comentario o una descripción",
     "tags": "Etiquetas",
     "tagsBody": "Cuando alguien te etiqueta en una publicación",
     "filmer": "Crédito de filmer",

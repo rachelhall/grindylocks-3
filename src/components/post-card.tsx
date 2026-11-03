@@ -10,6 +10,7 @@ import { Fragment } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
+import { MentionedText } from '@/components/mentions';
 import { Carousel } from '@/components/media';
 import { Avatar } from '@/components/profile';
 import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
@@ -474,7 +475,7 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
             <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
               {username}
             </Text>{' '}
-            {post.caption}
+            <MentionedText text={post.caption} variant="body" />
           </Text>
         ) : null}
         <CreditsLine slides={post.slides} />
