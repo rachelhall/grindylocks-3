@@ -14,6 +14,13 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
   - `stream-status`: asks Stream where a clip is and saves it on the slide.
   - `stream-webhook`: Stream calls this when a clip is ready or fails.
     Deployed with JWT verification off; it checks Stream's signature.
+  - `stream-token`: signed playback tokens (a few hours) for clips the
+    caller can see. Every clip requires one (`requireSignedURLs`), the way
+    post photos need signed URLs, so copied links stop working and private
+    accounts' clips stay private. Without the signing key it answers
+    `signed: false` and the app falls back to plain video IDs.
+  - `stream-sign-existing`: one-off, owner only. Makes clips uploaded before
+    signing was switched on require tokens. Delete it once it has run.
   - `push-send`: sends waiting push notifications through Expo's push
     service. The database pings it (pg_net); JWT verification is off
     because it only drains the queue. Needs no secrets.
@@ -25,6 +32,8 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
 | `CLOUDFLARE_ACCOUNT_ID` | Cloudflare account ID |
 | `CLOUDFLARE_STREAM_API_TOKEN` | API token with Stream: Edit |
 | `CLOUDFLARE_STREAM_WEBHOOK_SECRET` | the `secret` returned when the Stream webhook is created |
+| `STREAM_SIGNING_KEY_ID` | Stream signing key ID (`scripts/stream-signing-key.sh` sets both) |
+| `STREAM_SIGNING_KEY_JWK` | the base64 `jwk` Stream returns with that key |
 
 Until these are set the functions answer 503 `video_not_configured` and the
 app says clip uploads aren't switched on yet. Photos don't need any of this.

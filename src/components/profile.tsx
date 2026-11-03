@@ -331,8 +331,8 @@ function GridTile({ post, width, height }: { post: GridPost; width: number; heig
   const uri =
     cover?.kind === 'photo'
       ? cover.photoUrl
-      : cover?.videoId
-        ? (videoThumbnailUrl(cover.videoId, 480) ?? undefined)
+      : cover?.videoKey
+        ? (videoThumbnailUrl(cover.videoKey, 480) ?? undefined)
         : undefined;
   const date = new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(post.publishedAt));
   const tag =

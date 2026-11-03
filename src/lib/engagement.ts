@@ -14,7 +14,7 @@
  */
 import { type InfiniteData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { photoUrls, videoThumbnailUrl } from './media';
+import { photoUrls, videoKeys, videoThumbnailUrl } from './media';
 import type { Post } from './posts';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
@@ -249,13 +249,23 @@ export function usePostCovers(postIds: string[]) {
       const paths = [...first.values()]
         .filter((s) => s.kind === 'photo' && s.upload_status === 'ready' && s.storage_path)
         .map((s) => s.storage_path!);
-      const urls = await photoUrls(paths);
+      const [urls, clips] = await Promise.all([
+        photoUrls(paths),
+        videoKeys(
+          [...first.values()]
+            .filter((s) => s.kind === 'video' && s.upload_status === 'ready')
+            .map((s) => s.stream_video_id),
+        ),
+      ]);
       const out: Record<string, PostCover> = {};
       for (const [postId, s] of first) {
         out[postId] =
           s.kind === 'photo'
             ? { kind: 'photo', uri: s.storage_path ? (urls[s.storage_path] ?? null) : null }
-            : { kind: 'video', uri: s.stream_video_id ? videoThumbnailUrl(s.stream_video_id, 120) : null };
+            : {
+                kind: 'video',
+                uri: s.stream_video_id && clips[s.stream_video_id] ? videoThumbnailUrl(clips[s.stream_video_id], 120) : null,
+              };
       }
       return out;
     },

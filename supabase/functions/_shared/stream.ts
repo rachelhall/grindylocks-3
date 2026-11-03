@@ -14,6 +14,13 @@ const DURATION_SLACK_SECONDS = 0.5;
 /** How long a one-time upload URL stays valid. Generous, for slow connections. */
 const UPLOAD_URL_HOURS = 4;
 
+/**
+ * How long a playback token works. Long enough that a clip doesn't stop
+ * mid-session; the app asks for fresh ones whenever its post data refreshes.
+ * Stream allows at most 24 hours.
+ */
+export const PLAYBACK_TOKEN_HOURS = 4;
+
 export type SlideStatus = 'uploading' | 'processing' | 'ready' | 'failed';
 
 export type StreamVideo = {
@@ -35,6 +42,8 @@ export function json(body: unknown, status = 200): Response {
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
+
+const enc = new TextEncoder();
 
 /* Config --------------------------------------------------------------- */
 
@@ -104,7 +113,10 @@ export async function createDirectUpload(
       expiry,
       creator: meta.userId,
       meta: { slide: meta.slideId, post: meta.postId },
-      requireSignedURLs: false,
+      // Every clip needs a signed token to play, like post photos need a
+      // signed URL, so a copied link stops working and private accounts'
+      // clips stay private. stream-token hands out tokens.
+      requireSignedURLs: true,
     }),
   });
   const body = await res.json().catch(() => null);
@@ -135,6 +147,86 @@ export async function deleteVideo(cfg: { accountId: string; apiToken: string }, 
     method: 'DELETE',
     headers: { Authorization: `Bearer ${cfg.apiToken}` },
   }).catch(() => undefined);
+}
+
+/** Makes an existing video need signed tokens (or not). */
+export async function setRequireSignedURLs(
+  cfg: { accountId: string; apiToken: string },
+  uid: string,
+  required: boolean,
+): Promise<void> {
+  const res = await fetch(api(cfg.accountId, `/${uid}`), {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${cfg.apiToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uid, requireSignedURLs: required }),
+  });
+  const body = await res.json().catch(() => null);
+  if (!res.ok || !body?.success) {
+    throw new Error(`Stream update failed (${res.status}): ${JSON.stringify(body?.errors ?? body)}`);
+  }
+}
+
+/* Signed playback tokens ----------------------------------------------------- */
+
+export type SigningKey = { id: string; key: CryptoKey };
+
+let signingKey: Promise<SigningKey | null> | null = null;
+
+/**
+ * The Stream signing key from STREAM_SIGNING_KEY_ID and STREAM_SIGNING_KEY_JWK
+ * (the base64 `jwk` Stream returns when the key is created). Null when
+ * they aren't set yet.
+ */
+export function streamSigningKey(): Promise<SigningKey | null> {
+  if (!signingKey) {
+    signingKey = (async () => {
+      const id = Deno.env.get('STREAM_SIGNING_KEY_ID');
+      const jwk64 = Deno.env.get('STREAM_SIGNING_KEY_JWK');
+      if (!id || !jwk64) return null;
+      const jwk = JSON.parse(atob(jwk64.trim()));
+      const key = await crypto.subtle.importKey(
+        'jwk',
+        jwk,
+        { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+        false,
+        ['sign'],
+      );
+      return { id, key };
+    })().catch((err) => {
+      signingKey = null;
+      throw err;
+    });
+  }
+  return signingKey;
+}
+
+function b64url(data: Uint8Array | string): string {
+  const bytes = typeof data === 'string' ? enc.encode(data) : data;
+  let bin = '';
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+/**
+ * A self-signed Stream token (RS256 JWT) for one video. It goes in place of
+ * the video ID in playback and thumbnail URLs, and stops working at `exp`.
+ */
+export async function signPlaybackToken(
+  signer: SigningKey,
+  uid: string,
+  hours = PLAYBACK_TOKEN_HOURS,
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  const header = b64url(JSON.stringify({ alg: 'RS256', kid: signer.id }));
+  const payload = b64url(
+    JSON.stringify({ sub: uid, kid: signer.id, exp: now + hours * 3600, nbf: now - 60 }),
+  );
+  const sig = await crypto.subtle.sign(
+    'RSASSA-PKCS1-v1_5',
+    signer.key,
+    enc.encode(`${header}.${payload}`),
+  );
+  return `${header}.${payload}.${b64url(new Uint8Array(sig))}`;
 }
 
 /* Mapping Stream state onto post_slides ------------------------------------ */
@@ -178,8 +270,6 @@ export async function applyVideoState(
 }
 
 /* Webhook signatures ------------------------------------------------------- */
-
-const enc = new TextEncoder();
 
 function hex(buf: ArrayBuffer): string {
   return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');

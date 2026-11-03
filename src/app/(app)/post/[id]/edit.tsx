@@ -150,7 +150,7 @@ function EditForm({ post }: { post: Post }) {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbs} accessibilityRole="tablist">
           {post.slides.map((s, i) => {
             const on = i === at;
-            const uri = s.kind === 'photo' ? s.photoUrl : s.videoId ? videoThumbnailUrl(s.videoId, 200) : null;
+            const uri = s.kind === 'photo' ? s.photoUrl : s.videoKey ? videoThumbnailUrl(s.videoKey, 200) : null;
             const tagged = tags[s.id] ? hasTags(tags[s.id]) : false;
             return (
               <Pressable

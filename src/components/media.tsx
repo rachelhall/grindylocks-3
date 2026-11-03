@@ -22,8 +22,8 @@ export type ViewSlide = {
   status: 'uploading' | 'processing' | 'ready' | 'failed';
   /** Photos: a signed URL. */
   photoUrl?: string;
-  /** Clips: the Stream video ID. */
-  videoId?: string | null;
+  /** Clips: the playback key (a signed token) from `videoKeys`. */
+  videoKey?: string | null;
 };
 
 /** Small ink tag in a corner: a clip's length or "1 / 3". */
@@ -49,9 +49,9 @@ function setMuted(player: VideoPlayer, muted: boolean) {
  * session. When autoplay is off (Low Data Mode, Reduce Motion, the phone's
  * auto-play setting), it waits for a tap on the play button.
  */
-function VideoSlide({ videoId, active }: { videoId: string; active: boolean }) {
+function VideoSlide({ videoKey, active }: { videoKey: string; active: boolean }) {
   const { t } = useTranslation();
-  const url = videoPlaybackUrl(videoId);
+  const url = videoPlaybackUrl(videoKey);
   const soundOn = useSoundOn();
   const autoplay = useAutoplayAllowed();
   const focused = useIsFocused();
@@ -131,8 +131,8 @@ function Slide({ slide, width, height, active }: { slide: ViewSlide; width: numb
           contentFit="contain"
           accessibilityIgnoresInvertColors
         />
-      ) : slide.kind === 'video' && slide.videoId && videoPlaybackUrl(slide.videoId) ? (
-        <VideoSlide videoId={slide.videoId} active={active} />
+      ) : slide.kind === 'video' && slide.videoKey && videoPlaybackUrl(slide.videoKey) ? (
+        <VideoSlide videoKey={slide.videoKey} active={active} />
       ) : (
         <View style={styles.center}>
           <Icon name={slide.kind === 'video' ? 'video' : 'photo'} color={brand.paper} />

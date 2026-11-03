@@ -18,7 +18,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
 import type { Database } from './database.types';
-import { photoUrls } from './media';
+import { photoUrls, videoKeys } from './media';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
 import { uuid } from './uuid';
@@ -239,6 +239,8 @@ export type GridPost = {
     durationS: number | null;
     photoUrl?: string;
     videoId?: string | null;
+    /** The clip's playback key (a signed token); see `videoKeys`. */
+    videoKey?: string | null;
   } | null;
   /** A name shown on the tile (the poster, on Filmed tabs and obstacle feeds). */
   byline?: string | null;
@@ -259,12 +261,11 @@ async function fetchProfilePosts(userId: string, page: number): Promise<GridPost
   if (error) throw error;
 
   const rows = data ?? [];
-  const urls = await photoUrls(
-    rows
-      .map((r) => r.post_slides[0])
-      .filter((s) => s?.kind === 'photo' && s.storage_path)
-      .map((s) => s!.storage_path!),
-  );
+  const covers = rows.map((r) => r.post_slides[0]);
+  const [urls, clips] = await Promise.all([
+    photoUrls(covers.filter((s) => s?.kind === 'photo' && s.storage_path).map((s) => s!.storage_path!)),
+    videoKeys(covers.filter((s) => s?.kind === 'video').map((s) => s!.stream_video_id)),
+  ]);
   return rows.map((r) => {
     const s = r.post_slides[0];
     return {
@@ -279,6 +280,7 @@ async function fetchProfilePosts(userId: string, page: number): Promise<GridPost
             durationS: s.duration_s,
             photoUrl: s.storage_path ? urls[s.storage_path] : undefined,
             videoId: s.stream_video_id,
+            videoKey: s.stream_video_id ? (clips[s.stream_video_id] ?? null) : null,
           }
         : null,
     };

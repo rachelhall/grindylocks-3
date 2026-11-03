@@ -8,6 +8,13 @@ verify_jwt = true
 [functions.stream-status]
 verify_jwt = true
 
+[functions.stream-token]
+verify_jwt = true
+
+# One-off, owner only; delete once it has run.
+[functions.stream-sign-existing]
+verify_jwt = true
+
 # Called by Cloudflare Stream; it checks the Webhook-Signature header instead.
 [functions.stream-webhook]
 verify_jwt = false
