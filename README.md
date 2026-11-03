@@ -93,7 +93,10 @@ src/
                        my_notifications' comment_body, comment_id, post_id, park_slug, park_name and metro_name;
                        push_claim's actor_username, comment_body, metro_name, park_name and post_id;
                        moderation_queue's label, metro_area_id, metro_name, park_id, park_name, park_slug,
-                       reason and username; my_restriction's suspended_until and message
+                       reason and username; my_restriction's suspended_until and message;
+                       event_going_list's and park_here_now's avatar_path and username; meetup_comments'
+                       author_id, author_role, avatar_path, body, parent_id, reply_to_username and username;
+                       profile_check_in's audience; my_recent_meetups' note and title
     posts.ts      feeds, post detail, profile Tagged/Filmed tabs, regulars, tagging and post edits
     post-draft.tsx  the New post flow's shared draft (media, park, per-slide tags, caption)
     env.ts        public EXPO_PUBLIC_ config
