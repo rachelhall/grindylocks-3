@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { FormScreen } from '@/components/screen';
 import { BackButton, Button, TextField } from '@/components/ui';
 import { authErrorKey, otpOptions } from '@/lib/auth-errors';
+import { isReviewEmail, reviewSignIn } from '@/lib/review-sign-in';
 import { supabase } from '@/lib/supabase';
 import { Text } from '@/theme';
 
@@ -23,6 +24,8 @@ export default function CodeSignIn() {
   const [notice, setNotice] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [wait, setWait] = useState(RESEND_SECONDS);
+  // The App Review account: its code is fixed, so there's nothing to resend.
+  const review = isReviewEmail(email);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -37,6 +40,14 @@ export default function CodeSignIn() {
     if (!ready || !email) return;
     setVerifying(true);
     setError(null);
+    if (review) {
+      const key = await reviewSignIn(code);
+      if (key) {
+        setVerifying(false);
+        setError(t(key));
+      }
+      return;
+    }
     const { error: verifyError } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
     if (verifyError) {
       setVerifying(false);
@@ -68,12 +79,14 @@ export default function CodeSignIn() {
       footer={
         <>
           <Button label={t('auth.code.verify')} onPress={verify} disabled={!ready} loading={verifying} />
-          <Button
-            variant="tertiary"
-            label={wait > 0 ? t('auth.code.resendIn', { seconds: wait }) : t('auth.code.resend')}
-            disabled={wait > 0}
-            onPress={resend}
-          />
+          {!review && (
+            <Button
+              variant="tertiary"
+              label={wait > 0 ? t('auth.code.resendIn', { seconds: wait }) : t('auth.code.resend')}
+              disabled={wait > 0}
+              onPress={resend}
+            />
+          )}
           <Button variant="tertiary" label={t('auth.code.otherEmail')} onPress={() => router.back()} />
         </>
       }

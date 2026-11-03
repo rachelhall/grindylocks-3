@@ -28,6 +28,10 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
     from `export_my_data()` (once a day) through Resend. JWT verification on.
   - `delete-account`: runs `delete_my_account()` as the member, then removes
     their files and Stream clips and their sign-in. JWT verification on.
+  - `review-sign-in`: App Review access. Lets the one demo address
+    (`REVIEW_EMAIL`) sign in with a fixed code (`REVIEW_CODE`) instead of an
+    emailed one; locks for an hour after 10 wrong codes. JWT verification
+    off. See "App Review access" below.
 
 ## Secrets the functions need (Edge Functions → Secrets)
 
@@ -39,6 +43,8 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
 | `STREAM_SIGNING_KEY_ID` | Stream signing key ID (`scripts/stream-signing-key.sh` sets both) |
 | `STREAM_SIGNING_KEY_JWK` | the base64 `jwk` Stream returns with that key |
 | `RESEND_API_KEY` | Resend API key, for export-data's email; the same Resend account as the auth emails |
+| `REVIEW_EMAIL` | `review@grindylocks.com`, the App Review demo account (review-sign-in) |
+| `REVIEW_CODE` | its fixed sign-in code, 10 digits (review-sign-in). Delete it to switch reviewer sign-in off; change it to rotate |
 
 Until the Cloudflare ones are set the video functions answer 503
 `video_not_configured` and the app says clip uploads aren't switched on yet. Photos don't need any of this.
@@ -178,3 +184,31 @@ The two account functions need deploying, from the repo root:
 3. `supabase functions deploy delete-account`
 
 Both keep JWT verification on (the caller is a signed-in member).
+
+## App Review access (migration `review_sign_in`)
+
+Apple's reviewers can't read our emailed codes, so the demo account
+`review@grindylocks.com` signs in with a fixed code through the
+`review-sign-in` function. The app knows the address (`src/lib/review-sign-in.ts`)
+and, for it only, sends the typed code to the function instead of emailing
+one. The function makes a real one-time code with the secret key and the app
+signs in with it as usual, so the session is an ordinary code sign-in
+(Delete account works too). Every other address is unchanged. The address
+needs no mailbox: nothing is ever sent to it.
+
+Setting it up:
+
+1. Apply the migration (the lockout table and its two functions, service
+   role only).
+2. Set `REVIEW_EMAIL` and `REVIEW_CODE` (Edge Functions → Secrets).
+3. `supabase functions deploy review-sign-in --no-verify-jwt`
+4. Make an invite in the app, then create the account:
+   `node scripts/create-review-account.mjs <invite code>` (see the script's
+   header for the secret key).
+5. Sign in as `review@grindylocks.com` with the fixed code and finish
+   onboarding.
+
+Switch it off by deleting `REVIEW_CODE` (the function answers 404
+`not_enabled` and the app shows "wrong code"). Rotate by changing it, then
+update App Store Connect. If a reviewer deletes the account, repeat steps 4
+and 5.

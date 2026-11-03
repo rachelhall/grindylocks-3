@@ -16,7 +16,7 @@ import { fresh, keys } from './query';
 import { supabase } from './supabase';
 
 /** The error code an Edge Function replied with, or 'network' when it couldn't be reached. */
-async function functionErrorCode(error: unknown): Promise<string> {
+export async function functionErrorCode(error: unknown): Promise<string> {
   if (error instanceof FunctionsHttpError) {
     const body = await (error.context as Response).json().catch(() => ({}));
     return typeof body?.error === 'string' ? body.error : 'generic';
