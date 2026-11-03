@@ -22,6 +22,8 @@ initSentry();
 startQueryClient();
 configurePush();
 SplashScreen.preventAutoHideAsync();
+// Splash A (the G on ink) fades into the Map or the welcome screen.
+SplashScreen.setOptions({ fade: true, duration: 300 });
 
 function RootLayout() {
   const scheme = useColorSchemeName();
