@@ -1,0 +1,82 @@
+park_id,season_start,season_end,days,start,end,disciplines,note
+city-heights-sd,,,daily,10:00,22:00,"inline; skateboard; quad",
+linda-vista-sd,,,daily,09:00,21:00,"inline; skateboard; quad",
+copenhagen-skatepark-cph,09-01,05-31,mon,15:00,21:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,mon,21:00,24:00,"inline; quad; bmx",BMX/inline/quad session
+copenhagen-skatepark-cph,09-01,05-31,tue,15:00,19:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,tue,19:00,24:00,skateboard,Oldboys 40+ session
+copenhagen-skatepark-cph,09-01,05-31,wed,15:00,21:00,"inline; quad; bmx; scooter; skateboard",All disciplines
+copenhagen-skatepark-cph,09-01,05-31,thu,15:00,21:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,thu,21:00,24:00,skateboard,Oldboys 30+ session
+copenhagen-skatepark-cph,09-01,05-31,fri,15:00,21:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,sat,14:00,19:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,sun,14:00,19:00,skateboard,
+copenhagen-skatepark-cph,09-01,05-31,sun,19:00,23:00,skateboard,Sunday session for girls
+xhall-cph,,,mon-fri,15:00,21:00,"inline; quad; bmx; scooter; skateboard",Tue 18:00–20:00 surfskate session in the big bowl
+xhall-cph,,,wed,21:00,24:00,"inline; quad; bmx; scooter; skateboard",Oldboys 30+ session
+xhall-cph,,,sat-sun,14:00,19:00,"inline; quad; bmx; scooter; skateboard",
+faelledparken-cph,,,daily,,,"inline; quad; bmx; skateboard",No scooters; hours not listed
+enghave-plads-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+refshaleoen-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+mimersparken-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+norrebro-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+islands-brygge-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+prags-boulevard-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
+clairemont-sd,,,mon-fri,13:00,sunset,"inline; quad; bmx; scooter; skateboard",2026 fall hours; paid 2-hour sessions
+clairemont-sd,,,sat-sun,11:00,sunset,"inline; quad; bmx; scooter; skateboard",2026 fall hours; paid 2-hour sessions
+venice-la,,,daily,08:00,19:00,"inline; quad; skateboard",No BMX or scooters
+memo-sd,,,daily,10:00,22:00,"inline; skateboard; quad",No bikes or scooters; under 12 with a guardian
+mira-mesa-sd,,,daily,,,"inline; quad; skateboard; bmx; scooter",Hours not listed; inline assumed from all-wheels listing
+len-moore-cv,,,daily,07:00,sunset,"inline; quad; skateboard; scooter; bmx",City hours; Stray Rocket says 08:00
+two-rivers-nash,,,daily,sunrise,22:00,"inline; quad; skateboard; bmx",Closing time is Rachel's best guess; a 2007 source says 23:00
+rocketown-nash,,,mon-thu,12:00,20:00,"inline; quad; skateboard; bmx","Paid sessions; free Skatechurch Tue 17:00–18:00"
+rocketown-nash,,,fri,12:00,21:00,"inline; quad; skateboard; bmx",Paid sessions
+rocketown-nash,,,sat,10:00,21:00,"inline; quad; skateboard; bmx",Paid sessions
+dickson-tn,,,daily,,,"inline; quad; skateboard; bmx",Hours not listed
+prince-park-osd,,,daily,05:00,21:00,"inline; quad; skateboard",Hours from San Diego Magazine
+coronado-sd,,,daily,10:00,sunset,"inline; quad; skateboard",Intermittent supervision
+lemon-grove-sd,,,daily,sunrise,sunset,"inline; quad; skateboard",
+ecke-enc,03-31,10-31,mon-fri,15:00,19:45,"inline; quad; skateboard; scooter","Or until dark, whichever is first; paid sessions; no bikes"
+ecke-enc,03-31,10-31,sat-sun,09:00,16:00,"inline; quad; skateboard; scooter",Paid sessions; no bikes
+ecke-enc,11-01,03-06,mon-fri,15:00,18:00,"inline; quad; skateboard; scooter",Paid sessions; no bikes
+ecke-enc,11-01,03-06,sat-sun,09:00,16:00,"inline; quad; skateboard; scooter",Paid sessions; no bikes
+rancho-penasquitos-sd,,,daily,10:00,sunset,"inline; quad; skateboard",No bikes or scooters
+carmel-valley-sd,,,daily,10:00,20:00,"inline; quad; skateboard",No bikes or scooters
+phr-pump-track-sd,,,daily,08:00,sunset,"inline; quad; skateboard; bmx; scooter",San Diego Skateboarding says 09:00; helmet required
+lakeside-sd,,,daily,sunrise,sunset,"inline; quad; skateboard",Same source also says 09:00–22:00
+central-ave-sd,,,daily,09:00,sunset,"inline; quad; skateboard",No bikes or scooters (city rules)
+robb-field-sd,,,daily,10:00,sunset,"inline; quad; skateboard",Hours from San Diego Magazine; San Diego Skateboarding says it's lit
+la-colonia-sb,,,daily,sunrise,sunset,"inline; quad; skateboard",Same source also says 09:00–22:00
+poods-enc,,,daily,08:00,sunset,"inline; quad; skateboard",San Diego Skateboarding says 09:00–20:00
+alga-norte-cb,,,daily,10:00,22:00,"inline; quad; skateboard",Hours from San Diego Magazine
+vista-bowl,,,daily,07:00,21:00,"inline; quad; skateboard; bmx; scooter",City: all non-motorized wheels; San Diego Skateboarding says 08:00–20:00
+vista-street,,,daily,07:00,21:00,"inline; quad; skateboard; bmx; scooter",City: all non-motorized wheels; San Diego Skateboarding says 08:00–20:00
+john-landes-osd,,,daily,sunrise,sunset,"inline; quad; skateboard",
+chicano-park-sd,,,daily,sunrise,sunset,"inline; quad; skateboard",DIY spot; Rachel confirmed bladers are allowed
+clemson-park-sc,,,daily,,,"inline; quad; skateboard; scooter",Hours not listed; built for rollerblading and roller skating per Upstate Today
+hot-spot-spb,,,daily,,,"inline; quad; skateboard; scooter",Hours not listed; city page names inline skates; no bikes
+fourth-ward-atl,,,daily,06:00,23:00,"inline; quad; skateboard",Stray Rocket names in-line skating; also lists sunrise to 23:00
+brook-run-dun,,,mon-thu,07:00,21:00,"inline; quad; skateboard",Disciplines not listed; US default for inline
+brook-run-dun,,,fri-sat,07:00,22:00,"inline; quad; skateboard",
+brook-run-dun,,,sun,07:00,21:00,"inline; quad; skateboard",
+skateatl-cham,,,mon-thu,15:00,21:00,"inline; quad; skateboard","Paid; inline not named; no BMX, scooters or e-bikes"
+skateatl-cham,,,fri,15:00,22:00,"inline; quad; skateboard",Paid
+skateatl-cham,,,sat-sun,10:00,22:00,"inline; quad; skateboard",Paid
+kennesaw-ga,,,daily,06:00,22:00,"inline; quad; skateboard",No bikes or scooters; inline not named; helmets required for 15 and under
+louisville-extreme-lou,,,daily,06:00,23:00,"inline; quad; skateboard; bmx","City names in-line skating and biking; closes at 23:00 since 2023 (the same page still says open 24 hours)"
+arvada-co,,,daily,06:00,22:00,"inline; quad; skateboard; bmx; scooter","Hours from Stray Rocket and Skate the States; city's general park hours are sunrise to sunset; Westword names rollerbladers"
+memorial-spot-arv,,,daily,sunrise,sunset,"inline; quad; skateboard",City park hours; disciplines not listed; US default for inline
+wolffe-spot-arv,,,daily,sunrise,sunset,"inline; quad; skateboard",City park hours; disciplines not listed; US default for inline
+skyline-spot-arv,,,daily,sunrise,sunset,"inline; quad; skateboard",City park hours; disciplines not listed; US default for inline
+aboveboard-gso,,,mon-thu,11:00,21:00,"inline; quad; skateboard; bmx; scooter","Paid; 11:00–15:00 is the $5 lunch-break window; the day-pass page says 13:00–21:00; waiver required"
+aboveboard-gso,,,fri,11:00,22:00,"inline; quad; skateboard; bmx; scooter",Paid; the day-pass page says 13:00
+aboveboard-gso,,,fri,22:00,02:00,"inline; quad; skateboard; bmx; scooter",Friday late-night session; separate $10 pass; runs past midnight
+aboveboard-gso,,,sat,13:00,22:00,"inline; quad; skateboard; bmx; scooter",Paid
+aboveboard-gso,,,sun,13:00,21:00,"inline; quad; skateboard; bmx; scooter",Paid
+latham-gso,,,daily,sunrise,sunset,"inline; quad; skateboard; bmx; scooter",City names inline skates; Stray Rocket says 07:00 to dusk
+glenwood-gso,,,daily,sunrise,sunset,"inline; quad; skateboard; bmx; scooter",City names inline skates
+food-lion-avl,,,daily,06:00,22:00,"inline; quad; skateboard; bmx; scooter",City hours; city names skates in the upper plaza; older wannask8 rules (helmets; no bikes) date from when the park was staffed
+foundation-avl,,,daily,,,"inline; quad; skateboard",DIY spot; hours and disciplines not listed; US default for inline
+patton-park-hend,,,daily,07:00,23:00,"inline; quad; skateboard",No bikes; the county's Saturday Skate Club teaches rollerblading and roller skating here; scooter rule unknown
+vance-street-wayn,,,daily,sunrise,22:00,"inline; quad; skateboard",Town says dawn to 22:00; Skate the States says 07:00–19:00; no bikes; helmet and pads required
+raccoon-creek-wayn,,,daily,08:00,19:00,"inline; quad; skateboard; bmx; scooter","Or dusk if earlier; closed on holidays; inline not in the written rules, but rollerbladers rode on opening day"
