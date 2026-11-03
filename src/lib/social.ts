@@ -65,7 +65,11 @@ export type Invite = Fns['my_invites']['Returns'][number] & {
   state: 'active' | 'used' | 'expired' | 'cancelled';
 };
 
-/** Your invites, newest first, plus how many you have left. */
+/**
+ * Your invites, newest first, plus how many you have left. `remaining` is
+ * null when you have unlimited invites (the owner and city admins); park
+ * admins and contributors get 10, everyone else 5.
+ */
 export function useMyInvites(userId: string | undefined) {
   return useQuery({
     queryKey: keys.myInvites(userId ?? ''),
@@ -74,11 +78,12 @@ export function useMyInvites(userId: string | undefined) {
       if (error) throw error;
       const invites = (data ?? []) as Invite[];
       // The count rides along on every row; with no invites yet, ask for it.
-      let remaining = invites[0]?.invites_remaining;
+      // Null means unlimited (the generated types don't know it can be null).
+      let remaining = invites[0]?.invites_remaining as number | null | undefined;
       if (remaining === undefined) {
         const count = await supabase.rpc('my_invite_count');
         if (count.error) throw count.error;
-        remaining = count.data ?? 0;
+        remaining = count.data as number | null;
       }
       return { invites, remaining };
     },

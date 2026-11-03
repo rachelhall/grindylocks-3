@@ -70,7 +70,9 @@ export default function Invites() {
 
   const date = (iso: string) => new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(iso));
   const shown = (data?.invites ?? []).filter((i) => i.state !== 'cancelled');
+  const unlimited = data?.remaining === null;
   const remaining = data?.remaining ?? 0;
+  const noneLeft = !unlimited && remaining <= 0;
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
@@ -98,9 +100,11 @@ export default function Invites() {
           <>
             <View style={styles.block}>
               <Text variant="display" style={styles.count}>
-                {remaining}
+                {unlimited ? '∞' : remaining}
               </Text>
-              <Text variant="headline">{t('invites.left', { count: remaining })}</Text>
+              <Text variant="headline">
+                {unlimited ? t('invites.unlimited') : t('invites.left', { count: remaining })}
+              </Text>
               <Text variant="bodySm" color="textSecondary">
                 {t('invites.body')}
               </Text>
@@ -108,9 +112,9 @@ export default function Invites() {
                 label={t('invites.make')}
                 onPress={make}
                 loading={create.isPending}
-                disabled={remaining <= 0}
+                disabled={noneLeft}
               />
-              {remaining <= 0 ? (
+              {noneLeft ? (
                 <Text variant="bodySm" color="textSecondary">
                   {t('invites.noneLeftBody')}
                 </Text>

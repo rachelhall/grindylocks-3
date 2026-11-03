@@ -537,6 +537,7 @@
     "title": "Einladungen",
     "left_one": "Einladung übrig",
     "left_other": "Einladungen übrig",
+    "unlimited": "unbegrenzte Einladungen",
     "body": "Jeder Link funktioniert einmal und läuft nach 7 Tagen ab. Wird er zurückgezogen oder läuft ungenutzt ab, bekommst du die Einladung zurück. Brauchst du mehr? Frag dein Stadt- oder Park-Admin.",
     "make": "Einladungslink erstellen",
     "noneLeftTitle": "Keine Einladungen übrig",

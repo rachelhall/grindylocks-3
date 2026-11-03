@@ -198,7 +198,7 @@ function OwnActions({ userId }: { userId: string }) {
         style={styles.ownButton}
       />
       <Button
-        label={data ? t('profile.invitesCount', { count: data.remaining }) : t('profile.invites')}
+        label={data && data.remaining !== null ? t('profile.invitesCount', { count: data.remaining }) : t('profile.invites')}
         variant="secondary"
         onPress={() => router.push('/invites')}
         style={styles.ownButton}

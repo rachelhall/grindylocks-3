@@ -537,6 +537,7 @@
     "title": "Invites",
     "left_one": "invite left",
     "left_other": "invites left",
+    "unlimited": "unlimited invites",
     "body": "Each link works once and expires after 7 days. If it's cancelled or expires unused, you get the invite back. Need more? Ask your city or park admin.",
     "make": "Make an invite link",
     "noneLeftTitle": "No invites left",
