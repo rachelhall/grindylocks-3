@@ -7,6 +7,12 @@
     "icon": "./assets/images/icon.png",
     "scheme": "grindylocks",
     "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/9ea6f270-dd81-486d-ac14-1f0b7e45672a"
+    },
     "ios": {
       "icon": {
         "light": "./assets/images/ios-light.png",
@@ -37,13 +43,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#F2EFE6",
+          "backgroundColor": "#111111",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76,
-          "dark": {
-            "backgroundColor": "#111111",
-            "image": "./assets/images/splash-icon.png"
-          }
+          "imageWidth": 180
         }
       ],
       "expo-secure-store",
