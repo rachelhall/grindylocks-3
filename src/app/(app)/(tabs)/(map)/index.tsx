@@ -51,6 +51,8 @@ const NEAR_DELTA = 0.12;
 /** Edge markers: how many off-screen parks to look through, and how many to show. */
 const EDGE_CANDIDATES = 40;
 const EDGE_MAX = 2;
+/** Edge markers only for parks this close to the middle of the map (the same line as "near you"). */
+const EDGE_MAX_M = 100_000;
 /** A tag's size before it has measured itself. */
 const EDGE_GUESS = { width: 170, height: 44 };
 
@@ -133,18 +135,21 @@ export default function MapScreen() {
 
   /* Where to start ------------------------------------------------------- */
 
-  const fitTo = useCallback((coords: LatLng[]) => {
-    if (coords.length === 0) return;
-    if (coords.length === 1) {
-      animateTo({ ...coords[0], latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
-      return;
-    }
-    mapRef.current?.fitToCoordinates(coords, {
-      edgePadding: { top: 140, right: 48, bottom: 260, left: 48 },
-      animated: true,
-    });
-    scheduleSync(550);
-  }, [animateTo, scheduleSync]);
+  const fitTo = useCallback(
+    (coords: LatLng[]) => {
+      if (coords.length === 0) return;
+      if (coords.length === 1) {
+        animateTo({ ...coords[0], latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
+        return;
+      }
+      mapRef.current?.fitToCoordinates(coords, {
+        edgePadding: { top: 140, right: 48, bottom: 260, left: 48 },
+        animated: true,
+      });
+      scheduleSync(550);
+    },
+    [animateTo, scheduleSync],
+  );
 
   // Your home city, or the metro area with the most parks if you haven't set one.
   const showHomeCity = useCallback(async () => {
@@ -156,25 +161,22 @@ export default function MapScreen() {
     if (located[0]) setSelected((s) => s ?? located[0]);
   }, [fitTo, profile?.home_metro_area_id]);
 
-  const locate = useCallback(
-    async (ask: boolean) => {
-      let perm = await Location.getForegroundPermissionsAsync();
-      if (!perm.granted && ask && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
-      if (!perm.granted) {
-        setLocationOn(false);
-        return null;
-      }
-      setLocationOn(true);
-      const pos =
-        (await Location.getLastKnownPositionAsync().catch(() => null)) ??
-        (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }).catch(() => null));
-      if (!pos) return null;
-      const here = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-      setMe(here);
-      return here;
-    },
-    [],
-  );
+  const locate = useCallback(async (ask: boolean) => {
+    let perm = await Location.getForegroundPermissionsAsync();
+    if (!perm.granted && ask && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
+    if (!perm.granted) {
+      setLocationOn(false);
+      return null;
+    }
+    setLocationOn(true);
+    const pos =
+      (await Location.getLastKnownPositionAsync().catch(() => null)) ??
+      (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }).catch(() => null));
+    if (!pos) return null;
+    const here = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+    setMe(here);
+    return here;
+  }, []);
 
   // First open: a city picked in search wins; otherwise near you; otherwise
   // your home city.
@@ -237,12 +239,16 @@ export default function MapScreen() {
 
   // The nearest parks to the middle of the map, for edge markers. Rounded to
   // about 1 km so small pans reuse the same answer.
-  const middle = bounds
-    ? {
-        latitude: (bounds.north + bounds.south) / 2,
-        longitude: ((bounds.west + lngSpan(bounds) / 2 + 540) % 360) - 180,
-      }
-    : null;
+  const middle = useMemo(
+    () =>
+      bounds
+        ? {
+            latitude: (bounds.north + bounds.south) / 2,
+            longitude: ((bounds.west + lngSpan(bounds) / 2 + 540) % 360) - 180,
+          }
+        : null,
+    [bounds],
+  );
   const centre = middle
     ? { lat: Math.round(middle.latitude * 100) / 100, lng: Math.round(middle.longitude * 100) / 100 }
     : null;
@@ -260,10 +266,7 @@ export default function MapScreen() {
   );
   const { data: facets, isFetching: facetsLoading } = useParkFacets(facetIds, needsFacets(filters) || filtersOpen);
 
-  const passes = useCallback(
-    (p: ParkPin, f: MapFilters) => matchesFilters(p, facets?.get(p.id), f),
-    [facets],
-  );
+  const passes = useCallback((p: ParkPin, f: MapFilters) => matchesFilters(p, facets?.get(p.id), f), [facets]);
   const pins = useMemo(() => inView.filter((p) => passes(p, filters)), [inView, passes, filters]);
 
   // How many parks in view the sheet's draft would show; null while it's still working that out.
@@ -309,7 +312,12 @@ export default function MapScreen() {
   function goToClosest() {
     if (!far) return;
     setSelected(far);
-    animateTo({ latitude: far.latitude, longitude: far.longitude, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
+    animateTo({
+      latitude: far.latitude,
+      longitude: far.longitude,
+      latitudeDelta: NEAR_DELTA,
+      longitudeDelta: NEAR_DELTA,
+    });
   }
 
   /* Card ----------------------------------------------------------------------- */
@@ -323,21 +331,20 @@ export default function MapScreen() {
         timeZone: cardDetail.metro?.timezone ?? null,
       })
     : null;
-  const farDistance = far && me ? formatDistance(far.distance_m ?? distanceMeters(me, far), metric, i18n.language) : null;
+  const farDistance =
+    far && me ? formatDistance(far.distance_m ?? distanceMeters(me, far), metric, i18n.language) : null;
   // Only while there's nothing on the map: once you've moved somewhere with
   // parks, the card goes and the pins (and edge markers) take over.
   const showFar = far !== null && selected === null && inView.length === 0;
   const distance =
-    selected && me
-      ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language)
-      : null;
+    selected && me ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language) : null;
 
   // The nearest one or two matching parks just off the map, as tags at its
   // edge. They sit above the preview card and the locate button, and hide
   // under "No parks near you yet", which already names the closest park.
   const searchBottom = insets.top + space[2] + size.tapMin;
   const edgeTags = useMemo(() => {
-    if (!bounds || !mapSize || showFar || !nearCentre) return [];
+    if (!bounds || !mapSize || !middle || showFar || !nearCentre) return [];
     const { width: w, height: h } = mapSize;
     // Clear of the search bar at the top, and of the locate button (which
     // sits above the preview card while one is open) at the bottom.
@@ -353,6 +360,7 @@ export default function MapScreen() {
     for (const park of nearCentre) {
       if (placed.length >= EDGE_MAX) break;
       if (park.id === selected?.id) continue;
+      if (distanceMeters(middle, park) > EDGE_MAX_M) continue;
       const p = project(bounds, w, h, park);
       if (isOnScreen(p, w, h)) continue;
       if (!passes(park, filters)) continue;
@@ -364,7 +372,7 @@ export default function MapScreen() {
       placed.push({ park, ...box, angle: hit.angle, edge: hit.edge });
     }
     return placed;
-  }, [bounds, mapSize, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
+  }, [bounds, mapSize, middle, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
 
   function goToEdgePark(park: ParkPin) {
     setSelected(park);
@@ -377,7 +385,14 @@ export default function MapScreen() {
   }
 
   const edgeDistance = (park: ParkPin) => {
-    const from = me ?? middle;
+    // From you while you're on the map; from the middle of the map when
+    // you're looking somewhere else (planning a trip).
+    const youreHere =
+      me &&
+      bounds &&
+      mapSize &&
+      isOnScreen(project(bounds, mapSize.width, mapSize.height, me), mapSize.width, mapSize.height);
+    const from = youreHere ? me : middle;
     return from ? formatDistance(distanceMeters(from, park), metric, i18n.language) : null;
   };
 
@@ -600,7 +615,13 @@ const styles = StyleSheet.create({
   },
   notice: { borderWidth: stroke.rule, padding: space[2] },
   locate: { position: 'absolute', right: space[4] },
-  square: { width: size.tapMin, height: size.tapMin, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center' },
+  square: {
+    width: size.tapMin,
+    height: size.tapMin,
+    borderWidth: stroke.rule,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pin: { width: 36, height: 36, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center' },
   pinSelected: {
     height: 40,
