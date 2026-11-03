@@ -1914,6 +1914,7 @@ export type Database = {
           metro_name: string | null
           outbox_id: number
           park_name: string | null
+          park_slug: string | null
           post_id: string | null
           send: boolean
         }[]
