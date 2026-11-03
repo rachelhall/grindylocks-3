@@ -95,6 +95,8 @@ const icons = {
   dragVertical: { ios: 'arrow.up.and.down', android: 'swap_vert' },
   dragHorizontal: { ios: 'arrow.left.and.right', android: 'swap_horiz' },
   recenter: { ios: 'viewfinder', android: 'center_focus_strong' },
+  filter: { ios: 'slider.horizontal.3', android: 'tune' },
+  arrowUp: { ios: 'arrow.up', android: 'north' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

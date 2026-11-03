@@ -208,7 +208,36 @@
     "closest": "Am nächsten: {{park}}, {{distance}}",
     "closestNoDistance": "Am nächsten: {{park}}",
     "goToClosest": "Zum nächsten",
-    "goToCity": "Nach {{city}}"
+    "goToCity": "Nach {{city}}",
+    "filters": {
+      "button": "Filter",
+      "buttonOn": "Filter, {{count}} an",
+      "title": "Filter",
+      "whoCanSkate": "WER DARF FAHREN",
+      "whoCanSkateHint": "Parks, die eine deiner Auswahl erlauben.",
+      "setting": "LAGE",
+      "settings": {
+        "indoor": "Indoor",
+        "covered": "Überdacht",
+        "outdoor": "Outdoor"
+      },
+      "settingHint": "Parks mit Indoor- und Outdoor-Bereich erscheinen bei beidem.",
+      "onlyShow": "NUR ZEIGEN",
+      "openNow": "Jetzt geöffnet",
+      "openNowHint": "Nach den Zeiten des Parks, in seiner Ortszeit",
+      "free": "Kostenlos",
+      "lit": "Abends beleuchtet",
+      "litHint": "Bei manchen Parks wissen wir nicht, ob es Licht gibt, sie werden ausgeblendet",
+      "clear": "Zurücksetzen",
+      "show_one": "{{count}} Park zeigen",
+      "show_other": "{{count}} Parks zeigen",
+      "showLoading": "Parks werden gezählt…"
+    },
+    "edge": {
+      "label": "{{park}}, {{distance}} entfernt, außerhalb der Karte",
+      "labelNoDistance": "{{park}}, außerhalb der Karte",
+      "hint": "Verschiebt die Karte zu diesem Park"
+    }
   },
   "search": {
     "back": "Zurück zur Karte",
@@ -245,6 +274,7 @@
     "setting": {
       "indoor": "Indoor",
       "outdoor": "Outdoor",
+      "indoor_outdoor": "Indoor und outdoor",
       "covered_outdoor": "Überdacht"
     },
     "paid": "Kostenpflichtig",

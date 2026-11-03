@@ -7,6 +7,7 @@ import { SafeAreaView } from '@/components/safe-area';
 import { ParkRow, useParkLine } from '@/components/parks';
 import { BackButton, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { hasIndoor } from '@/lib/map-filters';
 import { type ParkPin, useDirectorySearch, useMetro, useParksInMetro, useSavedParks } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
@@ -117,8 +118,8 @@ export default function CitySearch() {
               <Text variant="bodySm" color="textSecondary" style={styles.flex}>
                 {[
                   t('search.parkCount', { count: metroParks.length }),
-                  metroParks.some((p) => p.setting === 'indoor')
-                    ? t('search.indoorCount', { count: metroParks.filter((p) => p.setting === 'indoor').length })
+                  metroParks.some((p) => hasIndoor(p.setting))
+                    ? t('search.indoorCount', { count: metroParks.filter((p) => hasIndoor(p.setting)).length })
                     : null,
                 ]
                   .filter(Boolean)

@@ -1,3 +1,4 @@
+import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -6,11 +7,14 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { EdgeTag, FilterButton, FilterSheet } from '@/components/map-filters';
 import { IconButton, openDirections, SaveButton, StatusChip, useParkLine } from '@/components/parks';
 import { Button, Icon } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { openState } from '@/lib/hours';
+import { type Edge, edgePoint, type Frame, isOnScreen, overlaps, type Point, project, tagPosition } from '@/lib/map-edge';
+import { type MapFilters, matchesFilters, needsFacets, NO_FILTERS, useParkFacets } from '@/lib/map-filters';
 import {
   type Bounds,
   busiestMetroId,
@@ -19,18 +23,26 @@ import {
   fetchParksNearCached,
   formatDistance,
   type ParkPin,
+  parksNear,
   usePark,
   useMetro,
   useParksInBounds,
   useParksInMetro,
   useSavedParks,
 } from '@/lib/parks';
+import { fresh, keys } from '@/lib/query';
 import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
 
 type LatLng = { latitude: number; longitude: number };
 
 /** Roughly a neighbourhood: enough to see a few nearby parks. */
 const NEAR_DELTA = 0.12;
+
+/** Edge markers: how many off-screen parks to look through, and how many to show. */
+const EDGE_CANDIDATES = 40;
+const EDGE_MAX = 2;
+/** A tag's size before it has measured itself. */
+const EDGE_GUESS = { width: 170, height: 44 };
 
 /** Beyond this, the nearest park isn't "near you", and the map says so. */
 const FAR_M = 100_000;
@@ -68,6 +80,11 @@ export default function MapScreen() {
   const describe = useParkLine();
 
   const [bounds, setBounds] = useState<Bounds | null>(null);
+  const [region, setRegion] = useState<Region | null>(null);
+  const [mapSize, setMapSize] = useState<{ width: number; height: number } | null>(null);
+  const [filters, setFilters] = useState<MapFilters>(NO_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [tagSizes, setTagSizes] = useState<Record<string, { width: number; height: number }>>({});
   const [selected, setSelected] = useState<ParkPin | null>(null);
   const [me, setMe] = useState<LatLng | null>(null);
   const [locationOn, setLocationOn] = useState(false);
@@ -167,7 +184,10 @@ export default function MapScreen() {
   // up while the new area loads, and panning back reuses earlier results.
   const onRegionChangeComplete = useCallback((region: Region) => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);
-    fetchTimer.current = setTimeout(() => setBounds(toBounds(region)), 250);
+    fetchTimer.current = setTimeout(() => {
+      setBounds(toBounds(region));
+      setRegion(region);
+    }, 250);
   }, []);
 
   useEffect(
@@ -178,8 +198,51 @@ export default function MapScreen() {
   );
 
   const pinsQuery = useParksInBounds(bounds);
-  const pins = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
+  const inView = useMemo(() => pinsQuery.data ?? [], [pinsQuery.data]);
   const loadError = pinsQuery.isError;
+
+  /* Filters and edge markers ------------------------------------------------- */
+
+  // The nearest parks to the middle of the map, for edge markers. Rounded to
+  // about 1 km so small pans reuse the same answer.
+  const centre = region
+    ? { lat: Math.round(region.latitude * 100) / 100, lng: Math.round(region.longitude * 100) / 100 }
+    : null;
+  const { data: nearCentre } = useQuery({
+    queryKey: centre ? keys.parksNear(centre.lat, centre.lng, EDGE_CANDIDATES) : ['parks', 'near', 'none'],
+    queryFn: () => parksNear(centre!.lat, centre!.lng, EDGE_CANDIDATES),
+    enabled: centre !== null,
+    staleTime: fresh.parks,
+  });
+
+  // Sessions, fees and time zones, only while a filter needs them (or the sheet is open to count).
+  const facetIds = useMemo(
+    () => [...inView.map((p) => p.id), ...(nearCentre ?? []).map((p) => p.id)],
+    [inView, nearCentre],
+  );
+  const { data: facets, isFetching: facetsLoading } = useParkFacets(facetIds, needsFacets(filters) || filtersOpen);
+
+  const passes = useCallback(
+    (p: ParkPin, f: MapFilters) => matchesFilters(p, facets?.get(p.id), f),
+    [facets],
+  );
+  const pins = useMemo(() => inView.filter((p) => passes(p, filters)), [inView, passes, filters]);
+
+  // How many parks in view the sheet's draft would show; null while it's still working that out.
+  const countFor = useCallback(
+    (draft: MapFilters) => {
+      if (needsFacets(draft) && (!facets || facetsLoading)) return null;
+      return inView.filter((p) => passes(p, draft)).length;
+    },
+    [facets, facetsLoading, inView, passes],
+  );
+
+  function applyFilters(next: MapFilters) {
+    setFilters(next);
+    setFiltersOpen(false);
+    // A picked park that no longer matches closes its card.
+    if (selected && !matchesFilters(selected, facets?.get(selected.id), next)) setSelected(null);
+  }
 
   // The card needs hours and the metro's time zone for "open now". It's the
   // same cache entry the park page reads, so a park seen once shows at once.
@@ -232,11 +295,64 @@ export default function MapScreen() {
       ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language)
       : null;
 
+  // The nearest one or two matching parks just off the map, as tags at its
+  // edge. Hidden while a card is up: the preview card, or "No parks near
+  // you yet", which already names the closest park.
+  const searchBottom = insets.top + space[2] + size.tapMin;
+  const edgeTags = useMemo(() => {
+    if (!region || !mapSize || selected || showFar || !nearCentre) return [];
+    const { width: w, height: h } = mapSize;
+    // Clear of the search bar at the top and the locate button at the bottom.
+    const frame: Frame = {
+      left: space[3],
+      right: w - space[3],
+      top: searchBottom + space[3],
+      bottom: h - 24 - size.tapMin - space[3],
+    };
+    if (frame.right - frame.left < 120 || frame.bottom - frame.top < 120) return [];
+    const middle = { x: w / 2, y: h / 2 };
+    const placed: (Point & { park: ParkPin; width: number; height: number; angle: number; edge: Edge })[] = [];
+    for (const park of nearCentre) {
+      if (placed.length >= EDGE_MAX) break;
+      const p = project(region, w, h, park);
+      if (isOnScreen(p, w, h)) continue;
+      if (!passes(park, filters)) continue;
+      const hit = edgePoint(middle, p, frame);
+      const tagSize = tagSizes[park.id] ?? EDGE_GUESS;
+      const at = tagPosition(hit, tagSize, frame);
+      const box = { ...at, ...tagSize };
+      if (placed.some((q) => overlaps(q, box))) continue;
+      placed.push({ park, ...box, angle: hit.angle, edge: hit.edge });
+    }
+    return placed;
+  }, [region, mapSize, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
+
+  function goToEdgePark(park: ParkPin) {
+    setSelected(park);
+    mapRef.current?.animateToRegion(
+      {
+        latitude: park.latitude,
+        longitude: park.longitude,
+        latitudeDelta: region?.latitudeDelta ?? NEAR_DELTA,
+        longitudeDelta: region?.longitudeDelta ?? NEAR_DELTA,
+      },
+      400,
+    );
+  }
+
+  const edgeDistance = (park: ParkPin) => {
+    const from = me ?? (region ? { latitude: region.latitude, longitude: region.longitude } : null);
+    return from ? formatDistance(distanceMeters(from, park), metric, i18n.language) : null;
+  };
+
   // Keep the selected pin on the map even when it's outside the last fetch.
   const shown = selected && !pins.some((p) => p.id === selected.id) ? [...pins, selected] : pins;
 
   return (
-    <View style={styles.screen}>
+    <View
+      style={styles.screen}
+      onLayout={(e) => setMapSize({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })}
+    >
       <MapView
         ref={mapRef}
         style={StyleSheet.absoluteFill}
@@ -283,21 +399,24 @@ export default function MapScreen() {
 
       {/* Search bar */}
       <View style={[styles.top, { top: insets.top + space[2] }]}>
-        <Pressable
-          accessibilityRole="search"
-          accessibilityLabel={t('map.search')}
-          onPress={() => router.push('/city-search')}
-          style={({ pressed }) => [
-            styles.search,
-            { backgroundColor: c.surfaceRaised, borderColor: c.border },
-            pressed && styles.pressed,
-          ]}
-        >
-          <Icon name="search" color={c.text} size={20} />
-          <Text variant="body" color="textSecondary">
-            {t('map.search')}
-          </Text>
-        </Pressable>
+        <View style={styles.searchRow}>
+          <Pressable
+            accessibilityRole="search"
+            accessibilityLabel={t('map.search')}
+            onPress={() => router.push('/city-search')}
+            style={({ pressed }) => [
+              styles.search,
+              { backgroundColor: c.surfaceRaised, borderColor: c.border },
+              pressed && styles.pressed,
+            ]}
+          >
+            <Icon name="search" color={c.text} size={20} />
+            <Text variant="body" color="textSecondary">
+              {t('map.search')}
+            </Text>
+          </Pressable>
+          <FilterButton filters={filters} onPress={() => setFiltersOpen(true)} />
+        </View>
         {loadError ? (
           <View style={[styles.notice, { backgroundColor: c.surfaceRaised, borderColor: c.statusClosed }]}>
             <Text variant="bodySm" color="statusClosed">
@@ -306,6 +425,27 @@ export default function MapScreen() {
           </View>
         ) : null}
       </View>
+
+      {/* Edge markers */}
+      {edgeTags.map((tag) => (
+        <EdgeTag
+          key={tag.park.id}
+          name={tag.park.display_name}
+          distance={edgeDistance(tag.park)}
+          angle={tag.angle}
+          edge={tag.edge}
+          left={tag.x}
+          top={tag.y}
+          onPress={() => goToEdgePark(tag.park)}
+          onSize={(s) =>
+            setTagSizes((prev) => {
+              const old = prev[tag.park.id];
+              if (old && Math.abs(old.width - s.width) < 1 && Math.abs(old.height - s.height) < 1) return prev;
+              return { ...prev, [tag.park.id]: s };
+            })
+          }
+        />
+      ))}
 
       {/* Locate me */}
       <View style={[styles.locate, { bottom: selected ? 228 : showFar ? space[3] + farCardHeight + space[3] : 24 }]}>
@@ -386,6 +526,14 @@ export default function MapScreen() {
           </View>
         </View>
       ) : null}
+
+      <FilterSheet
+        visible={filtersOpen}
+        filters={filters}
+        onApply={applyFilters}
+        onClose={() => setFiltersOpen(false)}
+        countFor={countFor}
+      />
     </View>
   );
 }
@@ -395,7 +543,9 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   pressed: { opacity: 0.8 },
   top: { position: 'absolute', left: space[4], right: space[4], gap: space[2] },
+  searchRow: { flexDirection: 'row', gap: space[2] },
   search: {
+    flex: 1,
     height: size.tapMin,
     borderWidth: stroke.rule,
     flexDirection: 'row',
