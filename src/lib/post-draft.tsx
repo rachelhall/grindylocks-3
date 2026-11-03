@@ -5,10 +5,11 @@
  */
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from 'react';
 
-import type { PickedMedia } from './media';
+import { CENTERED, type FramePoint, type PickedMedia } from './media';
 import { NO_TAGS, type SlideTags } from './posts';
 
-export type DraftItem = PickedMedia & { tags: SlideTags };
+/** A picked item, its tags, and where it sits in the post's frame. */
+export type DraftItem = PickedMedia & { tags: SlideTags; frame: FramePoint };
 export type DraftPark = { id: string; name: string };
 
 type Draft = {
@@ -16,6 +17,7 @@ type Draft = {
   setItems: (update: (prev: DraftItem[]) => DraftItem[]) => void;
   addMedia: (media: PickedMedia[], max: number) => void;
   setTags: (key: string, tags: SlideTags) => void;
+  setFrame: (key: string, frame: FramePoint) => void;
   park: DraftPark | null;
   /** Changing the park drops obstacle picks from the old park (general types stay). */
   setPark: (park: DraftPark | null) => void;
@@ -39,13 +41,17 @@ export function PostDraftProvider({ initialPark, children }: { initialPark: Draf
   const addMedia = useCallback((media: PickedMedia[], max: number) => {
     setItemsState((prev) => {
       const seen = new Set(prev.map((m) => m.key));
-      const added = media.filter((m) => !seen.has(m.key)).map((m) => ({ ...m, tags: NO_TAGS }));
+      const added = media.filter((m) => !seen.has(m.key)).map((m) => ({ ...m, tags: NO_TAGS, frame: CENTERED }));
       return [...prev, ...added].slice(0, max);
     });
   }, []);
 
   const setTags = useCallback((key: string, tags: SlideTags) => {
     setItemsState((prev) => prev.map((m) => (m.key === key ? { ...m, tags } : m)));
+  }, []);
+
+  const setFrame = useCallback((key: string, frame: FramePoint) => {
+    setItemsState((prev) => prev.map((m) => (m.key === key ? { ...m, frame } : m)));
   }, []);
 
   const setPark = useCallback(
@@ -63,8 +69,8 @@ export function PostDraftProvider({ initialPark, children }: { initialPark: Draf
   }, []);
 
   const value = useMemo(
-    () => ({ items, setItems, addMedia, setTags, park, setPark, caption, setCaption, names, addName }),
-    [items, setItems, addMedia, setTags, park, setPark, caption, names, addName],
+    () => ({ items, setItems, addMedia, setTags, setFrame, park, setPark, caption, setCaption, names, addName }),
+    [items, setItems, addMedia, setTags, setFrame, park, setPark, caption, names, addName],
   );
   return <DraftContext.Provider value={value}>{children}</DraftContext.Provider>;
 }

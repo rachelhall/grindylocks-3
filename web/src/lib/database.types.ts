@@ -1076,6 +1076,8 @@ export type Database = {
         Row: {
           duration_s: number | null
           filmer_id: string | null
+          frame_x: number
+          frame_y: number
           height: number
           id: string
           kind: Database["public"]["Enums"]["media_kind"]
@@ -1091,6 +1093,8 @@ export type Database = {
         Insert: {
           duration_s?: number | null
           filmer_id?: string | null
+          frame_x?: number
+          frame_y?: number
           height: number
           id?: string
           kind: Database["public"]["Enums"]["media_kind"]
@@ -1106,6 +1110,8 @@ export type Database = {
         Update: {
           duration_s?: number | null
           filmer_id?: string | null
+          frame_x?: number
+          frame_y?: number
           height?: number
           id?: string
           kind?: Database["public"]["Enums"]["media_kind"]

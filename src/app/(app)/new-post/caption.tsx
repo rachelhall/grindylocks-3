@@ -76,7 +76,7 @@ export default function NewPostCaption() {
       const prepared = [];
       for (const m of items) {
         const slideId = uuid();
-        prepared.push({ ...(await prepareForUpload(m, slideId)), slideId, tags: m.tags });
+        prepared.push({ ...(await prepareForUpload(m, slideId)), slideId, tags: m.tags, frame: m.frame });
       }
       await createPost({
         userId: session.user.id,

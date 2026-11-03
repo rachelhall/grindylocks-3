@@ -2,14 +2,25 @@ import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ReactNode, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { FrameEditor } from '@/components/media';
 import { MentionList, useCaptionMentions } from '@/components/mentions';
 import { type PickedPark, ParkPickerModal, ParkRow, SlideTagRows } from '@/components/tagging';
 import { Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { formatDuration, videoThumbnailUrl } from '@/lib/media';
+import { formatDuration, type FramePoint, frameRatio, videoThumbnailUrl } from '@/lib/media';
 import { hasTags, type Post, type SlideTags, tagsOf, useEditPost, usePost } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
@@ -21,9 +32,10 @@ const THUMB = 84;
  * Edit post (Edit post mockup, Built from the brief, Nov 2): Cancel (✕) and
  * Save at the top; the park row, warning that changing it clears obstacle
  * tags from that park (general types stay); a strip of slide thumbnails
- * that picks which slide's Obstacle, People and Filmer rows you're editing
- * (the media itself can't change after posting); the caption; and a note
- * on who's notified.
+ * that picks which slide's frame (v2 framing) and Obstacle, People and
+ * Filmer rows you're editing (the media itself can't change after posting);
+ * the caption; and a note on who's notified. A clip is framed over a still
+ * from Stream.
  */
 export default function EditPost() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -91,6 +103,12 @@ function EditForm({ post }: { post: Post }) {
     }
     return known;
   });
+  const [frames, setFrames] = useState<Record<string, FramePoint>>(() =>
+    Object.fromEntries(post.slides.map((s) => [s.id, s.frame])),
+  );
+  const { width } = useWindowDimensions();
+  const ratio = frameRatio(post.slides);
+  const [dragging, setDragging] = useState(false);
   const [index, setIndex] = useState(0);
   const [parkOpen, setParkOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -109,6 +127,13 @@ function EditForm({ post }: { post: Post }) {
 
   const at = Math.min(index, post.slides.length - 1);
   const slide = post.slides[at];
+  const frameUri = !slide
+    ? null
+    : slide.kind === 'photo'
+      ? (slide.photoUrl ?? null)
+      : slide.videoKey
+        ? videoThumbnailUrl(slide.videoKey, 1080)
+        : null;
 
   function pickPark(next: PickedPark | null) {
     if (next?.id !== park?.id) {
@@ -120,7 +145,7 @@ function EditForm({ post }: { post: Post }) {
   async function submit() {
     setError(null);
     try {
-      await save.mutateAsync({ caption, parkId: park?.id ?? null, slides: tags });
+      await save.mutateAsync({ caption, parkId: park?.id ?? null, slides: tags, frames });
       router.back();
     } catch (err) {
       Sentry.captureException(err);
@@ -151,7 +176,7 @@ function EditForm({ post }: { post: Post }) {
       />
 
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        <ScrollView scrollEnabled={!dragging} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {error ? (
             <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite" style={styles.pad}>
               {error}
@@ -207,6 +232,21 @@ function EditForm({ post }: { post: Post }) {
               );
             })}
           </ScrollView>
+
+          {slide && frameUri ? (
+            <View style={styles.framing}>
+              <FrameEditor
+                key={slide.id}
+                media={{ uri: frameUri, kind: 'photo', width: slide.width, height: slide.height }}
+                ratio={ratio}
+                at={frames[slide.id] ?? slide.frame}
+                onChange={(frame) => setFrames((prev) => ({ ...prev, [slide.id]: frame }))}
+                width={width}
+                label={t('viewer.slideOf', { number: at + 1, count: post.slides.length }).toUpperCase()}
+                onDragging={setDragging}
+              />
+            </View>
+          ) : null}
 
           <Text variant="label" color="textSecondary" accessibilityRole="header" style={[styles.caption, styles.tagsCaption]}>
             {t('tagging.slideTagsTitle', { number: at + 1 })}
@@ -293,6 +333,7 @@ const styles = StyleSheet.create({
   caption: { paddingHorizontal: 20, paddingTop: space[4], paddingBottom: space[2] },
   tagsCaption: { paddingTop: 18, paddingBottom: 6 },
   thumbs: { paddingHorizontal: 20, gap: 10 },
+  framing: { paddingTop: space[4] },
   thumb: { width: THUMB, height: THUMB, overflow: 'hidden' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', backgroundColor: brand.ink, paddingHorizontal: 5, paddingVertical: 1 },

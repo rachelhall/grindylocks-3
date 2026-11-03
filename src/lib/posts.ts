@@ -15,7 +15,7 @@
 import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { Database } from './database.types';
-import { photoUrls, videoKeys } from './media';
+import { type FramePoint, photoUrls, videoKeys } from './media';
 import type { ObstacleType } from './parks';
 import type { GridPost } from './profiles';
 import { fresh, keys } from './query';
@@ -29,7 +29,7 @@ export const POST_SELECT = `id, author_id, caption, created_at, published_at, ed
   author:profiles!posts_author_id_fkey(id, username, avatar_path, deleted_at),
   park:parks!posts_park_id_fkey(id, slug, display_name),
   metro:metro_areas!posts_metro_area_id_fkey(id, name),
-  post_slides(id, position, kind, width, height, duration_s, upload_status, storage_path, stream_video_id,
+  post_slides(id, position, kind, width, height, frame_x, frame_y, duration_s, upload_status, storage_path, stream_video_id,
     obstacle_id, obstacle_type, filmer_id,
     obstacle:obstacles!post_slides_obstacle_id_fkey(id, name, general_type),
     filmer:profiles!post_slides_filmer_id_fkey(id, username),
@@ -43,6 +43,8 @@ export type PostSlide = {
   kind: Enums['media_kind'];
   width: number;
   height: number;
+  /** Where the slide sits in its post's frame (v2 framing). */
+  frame: FramePoint;
   durationS: number | null;
   status: Enums['upload_status'];
   photoUrl?: string;
@@ -98,6 +100,8 @@ type Row = {
     kind: Enums['media_kind'];
     width: number;
     height: number;
+    frame_x: number;
+    frame_y: number;
     duration_s: number | null;
     upload_status: Enums['upload_status'];
     storage_path: string | null;
@@ -148,6 +152,7 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
         kind: s.kind,
         width: s.width,
         height: s.height,
+        frame: { x: s.frame_x, y: s.frame_y },
         durationS: s.duration_s,
         status: s.upload_status,
         photoUrl: s.storage_path ? urls[s.storage_path] : undefined,
@@ -479,6 +484,19 @@ export function tagsOf(slide: PostSlide): SlideTags {
   };
 }
 
+/** Where a slide sits in its frame. The author's own slides only. */
+export async function setSlideFrame(slideId: string, frame: FramePoint): Promise<void> {
+  const { error } = await supabase
+    .from('post_slides')
+    .update({ frame_x: frame.x, frame_y: frame.y })
+    .eq('id', slideId);
+  if (error) throw error;
+}
+
+export function sameFrame(a: FramePoint, b: FramePoint): boolean {
+  return Math.abs(a.x - b.x) < 0.001 && Math.abs(a.y - b.y) < 0.001;
+}
+
 function sameTags(a: SlideTags, b: SlideTags): boolean {
   return (
     a.obstacleId === b.obstacleId &&
@@ -503,7 +521,13 @@ function invalidatePostLists(qc: ReturnType<typeof useQueryClient>, postId: stri
 export function useEditPost(post: Post | null | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (input: { caption: string; parkId: string | null; slides: Record<string, SlideTags> }) => {
+    mutationFn: async (input: {
+      caption: string;
+      parkId: string | null;
+      slides: Record<string, SlideTags>;
+      /** Slides the author reframed, by slide ID. */
+      frames?: Record<string, FramePoint>;
+    }) => {
       if (!post) return;
       const caption = input.caption.trim() || null;
       if (caption !== post.caption || input.parkId !== (post.park?.id ?? null)) {
@@ -519,6 +543,11 @@ export function useEditPost(post: Post | null | undefined) {
         const parkChanged = input.parkId !== (post.park?.id ?? null);
         if (!parkChanged && sameTags(next, tagsOf(slide))) continue;
         await setSlideTags(slide.id, next);
+      }
+      for (const slide of post.slides) {
+        const frame = input.frames?.[slide.id];
+        if (!frame || sameFrame(frame, slide.frame)) continue;
+        await setSlideFrame(slide.id, frame);
       }
     },
     onSuccess: () => {
