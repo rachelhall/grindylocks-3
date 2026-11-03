@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { PRIVACY_PATH, SUPPORT_EMAIL } from "@/lib/contact";
+
 import { RequestForm } from "./request-form";
 
 export const metadata: Metadata = {
@@ -188,6 +190,12 @@ export default function SitePage() {
         <div className={`${WRAP} flex flex-wrap items-center justify-between gap-4 py-8`}>
           <span className="font-display text-lg leading-5 uppercase text-gl-paper">Grindylocks</span>
           <nav aria-label="Footer" className="flex flex-wrap gap-x-5 gap-y-1 type-body-sm">
+            <a href={PRIVACY_PATH} className="text-gl-paper underline underline-offset-4">
+              Privacy
+            </a>
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="text-gl-paper underline underline-offset-4">
+              {SUPPORT_EMAIL}
+            </a>
             <a href="/sign-in" className="text-gl-paper underline underline-offset-4">
               Admin log in
             </a>

@@ -1,12 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { ADMIN_ORIGIN, isMarketingHost, isWwwHost, MARKETING_HOST, SITE_PATH } from "@/lib/hosts";
+import { ADMIN_ORIGIN, isMarketingHost, isWwwHost, MARKETING_HOST, publicPathFor, SITE_PAGES } from "@/lib/hosts";
 import { updateSession } from "@/lib/supabase/proxy";
 
 /**
  * Two jobs:
- * - On grindylocks.com, serve the public marketing page at `/` and send
- *   anything else to the admin's own domain. No session is touched there.
+ * - On grindylocks.com, serve the public pages (the homepage at `/`, the
+ *   privacy policy at `/privacy`) and send anything else to the admin's own
+ *   domain. No session is touched there.
  * - Everywhere else (the admin): keep the Supabase session fresh and send
  *   signed-out visitors to sign-in. Whether a signed-in person is an admin is
  *   checked when the page renders (src/lib/admin.ts); Server Functions check
@@ -21,21 +22,23 @@ export async function proxy(request: NextRequest) {
     if (isWwwHost(host)) {
       return NextResponse.redirect(`https://${MARKETING_HOST}${pathname}${search}`, 308);
     }
-    if (pathname === "/") {
+    const route = SITE_PAGES[pathname];
+    if (route) {
       const url = request.nextUrl.clone();
-      url.pathname = SITE_PATH;
+      url.pathname = route;
       return NextResponse.rewrite(url);
     }
-    // The page's own address inside the app: show it at `/` instead.
-    if (pathname === SITE_PATH) {
-      return NextResponse.redirect(`https://${MARKETING_HOST}/${search}`, 308);
+    // A page's own address inside the app: show it at its public path instead.
+    const publicPath = publicPathFor(pathname);
+    if (publicPath) {
+      return NextResponse.redirect(`https://${MARKETING_HOST}${publicPath}${search}`, 308);
     }
     // Admin paths (sign-in, queue, …) live on the admin's domain.
     return NextResponse.redirect(`${ADMIN_ORIGIN}${pathname}${search}`, 307);
   }
 
-  // The marketing page is public on admin hosts too, for previews.
-  if (pathname === SITE_PATH) return NextResponse.next();
+  // The public pages stay public on admin hosts too, for previews.
+  if (publicPathFor(pathname)) return NextResponse.next();
 
   const { response, signedIn, withSession } = await updateSession(request);
   const onSignIn = pathname === "/sign-in";
