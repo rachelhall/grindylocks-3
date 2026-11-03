@@ -8,6 +8,7 @@ import { BackButton, Button } from '@/components/ui';
 import { useMyContentCounts } from '@/lib/account';
 import { authErrorKey } from '@/lib/auth-errors';
 import { useAuth } from '@/lib/auth';
+import { isReviewEmail } from '@/lib/review-sign-in';
 import { type RoleBadge, useMyProfile } from '@/lib/profiles';
 import { useMyInvites } from '@/lib/social';
 import { supabase } from '@/lib/supabase';
@@ -66,6 +67,11 @@ export default function DeleteAccount() {
   async function sendCode() {
     if (!email) return;
     setError(null);
+    // The App Review account confirms with its fixed code; nothing to email.
+    if (isReviewEmail(email)) {
+      router.push({ pathname: '/settings/delete-code', params: { keep: keepPosts ? '1' : '0' } });
+      return;
+    }
     setBusy(true);
     const { error: sendError } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
     setBusy(false);

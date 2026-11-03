@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { FormScreen } from '@/components/screen';
 import { BackButton, Button, TextField } from '@/components/ui';
 import { authErrorKey, isEmail, otpOptions } from '@/lib/auth-errors';
+import { isReviewEmail } from '@/lib/review-sign-in';
 import { supabase } from '@/lib/supabase';
 import { Text } from '@/theme';
 
@@ -25,6 +26,12 @@ export default function EmailSignIn() {
     const address = email.trim().toLowerCase();
     if (!isEmail(address)) {
       setError(t('auth.email.invalid'));
+      return;
+    }
+    // The App Review account has a fixed code, so nothing is emailed.
+    if (isReviewEmail(address)) {
+      setError(null);
+      router.push({ pathname: '/code', params: { email: address } });
       return;
     }
     setSending(true);

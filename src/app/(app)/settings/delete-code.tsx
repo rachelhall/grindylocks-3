@@ -7,6 +7,7 @@ import { BackButton, Button, TextField } from '@/components/ui';
 import { useDeleteAccount } from '@/lib/account';
 import { authErrorKey } from '@/lib/auth-errors';
 import { useAuth } from '@/lib/auth';
+import { isReviewEmail, reviewSignIn } from '@/lib/review-sign-in';
 import { supabase } from '@/lib/supabase';
 import { useColors, Text } from '@/theme';
 
@@ -33,6 +34,8 @@ export default function DeleteCode() {
   const [notice, setNotice] = useState<string | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [wait, setWait] = useState(RESEND_SECONDS);
+  // The App Review account confirms with its fixed code; nothing is emailed.
+  const review = isReviewEmail(email);
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -49,12 +52,21 @@ export default function DeleteCode() {
     setError(null);
     setNotice(null);
     setVerifying(true);
-    const { error: verifyError } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
-    setVerifying(false);
-    if (verifyError) {
-      const key = authErrorKey(verifyError);
-      setError(t(key === 'errors.generic' ? 'auth.code.wrong' : key));
-      return;
+    if (review) {
+      const key = await reviewSignIn(code);
+      setVerifying(false);
+      if (key) {
+        setError(t(key));
+        return;
+      }
+    } else {
+      const { error: verifyError } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' });
+      setVerifying(false);
+      if (verifyError) {
+        const key = authErrorKey(verifyError);
+        setError(t(key === 'errors.generic' ? 'auth.code.wrong' : key));
+        return;
+      }
     }
     remove.mutate(
       { keepPosts },
@@ -100,12 +112,14 @@ export default function DeleteCode() {
             disabled={!ready}
             loading={busy}
           />
-          <Button
-            variant="tertiary"
-            label={wait > 0 ? t('auth.code.resendIn', { seconds: wait }) : t('auth.code.resend')}
-            disabled={wait > 0 || busy}
-            onPress={() => void resend()}
-          />
+          {!review && (
+            <Button
+              variant="tertiary"
+              label={wait > 0 ? t('auth.code.resendIn', { seconds: wait }) : t('auth.code.resend')}
+              disabled={wait > 0 || busy}
+              onPress={() => void resend()}
+            />
+          )}
           <Button
             variant="tertiary"
             label={t('deleteAccount.cancel')}

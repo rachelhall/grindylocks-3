@@ -29,3 +29,8 @@ verify_jwt = true
 
 [functions.delete-account]
 verify_jwt = true
+
+# App Review sign-in. The caller isn't signed in yet; it checks the fixed
+# code against its secrets instead (and does nothing without them).
+[functions.review-sign-in]
+verify_jwt = false
