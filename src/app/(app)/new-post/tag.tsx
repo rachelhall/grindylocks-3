@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { FromMeetupChip } from '@/components/from-meetup';
 import { DraftPager, PagerDots } from '@/components/media';
 import { Chip, ParkPickerModal, ParkRow, SlideTagRows } from '@/components/tagging';
 import { BackButton, Button } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
 import { formatDuration } from '@/lib/media';
 import { usePostDraft } from '@/lib/post-draft';
 import { hasTags, NO_TAGS, type SlideTags } from '@/lib/posts';
@@ -26,12 +28,15 @@ function same(a: SlideTags, b: SlideTags): boolean {
  * the slides full width and swipeable, the way the post will look. Under
  * the slide showing are its Obstacle, People and Filmer rows, and "Same as
  * slide N" to copy the slide before. Everything here is optional.
+ * Meetups (v2): under the park row, "From Thursday's meetup?" when you
+ * were going to one at that park in the last 7 days.
  */
 export default function NewPostTag() {
   const { t } = useTranslation();
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { items, setTags, park, setPark, names, addName } = usePostDraft();
+  const { session } = useAuth();
+  const { items, setTags, park, setPark, eventId, setEventId, names, addName } = usePostDraft();
   const [selected, setSelected] = useState(0);
   const [parkOpen, setParkOpen] = useState(false);
 
@@ -66,6 +71,13 @@ export default function NewPostTag() {
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <ParkRow park={park} onPress={() => setParkOpen(true)} />
+        <FromMeetupChip
+          userId={session?.user.id}
+          parkId={park?.id ?? null}
+          parkName={park?.name ?? null}
+          value={eventId}
+          onChange={setEventId}
+        />
 
         <DraftPager
           items={items}

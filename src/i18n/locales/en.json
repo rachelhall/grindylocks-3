@@ -437,6 +437,7 @@
       "posts": "Posts",
       "tagged": "Tagged",
       "filmed": "Filmed",
+      "meetups": "Meetups",
       "saved": "Saved"
     },
     "onlyYou": "Only you can see this",
@@ -1015,7 +1016,7 @@
     "helmetNo": "Helmets not required",
     "address": "Address",
     "fee": "Entry fee",
-    "feePlaceholder": "$5 a session",
+    "feePlaceholder": "$5 a visit",
     "noDescription": "No description yet.",
     "note": "Note",
     "addPhoto": "Add a photo of the sign",
@@ -1081,7 +1082,11 @@
     "checkIn": "Check in",
     "tag": "At {{park}} · until {{time}}",
     "seenByFollowers": "Followers can see where you are",
-    "seenByFriends": "Friends can see where you are"
+    "seenByFriends": "Friends can see where you are",
+    "imAtAPark": "I'm at a park",
+    "noParkNear": "You're not at a park we know",
+    "noParkNearBody": "Check-ins are for parks on Grindylocks. If this one is missing, suggest it from Search.",
+    "whichPark": "Which park are you at?"
   },
   "meetup": {
     "plan": "Plan a meetup",
@@ -1195,5 +1200,38 @@
     "coHostHint": "Co-hosts accept before they're listed. Up to 10.",
     "results": "Results",
     "youFollow": "You follow"
+  },
+  "meetupCard": {
+    "goingCount_one": "{{count}} going",
+    "goingCount_other": "{{count}} going",
+    "namesGoing_one": "{{names}} is going",
+    "namesGoing_other": "{{names}} are going",
+    "namesAndOthersGoing_one": "{{names}} and {{count}} other are going",
+    "namesAndOthersGoing_other": "{{names}} and {{count}} others are going",
+    "withCoHost": "with {{username}}",
+    "cancelledA11y": "cancelled",
+    "posts_one": "{{count}} post",
+    "posts_other": "{{count}} posts",
+    "comments_one": "Comments, {{count}}",
+    "comments_other": "Comments, {{count}}",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "allUpcoming": "All upcoming",
+    "pastMeetups": "Past meetups",
+    "showMore": "Show more",
+    "emptyOwn": "Meetups you host or co-host show here.",
+    "empty": "{{username}} isn't hosting any meetups.",
+    "pastTape": "Past · {{date}}",
+    "wentWord_one": "went",
+    "wentWord_other": "went",
+    "postsFromSession_one": "{{count}} post from this session",
+    "postsFromSession_other": "{{count}} posts from this session",
+    "fromThisSession": "From this session"
+  },
+  "fromMeetup": {
+    "ask": "From {{day}}'s meetup?",
+    "linked": "From {{day}}'s meetup",
+    "note": "You were going to {{meetup}} here. Linking puts this post on the meetup.",
+    "linkedNote": "This post shows on {{meetup}}. Tap to remove it."
   }
 }

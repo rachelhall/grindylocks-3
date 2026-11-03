@@ -16,10 +16,12 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { FeedHeader } from '@/components/feed';
 import { UploadCard } from '@/components/media';
+import { MeetupFeedCard } from '@/components/meetup-card';
 import { PostCard } from '@/components/post-card';
 import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useNotificationsUnread } from '@/lib/engagement';
+import { type MeetupCard, useHomeMeetups } from '@/lib/meetups';
 import { useMetro } from '@/lib/parks';
 import { ActivePostContext } from '@/lib/playback';
 import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
@@ -32,6 +34,7 @@ type Item =
   | { kind: 'upload'; job: PostJob }
   | { kind: 'label'; text: string }
   | { kind: 'post'; post: Post; section: 'following' | 'nearby' }
+  | { kind: 'meetup'; meetup: MeetupCard }
   | { kind: 'caughtUp' }
   | { kind: 'empty' };
 
@@ -42,6 +45,11 @@ const SIDE = space[4];
  * newest first; once those run out, "You're caught up" and posts from your
  * home metro area by people you don't follow yet. Chronological, nothing
  * ranked. Uploads still in progress sit at the top.
+ *
+ * Meetups (v2): meetup cards from people you follow (and meetups you follow
+ * or host) sit among those posts by when they were posted; a repeating
+ * meetup's next date takes its place when the date before it ends. They
+ * never appear in the Near you part.
  */
 export default function Home() {
   const { t } = useTranslation();
@@ -59,6 +67,13 @@ export default function Home() {
   const following = useFollowingFeed(userId);
   const followingDone = following.isSuccess && !following.hasNextPage;
   const nearby = useNearbyFeed(userId, metroId, followingDone);
+  // Cards newer than the oldest post loaded so far; all of them once the
+  // posts from people you follow have run out.
+  const followingPosts = following.data?.pages.flat();
+  const oldestLoaded = followingDone ? null : (followingPosts?.[followingPosts.length - 1]?.publishedAt ?? null);
+  const meetups = useHomeMeetups(userId, oldestLoaded, following.isSuccess);
+  // When the cards were fetched: enough to tell which dates have passed.
+  const [now, setNow] = useState(() => Date.now());
   const [refreshing, setRefreshing] = useState(false);
 
   // The bell's dot: checked whenever Home comes back into view.
@@ -92,21 +107,30 @@ export default function Home() {
     const out: Item[] = queued.map((job) => ({ kind: 'upload', job }));
     const mine = following.data?.pages.flat() ?? [];
     const near = nearby.data?.pages.flat() ?? [];
-    if (mine.length) {
+    const cards = meetups.data ?? [];
+    if (mine.length || cards.length) {
       out.push({ kind: 'label', text: t('home.followingLabel') });
-      for (const post of mine) out.push({ kind: 'post', post, section: 'following' });
+      // Both lists are newest first; merge them by time.
+      let i = 0;
+      for (const post of mine) {
+        const at = post.publishedAt ?? post.createdAt;
+        while (i < cards.length && cards[i].feed_at > at) out.push({ kind: 'meetup', meetup: cards[i++] });
+        out.push({ kind: 'post', post, section: 'following' });
+      }
+      // Older cards wait until the posts around them load.
+      if (followingDone) while (i < cards.length) out.push({ kind: 'meetup', meetup: cards[i++] });
     }
     if (followingDone) {
-      if (mine.length) out.push({ kind: 'caughtUp' });
+      if (mine.length || cards.length) out.push({ kind: 'caughtUp' });
       if (near.length) {
         out.push({ kind: 'label', text: t('home.nearLabel', { metro: metro.data?.name ?? '' }) });
         for (const post of near) out.push({ kind: 'post', post, section: 'nearby' });
-      } else if (!mine.length && nearby.isSuccess && !nearby.hasNextPage) {
+      } else if (!mine.length && !cards.length && nearby.isSuccess && !nearby.hasNextPage) {
         out.push({ kind: 'empty' });
       }
     }
     return out;
-  }, [queued, following.data, nearby.data, followingDone, nearby.isSuccess, nearby.hasNextPage, metro.data, t]);
+  }, [queued, following.data, nearby.data, meetups.data, followingDone, nearby.isSuccess, nearby.hasNextPage, metro.data, t]);
 
   function loadMore() {
     if (following.hasNextPage) {
@@ -118,7 +142,8 @@ export default function Home() {
 
   async function refresh() {
     setRefreshing(true);
-    await Promise.all([following.refetch(), followingDone ? nearby.refetch() : null]);
+    setNow(Date.now());
+    await Promise.all([following.refetch(), meetups.refetch(), followingDone ? nearby.refetch() : null]);
     setRefreshing(false);
   }
 
@@ -131,7 +156,7 @@ export default function Home() {
 
   const loading =
     following.isLoading || (followingDone && nearby.isLoading) || following.isFetchingNextPage || nearby.isFetchingNextPage;
-  const failed = following.isError || nearby.isError;
+  const failed = following.isError || nearby.isError || meetups.isError;
   const cardWidth = width - SIDE * 2;
 
   return (
@@ -145,7 +170,9 @@ export default function Home() {
         keyExtractor={(item, i) =>
           item.kind === 'post'
             ? `${item.section}-${item.post.id}`
-            : item.kind === 'upload'
+            : item.kind === 'meetup'
+              ? `meetup-${item.meetup.id}`
+              : item.kind === 'upload'
               ? `upload-${item.job.postId}`
               : `${item.kind}-${i}`
         }
@@ -165,6 +192,8 @@ export default function Home() {
               );
             case 'post':
               return <PostCard post={item.post} width={cardWidth} />;
+            case 'meetup':
+              return <MeetupFeedCard m={item.meetup} now={now} viewerId={userId} />;
             case 'caughtUp':
               return (
                 <View style={[styles.caughtUp, { borderTopColor: c.text }]}>

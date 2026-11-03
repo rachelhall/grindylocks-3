@@ -138,6 +138,20 @@ export const keys = {
   meetupGoing: (eventId: string) => ['meetups', 'going', eventId] as const,
   /** A date's comments. */
   meetupComments: (eventId: string) => ['meetups', 'comments', eventId] as const,
+  /** Meetup cards in Home, for the time the loaded posts cover. */
+  homeMeetups: (userId: string, newerThan: string) => ['meetups', 'home', userId, newerThan] as const,
+  /** A park's Upcoming meetups. */
+  parkMeetups: (parkId: string) => ['meetups', 'park', parkId] as const,
+  /** A park's Past meetups (paged) and how many there are. */
+  parkPastMeetups: (parkId: string) => ['meetups', 'park-past', parkId] as const,
+  parkPastMeetupCount: (parkId: string) => ['meetups', 'park-past-count', parkId] as const,
+  /** A profile's Upcoming and Past meetups (ones they host or co-host). */
+  profileMeetups: (userId: string) => ['meetups', 'profile', userId] as const,
+  profilePastMeetups: (userId: string) => ['meetups', 'profile-past', userId] as const,
+  /** Meetups you were going to at a park in the last 7 days (the posting chip). */
+  recentMeetups: (userId: string, parkId: string) => ['meetups', 'recent', userId, parkId] as const,
+  /** Posts linked to a meetup date. Starts with 'feed' so new posts refresh it. */
+  meetupPosts: (eventId: string) => ['feed', 'meetup', eventId] as const,
   /** Whether you follow a repeating meetup. */
   seriesFollow: (seriesId: string, userId: string) => ['meetups', 'follow', seriesId, userId] as const,
   /** Your Going privately default (Settings › Privacy). */

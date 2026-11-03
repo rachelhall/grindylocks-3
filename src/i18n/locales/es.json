@@ -437,6 +437,7 @@
       "posts": "Posts",
       "tagged": "Etiquetado",
       "filmed": "Grabado",
+      "meetups": "Meetups",
       "saved": "Guardado"
     },
     "onlyYou": "Solo tú puedes verlo",
@@ -1015,7 +1016,7 @@
     "helmetNo": "Casco no obligatorio",
     "address": "Dirección",
     "fee": "Precio de entrada",
-    "feePlaceholder": "5 € por sesión",
+    "feePlaceholder": "5 € por visita",
     "noDescription": "Aún no hay descripción.",
     "note": "Nota",
     "addPhoto": "Añadir una foto del cartel",
@@ -1081,7 +1082,11 @@
     "checkIn": "Registrarme",
     "tag": "En {{park}} · hasta las {{time}}",
     "seenByFollowers": "Tus seguidores pueden ver dónde estás",
-    "seenByFriends": "Tus amigos pueden ver dónde estás"
+    "seenByFriends": "Tus amigos pueden ver dónde estás",
+    "imAtAPark": "Estoy en un parque",
+    "noParkNear": "No estás en un parque que conozcamos",
+    "noParkNearBody": "Los check-ins son para parques de Grindylocks. Si falta este, sugiérelo desde Buscar.",
+    "whichPark": "¿En qué parque estás?"
   },
   "meetup": {
     "plan": "Planear un meetup",
@@ -1195,5 +1200,38 @@
     "coHostHint": "Los coanfitriones aceptan antes de aparecer. Hasta 10.",
     "results": "Resultados",
     "youFollow": "Sigues a"
+  },
+  "meetupCard": {
+    "goingCount_one": "{{count}} va",
+    "goingCount_other": "{{count}} van",
+    "namesGoing_one": "{{names}} va",
+    "namesGoing_other": "{{names}} van",
+    "namesAndOthersGoing_one": "{{names}} y {{count}} más van",
+    "namesAndOthersGoing_other": "{{names}} y {{count}} más van",
+    "withCoHost": "con {{username}}",
+    "cancelledA11y": "cancelado",
+    "posts_one": "{{count}} post",
+    "posts_other": "{{count}} posts",
+    "comments_one": "Comentarios, {{count}}",
+    "comments_other": "Comentarios, {{count}}",
+    "upcoming": "Próximos",
+    "past": "Pasados",
+    "allUpcoming": "Ver todos los próximos",
+    "pastMeetups": "Meetups pasados",
+    "showMore": "Ver más",
+    "emptyOwn": "Aquí salen los meetups que organizas o coorganizas.",
+    "empty": "{{username}} no organiza ningún meetup.",
+    "pastTape": "Pasado · {{date}}",
+    "wentWord_one": "fue",
+    "wentWord_other": "fueron",
+    "postsFromSession_one": "{{count}} post de esta sesión",
+    "postsFromSession_other": "{{count}} posts de esta sesión",
+    "fromThisSession": "De esta sesión"
+  },
+  "fromMeetup": {
+    "ask": "¿Del meetup del {{day}}?",
+    "linked": "Del meetup del {{day}}",
+    "note": "Ibas a ir a {{meetup}} aquí. Al vincularlo, este post sale en el meetup.",
+    "linkedNote": "Este post sale en {{meetup}}. Toca para quitarlo."
   }
 }

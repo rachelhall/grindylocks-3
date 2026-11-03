@@ -19,8 +19,11 @@ type Draft = {
   setTags: (key: string, tags: SlideTags) => void;
   setFrame: (key: string, frame: FramePoint) => void;
   park: DraftPark | null;
-  /** Changing the park drops obstacle picks from the old park (general types stay). */
+  /** Changing the park drops obstacle picks from the old park (general types stay) and the meetup link. */
   setPark: (park: DraftPark | null) => void;
+  /** The meetup it's from ("From Thursday's meetup?"), if picked. */
+  eventId: string | null;
+  setEventId: (eventId: string | null) => void;
   caption: string;
   setCaption: (caption: string) => void;
   /** Usernames for tagged people, so the screens can show them. */
@@ -34,6 +37,7 @@ export function PostDraftProvider({ initialPark, children }: { initialPark: Draf
   const [items, setItemsState] = useState<DraftItem[]>([]);
   const [park, setParkState] = useState<DraftPark | null>(initialPark);
   const [caption, setCaption] = useState('');
+  const [eventId, setEventId] = useState<string | null>(null);
   const [names, setNames] = useState<Record<string, string>>({});
 
   const setItems = useCallback((update: (prev: DraftItem[]) => DraftItem[]) => setItemsState(update), []);
@@ -58,6 +62,7 @@ export function PostDraftProvider({ initialPark, children }: { initialPark: Draf
     (next: DraftPark | null) => {
       if (park?.id !== next?.id) {
         setItemsState((prev) => prev.map((m) => ({ ...m, tags: { ...m.tags, obstacleId: null } })));
+        setEventId(null);
       }
       setParkState(next);
     },
@@ -69,8 +74,8 @@ export function PostDraftProvider({ initialPark, children }: { initialPark: Draf
   }, []);
 
   const value = useMemo(
-    () => ({ items, setItems, addMedia, setTags, setFrame, park, setPark, caption, setCaption, names, addName }),
-    [items, setItems, addMedia, setTags, setFrame, park, setPark, caption, names, addName],
+    () => ({ items, setItems, addMedia, setTags, setFrame, park, setPark, eventId, setEventId, caption, setCaption, names, addName }),
+    [items, setItems, addMedia, setTags, setFrame, park, setPark, eventId, caption, names, addName],
   );
   return <DraftContext.Provider value={value}>{children}</DraftContext.Provider>;
 }

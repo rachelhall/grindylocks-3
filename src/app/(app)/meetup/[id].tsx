@@ -12,12 +12,14 @@ import {
   ScrollView,
   StyleSheet,
   type TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoingList, GoingSheet, MeetupCommentComposer, MeetupComments, type MeetupReply } from '@/components/meetup';
 import { HalftoneGround, PHOTOCOPY } from '@/components/park-header';
+import { MasonryGrid } from '@/components/profile';
 import { SafeAreaView } from '@/components/safe-area';
 import { BackButton, Button, CheckBox, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -29,10 +31,12 @@ import {
   useCoverUrl,
   useGoing,
   useMeetup,
+  useMeetupCard,
   useMyHostRow,
   useRespondCoHost,
   useSeriesFollow,
 } from '@/lib/meetups';
+import { toGridPost, useMeetupPosts } from '@/lib/posts';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /**
@@ -40,10 +44,13 @@ import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme
  * title, or its one line when there's no title), when and where on the
  * park's clock (your own time too when you're elsewhere), who can see it
  * and its disciplines, the note, I'm going and Follow series, the going
- * list and comments. Once it's over, the list gives way to "12 went".
+ * list and comments. Once it's over (mockup "A past meetup"), the list gives
+ * way to "12 went" and the posts linked to it ("From this session") in the
+ * masonry grid. Opened with `going=1` (the I'm going button on a card), it
+ * opens the Going sheet straight away.
  */
 export default function MeetupScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, going: openGoing } = useLocalSearchParams<{ id: string; going?: string }>();
   const { t, i18n } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
@@ -62,6 +69,21 @@ export default function MeetupScreen() {
   const inputRef = useRef<TextInput>(null);
   // When the page opened; enough to tell whether this date is over.
   const [now] = useState(() => Date.now());
+  const { width } = useWindowDimensions();
+  // Posts linked to this date can come from its start onwards.
+  const started = meetup ? new Date(meetup.starts_at).getTime() <= now : false;
+  const linked = useMeetupPosts(id, started);
+  const counts = useMeetupCard(started ? id : undefined);
+
+  // The card's I'm going button: open the sheet once we know you can go
+  // (once only, decided while rendering, like the check-in sheet's reset).
+  const [autoDone, setAutoDone] = useState(openGoing !== '1');
+  const summaryNow = going.data?.summary;
+  if (!autoDone && meetup && summaryNow) {
+    setAutoDone(true);
+    const ended = new Date(meetup.ends_at).getTime() <= now;
+    if (!summaryNow.i_host && meetup.status !== 'cancelled' && !ended) setGoingOpen(true);
+  }
 
   if (isPending || meetup === undefined) {
     return (
@@ -118,6 +140,9 @@ export default function MeetupScreen() {
   const isHost = hostRow.data?.role === 'host' || (hostRow.data?.role === 'co_host' && hostRow.data.accepted_at);
   const invited = hostRow.data?.role === 'co_host' && !hostRow.data.accepted_at;
   const goingLine = [headline, dayLine, meetup.park.display_name].join(' · ');
+  const pastDate = new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start);
+  const linkedPosts = linked.data?.pages.flat() ?? [];
+  const linkedCount = counts.data?.linked_post_count ?? linkedPosts.length;
 
   const answer = (accept: boolean) =>
     respond.mutate(accept, {
@@ -156,7 +181,11 @@ export default function MeetupScreen() {
             <View style={styles.headerText}>
               <View style={[styles.tape, { backgroundColor: brand.pink }]}>
                 <Text variant="label" style={{ color: brand.ink }}>
-                  {repeats ? t('meetup.tapeRepeating', { repeats }) : t('meetup.tape')}
+                  {over
+                    ? t('meetupCard.pastTape', { date: pastDate })
+                    : repeats
+                      ? t('meetup.tapeRepeating', { repeats })
+                      : t('meetup.tape')}
                 </Text>
               </View>
               <Text
@@ -249,7 +278,19 @@ export default function MeetupScreen() {
           {!cancelled ? (
             <View style={[styles.block, styles.actions]}>
               {over ? (
-                <Text variant="headline">{t('meetup.went', { count: total })}</Text>
+                <View style={styles.wentBlock}>
+                  <Text variant="displayXl" style={styles.wentNumber}>
+                    {String(counts.data?.going_total ?? total)}
+                  </Text>
+                  <View style={styles.flex}>
+                    <Text variant="headline" style={{ color: brand.paper }}>
+                      {t('meetupCard.wentWord', { count: counts.data?.going_total ?? total })}
+                    </Text>
+                    <Text variant="bodySm" style={{ color: brand.paper, opacity: 0.75 }}>
+                      {t('meetupCard.postsFromSession', { count: linkedCount })}
+                    </Text>
+                  </View>
+                </View>
               ) : iHost || isHost ? (
                 <View style={[styles.hosting, { borderColor: c.border }]}>
                   <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
@@ -306,6 +347,26 @@ export default function MeetupScreen() {
                 <Text variant="caption" color="textSecondary">
                   {t('meetup.hostsOnlyList')}
                 </Text>
+              ) : null}
+            </View>
+          ) : null}
+
+          {/* From this session: posts linked to this date. */}
+          {started && linkedPosts.length > 0 ? (
+            <View style={styles.sessionPosts}>
+              <Text variant="title" accessibilityRole="header" style={styles.block}>
+                {t('meetupCard.fromThisSession')}
+              </Text>
+              <MasonryGrid posts={linkedPosts.map(toGridPost)} width={width} />
+              {linked.hasNextPage ? (
+                <View style={styles.block}>
+                  <Button
+                    label={t('meetupCard.showMore')}
+                    variant="secondary"
+                    loading={linked.isFetchingNextPage}
+                    onPress={() => void linked.fetchNextPage()}
+                  />
+                </View>
               ) : null}
             </View>
           ) : null}
@@ -386,5 +447,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space[2],
   },
+  wentBlock: { flex: 1, backgroundColor: brand.ink, padding: space[4], flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  wentNumber: { color: brand.paper, textShadowColor: brand.pink, textShadowOffset: { width: 3, height: 3 }, textShadowRadius: 0 },
+  sessionPosts: { gap: space[2] },
   hosting: { flex: 1, minHeight: size.tapMin, borderWidth: stroke.rule, borderStyle: 'dashed', alignItems: 'center', justifyContent: 'center' },
 });

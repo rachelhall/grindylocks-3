@@ -41,7 +41,7 @@ export default function NewPostCaption() {
   const c = useColors();
   const qc = useQueryClient();
   const { session, profile } = useAuth();
-  const { items, park, caption, setCaption, names } = usePostDraft();
+  const { items, park, eventId, caption, setCaption, names } = usePostDraft();
   const summary = useTagSummary(park?.id ?? null);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -82,6 +82,7 @@ export default function NewPostCaption() {
         userId: session.user.id,
         metroAreaId,
         parkId: park?.id ?? null,
+        eventId,
         caption,
         media: prepared,
       });

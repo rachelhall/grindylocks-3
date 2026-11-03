@@ -31,7 +31,7 @@ const CITIES = [
 const FEATURES = [
   {
     title: "Park pages",
-    body: "Hours and discipline sessions, whether it's open now, lights, fees, helmet rules, surface and every obstacle, checked by local admins with a last-verified date.",
+    body: "Hours (blade nights and other discipline hours included), whether it's open now, lights, fees, helmet rules, surface and every obstacle, checked by local admins with a last-verified date.",
   },
   {
     title: "Tagged clips",

@@ -24,7 +24,7 @@ import { supabase } from './supabase';
 type Enums = Database['public']['Enums'];
 
 /** Everything a post card or post detail shows, in one select. */
-export const POST_SELECT = `id, author_id, caption, created_at, published_at, edited_at, park_id, slide_count, anonymized,
+export const POST_SELECT = `id, author_id, caption, created_at, published_at, edited_at, park_id, event_id, slide_count, anonymized,
   comment_count, liked_by_me,
   author:profiles!posts_author_id_fkey(id, username, avatar_path, deleted_at),
   park:parks!posts_park_id_fkey(id, slug, display_name),
@@ -68,6 +68,8 @@ export type Post = {
   author: { id: string; username: string | null; avatarPath: string | null } | null;
   park: { id: string; slug: string; name: string } | null;
   metro: { id: string; name: string } | null;
+  /** The meetup it's from ("From Thursday's meetup?"), if linked. */
+  eventId: string | null;
   caption: string | null;
   createdAt: string;
   publishedAt: string | null;
@@ -87,6 +89,7 @@ type Row = {
   published_at: string | null;
   edited_at: string | null;
   park_id: string | null;
+  event_id: string | null;
   slide_count: number;
   anonymized: boolean;
   comment_count: number | null;
@@ -138,6 +141,7 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
         : { id: r.author.id, username: r.author.username, avatarPath: r.author.avatar_path },
     park: r.park ? { id: r.park.id, slug: r.park.slug, name: r.park.display_name } : null,
     metro: r.metro,
+    eventId: r.event_id ?? null,
     caption: r.caption,
     createdAt: r.created_at,
     publishedAt: r.published_at,
@@ -279,6 +283,30 @@ export function useParkPosts(parkId: string | undefined) {
     },
     GRID_PAGE,
     Boolean(parkId),
+  );
+}
+
+/** Posts linked to a meetup date ("From this session"), newest first. */
+export function useMeetupPosts(eventId: string | undefined, enabled = true) {
+  return usePostPages(
+    keys.meetupPosts(eventId ?? ''),
+    async (cursor) => {
+      let q = supabase
+        .from('posts')
+        .select(POST_SELECT)
+        .eq('event_id', eventId!)
+        .eq('status', 'visible')
+        .not('published_at', 'is', null)
+        .order('published_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(GRID_PAGE);
+      if (cursor) q = q.or(`published_at.lt."${cursor.at}",and(published_at.eq."${cursor.at}",id.lt.${cursor.id})`);
+      const { data, error } = await q;
+      if (error) throw error;
+      return toPosts((data ?? []) as unknown as Row[]);
+    },
+    GRID_PAGE,
+    Boolean(eventId) && enabled,
   );
 }
 
@@ -511,6 +539,8 @@ function invalidatePostLists(qc: ReturnType<typeof useQueryClient>, postId: stri
   void qc.invalidateQueries({ queryKey: keys.post(postId) });
   void qc.invalidateQueries({ queryKey: ['posts'] });
   void qc.invalidateQueries({ queryKey: ['feed'] });
+  // Meetup cards count their linked posts.
+  void qc.invalidateQueries({ queryKey: ['meetups'] });
 }
 
 /**
@@ -524,17 +554,26 @@ export function useEditPost(post: Post | null | undefined) {
     mutationFn: async (input: {
       caption: string;
       parkId: string | null;
+      /** The meetup it's from; changing the park drops it. */
+      eventId?: string | null;
       slides: Record<string, SlideTags>;
       /** Slides the author reframed, by slide ID. */
       frames?: Record<string, FramePoint>;
     }) => {
       if (!post) return;
       const caption = input.caption.trim() || null;
-      if (caption !== post.caption || input.parkId !== (post.park?.id ?? null)) {
+      const parkMoved = input.parkId !== (post.park?.id ?? null);
+      if (caption !== post.caption || parkMoved) {
         const { error } = await supabase
           .from('posts')
           .update({ caption, park_id: input.parkId })
           .eq('id', post.id);
+        if (error) throw error;
+      }
+      // After the park: a new park drops the link in the database too.
+      const eventId = input.eventId === undefined ? post.eventId : input.eventId;
+      if (eventId !== (parkMoved ? null : post.eventId)) {
+        const { error } = await supabase.from('posts').update({ event_id: eventId }).eq('id', post.id);
         if (error) throw error;
       }
       for (const slide of post.slides) {

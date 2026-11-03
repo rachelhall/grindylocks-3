@@ -537,6 +537,8 @@ export async function createPost(input: {
   caption: string;
   /** The park for every slide, if one was picked. */
   parkId?: string | null;
+  /** The meetup it's from ("From Thursday's meetup?"), if picked. */
+  eventId?: string | null;
   media: (PreparedMedia & { slideId: string; tags?: SlideTags; frame?: FramePoint })[];
 }): Promise<string> {
   const postId = uuid();
@@ -552,6 +554,13 @@ export async function createPost(input: {
     slide_count: input.media.length,
   });
   if (postError) throw postError;
+
+  // The meetup link goes on separately, so a link the database turns down
+  // (the meetup was cancelled meanwhile, say) never stops the post itself.
+  if (input.eventId && input.parkId) {
+    const { error } = await supabase.from('posts').update({ event_id: input.eventId }).eq('id', postId);
+    if (error) Sentry.captureException(error);
+  }
 
   const photoRows = input.media
     .map((m, position) => ({ m, position }))

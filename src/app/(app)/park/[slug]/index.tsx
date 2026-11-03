@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaView } from '@/components/safe-area';
 
 import { HereNowSection } from '@/components/here-now';
+import { ParkPastMeetups, ParkUpcomingMeetups } from '@/components/park-meetups';
 import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
 import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';
 import { ParkPosts, ParkRegulars } from '@/components/park-social';
@@ -280,10 +281,9 @@ export default function ParkScreen() {
           <IconButton icon="directions" label={t('park.directions')} onPress={() => openDirections(park)} />
         </View>
 
-        {/* Meetups (v2): who's checked in, above Upcoming (PR 4). */}
+        {/* Meetups (v2): who's checked in, then Upcoming, then Plan a meetup. */}
         <HereNowSection park={park} />
-
-        {/* Meetups (v2): Upcoming goes between Here now and Plan a meetup (PR 4). */}
+        <ParkUpcomingMeetups parkId={park.id} />
         <View style={styles.block}>
           <Button
             label={t('meetup.plan')}
@@ -423,6 +423,9 @@ export default function ParkScreen() {
             </View>
           )}
         </View>
+
+        {/* Meetups (v2): Past meetups, collapsed until opened. */}
+        <ParkPastMeetups parkId={park.id} />
 
         <ParkRegulars parkId={park.id} />
         <ParkPosts park={park} />

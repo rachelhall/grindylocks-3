@@ -437,6 +437,7 @@
       "posts": "Opslag",
       "tagged": "Tagget",
       "filmed": "Filmet",
+      "meetups": "Meetups",
       "saved": "Gemt"
     },
     "onlyYou": "Kun du kan se dette",
@@ -1015,7 +1016,7 @@
     "helmetNo": "Hjelm ikke påkrævet",
     "address": "Adresse",
     "fee": "Entrépris",
-    "feePlaceholder": "40 kr. pr. session",
+    "feePlaceholder": "40 kr. pr. besøg",
     "noDescription": "Ingen beskrivelse endnu.",
     "note": "Note",
     "addPhoto": "Tilføj et billede af skiltet",
@@ -1081,7 +1082,11 @@
     "checkIn": "Tjek ind",
     "tag": "I {{park}} · indtil {{time}}",
     "seenByFollowers": "Dine følgere kan se, hvor du er",
-    "seenByFriends": "Dine venner kan se, hvor du er"
+    "seenByFriends": "Dine venner kan se, hvor du er",
+    "imAtAPark": "Jeg er i en park",
+    "noParkNear": "Du er ikke i en park, vi kender",
+    "noParkNearBody": "Check-ins er for parker på Grindylocks. Mangler denne, så foreslå den fra Søg.",
+    "whichPark": "Hvilken park er du i?"
   },
   "meetup": {
     "plan": "Planlæg et meetup",
@@ -1195,5 +1200,38 @@
     "coHostHint": "Medværter skal sige ja, før de vises. Op til 10.",
     "results": "Resultater",
     "youFollow": "Du følger"
+  },
+  "meetupCard": {
+    "goingCount_one": "{{count}} kommer",
+    "goingCount_other": "{{count}} kommer",
+    "namesGoing_one": "{{names}} kommer",
+    "namesGoing_other": "{{names}} kommer",
+    "namesAndOthersGoing_one": "{{names}} og {{count}} anden kommer",
+    "namesAndOthersGoing_other": "{{names}} og {{count}} andre kommer",
+    "withCoHost": "med {{username}}",
+    "cancelledA11y": "aflyst",
+    "posts_one": "{{count}} opslag",
+    "posts_other": "{{count}} opslag",
+    "comments_one": "Kommentarer, {{count}}",
+    "comments_other": "Kommentarer, {{count}}",
+    "upcoming": "Kommende",
+    "past": "Tidligere",
+    "allUpcoming": "Alle kommende",
+    "pastMeetups": "Tidligere meetups",
+    "showMore": "Vis flere",
+    "emptyOwn": "Meetups, du er vært eller medvært for, vises her.",
+    "empty": "{{username}} er ikke vært for nogen meetups.",
+    "pastTape": "Tidligere · {{date}}",
+    "wentWord_one": "var der",
+    "wentWord_other": "var der",
+    "postsFromSession_one": "{{count}} opslag fra sessionen",
+    "postsFromSession_other": "{{count}} opslag fra sessionen",
+    "fromThisSession": "Fra sessionen"
+  },
+  "fromMeetup": {
+    "ask": "Fra meetup {{day}}?",
+    "linked": "Fra meetup {{day}}",
+    "note": "Du skulle til {{meetup}} her. Kobler du dem, vises opslaget på meetuppet.",
+    "linkedNote": "Opslaget vises på {{meetup}}. Tryk for at fjerne det."
   }
 }
