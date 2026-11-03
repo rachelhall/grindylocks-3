@@ -10,12 +10,38 @@ library. Data © OpenStreetMap contributors (ODbL); keep the credit in the app.
 """
 import argparse
 import json
-import math
+import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 
-OVERPASS = "https://overpass-api.de/api/interpreter"
+# Public Overpass servers, tried in order. The main one is often busy (502,
+# 504 or 429), so the script retries and then falls back to the mirrors.
+OVERPASS = [
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+]
 UA = "grindylocks-seed/1.0 (https://grindylocks.com)"
+
+
+def fetch(query):
+    body = urllib.parse.urlencode({"data": query}).encode()
+    errors = []
+    for url in OVERPASS:
+        for attempt in range(2):
+            try:
+                req = urllib.request.Request(url, data=body, headers={"User-Agent": UA})
+                with urllib.request.urlopen(req, timeout=90) as r:
+                    data = json.load(r)
+                print(f"(from {url})", file=sys.stderr)
+                return data
+            except (urllib.error.URLError, TimeoutError, json.JSONDecodeError) as e:
+                errors.append(f"{url}: {getattr(e, 'code', '')} {getattr(e, 'reason', e)}")
+                time.sleep(5 * (attempt + 1))
+    sys.exit("No Overpass server answered:\n  " + "\n  ".join(errors))
 
 
 def main():
@@ -29,13 +55,10 @@ def main():
   nwr["sport"~"skateboard|roller_skating|pump_track"]({box});
   nwr["leisure"="pitch"]["name"~"skate",i]({box});
   nwr["cycling"="pump_track"]({box});
-  nwr["name"~"skate ?park|pump ?track|skate spot",i]({box});
+  nwr["leisure"]["name"~"skate|pump ?track",i]({box});
 );
 out center tags;"""
-    req = urllib.request.Request(OVERPASS, data=urllib.parse.urlencode({"data": query}).encode(),
-                                 headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=90) as r:
-        data = json.load(r)
+    data = fetch(query)
 
     rows = []
     for el in data.get("elements", []):
