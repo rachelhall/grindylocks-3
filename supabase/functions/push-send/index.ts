@@ -50,7 +50,8 @@ function fill(template: string, values: Record<string, string>): string {
 
 /**
  * The sentence is the same one the bell shows. A comment, reply or mention
- * puts the sentence in the title and the comment itself in the body.
+ * puts the sentence in the title and the comment itself in the body; a
+ * caption mention does the same with the caption.
  */
 function compose(row: Claimed, language: string): { title?: string; body: string } | null {
   const s: Sentences = strings[(language in strings ? language : 'en') as Language];
@@ -66,6 +67,9 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { title: say('reply'), body: row.comment_body ?? '' };
     case 'mention':
       return { title: say('mention'), body: row.comment_body ?? '' };
+    case 'caption_mention':
+      // The caption plays the part of the comment.
+      return { title: say('captionMention'), body: row.comment_body ?? '' };
     case 'tag':
       return { body: say('tag') };
     case 'filmer_credit':

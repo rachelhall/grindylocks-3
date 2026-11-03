@@ -162,7 +162,8 @@
     "moveEarlier": "Flyt frem",
     "moveLater": "Flyt tilbage",
     "slideItem": "Slide {{number}}",
-    "limitsShort": "Op til 10 · klip op til 60 s"
+    "limitsShort": "Op til 10 · klip op til 60 s",
+    "mentionHint": "Dem, du nævner, får besked, når du slår op."
   },
   "uploads": {
     "uploading": "Uploader {{done}} af {{total}}",
@@ -337,6 +338,7 @@
     "commentMany_other": "{{a}}, {{b}} og {{count}} andre kommenterede dit opslag",
     "reply": "{{a}} svarede dig",
     "mention": "{{a}} nævnte dig i en kommentar",
+    "captionMention": "{{a}} nævnte dig i teksten til et opslag",
     "tag": "{{a}} taggede dig i et opslag",
     "filmer": "{{a}} krediterede dig som filmer",
     "someoneNew": "{{a}} er lige startet på Grindylocks i {{metro}}. Sig hej!",
@@ -719,7 +721,8 @@
     "slides": "Slides · medier kan ikke ændres efter opslaget",
     "slideClip": "Slide {{number}}, klip",
     "slidePhoto": "Slide {{number}}, foto",
-    "footnote": "Gemte ændringer viser “redigeret” på opslaget. Personer, du tilføjer, får besked; personer, du fjerner, gør ikke."
+    "footnote": "Gemte ændringer viser “redigeret” på opslaget. Personer, du tilføjer, får besked; personer, du fjerner, gør ikke.",
+    "mentionNote": "Kun dem, du tilføjer nu, får besked. Dem, der allerede er nævnt, får ikke besked igen, og dem, du fjerner, får ikke noget at vide."
   },
   "obstacle": {
     "kicker": "Obstacle · {{type}}",
@@ -773,7 +776,7 @@
     "comments": "Kommentarer",
     "commentsBody": "På dine opslag og svar på dine kommentarer",
     "mentions": "Omtaler",
-    "mentionsBody": "Når nogen @nævner dig i en kommentar",
+    "mentionsBody": "Når nogen @nævner dig i en kommentar eller tekst",
     "tags": "Tags",
     "tagsBody": "Når nogen tagger dig i et opslag",
     "filmer": "Filmer-kredit",

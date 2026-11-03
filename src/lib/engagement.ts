@@ -160,6 +160,8 @@ export type NotificationKind =
   | 'comment'
   | 'reply'
   | 'mention'
+  // v2: @mentioned in a post's caption.
+  | 'caption_mention'
   | 'tag'
   | 'filmer_credit'
   | 'invite_used'
@@ -186,7 +188,8 @@ export type AppNotification = {
   postId: string | null;
   commentId: string | null;
   /**
-   * The start of the comment, for comments, replies and mentions. For
+   * The start of the comment, for comments, replies and mentions (the
+   * caption, for caption mentions). For
    * moderation notices, the admin's message (may be null); for role_vacated,
    * the role that ended (park_admin, park_contributor or city_admin).
    */
@@ -201,6 +204,7 @@ const KINDS = new Set<NotificationKind>([
   'comment',
   'reply',
   'mention',
+  'caption_mention',
   'tag',
   'filmer_credit',
   'invite_used',

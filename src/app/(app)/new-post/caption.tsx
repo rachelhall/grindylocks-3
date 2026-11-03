@@ -1,11 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
 import { MediaTag, MediaThumb } from '@/components/media';
+import { MentionList, useCaptionMentions } from '@/components/mentions';
 import { TagSectionTitle, useTagSummary } from '@/components/tagging';
 import { BackButton, Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -29,6 +30,11 @@ function thumbWidth(m: DraftItem): number {
  * New post, step 3 of 3 (Post-Caption mockup): the caption, a summary of
  * what's tagged, and Post it. The flow closes straight away and uploads carry
  * on in the background; Home shows their progress.
+ *
+ * Typing @ in the caption opens the mention list above the keyboard
+ * (Mentions (v2) mockup, Nov 2): people tagged or credited in the draft
+ * first, then people you follow, then regulars at the post's park. While
+ * it's open, a line saying mentions are notified stands in for Post it.
  */
 export default function NewPostCaption() {
   const { t } = useTranslation();
@@ -39,6 +45,25 @@ export default function NewPostCaption() {
   const summary = useTagSummary(park?.id ?? null);
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const input = useRef<TextInput>(null);
+
+  const onPost = items.flatMap((m) => [
+    ...(m.tags.filmerId && names[m.tags.filmerId]
+      ? [{ person: { id: m.tags.filmerId, username: names[m.tags.filmerId], avatarPath: null }, reason: 'filmed' as const }]
+      : []),
+    ...m.tags.peopleIds
+      .filter((id) => names[id])
+      .map((id) => ({ person: { id, username: names[id], avatarPath: null }, reason: 'tagged' as const })),
+  ]);
+  const mentions = useCaptionMentions({
+    userId: session?.user.id,
+    text: caption,
+    setText: setCaption,
+    inputRef: input,
+    onPost,
+    parkId: park?.id,
+  });
+  const mentioning = mentions.candidates.length > 0;
 
   const clips = items.filter((m) => m.kind === 'video').length;
 
@@ -71,109 +96,129 @@ export default function NewPostCaption() {
 
   return (
     <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
-      <View style={styles.header}>
-        <BackButton />
-        <Text variant="title" accessibilityRole="header">
-          {t('post.captionTitle')}
-        </Text>
-        <View style={styles.spacer} />
-      </View>
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.flex}>
+        <View style={styles.header}>
+          <BackButton />
+          <Text variant="title" accessibilityRole="header">
+            {t('post.captionTitle')}
+          </Text>
+          <View style={styles.spacer} />
+        </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.slides}
-          accessibilityLabel={t('post.mix', {
-            clips: t('post.clipCount', { count: clips }),
-            photos: t('post.photoCount', { count: items.length - clips }),
-          })}
-        >
-          {items.map((m, i) => (
-            <View
-              key={m.key}
-              style={[styles.slide, { width: thumbWidth(m), backgroundColor: c.surfaceSunk }]}
-              accessibilityElementsHidden
-              importantForAccessibility="no-hide-descendants"
-            >
-              <MediaThumb uri={m.uri} kind={m.kind} />
-              {items.length > 1 ? <MediaTag label={String(i + 1)} style={styles.slideTag} /> : null}
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.slides}
+            accessibilityLabel={t('post.mix', {
+              clips: t('post.clipCount', { count: clips }),
+              photos: t('post.photoCount', { count: items.length - clips }),
+            })}
+          >
+            {items.map((m, i) => (
+              <View
+                key={m.key}
+                style={[styles.slide, { width: thumbWidth(m), backgroundColor: c.surfaceSunk }]}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <MediaThumb uri={m.uri} kind={m.kind} />
+                {items.length > 1 ? <MediaTag label={String(i + 1)} style={styles.slideTag} /> : null}
+              </View>
+            ))}
+          </ScrollView>
+
+          <View style={styles.field}>
+            <TextInput
+              ref={input}
+              accessibilityLabel={t('post.captionLabel')}
+              value={caption}
+              onChangeText={setCaption}
+              onSelectionChange={mentions.onSelectionChange}
+              placeholder={t('post.captionPlaceholder')}
+              placeholderTextColor={c.textMuted}
+              selectionColor={c.accent}
+              cursorColor={c.text}
+              multiline
+              maxLength={CAPTION_MAX}
+              style={[styles.caption, { color: c.text, borderBottomColor: c.text }]}
+            />
+          </View>
+
+          <View style={styles.tagged}>
+            <TagSectionTitle>{t('tagging.whatsTagged')}</TagSectionTitle>
+            <View style={{ backgroundColor: c.surfaceRaised }}>
+              <View style={[styles.summaryRow, { borderBottomColor: c.surfaceSunk }]}>
+                <Text variant="label" color="textSecondary" style={styles.summaryLabel}>
+                  {t('tagging.park')}
+                </Text>
+                <Text variant="body" style={[styles.flex, { fontFamily: fontFamily.sansSemiBold }]}>
+                  {park?.name ?? t('tagging.noPark')}
+                </Text>
+              </View>
+              {items.map((m, i) => {
+                const line = summary(m.tags, names);
+                return (
+                  <View
+                    key={m.key}
+                    style={[
+                      styles.summaryRow,
+                      i < items.length - 1 && { borderBottomColor: c.surfaceSunk, borderBottomWidth: stroke.hairline },
+                    ]}
+                  >
+                    <Text variant="label" color="textSecondary" style={styles.summaryLabel}>
+                      {t('tagging.slide', { number: i + 1 }).toUpperCase()}
+                    </Text>
+                    <Text variant="bodySm" color={line ? 'text' : 'textSecondary'} style={styles.flex}>
+                      {line ?? t('tagging.noTags')}
+                    </Text>
+                  </View>
+                );
+              })}
             </View>
-          ))}
+            <Text variant="bodySm" color="textSecondary">
+              {t('tagging.editLater')}
+            </Text>
+          </View>
         </ScrollView>
 
-        <View style={styles.field}>
-          <TextInput
-            accessibilityLabel={t('post.captionLabel')}
-            value={caption}
-            onChangeText={setCaption}
-            placeholder={t('post.captionPlaceholder')}
-            placeholderTextColor={c.textMuted}
-            selectionColor={c.accent}
-            cursorColor={c.text}
-            multiline
-            maxLength={CAPTION_MAX}
-            style={[styles.caption, { color: c.text, borderBottomColor: c.text }]}
-          />
-        </View>
-
-        <View style={styles.tagged}>
-          <TagSectionTitle>{t('tagging.whatsTagged')}</TagSectionTitle>
-          <View style={{ backgroundColor: c.surfaceRaised }}>
-            <View style={[styles.summaryRow, { borderBottomColor: c.surfaceSunk }]}>
-              <Text variant="label" color="textSecondary" style={styles.summaryLabel}>
-                {t('tagging.park')}
-              </Text>
-              <Text variant="body" style={[styles.flex, { fontFamily: fontFamily.sansSemiBold }]}>
-                {park?.name ?? t('tagging.noPark')}
+        {mentioning ? (
+          <View>
+            <MentionList
+              candidates={mentions.candidates}
+              typed={mentions.typed}
+              parkName={park?.name ?? null}
+              onPick={mentions.pick}
+            />
+            <View style={[styles.mentionHint, { backgroundColor: c.surfaceRaised, borderTopColor: c.border }]}>
+              <Text variant="bodySm" color="textSecondary">
+                {t('post.mentionHint')}
               </Text>
             </View>
-            {items.map((m, i) => {
-              const line = summary(m.tags, names);
-              return (
-                <View
-                  key={m.key}
-                  style={[
-                    styles.summaryRow,
-                    i < items.length - 1 && { borderBottomColor: c.surfaceSunk, borderBottomWidth: stroke.hairline },
-                  ]}
-                >
-                  <Text variant="label" color="textSecondary" style={styles.summaryLabel}>
-                    {t('tagging.slide', { number: i + 1 }).toUpperCase()}
-                  </Text>
-                  <Text variant="bodySm" color={line ? 'text' : 'textSecondary'} style={styles.flex}>
-                    {line ?? t('tagging.noTags')}
-                  </Text>
-                </View>
-              );
-            })}
           </View>
-          <Text variant="bodySm" color="textSecondary">
-            {t('tagging.editLater')}
-          </Text>
-        </View>
-      </ScrollView>
-
-      <View style={styles.footer}>
-        {error ? (
-          <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
-            {error}
-          </Text>
-        ) : null}
-        <View style={styles.note}>
-          <Icon name="sync" color={c.textSecondary} size={16} />
-          <Text variant="bodySm" color="textSecondary" style={styles.flex}>
-            {posting ? t('post.preparing') : t('post.backgroundNote')}
-          </Text>
-        </View>
-        <Button
-          label={t('post.postIt')}
-          onPress={post}
-          loading={posting}
-          disabled={items.length === 0}
-          palette={{ fill: c.accent, text: c.onAccent, border: c.accent }}
-        />
-      </View>
+        ) : (
+          <View style={styles.footer}>
+            {error ? (
+              <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
+                {error}
+              </Text>
+            ) : null}
+            <View style={styles.note}>
+              <Icon name="sync" color={c.textSecondary} size={16} />
+              <Text variant="bodySm" color="textSecondary" style={styles.flex}>
+                {posting ? t('post.preparing') : t('post.backgroundNote')}
+              </Text>
+            </View>
+            <Button
+              label={t('post.postIt')}
+              onPress={post}
+              loading={posting}
+              disabled={items.length === 0}
+              palette={{ fill: c.accent, text: c.onAccent, border: c.accent }}
+            />
+          </View>
+        )}
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -217,4 +262,5 @@ const styles = StyleSheet.create({
   summaryLabel: { width: 64, paddingTop: 3 },
   footer: { paddingHorizontal: space[4], paddingBottom: space[4], gap: space[3] },
   note: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  mentionHint: { borderTopWidth: stroke.rule, paddingHorizontal: space[4], paddingVertical: space[2] },
 });

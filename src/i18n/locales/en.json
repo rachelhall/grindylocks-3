@@ -162,7 +162,8 @@
     "moveEarlier": "Move earlier",
     "moveLater": "Move later",
     "slideItem": "Slide {{number}}",
-    "limitsShort": "Up to 10 · clips up to 60 s"
+    "limitsShort": "Up to 10 · clips up to 60 s",
+    "mentionHint": "People you mention are notified when you post."
   },
   "uploads": {
     "uploading": "Uploading {{done}} of {{total}}",
@@ -337,6 +338,7 @@
     "commentMany_other": "{{a}}, {{b}} and {{count}} others commented on your post",
     "reply": "{{a}} replied to you",
     "mention": "{{a}} mentioned you in a comment",
+    "captionMention": "{{a}} mentioned you in a caption",
     "tag": "{{a}} tagged you in a post",
     "filmer": "{{a}} credited you as the filmer",
     "someoneNew": "{{a}} just joined Grindylocks in {{metro}}. Say hi!",
@@ -719,7 +721,8 @@
     "slides": "Slides · media can't change after posting",
     "slideClip": "Slide {{number}}, clip",
     "slidePhoto": "Slide {{number}}, photo",
-    "footnote": "Saved changes show “edited” on the post. People you add are notified; people you take off aren't."
+    "footnote": "Saved changes show “edited” on the post. People you add are notified; people you take off aren't.",
+    "mentionNote": "Only people you add now are notified. People already mentioned aren't notified again, and people you remove aren't told."
   },
   "obstacle": {
     "kicker": "Obstacle · {{type}}",
@@ -773,7 +776,7 @@
     "comments": "Comments",
     "commentsBody": "On your posts, and replies to your comments",
     "mentions": "Mentions",
-    "mentionsBody": "When someone @mentions you in a comment",
+    "mentionsBody": "When someone @mentions you in a comment or caption",
     "tags": "Tags",
     "tagsBody": "When someone tags you in a post",
     "filmer": "Filmer credit",

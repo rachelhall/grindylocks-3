@@ -162,7 +162,8 @@
     "moveEarlier": "Nach vorne",
     "moveLater": "Nach hinten",
     "slideItem": "Slide {{number}}",
-    "limitsShort": "Bis zu 10 · Clips bis 60 s"
+    "limitsShort": "Bis zu 10 · Clips bis 60 s",
+    "mentionHint": "Wen du erwähnst, wird benachrichtigt, sobald du postest."
   },
   "uploads": {
     "uploading": "Lädt {{done}} von {{total}} hoch",
@@ -337,6 +338,7 @@
     "commentMany_other": "{{a}}, {{b}} und {{count}} weitere haben deinen Post kommentiert",
     "reply": "{{a}} hat dir geantwortet",
     "mention": "{{a}} hat dich in einem Kommentar erwähnt",
+    "captionMention": "{{a}} hat dich in der Bildunterschrift eines Posts erwähnt",
     "tag": "{{a}} hat dich in einem Post markiert",
     "filmer": "{{a}} hat dich als Filmer genannt",
     "someoneNew": "{{a}} ist neu bei Grindylocks in {{metro}}. Sag hallo!",
@@ -719,7 +721,8 @@
     "slides": "Slides · Medien lassen sich nach dem Posten nicht ändern",
     "slideClip": "Slide {{number}}, Clip",
     "slidePhoto": "Slide {{number}}, Foto",
-    "footnote": "Gespeicherte Änderungen zeigen „bearbeitet“ am Post. Leute, die du hinzufügst, werden benachrichtigt; Leute, die du entfernst, nicht."
+    "footnote": "Gespeicherte Änderungen zeigen „bearbeitet“ am Post. Leute, die du hinzufügst, werden benachrichtigt; Leute, die du entfernst, nicht.",
+    "mentionNote": "Nur wen du jetzt hinzufügst, wird benachrichtigt. Bereits Erwähnte werden nicht noch einmal benachrichtigt, und wen du entfernst, erfährt nichts davon."
   },
   "obstacle": {
     "kicker": "Obstacle · {{type}}",
@@ -773,7 +776,7 @@
     "comments": "Kommentare",
     "commentsBody": "Zu deinen Posts und Antworten auf deine Kommentare",
     "mentions": "Erwähnungen",
-    "mentionsBody": "Wenn dich jemand in einem Kommentar @erwähnt",
+    "mentionsBody": "Wenn dich jemand in einem Kommentar oder einer Bildunterschrift @erwähnt",
     "tags": "Markierungen",
     "tagsBody": "Wenn dich jemand in einem Post markiert",
     "filmer": "Filmer-Credit",
