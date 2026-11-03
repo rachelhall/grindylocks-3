@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const languages = ['en', 'es', 'da', 'de'];
-const keys = ['commentOne', 'reply', 'mention', 'captionMention', 'tag', 'filmer', 'inviteUsed', 'someoneNew', 'visiting', 'visitingPark'];
+const keys = ['commentOne', 'reply', 'mention', 'captionMention', 'tag', 'filmer', 'inviteUsed', 'someoneNew', 'visiting', 'visitingPark', 'parkFixLive'];
 
 export function pushStrings() {
   const out = {};

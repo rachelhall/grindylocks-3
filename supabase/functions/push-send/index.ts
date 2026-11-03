@@ -22,6 +22,7 @@ type Claimed = {
   comment_body: string | null;
   post_id: string | null;
   park_name: string | null;
+  park_slug: string | null;
   metro_name: string | null;
   devices: { token: string; language: string }[];
 };
@@ -80,8 +81,9 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { body: say('someoneNew') };
     case 'visiting':
       return { body: row.park_name ? say('visitingPark', { park: row.park_name }) : say('visiting') };
+    case 'park_report_accepted':
+      return row.park_name ? { body: say('parkFixLive', { park: row.park_name }) } : null;
     default:
-      // park_report_accepted arrives with M5; nothing to say until then.
       return null;
   }
 }
@@ -92,6 +94,7 @@ function destination(row: Claimed): Record<string, string> {
     const comments = ['comment', 'reply', 'mention'].includes(row.kind);
     return { open: 'post', id: row.post_id, ...(comments ? { comments: '1' } : {}) };
   }
+  if (row.kind === 'park_report_accepted' && row.park_slug) return { open: 'park', slug: row.park_slug };
   if (row.actor_username) return { open: 'profile', username: row.actor_username };
   return { open: 'notifications' };
 }

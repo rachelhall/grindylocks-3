@@ -202,6 +202,11 @@ function open(data: Record<string, unknown> | undefined) {
       if (username) router.push({ pathname: '/profile/[username]', params: { username } });
       return;
     }
+    case 'park': {
+      const slug = str('slug');
+      if (slug) router.push({ pathname: '/park/[slug]', params: { slug } });
+      return;
+    }
     case 'notifications':
       router.push('/notifications');
       return;
