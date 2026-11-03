@@ -128,6 +128,10 @@ export const keys = {
   restriction: (userId: string) => ['restriction', userId] as const,
   /** Open reports on a post that you can act on (a role holder's post menu). */
   reportDetail: (userId: string, postId: string) => ['report-detail', userId, postId] as const,
+  /** Who's checked in at a park (Here now). Every key starts with 'here-now'. */
+  hereNow: (parkId: string) => ['here-now', parkId] as const,
+  /** A member's current check-in, for their profile tag. */
+  checkIn: (userId: string) => ['check-in', userId] as const,
   /** How many posts and park photos you have (Delete account). */
   myContentCounts: (userId: string) => ['content-counts', userId] as const,
 };

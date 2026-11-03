@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { CheckInTag } from '@/components/check-in-tag';
 import { MediaTag } from '@/components/media';
 import { ParkRow, useParkLine } from '@/components/parks';
 import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
@@ -101,7 +102,7 @@ function useActiveLabel() {
   };
 }
 
-function ProfileHeader({ profile, actions }: { profile: Profile; actions?: ReactNode }) {
+function ProfileHeader({ profile, actions, isMe }: { profile: Profile; actions?: ReactNode; isMe: boolean }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const roleLabel = useRoleLabel();
@@ -172,6 +173,8 @@ function ProfileHeader({ profile, actions }: { profile: Profile; actions?: React
       </View>
 
       {profile.bio ? <Text variant="bodySm">{profile.bio}</Text> : null}
+
+      <CheckInTag personId={profile.id} isMe={isMe} />
 
       {profile.openToMeetup ? (
         <View style={[styles.meetup, { borderColor: c.border }]}>
@@ -604,6 +607,7 @@ export function ProfileView({ username }: { username?: string }) {
       <>
         <ProfileHeader
           profile={profile}
+          isMe={isMe}
           actions={
             isMe && myId ? <OwnActions userId={myId} /> : myId ? <FollowButton viewerId={myId} profile={profile} /> : null
           }

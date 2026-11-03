@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SafeAreaView } from '@/components/safe-area';
 
+import { HereNowSection } from '@/components/here-now';
 import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
 import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';
 import { ParkPosts, ParkRegulars } from '@/components/park-social';
@@ -34,7 +35,8 @@ type HoursLine = { key: string; season: string | null; days: string; time: strin
  * The park page, per the Park page mockups: a header with the park's name
  * (on its first photo, photocopied, or on ink), then what's there, when it's
  * open, who can skate, and its obstacles. People with a role at the park
- * add photos from here. Then its regulars and latest posts (M4a). Each
+ * add photos from here. Here now (Meetups v2) sits under Save. Then its
+ * regulars and latest posts (M4a). Each
  * obstacle opens its own feed. Anyone can report wrong info (M5) from the
  * More menu or the "Suggest a fix" link by the last-verified line.
  */
@@ -277,6 +279,9 @@ export default function ParkScreen() {
           </Pressable>
           <IconButton icon="directions" label={t('park.directions')} onPress={() => openDirections(park)} />
         </View>
+
+        {/* Meetups (v2): who's checked in, above Upcoming (PR 4). */}
+        <HereNowSection park={park} />
 
         <View style={[styles.block, styles.grid]}>
           {facts.map((f) => (

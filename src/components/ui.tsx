@@ -97,6 +97,9 @@ const icons = {
   recenter: { ios: 'viewfinder', android: 'center_focus_strong' },
   filter: { ios: 'slider.horizontal.3', android: 'tune' },
   arrowUp: { ios: 'arrow.up', android: 'north' },
+  // Meetups (v2 mockups).
+  checkIn: { ios: 'mappin.and.ellipse', android: 'where_to_vote' },
+  timer: { ios: 'timer', android: 'timer' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
