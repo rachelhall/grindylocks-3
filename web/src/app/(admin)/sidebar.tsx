@@ -4,13 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 import { countNotInvited, isOwner } from "@/lib/access-requests";
 import { getAdmin, roleLabel } from "@/lib/admin";
+import { countQueue } from "@/lib/queue";
 
 import { signOut } from "../sign-in/actions";
 import { NavLink } from "./nav-link";
 
 /**
  * The sidebar from design/web.md: wordmark with the ADMIN tape, one item per
- * section that exists (only Queue for now; Parks and Roles come later), and
+ * section that exists (Queue, with a count of what's waiting; Parks and Roles
+ * come later), and
  * the signed-in admin with Sign out at the bottom. Under 768px it's a top bar.
  * Requests (invite requests from grindylocks.com) shows for the owner only,
  * with the count of requests not yet invited.
@@ -25,9 +27,15 @@ export function Sidebar() {
     >
       <Wordmark />
       <nav aria-label="Admin" className="order-last flex basis-full gap-1 md:order-none md:flex-1 md:basis-auto md:flex-col">
-        <NavLink href="/queue" icon="inbox">
-          Queue
-        </NavLink>
+        <Suspense
+          fallback={
+            <NavLink href="/queue" icon="inbox">
+              Queue
+            </NavLink>
+          }
+        >
+          <QueueLink />
+        </Suspense>
         <Suspense fallback={null}>
           <OwnerLinks />
         </Suspense>
@@ -36,6 +44,16 @@ export function Sidebar() {
         <SignedIn />
       </Suspense>
     </aside>
+  );
+}
+
+/** Queue, with how many things are waiting in the admin's scope. */
+async function QueueLink() {
+  const waiting = (await getAdmin()) ? await countQueue() : 0;
+  return (
+    <NavLink href="/queue" icon="inbox" badge={waiting} badgeLabel="waiting">
+      Queue
+    </NavLink>
   );
 }
 

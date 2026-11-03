@@ -90,7 +90,10 @@ src/
                        home_metro_name and home_park_name; avatar_path on my_blocked_accounts and
                        my_follow_requests; my_invites' used_at and used_by_username; redeem_my_invite's return;
                        post_comments' author_id, username, avatar_path, body, parent_id and reply_to_username;
-                       my_notifications' comment_body, comment_id, post_id, park_slug, park_name and metro_name
+                       my_notifications' comment_body, comment_id, post_id, park_slug, park_name and metro_name;
+                       push_claim's actor_username, comment_body, metro_name, park_name and post_id;
+                       moderation_queue's label, metro_area_id, metro_name, park_id, park_name, park_slug,
+                       reason and username; my_restriction's suspended_until and message
     posts.ts      feeds, post detail, profile Tagged/Filmed tabs, regulars, tagging and post edits
     post-draft.tsx  the New post flow's shared draft (media, park, per-slide tags, caption)
     env.ts        public EXPO_PUBLIC_ config
