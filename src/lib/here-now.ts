@@ -87,17 +87,33 @@ export function metresBetween(a: { latitude: number; longitude: number }, b: { l
  * last known one, since that could be from somewhere else.
  */
 export async function locateForCheckIn(park: { latitude: number | null; longitude: number | null }): Promise<Spot> {
+  const at = await locateOnce();
+  if (at.kind !== 'at') return at;
+  return spotAt(at, park);
+}
+
+/**
+ * One location reading (asking for permission if it can): where you are, or
+ * why it couldn't tell. Nothing is kept. Checking in from your own profile
+ * uses this, then finds the parks near you.
+ */
+export async function locateOnce(): Promise<{ kind: 'off' } | { kind: 'unknown' } | { kind: 'at'; latitude: number; longitude: number }> {
   let perm = await Location.getForegroundPermissionsAsync();
   if (!perm.granted && perm.canAskAgain) perm = await Location.requestForegroundPermissionsAsync();
   if (!perm.granted) return { kind: 'off' };
   const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High }).catch(() => null);
   if (!pos) return { kind: 'unknown' };
-  const at = { latitude: pos.coords.latitude, longitude: pos.coords.longitude };
-  if (park.latitude === null || park.longitude === null) return { kind: 'away', ...at, metres: Infinity };
+  return { kind: 'at', latitude: pos.coords.latitude, longitude: pos.coords.longitude };
+}
+
+/** Where a reading puts you relative to a park's pin. */
+export function spotAt(at: { latitude: number; longitude: number }, park: { latitude: number | null; longitude: number | null }): Spot {
+  if (park.latitude === null || park.longitude === null)
+    return { kind: 'away', latitude: at.latitude, longitude: at.longitude, metres: Infinity };
   const metres = metresBetween(at, { latitude: park.latitude, longitude: park.longitude });
   // A little inside the server's radius, so the sheet never says "you're
   // here" and then gets turned down.
-  return { kind: metres <= CHECK_IN_RADIUS_M - 25 ? 'here' : 'away', ...at, metres };
+  return { kind: metres <= CHECK_IN_RADIUS_M - 25 ? 'here' : 'away', latitude: at.latitude, longitude: at.longitude, metres };
 }
 
 /* Checking in and out ------------------------------------------------------------- */

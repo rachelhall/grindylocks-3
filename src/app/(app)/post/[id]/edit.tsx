@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { FromMeetupChip } from '@/components/from-meetup';
 import { FrameEditor } from '@/components/media';
 import { MentionList, useCaptionMentions } from '@/components/mentions';
 import { type PickedPark, ParkPickerModal, ParkRow, SlideTagRows } from '@/components/tagging';
@@ -92,6 +93,7 @@ function EditForm({ post }: { post: Post }) {
   const [caption, setCaption] = useState(post.caption ?? '');
   const captionInput = useRef<TextInput>(null);
   const [park, setPark] = useState<PickedPark | null>(post.park ? { id: post.park.id, name: post.park.name } : null);
+  const [eventId, setEventId] = useState<string | null>(post.eventId);
   const [tags, setTags] = useState<Record<string, SlideTags>>(() =>
     Object.fromEntries(post.slides.map((s) => [s.id, tagsOf(s)])),
   );
@@ -138,6 +140,8 @@ function EditForm({ post }: { post: Post }) {
   function pickPark(next: PickedPark | null) {
     if (next?.id !== park?.id) {
       setTags((prev) => Object.fromEntries(Object.entries(prev).map(([k, v]) => [k, { ...v, obstacleId: null }])));
+      // A meetup link belongs to the park; another park drops it.
+      setEventId(null);
     }
     setPark(next);
   }
@@ -145,7 +149,7 @@ function EditForm({ post }: { post: Post }) {
   async function submit() {
     setError(null);
     try {
-      await save.mutateAsync({ caption, parkId: park?.id ?? null, slides: tags, frames });
+      await save.mutateAsync({ caption, parkId: park?.id ?? null, eventId, slides: tags, frames });
       router.back();
     } catch (err) {
       Sentry.captureException(err);
@@ -184,6 +188,13 @@ function EditForm({ post }: { post: Post }) {
           ) : null}
 
           <ParkRow park={park} onPress={() => setParkOpen(true)} line={t('tagging.parkLineEdit')} />
+          <FromMeetupChip
+            userId={session?.user.id}
+            parkId={park?.id ?? null}
+            parkName={park?.name ?? null}
+            value={eventId}
+            onChange={setEventId}
+          />
 
           <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.caption}>
             {t('editPost.slides')}

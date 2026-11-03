@@ -4,16 +4,16 @@
  *   now section, with names for people you can see and an unnamed count for
  *   everyone else (only from 3 skaters up), and I'm here / I left.
  * - "Check-in sheet": checks your location once, then who sees you.
- * The profile tag is in check-in-tag.tsx (profile.tsx can't import this file,
- * which uses its Avatar).
+ * The profile tag is in check-in-tag.tsx. Avatar comes from avatar.tsx, so
+ * the profile (through the tag) can use this file's check-in sheet.
  */
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { HalftoneGround } from '@/components/park-header';
-import { Avatar } from '@/components/profile';
 import { Caption, Sheet } from '@/components/tagging';
 import { Button, CheckBox, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -22,6 +22,7 @@ import {
   isNotAtPark,
   locateForCheckIn,
   type Spot,
+  spotAt,
   useCheckIn,
   useCheckOut,
   useParkHereNow,
@@ -154,7 +155,18 @@ export function HereNowSection({ park }: { park: ParkForHereNow }) {
 
 /* Check-in sheet ------------------------------------------------------------------- */
 
-export function CheckInSheet({ park, visible, onClose }: { park: ParkForHereNow; visible: boolean; onClose: () => void }) {
+export function CheckInSheet({
+  park,
+  visible,
+  onClose,
+  located,
+}: {
+  park: ParkForHereNow;
+  visible: boolean;
+  onClose: () => void;
+  /** A reading already taken (checking in from your profile), used for the first look instead of locating again. */
+  located?: { latitude: number; longitude: number } | null;
+}) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const { session } = useAuth();
@@ -184,7 +196,8 @@ export function CheckInSheet({ park, visible, onClose }: { park: ParkForHereNow;
   useEffect(() => {
     if (attempt === 0) return;
     let cancelled = false;
-    void locateForCheckIn(park).then((found) => {
+    const reading = attempt === 1 && located ? Promise.resolve(spotAt(located, park)) : locateForCheckIn(park);
+    void reading.then((found) => {
       if (cancelled) return;
       setSpot(found);
       // A check-in made now would last 3 hours.

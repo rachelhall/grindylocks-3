@@ -246,7 +246,7 @@ export function ParkInfoDetailPane({ detail: d }: { detail: ParkInfoDetail }) {
               {paid === "yes" && (
                 <input
                   aria-label="Entry fee"
-                  placeholder="$5 a session"
+                  placeholder="$5 a visit"
                   value={fee}
                   onChange={(e) => setFee(e.target.value)}
                   className={`${inputClass} min-w-0 flex-1`}
@@ -295,7 +295,7 @@ export function ParkInfoDetailPane({ detail: d }: { detail: ParkInfoDetail }) {
           )}
           <p className="type-caption text-gl-text-secondary">
             Filled in from the suggestion. Change it before approving if needed.
-            {d.field === "hours" && " Sessions for specific disciplines and seasons stay as they are."}
+            {d.field === "hours" && " Hours for specific disciplines and seasons stay as they are."}
             {d.field === "description" && " Saved as the English description; translations follow."}
           </p>
         </PaneSection>

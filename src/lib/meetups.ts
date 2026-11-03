@@ -6,7 +6,14 @@
  * co-hosts may do. This file only asks. A meetup is a series (one-off or
  * repeating); each date is its own row (`events`), and the app opens dates.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  type InfiniteData,
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query';
 import { File } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import type { TFunction } from 'i18next';
@@ -158,7 +165,9 @@ export function useSetGoing(eventId: string | undefined) {
       });
       if (error) throw error;
     },
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: keys.meetupGoing(eventId ?? '') }),
+    // Every meetup key starts with 'meetups', so cards elsewhere (Home, the
+    // park page, profiles) pick up the new count and button too.
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
   });
 }
 
@@ -413,4 +422,181 @@ export function useRespondCoHost(seriesId: string | undefined) {
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
   });
+}
+
+/* Where meetups show (PR 4) ------------------------------------------------------------ */
+
+/**
+ * A date as lists show it: the meetup page's fields plus what the card
+ * needs, computed in the database (migration `meetups_everywhere`): its
+ * place in Home, the count going (or "went"), up to three faces you may
+ * see, whether you're going, the hosts, and comment and linked-post counts.
+ */
+const CARD_SELECT = `${MEETUP_SELECT},
+  feed_at, going_total, going_faces, i_am_going, host_list, meetup_comment_count, linked_post_count`;
+
+export type MeetupFace = { id: string; username: string | null; avatar_path: string | null; following: boolean };
+export type MeetupHost = { id: string; username: string | null; avatar_path: string | null; role: 'host' | 'co_host' };
+
+export type MeetupCard = Meetup & {
+  feed_at: string;
+  going_total: number;
+  going_faces: MeetupFace[];
+  i_am_going: boolean;
+  host_list: MeetupHost[];
+  meetup_comment_count: number;
+  linked_post_count: number;
+};
+
+type CardFn =
+  | 'feed_meetups'
+  | 'park_meetups'
+  | 'park_past_meetups'
+  | 'profile_meetups'
+  | 'profile_past_meetups';
+
+async function cardsFrom(fn: CardFn, args: Record<string, unknown>): Promise<MeetupCard[]> {
+  const { data, error } = await supabase.rpc(fn as never, args as never).select(CARD_SELECT);
+  if (error) throw error;
+  return ((data ?? []) as unknown as MeetupCard[]).map((m) => ({
+    ...m,
+    going_total: m.going_total ?? 0,
+    going_faces: m.going_faces ?? [],
+    host_list: m.host_list ?? [],
+    meetup_comment_count: m.meetup_comment_count ?? 0,
+    linked_post_count: m.linked_post_count ?? 0,
+  }));
+}
+
+/** One meetup date with the card fields (the past meetup page's counts). */
+export function useMeetupCard(eventId: string | undefined) {
+  return useQuery({
+    queryKey: ['meetups', 'card', eventId ?? ''],
+    queryFn: async (): Promise<MeetupCard | null> => {
+      const { data, error } = await supabase.from('events').select(CARD_SELECT).eq('id', eventId!).maybeSingle();
+      if (error) throw error;
+      return (data as unknown as MeetupCard | null) ?? null;
+    },
+    enabled: Boolean(eventId),
+    staleTime: fresh.social,
+  });
+}
+
+/**
+ * Meetup cards for Home whose place falls after `newerThan` (the oldest post
+ * loaded so far), so they sit among the posts by time. Null once the posts
+ * from people you follow have run out: then every older card comes too.
+ */
+export function useHomeMeetups(userId: string | undefined, newerThan: string | null, enabled = true) {
+  return useQuery({
+    queryKey: keys.homeMeetups(userId ?? '', newerThan ?? 'all'),
+    queryFn: () => cardsFrom('feed_meetups', { newer_than: newerThan, up_to: null, max_results: 50 }),
+    enabled: Boolean(userId) && enabled,
+    staleTime: fresh.posts,
+    placeholderData: keepPreviousData,
+  });
+}
+
+/** A park's Upcoming: each meetup once, at its next date. */
+export function useParkMeetups(parkId: string | undefined, max = 5) {
+  return useQuery({
+    queryKey: [...keys.parkMeetups(parkId ?? ''), max],
+    queryFn: () => cardsFrom('park_meetups', { park: parkId, max_results: max }),
+    enabled: Boolean(parkId),
+    staleTime: fresh.social,
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useParkPastMeetupCount(parkId: string | undefined) {
+  return useQuery({
+    queryKey: keys.parkPastMeetupCount(parkId ?? ''),
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('park_past_meetup_count', { park: parkId! });
+      if (error) throw error;
+      return data ?? 0;
+    },
+    enabled: Boolean(parkId),
+    staleTime: fresh.social,
+  });
+}
+
+const PAST_PAGE = 10;
+
+function usePastPages(key: readonly unknown[], fetchPage: (cursor: { at: string; id: string } | null) => Promise<MeetupCard[]>, enabled: boolean) {
+  return useInfiniteQuery<MeetupCard[], Error, InfiniteData<MeetupCard[]>, readonly unknown[], { at: string; id: string } | null>({
+    queryKey: key,
+    queryFn: ({ pageParam }) => fetchPage(pageParam),
+    initialPageParam: null,
+    getNextPageParam: (last) => (last.length < PAST_PAGE ? undefined : { at: last[last.length - 1].starts_at, id: last[last.length - 1].id }),
+    enabled,
+    staleTime: fresh.social,
+  });
+}
+
+/** A park's Past meetups, newest first; loads once the row is opened. */
+export function useParkPastMeetups(parkId: string | undefined, enabled: boolean) {
+  return usePastPages(
+    keys.parkPastMeetups(parkId ?? ''),
+    (cursor) =>
+      cardsFrom('park_past_meetups', { park: parkId, before_at: cursor?.at ?? null, before_id: cursor?.id ?? null, max_results: PAST_PAGE }),
+    Boolean(parkId) && enabled,
+  );
+}
+
+/** Meetups a member hosts or co-hosts: Upcoming (each once) … */
+export function useProfileMeetups(userId: string | undefined, enabled = true) {
+  return useQuery({
+    queryKey: keys.profileMeetups(userId ?? ''),
+    queryFn: () => cardsFrom('profile_meetups', { person: userId, max_results: 20 }),
+    enabled: Boolean(userId) && enabled,
+    staleTime: fresh.social,
+  });
+}
+
+/** … and Past, newest first. */
+export function useProfilePastMeetups(userId: string | undefined, enabled = true) {
+  return usePastPages(
+    keys.profilePastMeetups(userId ?? ''),
+    (cursor) =>
+      cardsFrom('profile_past_meetups', { person: userId, before_at: cursor?.at ?? null, before_id: cursor?.id ?? null, max_results: PAST_PAGE }),
+    Boolean(userId) && enabled,
+  );
+}
+
+/* From this session -------------------------------------------------------------------- */
+
+export type RecentMeetup = Fns['my_recent_meetups']['Returns'][number];
+
+/**
+ * Meetups at this park you said you were going to (or hosted) that started
+ * and ended within the last 7 days: the "From Thursday's meetup?" chip.
+ */
+export function useRecentMeetups(userId: string | undefined, parkId: string | null | undefined) {
+  return useQuery({
+    queryKey: keys.recentMeetups(userId ?? '', parkId ?? ''),
+    queryFn: async (): Promise<RecentMeetup[]> => {
+      const { data, error } = await supabase.rpc('my_recent_meetups', { park: parkId! });
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: Boolean(userId && parkId),
+    staleTime: fresh.mine,
+  });
+}
+
+/** "Thursday's", on the park's clock: the chip's day name. */
+export function meetupDayName(startsAt: string, timeZone: string | null | undefined, locale: string): string {
+  return new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: timeZone ?? undefined }).format(new Date(startsAt));
+}
+
+/* Checking in from your profile -------------------------------------------------------- */
+
+export type NearbyPark = Fns['check_in_parks']['Returns'][number];
+
+/** Parks within about 500 m of a position, nearest first. The position isn't kept. */
+export async function fetchCheckInParks(latitude: number, longitude: number): Promise<NearbyPark[]> {
+  const { data, error } = await supabase.rpc('check_in_parks', { latitude, longitude });
+  if (error) throw error;
+  return data ?? [];
 }

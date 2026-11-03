@@ -437,6 +437,7 @@
       "posts": "Posts",
       "tagged": "Markiert",
       "filmed": "Gefilmt",
+      "meetups": "Meetups",
       "saved": "Gemerkt"
     },
     "onlyYou": "Nur du siehst das",
@@ -1015,7 +1016,7 @@
     "helmetNo": "Keine Helmpflicht",
     "address": "Adresse",
     "fee": "Eintritt",
-    "feePlaceholder": "5 € pro Session",
+    "feePlaceholder": "5 € pro Besuch",
     "noDescription": "Noch keine Beschreibung.",
     "note": "Notiz",
     "addPhoto": "Foto vom Schild hinzufügen",
@@ -1081,7 +1082,11 @@
     "checkIn": "Einchecken",
     "tag": "Im {{park}} · bis {{time}}",
     "seenByFollowers": "Deine Follower sehen, wo du bist",
-    "seenByFriends": "Deine Freunde sehen, wo du bist"
+    "seenByFriends": "Deine Freunde sehen, wo du bist",
+    "imAtAPark": "Ich bin im Park",
+    "noParkNear": "Du bist in keinem Park, den wir kennen",
+    "noParkNearBody": "Check-ins gibt es für Parks auf Grindylocks. Fehlt dieser, schlag ihn über die Suche vor.",
+    "whichPark": "In welchem Park bist du?"
   },
   "meetup": {
     "plan": "Meetup planen",
@@ -1195,5 +1200,38 @@
     "coHostHint": "Co-Hosts sagen erst zu, bevor sie angezeigt werden. Bis zu 10.",
     "results": "Ergebnisse",
     "youFollow": "Du folgst"
+  },
+  "meetupCard": {
+    "goingCount_one": "{{count}} kommt",
+    "goingCount_other": "{{count}} kommen",
+    "namesGoing_one": "{{names}} kommt",
+    "namesGoing_other": "{{names}} kommen",
+    "namesAndOthersGoing_one": "{{names}} und {{count}} weitere Person kommen",
+    "namesAndOthersGoing_other": "{{names}} und {{count}} weitere kommen",
+    "withCoHost": "mit {{username}}",
+    "cancelledA11y": "abgesagt",
+    "posts_one": "{{count}} Post",
+    "posts_other": "{{count}} Posts",
+    "comments_one": "Kommentare, {{count}}",
+    "comments_other": "Kommentare, {{count}}",
+    "upcoming": "Demnächst",
+    "past": "Vorbei",
+    "allUpcoming": "Alle kommenden",
+    "pastMeetups": "Vergangene Meetups",
+    "showMore": "Mehr anzeigen",
+    "emptyOwn": "Meetups, die du veranstaltest oder mitveranstaltest, stehen hier.",
+    "empty": "{{username}} veranstaltet keine Meetups.",
+    "pastTape": "Vorbei · {{date}}",
+    "wentWord_one": "war da",
+    "wentWord_other": "waren da",
+    "postsFromSession_one": "{{count}} Post von dieser Session",
+    "postsFromSession_other": "{{count}} Posts von dieser Session",
+    "fromThisSession": "Von dieser Session"
+  },
+  "fromMeetup": {
+    "ask": "Vom Meetup am {{day}}?",
+    "linked": "Vom Meetup am {{day}}",
+    "note": "Du wolltest hier zu {{meetup}}. Verknüpft erscheint der Post beim Meetup.",
+    "linkedNote": "Der Post erscheint bei {{meetup}}. Zum Entfernen tippen."
   }
 }

@@ -566,6 +566,13 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          feed_at: string | null
+          going_faces: Json | null
+          going_total: number | null
+          host_list: Json | null
+          i_am_going: boolean | null
+          linked_post_count: number | null
+          meetup_comment_count: number | null
         }
         Insert: {
           cancel_note?: string | null
@@ -2064,6 +2071,15 @@ export type Database = {
         }
         Returns: string
       }
+      check_in_parks: {
+        Args: { latitude: number; longitude: number }
+        Returns: {
+          display_name: string
+          distance_m: number
+          id: string
+          slug: string
+        }[]
+      }
       check_out: { Args: never; Returns: undefined }
       comment_count: {
         Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
@@ -2121,6 +2137,10 @@ export type Database = {
         }[]
       }
       export_my_data: { Args: never; Returns: Json }
+      feed_at: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: string
+      }
       feed_following: {
         Args: { before_at?: string; before_id?: string; max_results?: number }
         Returns: {
@@ -2139,6 +2159,37 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "posts"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      feed_meetups: {
+        Args: { max_results?: number; newer_than?: string; up_to?: string }
+        Returns: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
           isOneToOne: false
           isSetofReturn: true
         }
@@ -2211,6 +2262,22 @@ export type Database = {
         Args: { follow: boolean; series: string }
         Returns: undefined
       }
+      going_faces: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json
+      }
+      going_total: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: number
+      }
+      host_list: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json
+      }
+      i_am_going: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: boolean
+      }
       invite_co_hosts: {
         Args: { people: string[]; series: string }
         Returns: number
@@ -2225,8 +2292,16 @@ export type Database = {
         Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
         Returns: boolean
       }
+      linked_post_count: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: number
+      }
       mark_admin_page_seen: { Args: { page: string }; Returns: undefined }
       mark_notifications_seen: { Args: never; Returns: undefined }
+      meetup_comment_count: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: number
+      }
       meetup_comments: {
         Args: { event: string }
         Returns: {
@@ -2412,6 +2487,74 @@ export type Database = {
       }
       park_here_now_unnamed: { Args: { park: string }; Returns: number }
       park_info_review_detail: { Args: { report: string }; Returns: Json }
+      park_meetups: {
+        Args: { max_results?: number; park: string }
+        Returns: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      park_past_meetup_count: { Args: { park: string }; Returns: number }
+      park_past_meetups: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          park: string
+        }
+        Returns: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       park_regulars_list: {
         Args: { max_results?: number; park: string }
         Returns: {
@@ -2462,6 +2605,73 @@ export type Database = {
           park_name: string
           park_slug: string
         }[]
+      }
+      profile_meetups: {
+        Args: { max_results?: number; person: string }
+        Returns: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      profile_past_meetups: {
+        Args: {
+          before_at?: string
+          before_id?: string
+          max_results?: number
+          person: string
+        }
+        Returns: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       push_claim: {
         Args: { max_rows?: number }
