@@ -44,6 +44,10 @@ const EDGE_MAX = 2;
 /** A tag's size before it has measured itself. */
 const EDGE_GUESS = { width: 170, height: 44 };
 
+/** The locate button's distance from the bottom: on its own, and above the preview card. */
+const LOCATE_BOTTOM = 24;
+const LOCATE_ABOVE_CARD = 228;
+
 /** Beyond this, the nearest park isn't "near you", and the map says so. */
 const FAR_M = 100_000;
 
@@ -296,24 +300,26 @@ export default function MapScreen() {
       : null;
 
   // The nearest one or two matching parks just off the map, as tags at its
-  // edge. Hidden while a card is up: the preview card, or "No parks near
-  // you yet", which already names the closest park.
+  // edge. They sit above the preview card and the locate button, and hide
+  // under "No parks near you yet", which already names the closest park.
   const searchBottom = insets.top + space[2] + size.tapMin;
   const edgeTags = useMemo(() => {
-    if (!region || !mapSize || selected || showFar || !nearCentre) return [];
+    if (!region || !mapSize || showFar || !nearCentre) return [];
     const { width: w, height: h } = mapSize;
-    // Clear of the search bar at the top and the locate button at the bottom.
+    // Clear of the search bar at the top, and of the locate button (which
+    // sits above the preview card while one is open) at the bottom.
     const frame: Frame = {
       left: space[3],
       right: w - space[3],
       top: searchBottom + space[3],
-      bottom: h - 24 - size.tapMin - space[3],
+      bottom: h - (selected ? LOCATE_ABOVE_CARD : LOCATE_BOTTOM) - size.tapMin - space[3],
     };
     if (frame.right - frame.left < 120 || frame.bottom - frame.top < 120) return [];
     const middle = { x: w / 2, y: h / 2 };
     const placed: (Point & { park: ParkPin; width: number; height: number; angle: number; edge: Edge })[] = [];
     for (const park of nearCentre) {
       if (placed.length >= EDGE_MAX) break;
+      if (park.id === selected?.id) continue;
       const p = project(region, w, h, park);
       if (isOnScreen(p, w, h)) continue;
       if (!passes(park, filters)) continue;
@@ -359,6 +365,10 @@ export default function MapScreen() {
         initialRegion={{ latitude: 32.75, longitude: -117.15, latitudeDelta: 0.4, longitudeDelta: 0.4 }}
         onMapReady={() => setMapReady(true)}
         onRegionChangeComplete={onRegionChangeComplete}
+        // Tapping the map (not a pin) closes the preview card.
+        onPress={(e) => {
+          if (e.nativeEvent.action !== 'marker-press') setSelected(null);
+        }}
         showsUserLocation={locationOn}
         showsMyLocationButton={false}
         showsPointsOfInterests={false}
@@ -448,7 +458,12 @@ export default function MapScreen() {
       ))}
 
       {/* Locate me */}
-      <View style={[styles.locate, { bottom: selected ? 228 : showFar ? space[3] + farCardHeight + space[3] : 24 }]}>
+      <View
+        style={[
+          styles.locate,
+          { bottom: selected ? LOCATE_ABOVE_CARD : showFar ? space[3] + farCardHeight + space[3] : LOCATE_BOTTOM },
+        ]}
+      >
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('map.locate')}
