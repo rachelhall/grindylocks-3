@@ -8,7 +8,7 @@ import { brand, useColors } from '@/theme';
 
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
- * (new post, notifications, a post and its full-screen viewer, a park and its photos, a profile, edit
+ * (new post or meetup, a meetup, notifications, a post and its full-screen viewer, a park and its photos, a profile, edit
  * profile, settings and invites, plus M5's park info report, help, data
  * copy and account deletion). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
@@ -35,6 +35,8 @@ export default function AppLayout() {
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.surface } }}>
       <Stack.Screen name="(tabs)" />
       <Stack.Screen name="new-post" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="new-meetup" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen name="meetup/[id]" />
       <Stack.Screen name="notifications" />
       <Stack.Screen name="post/[id]/index" />
       <Stack.Screen name="post/[id]/edit" options={{ presentation: 'fullScreenModal' }} />

@@ -11,6 +11,7 @@ import { BackButton, Button, Toggle } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { appConfig } from '@/lib/config';
+import { useGoingPrivatelyDefault, useSetGoingPrivatelyDefault } from '@/lib/meetups';
 import { useMyProfile, useProfileSetting } from '@/lib/profiles';
 import { usePushPermission, usePushSettings } from '@/lib/push';
 import { space, Text, useColors } from '@/theme';
@@ -28,6 +29,8 @@ export default function Settings() {
   const userId = session?.user.id;
   const { data: profile } = useMyProfile(userId);
   const setting = useProfileSetting(userId);
+  const { data: goingPrivately } = useGoingPrivatelyDefault(userId);
+  const setGoingPrivately = useSetGoingPrivatelyDefault(userId);
   const roleLabel = useRoleLabel();
   const pushPermission = usePushPermission();
   const pushSettings = usePushSettings(userId);
@@ -108,6 +111,19 @@ export default function Settings() {
                 value={!(profile?.hideFromRegulars ?? false)}
                 onChange={(v) => flip('hide_from_regulars', !v)}
                 label={t('settings.regulars')}
+                fg={c.text}
+              />
+            }
+          />
+          {/* Meetups (v2): next to the regulars switch, since both say where you skate. */}
+          <SettingsRow
+            title={t('settings.goingPrivately')}
+            subtitle={t('settings.goingPrivatelyBody')}
+            control={
+              <Toggle
+                value={goingPrivately ?? false}
+                onChange={(v) => setGoingPrivately.mutate(v)}
+                label={t('settings.goingPrivately')}
                 fg={c.text}
               />
             }

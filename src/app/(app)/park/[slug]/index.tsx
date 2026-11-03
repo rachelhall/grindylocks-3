@@ -283,6 +283,18 @@ export default function ParkScreen() {
         {/* Meetups (v2): who's checked in, above Upcoming (PR 4). */}
         <HereNowSection park={park} />
 
+        {/* Meetups (v2): Upcoming goes between Here now and Plan a meetup (PR 4). */}
+        <View style={styles.block}>
+          <Button
+            label={t('meetup.plan')}
+            icon="add"
+            onPress={() =>
+              router.push({ pathname: '/new-meetup', params: { park: park.id, parkName: park.display_name } })
+            }
+            palette={{ fill: c.accent, text: c.onAccent, border: c.onAccent }}
+          />
+        </View>
+
         <View style={[styles.block, styles.grid]}>
           {facts.map((f) => (
             <View key={f.label} style={[styles.fact, { backgroundColor: c.surfaceRaised }]}>
