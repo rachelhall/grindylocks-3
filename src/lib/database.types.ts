@@ -149,6 +149,45 @@ export type Database = {
           },
         ]
       }
+      check_ins: {
+        Row: {
+          audience: Database["public"]["Enums"]["check_in_audience"]
+          ends_at: string
+          park_id: string
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          audience?: Database["public"]["Enums"]["check_in_audience"]
+          ends_at: string
+          park_id: string
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          audience?: Database["public"]["Enums"]["check_in_audience"]
+          ends_at?: string
+          park_id?: string
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "check_ins_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           author_id: string
@@ -207,6 +246,391 @@ export type Database = {
             columns: ["reply_to_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          deleted_at: string | null
+          event_id: string
+          id: string
+          parent_id: string | null
+          reply_to_user_id: string | null
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          deleted_at?: string | null
+          event_id: string
+          id?: string
+          parent_id?: string | null
+          reply_to_user_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          event_id?: string
+          id?: string
+          parent_id?: string | null
+          reply_to_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "event_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_comments_reply_to_user_id_fkey"
+            columns: ["reply_to_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_going: {
+        Row: {
+          created_at: string
+          event_id: string
+          going_privately: boolean
+          remind_me: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          going_privately?: boolean
+          remind_me?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          going_privately?: boolean
+          remind_me?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_going_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_going_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_hosts: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          invited_by: string | null
+          role: Database["public"]["Enums"]["meetup_host_role"]
+          series_id: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          invited_by?: string | null
+          role: Database["public"]["Enums"]["meetup_host_role"]
+          series_id: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          invited_by?: string | null
+          role?: Database["public"]["Enums"]["meetup_host_role"]
+          series_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_hosts_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_hosts_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "event_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_hosts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_series: {
+        Row: {
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          duration: string
+          ended_at: string | null
+          ends_on: string | null
+          host_id: string
+          id: string
+          note: string | null
+          park_id: string
+          start_time: string
+          starts_on: string
+          title: string | null
+          updated_at: string
+          visibility: Database["public"]["Enums"]["meetup_visibility"]
+          weekdays: number[]
+        }
+        Insert: {
+          cover_path?: string | null
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          duration: string
+          ended_at?: string | null
+          ends_on?: string | null
+          host_id: string
+          id?: string
+          note?: string | null
+          park_id: string
+          start_time: string
+          starts_on: string
+          title?: string | null
+          updated_at?: string
+          visibility: Database["public"]["Enums"]["meetup_visibility"]
+          weekdays?: number[]
+        }
+        Update: {
+          cover_path?: string | null
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          duration?: string
+          ended_at?: string | null
+          ends_on?: string | null
+          host_id?: string
+          id?: string
+          note?: string | null
+          park_id?: string
+          start_time?: string
+          starts_on?: string
+          title?: string | null
+          updated_at?: string
+          visibility?: Database["public"]["Enums"]["meetup_visibility"]
+          weekdays?: number[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_series_host_id_fkey"
+            columns: ["host_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_series_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_series_follows: {
+        Row: {
+          created_at: string
+          series_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          series_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          series_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_series_follows_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "event_series"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_series_follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_series_seasons: {
+        Row: {
+          from_month: number
+          id: string
+          park_id: string
+          series_id: string
+          to_month: number
+        }
+        Insert: {
+          from_month: number
+          id?: string
+          park_id: string
+          series_id: string
+          to_month: number
+        }
+        Update: {
+          from_month?: number
+          id?: string
+          park_id?: string
+          series_id?: string
+          to_month?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_series_seasons_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_series_seasons_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "event_series"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          note: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }
+        Insert: {
+          cancel_note?: string | null
+          cancel_reason?:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at?: string | null
+          cover_path?: string | null
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          note?: string | null
+          park_id: string
+          series_id: string
+          starts_at: string
+          status?: Database["public"]["Enums"]["meetup_status"]
+          title?: string | null
+          updated_at?: string
+          went_count?: number | null
+        }
+        Update: {
+          cancel_note?: string | null
+          cancel_reason?:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at?: string | null
+          cover_path?: string | null
+          created_at?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          ends_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          note?: string | null
+          park_id?: string
+          series_id?: string
+          starts_at?: string
+          status?: Database["public"]["Enums"]["meetup_status"]
+          title?: string | null
+          updated_at?: string
+          went_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "event_series"
             referencedColumns: ["id"]
           },
         ]
@@ -1155,6 +1579,7 @@ export type Database = {
           caption: string | null
           created_at: string
           edited_at: string | null
+          event_id: string | null
           id: string
           metro_area_id: string
           park_id: string | null
@@ -1170,6 +1595,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           edited_at?: string | null
+          event_id?: string | null
           id?: string
           metro_area_id: string
           park_id?: string | null
@@ -1183,6 +1609,7 @@ export type Database = {
           caption?: string | null
           created_at?: string
           edited_at?: string | null
+          event_id?: string | null
           id?: string
           metro_area_id?: string
           park_id?: string | null
@@ -1196,6 +1623,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {
@@ -1222,6 +1656,7 @@ export type Database = {
           bio: string | null
           deleted_at: string | null
           disciplines: Database["public"]["Enums"]["discipline"][]
+          going_privately_default: boolean | null
           hide_from_regulars: boolean
           home_metro_area_id: string | null
           home_park_id: string | null
@@ -1243,6 +1678,7 @@ export type Database = {
           bio?: string | null
           deleted_at?: string | null
           disciplines?: Database["public"]["Enums"]["discipline"][]
+          going_privately_default?: boolean | null
           hide_from_regulars?: boolean
           home_metro_area_id?: string | null
           home_park_id?: string | null
@@ -1264,6 +1700,7 @@ export type Database = {
           bio?: string | null
           deleted_at?: string | null
           disciplines?: Database["public"]["Enums"]["discipline"][]
+          going_privately_default?: boolean | null
           hide_from_regulars?: boolean
           home_metro_area_id?: string | null
           home_park_id?: string | null
@@ -1607,7 +2044,27 @@ export type Database = {
     }
     Functions: {
       before_user_created: { Args: { event: Json }; Returns: Json }
+      can_delete_meetup: { Args: { event: string }; Returns: boolean }
       cancel_invite: { Args: { invite: string }; Returns: undefined }
+      cancel_meetup: {
+        Args: {
+          event: string
+          note?: string
+          reason: Database["public"]["Enums"]["meetup_cancel_reason"]
+          scope?: string
+        }
+        Returns: number
+      }
+      check_in: {
+        Args: {
+          audience?: Database["public"]["Enums"]["check_in_audience"]
+          latitude: number
+          longitude: number
+          park: string
+        }
+        Returns: string
+      }
+      check_out: { Args: never; Returns: undefined }
       comment_count: {
         Args: { "": Database["public"]["Tables"]["posts"]["Row"] }
         Returns: number
@@ -1621,7 +2078,48 @@ export type Database = {
           id: string
         }[]
       }
+      create_meetup: {
+        Args: {
+          co_hosts?: string[]
+          cover_path?: string
+          disciplines?: Database["public"]["Enums"]["discipline"][]
+          ends_at?: string
+          note?: string
+          park: string
+          repeat_ends_on?: string
+          seasons?: Json
+          starts_at: string
+          title?: string
+          visibility?: Database["public"]["Enums"]["meetup_visibility"]
+          weekdays?: number[]
+        }
+        Returns: string
+      }
+      delete_meetup: { Args: { event: string }; Returns: undefined }
+      delete_meetup_comment: { Args: { comment: string }; Returns: undefined }
       delete_my_account: { Args: { keep_posts?: boolean }; Returns: undefined }
+      event_going_list: {
+        Args: { event: string }
+        Returns: {
+          avatar_path: string | null
+          following: boolean
+          going_privately: boolean
+          role: string
+          user_id: string
+          username: string | null
+        }[]
+      }
+      event_going_summary: {
+        Args: { event: string }
+        Returns: {
+          i_am_going: boolean
+          i_host: boolean
+          my_going_privately: boolean
+          my_remind_me: boolean
+          total: number
+          unnamed: number
+        }[]
+      }
       export_my_data: { Args: never; Returns: Json }
       feed_following: {
         Args: { before_at?: string; before_id?: string; max_results?: number }
@@ -1709,6 +2207,14 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      follow_meetup_series: {
+        Args: { follow: boolean; series: string }
+        Returns: undefined
+      }
+      invite_co_hosts: {
+        Args: { people: string[]; series: string }
+        Returns: number
+      }
       invite_preview: {
         Args: { code: string }
         Returns: {
@@ -1721,6 +2227,21 @@ export type Database = {
       }
       mark_admin_page_seen: { Args: { page: string }; Returns: undefined }
       mark_notifications_seen: { Args: never; Returns: undefined }
+      meetup_comments: {
+        Args: { event: string }
+        Returns: {
+          author_id: string | null
+          author_role: string | null
+          avatar_path: string | null
+          body: string | null
+          created_at: string
+          deleted: boolean
+          id: string
+          parent_id: string | null
+          reply_to_username: string | null
+          username: string | null
+        }[]
+      }
       moderate_reports: {
         Args: {
           days?: number
@@ -1831,6 +2352,16 @@ export type Database = {
           tags: boolean
         }[]
       }
+      my_recent_meetups: {
+        Args: { park: string }
+        Returns: {
+          ends_at: string
+          event_id: string
+          note: string | null
+          starts_at: string
+          title: string | null
+        }[]
+      }
       my_restriction: {
         Args: never
         Returns: {
@@ -1868,6 +2399,17 @@ export type Database = {
         }
       }
       obstacle_review_detail: { Args: { obstacle: string }; Returns: Json }
+      park_here_now: {
+        Args: { park: string }
+        Returns: {
+          avatar_path: string | null
+          ends_at: string
+          following: boolean
+          user_id: string
+          username: string | null
+        }[]
+      }
+      park_here_now_unnamed: { Args: { park: string }; Returns: number }
       park_info_review_detail: { Args: { report: string }; Returns: Json }
       park_regulars_list: {
         Args: { max_results?: number; park: string }
@@ -1910,6 +2452,16 @@ export type Database = {
           username: string | null
         }[]
       }
+      profile_check_in: {
+        Args: { person: string }
+        Returns: {
+          audience: Database["public"]["Enums"]["check_in_audience"] | null
+          ends_at: string
+          park_id: string
+          park_name: string
+          park_slug: string
+        }[]
+      }
       push_claim: {
         Args: { max_rows?: number }
         Returns: {
@@ -1934,6 +2486,14 @@ export type Database = {
         Args: { language: string; platform: string; token: string }
         Returns: undefined
       }
+      remove_co_host: {
+        Args: { person: string; series: string }
+        Returns: undefined
+      }
+      remove_from_going: {
+        Args: { event: string; person: string }
+        Returns: undefined
+      }
       remove_my_filmer_credit: { Args: { slide: string }; Returns: undefined }
       reorder_park_photos: {
         Args: { park: string; photo_ids: string[] }
@@ -1956,6 +2516,10 @@ export type Database = {
           email: string
           home_city?: string
         }
+        Returns: undefined
+      }
+      respond_co_host_invite: {
+        Args: { accept: boolean; series: string }
         Returns: undefined
       }
       review_obstacle: {
@@ -2005,6 +2569,24 @@ export type Database = {
           username: string
         }[]
       }
+      set_going: {
+        Args: {
+          event: string
+          going: boolean
+          going_privately?: boolean
+          remind_me?: boolean
+        }
+        Returns: undefined
+      }
+      set_meetup_repeat: {
+        Args: {
+          repeat_ends_on?: string
+          seasons?: Json
+          series: string
+          weekdays: number[]
+        }
+        Returns: number
+      }
       set_park_verified: { Args: { park: string }; Returns: undefined }
       set_push_setting: {
         Args: { enabled: boolean; setting: string }
@@ -2048,14 +2630,27 @@ export type Database = {
         }
       }
       unregister_push_device: { Args: { token: string }; Returns: undefined }
+      update_meetup: {
+        Args: { changes: Json; event: string; scope: string }
+        Returns: number
+      }
       username_available: { Args: { name: string }; Returns: boolean }
       welcome_metro_areas: { Args: never; Returns: { name: string }[] }
     }
     Enums: {
       announcement_kind: "joined" | "visiting"
+      check_in_audience: "followers" | "friends"
       discipline: "inline" | "quad" | "skateboard" | "bmx" | "scooter"
       follow_status: "pending" | "accepted"
       media_kind: "photo" | "video"
+      meetup_cancel_reason:
+        | "rained_out"
+        | "park_closed"
+        | "something_came_up"
+        | "other"
+      meetup_host_role: "host" | "co_host"
+      meetup_status: "scheduled" | "cancelled"
+      meetup_visibility: "public" | "followers"
       notification_kind:
         | "comment"
         | "tag"
@@ -2267,9 +2862,19 @@ export const Constants = {
   public: {
     Enums: {
       announcement_kind: ["joined", "visiting"],
+      check_in_audience: ["followers", "friends"],
       discipline: ["inline", "quad", "skateboard", "bmx", "scooter"],
       follow_status: ["pending", "accepted"],
       media_kind: ["photo", "video"],
+      meetup_cancel_reason: [
+        "rained_out",
+        "park_closed",
+        "something_came_up",
+        "other",
+      ],
+      meetup_host_role: ["host", "co_host"],
+      meetup_status: ["scheduled", "cancelled"],
+      meetup_visibility: ["public", "followers"],
       notification_kind: [
         "comment",
         "tag",
