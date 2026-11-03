@@ -47,3 +47,11 @@ example
 
 # Terminal output saved for Claude to read (see cli-output/README in project instructions)
 cli-output/
+
+# Firebase config for Android push. Kept out of this public repo; local
+# builds read it from the repo root, cloud builds from the EAS file
+# variable GOOGLE_SERVICES_JSON. (.easignore deliberately doesn't list it,
+# so `eas build --local` includes it.)
+google-services.json
+# Firebase service account keys (FCM V1) never belong in the repo
+*firebase-adminsdk*.json
