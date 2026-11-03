@@ -208,7 +208,36 @@
     "closest": "El más cercano: {{park}}, a {{distance}}",
     "closestNoDistance": "El más cercano: {{park}}",
     "goToClosest": "Ir al más cercano",
-    "goToCity": "Ir a {{city}}"
+    "goToCity": "Ir a {{city}}",
+    "filters": {
+      "button": "Filtros",
+      "buttonOn": "Filtros, {{count}} activos",
+      "title": "Filtros",
+      "whoCanSkate": "QUIÉN PUEDE PATINAR",
+      "whoCanSkateHint": "Parques que permiten cualquiera que elijas.",
+      "setting": "ENTORNO",
+      "settings": {
+        "indoor": "Interior",
+        "covered": "Cubierto",
+        "outdoor": "Exterior"
+      },
+      "settingHint": "Los parques con zona interior y exterior salen con cualquiera de las dos.",
+      "onlyShow": "MOSTRAR SOLO",
+      "openNow": "Abierto ahora",
+      "openNowHint": "Según el horario de cada parque, en su hora local",
+      "free": "Gratis",
+      "lit": "Con luz de noche",
+      "litHint": "No sabemos si algunos parques tienen luz, así que no salen",
+      "clear": "Borrar",
+      "show_one": "Ver {{count}} parque",
+      "show_other": "Ver {{count}} parques",
+      "showLoading": "Contando parques…"
+    },
+    "edge": {
+      "label": "{{park}}, a {{distance}}, fuera del mapa",
+      "labelNoDistance": "{{park}}, fuera del mapa",
+      "hint": "Mueve el mapa a este parque"
+    }
   },
   "search": {
     "back": "Volver al mapa",
@@ -245,6 +274,7 @@
     "setting": {
       "indoor": "Interior",
       "outdoor": "Exterior",
+      "indoor_outdoor": "Interior y exterior",
       "covered_outdoor": "Cubierto"
     },
     "paid": "De pago",

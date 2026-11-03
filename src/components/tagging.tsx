@@ -104,7 +104,7 @@ export function TagSectionTitle({ children }: { children: string }) {
 }
 
 /** Small uppercase caption above a group in a sheet ("YOUR HOME PARK"). */
-function Caption({ children }: { children: string }) {
+export function Caption({ children }: { children: string }) {
   return (
     <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.caption}>
       {children}
@@ -121,7 +121,7 @@ function Picked({ on, c }: { on: boolean; c: ThemeColors }) {
  * A sheet over a dimmed screen (Nov 2 mockups): grab bar, an Archivo Black
  * title, and Close (✕) or a Done button. Tapping the dimmed strip closes it.
  */
-function Sheet({
+export function Sheet({
   visible,
   title,
   onClose,

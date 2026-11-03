@@ -208,7 +208,36 @@
     "closest": "Nærmeste: {{park}}, {{distance}}",
     "closestNoDistance": "Nærmeste: {{park}}",
     "goToClosest": "Gå til nærmeste",
-    "goToCity": "Gå til {{city}}"
+    "goToCity": "Gå til {{city}}",
+    "filters": {
+      "button": "Filtre",
+      "buttonOn": "Filtre, {{count}} slået til",
+      "title": "Filtre",
+      "whoCanSkate": "HVEM MÅ KØRE",
+      "whoCanSkateHint": "Parker, der tillader en af dem, du vælger.",
+      "setting": "OMGIVELSER",
+      "settings": {
+        "indoor": "Indendørs",
+        "covered": "Overdækket",
+        "outdoor": "Udendørs"
+      },
+      "settingHint": "Parker med både indendørs og udendørs del vises for begge.",
+      "onlyShow": "VIS KUN",
+      "openNow": "Åben nu",
+      "openNowHint": "Efter hver parks åbningstider, i dens egen tid",
+      "free": "Gratis",
+      "lit": "Lys om aftenen",
+      "litHint": "Vi ved ikke, om nogle parker har lys, så de skjules",
+      "clear": "Nulstil",
+      "show_one": "Vis {{count}} park",
+      "show_other": "Vis {{count}} parker",
+      "showLoading": "Tæller parker…"
+    },
+    "edge": {
+      "label": "{{park}}, {{distance}} væk, uden for kortet",
+      "labelNoDistance": "{{park}}, uden for kortet",
+      "hint": "Flytter kortet til parken"
+    }
   },
   "search": {
     "back": "Tilbage til kortet",
@@ -245,6 +274,7 @@
     "setting": {
       "indoor": "Indendørs",
       "outdoor": "Udendørs",
+      "indoor_outdoor": "Indendørs og udendørs",
       "covered_outdoor": "Overdækket"
     },
     "paid": "Betaling",
