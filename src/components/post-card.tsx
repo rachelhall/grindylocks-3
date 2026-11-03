@@ -454,6 +454,7 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
           slides={post.slides}
           width={width}
           active={active}
+          onExpand={(i) => router.push({ pathname: '/post/[id]/view', params: { id: post.id, slide: String(i) } })}
           overlay={(i) =>
             post.slides[i] ? (
               <View style={styles.overlayBottomLeft} pointerEvents="box-none">

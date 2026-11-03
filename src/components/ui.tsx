@@ -90,6 +90,11 @@ const icons = {
   mail: { ios: 'envelope', android: 'mail' },
   mailSent: { ios: 'envelope.open', android: 'mark_email_read' },
   chevronUp: { ios: 'chevron.up', android: 'expand_less' },
+  // Feed media framing (v2 mockups).
+  expand: { ios: 'arrow.up.left.and.arrow.down.right', android: 'open_in_full' },
+  dragVertical: { ios: 'arrow.up.and.down', android: 'swap_vert' },
+  dragHorizontal: { ios: 'arrow.left.and.right', android: 'swap_horiz' },
+  recenter: { ios: 'viewfinder', android: 'center_focus_strong' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

@@ -182,7 +182,12 @@
     "missing": "Dieser Post ist nicht verfügbar.",
     "videoUnavailable": "Clips können noch nicht abgespielt werden: Die Videowiedergabe ist nicht eingerichtet.",
     "posted": "Gepostet am {{date}}",
-    "notPosted": "Noch nicht gepostet: lädt noch hoch"
+    "notPosted": "Noch nicht gepostet: lädt noch hoch",
+    "position": "Position im Clip",
+    "openClip": "Ganzen Clip öffnen",
+    "openPhoto": "Ganzes Foto öffnen",
+    "close": "Schließen",
+    "slideOf": "Slide {{number}} von {{count}}"
   },
   "tabs": {
     "home": "Start",
@@ -993,5 +998,17 @@
       "too_many_reports": "Das sind viele Meldungen in einer Stunde. Versuch es etwas später noch mal.",
       "generic": "Konnte nicht gesendet werden. Prüf deine Verbindung und versuch es noch mal."
     }
+  },
+  "framing": {
+    "frameLabel": "Ausschnitt im Feed",
+    "hintVertical": "Nach oben oder unten ziehen, um zu wählen, was der Feed zeigt",
+    "hintHorizontal": "Nach links oder rechts ziehen, um zu wählen, was der Feed zeigt",
+    "fits": "Passt in den Ausschnitt",
+    "drag": "Ziehen für den Ausschnitt",
+    "center": "Mittig",
+    "centerLabel": "Ausschnitt wieder mittig setzen",
+    "note": "Der Feed zeigt den pinken Ausschnitt. Das ganze Foto oder der ganze Clip ist einen Tipp entfernt.",
+    "shape": "Alle Slides {{shape}} · von Slide 1 bestimmt",
+    "title": "Ausschnitt"
   }
 }

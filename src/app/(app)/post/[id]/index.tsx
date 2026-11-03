@@ -121,6 +121,7 @@ export default function PostScreen() {
             slides={post.slides}
             width={width}
             onIndexChange={setIndex}
+            onExpand={(i) => router.push({ pathname: '/post/[id]/view', params: { id: post.id, slide: String(i) } })}
             overlay={(i) => {
               const slide = post.slides[i];
               if (!slide) return null;

@@ -182,7 +182,12 @@
     "missing": "This post isn't available.",
     "videoUnavailable": "Clips can't play yet: video playback isn't set up.",
     "posted": "Posted {{date}}",
-    "notPosted": "Not posted yet: still uploading"
+    "notPosted": "Not posted yet: still uploading",
+    "position": "Clip position",
+    "openClip": "Open the whole clip",
+    "openPhoto": "Open the whole photo",
+    "close": "Close",
+    "slideOf": "Slide {{number}} of {{count}}"
   },
   "tabs": {
     "home": "Home",
@@ -993,5 +998,17 @@
       "too_many_reports": "That's a lot of reports in an hour. Try again a bit later.",
       "generic": "Couldn't send it. Check your connection and try again."
     }
+  },
+  "framing": {
+    "frameLabel": "Feed frame",
+    "hintVertical": "Drag up or down to choose what the feed shows",
+    "hintHorizontal": "Drag left or right to choose what the feed shows",
+    "fits": "Fits the frame",
+    "drag": "Drag to frame",
+    "center": "Center",
+    "centerLabel": "Put the frame back in the middle",
+    "note": "The feed shows the pink frame. The whole photo or clip is one tap away.",
+    "shape": "All slides {{shape}} · set by slide 1",
+    "title": "Frame"
   }
 }

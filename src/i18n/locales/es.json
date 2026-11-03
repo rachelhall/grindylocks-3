@@ -182,7 +182,12 @@
     "missing": "Esta publicación no está disponible.",
     "videoUnavailable": "Los clips aún no se pueden reproducir: falta configurar la reproducción de vídeo.",
     "posted": "Publicado el {{date}}",
-    "notPosted": "Aún sin publicar: se está subiendo"
+    "notPosted": "Aún sin publicar: se está subiendo",
+    "position": "Posición del clip",
+    "openClip": "Abrir el clip completo",
+    "openPhoto": "Abrir la foto completa",
+    "close": "Cerrar",
+    "slideOf": "Diapositiva {{number}} de {{count}}"
   },
   "tabs": {
     "home": "Inicio",
@@ -993,5 +998,17 @@
       "too_many_reports": "Son muchos informes en una hora. Vuelve a intentarlo un poco más tarde.",
       "generic": "No se pudo enviar. Revisa tu conexión y vuelve a intentarlo."
     }
+  },
+  "framing": {
+    "frameLabel": "Encuadre del feed",
+    "hintVertical": "Arrastra hacia arriba o abajo para elegir lo que muestra el feed",
+    "hintHorizontal": "Arrastra a la izquierda o la derecha para elegir lo que muestra el feed",
+    "fits": "Cabe en el encuadre",
+    "drag": "Arrastra para encuadrar",
+    "center": "Centrar",
+    "centerLabel": "Volver a poner el encuadre en el centro",
+    "note": "El feed muestra el encuadre rosa. La foto o el clip completo está a un toque.",
+    "shape": "Todas las diapositivas {{shape}} · según la diapositiva 1",
+    "title": "Encuadre"
   }
 }

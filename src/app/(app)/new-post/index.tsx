@@ -4,25 +4,26 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
-import { DraftPager, StripThumb } from '@/components/media';
+import { FrameEditor, StripThumb } from '@/components/media';
 import { Button, Icon } from '@/components/ui';
-import { formatDuration, MAX_SLIDES, pickFromLibrary, type Rejection } from '@/lib/media';
-import { type DraftItem, usePostDraft } from '@/lib/post-draft';
+import { formatDuration, frameRatio, frameShapeLabel, MAX_SLIDES, pickFromLibrary, type Rejection } from '@/lib/media';
+import { usePostDraft } from '@/lib/post-draft';
 import { Sentry } from '@/lib/sentry';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 const STRIP_H = 80;
 
-/** Strip thumbnails keep their shape, between 3:4 and 4:3. */
-function stripWidth(m: DraftItem): number {
-  const ratio = m.width > 0 && m.height > 0 ? m.width / m.height : 1;
-  return Math.round(STRIP_H * Math.min(4 / 3, Math.max(3 / 4, ratio)));
+/** Strip thumbnails take the post's frame shape, at most 4:3 wide. */
+function stripWidth(ratio: number): number {
+  return Math.round(STRIP_H * Math.min(4 / 3, 1 / ratio));
 }
 
 /**
- * New post, step 1 of 3 (Post-Media mockup): the picked photos and clips,
- * big and at the shape they'll post at, with a strip below to switch,
- * reorder and remove them. The system picker adds media (up to 10; clips
+ * New post, step 1 of 3 (Post-Media mockup, framing from the Media framing
+ * (v2) mockup): the picked photos and clips, whole, with the post's frame
+ * over the one showing to drag (the feed shows what's inside it), and a
+ * strip below to switch, reorder and remove them. The first slide sets the
+ * frame's shape for every slide, between 4:5 and 1.91:1. The system picker adds media (up to 10; clips
  * over 60 seconds are turned down with a note to trim them in Photos first).
  * Next goes to tagging.
  */
@@ -30,9 +31,10 @@ export default function NewPostMedia() {
   const { t } = useTranslation();
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { items, setItems, addMedia } = usePostDraft();
+  const { items, setItems, addMedia, setFrame } = usePostDraft();
 
   const [selected, setSelected] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const [rejected, setRejected] = useState<Record<Rejection, number>>({ tooLong: 0, tooBig: 0, unsupported: 0 });
   const [picking, setPicking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export default function NewPostMedia() {
   const clips = items.filter((m) => m.kind === 'video').length;
   const index = Math.min(selected, Math.max(items.length - 1, 0));
   const current = items[index];
+  const ratio = frameRatio(items.map((m) => ({ width: m.width || 1, height: m.height || 1 })));
 
   async function pick() {
     setPicking(true);
@@ -121,14 +124,25 @@ export default function NewPostMedia() {
           <Messages lines={rejectionLines} error={error} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content}>
-          <DraftPager
-            items={items}
-            width={width}
-            index={index}
-            onIndexChange={setSelected}
-            label={label.toUpperCase()}
-          />
+        <ScrollView scrollEnabled={!dragging} contentContainerStyle={styles.content}>
+          {current ? (
+            <FrameEditor
+              key={current.key}
+              media={current}
+              ratio={ratio}
+              at={current.frame}
+              onChange={(frame) => setFrame(current.key, frame)}
+              width={width}
+              label={label.toUpperCase()}
+              onDragging={setDragging}
+            />
+          ) : null}
+          <View style={styles.frameNote}>
+            <Icon name="info" color={c.textSecondary} size={16} />
+            <Text variant="bodySm" color="textSecondary" style={styles.flex}>
+              {t('framing.note')}
+            </Text>
+          </View>
 
           <View style={styles.section}>
             <View style={styles.sectionHead}>
@@ -136,7 +150,7 @@ export default function NewPostMedia() {
                 {t('tagging.slides').toUpperCase()}
               </Text>
               <Text variant="caption" color="textSecondary">
-                {t('post.tapToPreview')}
+                {t('framing.shape', { shape: frameShapeLabel(ratio) })}
               </Text>
             </View>
 
@@ -150,7 +164,7 @@ export default function NewPostMedia() {
                   key={m.key}
                   uri={m.uri}
                   kind={m.kind}
-                  width={stripWidth(m)}
+                  width={stripWidth(ratio)}
                   height={STRIP_H}
                   number={i + 1}
                   selected={i === index}
@@ -290,6 +304,7 @@ const styles = StyleSheet.create({
   emptyIcon: { width: 88, height: 88, alignItems: 'center', justifyContent: 'center' },
   emptyButton: { alignSelf: 'stretch' },
   content: { paddingBottom: space[6] },
+  frameNote: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[4], paddingTop: space[3] },
   section: { paddingHorizontal: space[4], paddingTop: space[4], gap: space[3] },
   sectionHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline', gap: space[3] },
   sectionTitle: { fontFamily: fontFamily.sansSemiBold, letterSpacing: 0.5 },

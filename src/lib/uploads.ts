@@ -23,8 +23,8 @@ import { AppState } from 'react-native';
 import { useSyncExternalStore } from 'react';
 
 import { env } from './env';
-import { deleteLocalFile, type MediaKind, type PreparedMedia } from './media';
-import { hasTags, setSlideTags, type SlideTags } from './posts';
+import { deleteLocalFile, type FramePoint, type MediaKind, type PreparedMedia } from './media';
+import { hasTags, sameFrame, setSlideFrame, setSlideTags, type SlideTags } from './posts';
 import { Sentry } from './sentry';
 import { supabase } from './supabase';
 import { uuid } from './uuid';
@@ -64,6 +64,13 @@ export type SlideJob = {
    */
   tags?: SlideTags;
   tagsSaved?: boolean;
+  /**
+   * Where the slide sits in the post's frame. Photo rows are written with
+   * it; clip rows are made by the upload service, so it's saved the same
+   * way as tags, once the row exists.
+   */
+  frame?: FramePoint;
+  frameSaved?: boolean;
 };
 
 export type PostJob = {
@@ -123,11 +130,25 @@ function findSlide(postId: string, position: number): SlideJob | undefined {
  * and tried again on the next pass, and never stops the upload.
  */
 async function saveTagsIfNeeded(postId: string, position: number) {
+  await saveFrameIfNeeded(postId, position);
   const slide = findSlide(postId, position);
   if (!slide || !slide.slideId || slide.tagsSaved || !slide.tags || !hasTags(slide.tags)) return;
   try {
     await setSlideTags(slide.slideId, slide.tags);
     updateSlide(postId, position, { tagsSaved: true });
+  } catch (err) {
+    Sentry.captureException(err);
+  }
+}
+
+/** The same for a slide's frame; centred needs no save (it's the default). */
+async function saveFrameIfNeeded(postId: string, position: number) {
+  const slide = findSlide(postId, position);
+  if (!slide || !slide.slideId || slide.frameSaved || !slide.frame) return;
+  if (sameFrame(slide.frame, { x: 0.5, y: 0.5 })) return;
+  try {
+    await setSlideFrame(slide.slideId, slide.frame);
+    updateSlide(postId, position, { frameSaved: true });
   } catch (err) {
     Sentry.captureException(err);
   }
@@ -516,7 +537,7 @@ export async function createPost(input: {
   caption: string;
   /** The park for every slide, if one was picked. */
   parkId?: string | null;
-  media: (PreparedMedia & { slideId: string; tags?: SlideTags })[];
+  media: (PreparedMedia & { slideId: string; tags?: SlideTags; frame?: FramePoint })[];
 }): Promise<string> {
   const postId = uuid();
   const caption = input.caption.trim() || null;
@@ -543,6 +564,8 @@ export async function createPost(input: {
       storage_path: `${input.userId}/${postId}/${m.slideId}.jpg`,
       width: m.width,
       height: m.height,
+      frame_x: m.frame?.x ?? 0.5,
+      frame_y: m.frame?.y ?? 0.5,
       upload_status: 'uploading' as const,
     }));
   if (photoRows.length > 0) {
@@ -586,6 +609,9 @@ export async function createPost(input: {
       nextAttemptAt: 0,
       tags: m.tags,
       tagsSaved: photoTagsSaved.has(position),
+      frame: m.frame,
+      // Photo rows were written with their frame.
+      frameSaved: m.kind === 'photo',
     })),
   });
   return postId;

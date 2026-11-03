@@ -1,15 +1,24 @@
 import { Image } from 'expo-image';
+import { useEvent } from 'expo';
 import { useVideoPlayer, type VideoPlayer, type VideoThumbnail, VideoView } from 'expo-video';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View, type ViewProps } from 'react-native';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useIsFocused } from 'expo-router';
 
 import { Button, Icon } from '@/components/ui';
-import { carouselHeight, formatDuration, videoPlaybackUrl } from '@/lib/media';
+import {
+  CENTERED,
+  coverRect,
+  formatDuration,
+  type FramePoint,
+  frameHeight,
+  MAX_HEIGHT_RATIO,
+  videoPlaybackUrl,
+} from '@/lib/media';
 import { toggleSound, useAutoplayAllowed, useSoundOn } from '@/lib/playback';
 import { postProgress, postState, type PostJob, uploads } from '@/lib/uploads';
-import { brand, space, stroke, Text, useColors } from '@/theme';
+import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
 /* Slides ------------------------------------------------------------------- */
 
@@ -18,6 +27,8 @@ export type ViewSlide = {
   kind: 'photo' | 'video';
   width: number;
   height: number;
+  /** Where the slide sits in its post's frame; centred if missing. */
+  frame?: FramePoint;
   durationS: number | null;
   status: 'uploading' | 'processing' | 'ready' | 'failed';
   /** Photos: a signed URL. */
@@ -42,14 +53,40 @@ function setMuted(player: VideoPlayer, muted: boolean) {
   player.muted = muted;
 }
 
+/** Jumps a clip to a time, in seconds. */
+function seek(player: VideoPlayer, seconds: number) {
+  player.currentTime = Math.max(0, Math.min(player.duration || 0, seconds));
+}
+
+/** Where media is drawn inside its slide: a cover rect, or the whole slide. */
+type MediaBox = { width: number; height: number; left: number; top: number } | null;
+
+function boxStyle(box: MediaBox) {
+  return box ? { position: 'absolute' as const, ...box } : StyleSheet.absoluteFill;
+}
+
 /**
  * A clip in a post. It plays muted and loops while it's the active clip
  * (its post is the one mostly on screen, and it's the slide showing), and
  * pauses otherwise. Tapping it turns sound on or off for every clip this
  * session. When autoplay is off (Low Data Mode, Reduce Motion, the phone's
  * auto-play setting), it waits for a tap on the play button.
+ *
+ * `box` places the video inside the slide (feeds crop it to the post's
+ * frame); without one it's shown whole. `progress` adds a bar along the
+ * bottom that seeks when tapped (the full-screen viewer).
  */
-function VideoSlide({ videoKey, active }: { videoKey: string; active: boolean }) {
+function VideoSlide({
+  videoKey,
+  active,
+  box,
+  progress = false,
+}: {
+  videoKey: string;
+  active: boolean;
+  box: MediaBox;
+  progress?: boolean;
+}) {
   const { t } = useTranslation();
   const url = videoPlaybackUrl(videoKey);
   const soundOn = useSoundOn();
@@ -61,6 +98,7 @@ function VideoSlide({ videoKey, active }: { videoKey: string; active: boolean })
     p.muted = true;
     // Muted clips don't stop music that's already playing.
     p.audioMixingMode = 'auto';
+    if (progress) p.timeUpdateEventInterval = 0.25;
   });
 
   const live = active && focused;
@@ -86,7 +124,12 @@ function VideoSlide({ videoKey, active }: { videoKey: string; active: boolean })
   const waiting = live && !shouldPlay;
   return (
     <>
-      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      <VideoView
+        player={player}
+        style={boxStyle(box)}
+        contentFit={box ? 'cover' : 'contain'}
+        nativeControls={false}
+      />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={waiting ? t('clip.play') : soundOn ? t('clip.mute') : t('clip.unmute')}
@@ -104,17 +147,63 @@ function VideoSlide({ videoKey, active }: { videoKey: string; active: boolean })
       <View style={[styles.tag, styles.soundBadge]} pointerEvents="none">
         <Icon name={soundOn ? 'soundOn' : 'soundOff'} color={brand.paper} size={14} />
       </View>
+      {progress ? <ClipProgress player={player} /> : null}
     </>
   );
 }
 
+/** How far a clip has played; tapping the bar jumps there. */
+function ClipProgress({ player }: { player: VideoPlayer }) {
+  const { t } = useTranslation();
+  const update = useEvent(player, 'timeUpdate', null);
+  const [barWidth, setBarWidth] = useState(0);
+  const duration = player.duration || 0;
+  const now = update?.currentTime ?? 0;
+  const share = duration > 0 ? Math.min(1, now / duration) : 0;
+  return (
+    <Pressable
+      accessibilityRole="adjustable"
+      accessibilityLabel={t('viewer.position')}
+      accessibilityValue={{ text: `${formatDuration(now)} / ${formatDuration(duration)}` }}
+      accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+      onAccessibilityAction={(e) => {
+        const step = e.nativeEvent.actionName === 'increment' ? 5 : -5;
+        seek(player, now + step);
+      }}
+      onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+      onPress={(e) => {
+        if (barWidth > 0 && duration > 0) seek(player, (e.nativeEvent.locationX / barWidth) * duration);
+      }}
+      style={styles.progressHit}
+    >
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, { width: `${share * 100}%` }]} />
+      </View>
+    </Pressable>
+  );
+}
+
 /**
- * One slide at its original aspect ratio, letterboxed in an ink frame of
- * the given size. Never cropped.
+ * One slide. In feeds (`fit="frame"`) it fills the post's frame, cropped
+ * where the poster framed it; in the full-screen viewer (`fit="whole"`) it
+ * shows whole, letterboxed in ink.
  */
-function Slide({ slide, width, height, active }: { slide: ViewSlide; width: number; height: number; active: boolean }) {
+function Slide({
+  slide,
+  width,
+  height,
+  active,
+  fit = 'frame',
+}: {
+  slide: ViewSlide;
+  width: number;
+  height: number;
+  active: boolean;
+  fit?: 'frame' | 'whole';
+}) {
   const { t } = useTranslation();
   const ready = slide.status === 'ready';
+  const box: MediaBox = fit === 'frame' ? coverRect({ width, height }, slide, slide.frame ?? CENTERED) : null;
   return (
     <View style={[styles.frame, { width, height }]}>
       {!ready ? (
@@ -127,12 +216,12 @@ function Slide({ slide, width, height, active }: { slide: ViewSlide; width: numb
       ) : slide.kind === 'photo' && slide.photoUrl ? (
         <Image
           source={{ uri: slide.photoUrl }}
-          style={StyleSheet.absoluteFill}
-          contentFit="contain"
+          style={boxStyle(box)}
+          contentFit={box ? 'cover' : 'contain'}
           accessibilityIgnoresInvertColors
         />
       ) : slide.kind === 'video' && slide.videoKey && videoPlaybackUrl(slide.videoKey) ? (
-        <VideoSlide videoKey={slide.videoKey} active={active} />
+        <VideoSlide videoKey={slide.videoKey} active={active} box={box} progress={fit === 'whole'} />
       ) : (
         <View style={styles.center}>
           <Icon name={slide.kind === 'video' ? 'video' : 'photo'} color={brand.paper} />
@@ -141,7 +230,7 @@ function Slide({ slide, width, height, active }: { slide: ViewSlide; width: numb
           </Text>
         </View>
       )}
-      {slide.kind === 'video' && slide.durationS ? (
+      {slide.kind === 'video' && slide.durationS && fit === 'frame' ? (
         <MediaTag label={formatDuration(slide.durationS)} style={styles.tagBottomRight} />
       ) : null}
     </View>
@@ -149,15 +238,17 @@ function Slide({ slide, width, height, active }: { slide: ViewSlide; width: numb
 }
 
 /**
- * A post's slides. One slide shows on its own; several page sideways at a
- * fixed height taken from the tallest slide, so the post doesn't jump while
- * swiping.
+ * A post's slides in its frame: every slide shares the first slide's shape,
+ * between 4:5 and 1.91:1, cropped where the poster framed it (v2, Nov 2).
+ * Several slides page sideways. `onExpand` adds a button that opens the
+ * full-screen viewer, where nothing is cropped.
  */
 export function Carousel({
   slides,
   width,
   overlay,
   onIndexChange,
+  onExpand,
   active = true,
 }: {
   slides: ViewSlide[];
@@ -167,14 +258,29 @@ export function Carousel({
   /** Tags drawn over the slide that's showing (its obstacle, its people). */
   overlay?: (index: number) => ReactNode;
   onIndexChange?: (index: number) => void;
+  /** Opens the slide showing, whole, in the full-screen viewer. */
+  onExpand?: (index: number) => void;
 }) {
+  const { t } = useTranslation();
   const [index, setIndex] = useState(0);
-  const height = carouselHeight(width, slides);
+  const height = frameHeight(width, slides);
+  const expand = onExpand ? (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={slides[index]?.kind === 'video' ? t('viewer.openClip') : t('viewer.openPhoto')}
+      onPress={() => onExpand(index)}
+      hitSlop={6}
+      style={({ pressed }) => [styles.expand, pressed && { opacity: 0.75 }]}
+    >
+      <Icon name="expand" color={brand.paper} size={16} />
+    </Pressable>
+  ) : null;
   if (slides.length === 1) {
     return (
       <View>
         <Slide slide={slides[0]} width={width} height={height} active={active} />
         {overlay?.(0)}
+        {expand}
       </View>
     );
   }
@@ -195,9 +301,53 @@ export function Carousel({
           <Slide key={s.id} slide={s} width={width} height={height} active={active && i === index} />
         ))}
       </ScrollView>
-      <MediaTag label={`${index + 1} / ${slides.length}`} style={styles.tagTopRight} />
+      <MediaTag
+        label={`${index + 1} / ${slides.length}`}
+        style={onExpand ? styles.countBesideExpand : styles.tagTopRight}
+      />
       {overlay?.(index)}
+      {expand}
     </View>
+  );
+}
+
+/**
+ * A post's slides whole, one per page, for the full-screen viewer: nothing
+ * cropped, clips with a progress bar. Opens on `initialIndex`.
+ */
+export function WholeSlides({
+  slides,
+  width,
+  height,
+  initialIndex = 0,
+  onIndexChange,
+}: {
+  slides: ViewSlide[];
+  width: number;
+  height: number;
+  initialIndex?: number;
+  onIndexChange?: (index: number) => void;
+}) {
+  const start = Math.min(Math.max(initialIndex, 0), Math.max(slides.length - 1, 0));
+  const [index, setIndex] = useState(start);
+  return (
+    <ScrollView
+      horizontal
+      pagingEnabled
+      scrollEnabled={slides.length > 1}
+      showsHorizontalScrollIndicator={false}
+      contentOffset={{ x: start * width, y: 0 }}
+      onMomentumScrollEnd={(e) => {
+        const next = Math.round(e.nativeEvent.contentOffset.x / width);
+        setIndex(next);
+        onIndexChange?.(next);
+      }}
+      style={{ width, height }}
+    >
+      {slides.map((s, i) => (
+        <Slide key={s.id} slide={s} width={width} height={height} active={i === index} fit="whole" />
+      ))}
+    </ScrollView>
   );
 }
 
@@ -319,10 +469,17 @@ export function MediaThumb({ uri, kind }: { uri: string; kind: 'photo' | 'video'
 
 /* Previews while posting ------------------------------------------------------ */
 
-type DraftMedia = { key: string; uri: string; kind: 'photo' | 'video'; width: number; height: number };
+type DraftMedia = {
+  key: string;
+  uri: string;
+  kind: 'photo' | 'video';
+  width: number;
+  height: number;
+  frame?: FramePoint;
+};
 
 /** The size posts use for a slide, even when the picker didn't report one. */
-function shapeOf(m: DraftMedia): { width: number; height: number } {
+function shapeOf(m: { width: number; height: number }): { width: number; height: number } {
   return m.width > 0 && m.height > 0 ? m : { width: 1, height: 1 };
 }
 
@@ -331,7 +488,7 @@ function shapeOf(m: DraftMedia): { width: number; height: number } {
  * slide showing. Tapping it turns its sound on or off. When autoplay is off
  * it waits for a tap on the play button.
  */
-function LocalClip({ uri, active }: { uri: string; active: boolean }) {
+function LocalClip({ uri, active, box }: { uri: string; active: boolean; box: MediaBox }) {
   const { t } = useTranslation();
   const autoplay = useAutoplayAllowed();
   const focused = useIsFocused();
@@ -358,7 +515,7 @@ function LocalClip({ uri, active }: { uri: string; active: boolean }) {
   const waiting = live && !shouldPlay;
   return (
     <>
-      <VideoView player={player} style={StyleSheet.absoluteFill} contentFit="contain" nativeControls={false} />
+      <VideoView player={player} style={boxStyle(box)} contentFit="cover" nativeControls={false} />
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={waiting ? t('clip.play') : soundOn ? t('clip.mute') : t('clip.unmute')}
@@ -380,7 +537,7 @@ function LocalClip({ uri, active }: { uri: string; active: boolean }) {
   );
 }
 
-/** One picked item at the shape it will post at, letterboxed in ink. */
+/** One picked item in the post's frame, cropped where it's framed. */
 function DraftSlide({
   item,
   width,
@@ -395,12 +552,13 @@ function DraftSlide({
   /** Clips only load a player when they're the slide showing or next to it. */
   near: boolean;
 }) {
+  const box = coverRect({ width, height }, shapeOf(item), item.frame ?? CENTERED);
   return (
     <View style={[styles.frame, { width, height }]}>
       {item.kind === 'photo' ? (
-        <Image source={{ uri: item.uri }} style={StyleSheet.absoluteFill} contentFit="contain" />
+        <Image source={{ uri: item.uri }} style={boxStyle(box)} contentFit="cover" />
       ) : near ? (
-        <LocalClip uri={item.uri} active={active} />
+        <LocalClip uri={item.uri} active={active} box={box} />
       ) : (
         <View style={styles.center}>
           <Icon name="video" color={brand.paper} />
@@ -411,9 +569,10 @@ function DraftSlide({
 }
 
 /**
- * The picked slides, full width and swipeable, the way the post will look.
- * The slide showing is controlled by the screen, so a strip of thumbnails or
- * a tag editor can follow it.
+ * The picked slides, full width and swipeable, the way the post will look in
+ * a feed: every slide in the first slide's frame shape, cropped where it's
+ * framed. The slide showing is controlled by the screen, so a strip of
+ * thumbnails or a tag editor can follow it.
  */
 export function DraftPager({
   items,
@@ -430,7 +589,7 @@ export function DraftPager({
   label?: string;
 }) {
   const ref = useRef<ScrollView>(null);
-  const height = carouselHeight(width, items.map(shapeOf));
+  const height = frameHeight(width, items.map(shapeOf));
 
   // A thumbnail tap moves the pager; a swipe tells the screen.
   useEffect(() => {
@@ -466,6 +625,196 @@ export function DraftPager({
     </View>
   );
 }
+
+/* Framing ---------------------------------------------------------------------- */
+
+/** A picked clip in the frame editor: muted, looping, no controls. */
+function EditorClip({ uri, style }: { uri: string; style: object }) {
+  const autoplay = useAutoplayAllowed();
+  const focused = useIsFocused();
+  const player = useVideoPlayer(uri, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.audioMixingMode = 'auto';
+  });
+  useEffect(() => {
+    if (autoplay && focused) player.play();
+    else player.pause();
+  }, [player, autoplay, focused]);
+  return <VideoView player={player} style={style} contentFit="fill" nativeControls={false} />;
+}
+
+/** One step of the screen reader's adjust actions, along the drag axis. */
+const FRAME_STEP = 0.1;
+
+/**
+ * Framing a slide (Media framing (v2) mockup, "New post · drag to frame"):
+ * the whole photo or clip, with the post's frame drawn over it in pink and
+ * everything outside it dimmed. Dragging moves the frame; Center puts it
+ * back in the middle. The feed shows what's inside the frame.
+ *
+ * `ratio` is the post's frame shape (height ÷ width, from the first slide).
+ * Clips play from the phone (`kind: 'video'`); in Edit post a clip's frame
+ * is set over a still from Stream, passed as a photo.
+ */
+export function FrameEditor({
+  media,
+  ratio,
+  at,
+  onChange,
+  width,
+  label,
+  onDragging,
+}: {
+  media: { uri: string; kind: 'photo' | 'video'; width: number; height: number };
+  ratio: number;
+  at: FramePoint;
+  onChange: (at: FramePoint) => void;
+  width: number;
+  /** Tag in the top left ("SLIDE 1 · 0:30"). */
+  label?: string;
+  /** Lets a screen pause its scroll view while the frame is dragged. */
+  onDragging?: (dragging: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const height = Math.round(width * MAX_HEIGHT_RATIO);
+  const shape = shapeOf(media);
+
+  // The whole media, fitted inside the editor.
+  const scale = Math.min(width / shape.width, height / shape.height);
+  const shown = { width: shape.width * scale, height: shape.height * scale };
+  const left = (width - shown.width) / 2;
+  const top = (height - shown.height) / 2;
+
+  // The frame: the largest `ratio`-shaped box inside the media.
+  const win =
+    shown.height / shown.width > ratio
+      ? { width: shown.width, height: shown.width * ratio }
+      : { width: shown.height / ratio, height: shown.height };
+  const slackX = shown.width - win.width;
+  const slackY = shown.height - win.height;
+  const axis: 'x' | 'y' | null = slackY > 0.5 ? 'y' : slackX > 0.5 ? 'x' : null;
+
+  // While dragging the frame moves here; the draft is updated on release.
+  const [grab, setGrab] = useState<{ x0: number; y0: number; from: FramePoint } | null>(null);
+  const [drag, setDrag] = useState<FramePoint | null>(null);
+  const point = drag ?? at;
+  const winLeft = left + slackX * point.x;
+  const winTop = top + slackY * point.y;
+
+  function moved(g: { x0: number; y0: number; from: FramePoint }, pageX: number, pageY: number): FramePoint {
+    return {
+      x: slackX > 0.5 ? clamp01(g.from.x + (pageX - g.x0) / slackX) : g.from.x,
+      y: slackY > 0.5 ? clamp01(g.from.y + (pageY - g.y0) / slackY) : g.from.y,
+    };
+  }
+
+  function stop() {
+    setGrab(null);
+    setDrag(null);
+    onDragging?.(false);
+  }
+
+  // Plain responder props: the editor takes the touch (a scroll view around
+  // it is paused while dragging) and moves the frame with the finger.
+  const responder: Partial<ViewProps> = axis
+    ? {
+        onStartShouldSetResponder: () => true,
+        onMoveShouldSetResponder: () => true,
+        onResponderTerminationRequest: () => false,
+        onResponderGrant: (e) => {
+          setGrab({ x0: e.nativeEvent.pageX, y0: e.nativeEvent.pageY, from: at });
+          onDragging?.(true);
+        },
+        onResponderMove: (e) => {
+          if (grab) setDrag(moved(grab, e.nativeEvent.pageX, e.nativeEvent.pageY));
+        },
+        onResponderRelease: (e) => {
+          if (grab) onChange(moved(grab, e.nativeEvent.pageX, e.nativeEvent.pageY));
+          stop();
+        },
+        onResponderTerminate: stop,
+      }
+    : {};
+
+  const centered = Math.abs(point.x - 0.5) < 0.001 && Math.abs(point.y - 0.5) < 0.001;
+  const along = axis === 'x' ? point.x : point.y;
+  const shade = { position: 'absolute' as const, backgroundColor: c.overlay };
+
+  return (
+    <View {...responder} style={[styles.editor, { width, height }]}>
+      {media.kind === 'photo' ? (
+        <Image
+          source={{ uri: media.uri }}
+          style={{ position: 'absolute', left, top, width: shown.width, height: shown.height }}
+          contentFit="fill"
+        />
+      ) : (
+        <EditorClip uri={media.uri} style={{ position: 'absolute', left, top, width: shown.width, height: shown.height }} />
+      )}
+
+      {/* Dim everything outside the frame. */}
+      <View pointerEvents="none" style={[shade, { left, top, width: shown.width, height: winTop - top }]} />
+      <View
+        pointerEvents="none"
+        style={[shade, { left, top: winTop + win.height, width: shown.width, height: top + shown.height - (winTop + win.height) }]}
+      />
+      <View pointerEvents="none" style={[shade, { left, top: winTop, width: winLeft - left, height: win.height }]} />
+      <View
+        pointerEvents="none"
+        style={[shade, { left: winLeft + win.width, top: winTop, width: left + shown.width - (winLeft + win.width), height: win.height }]}
+      />
+
+      <View
+        accessible
+        accessibilityRole={axis ? 'adjustable' : undefined}
+        accessibilityLabel={t('framing.frameLabel')}
+        accessibilityHint={axis ? t(axis === 'y' ? 'framing.hintVertical' : 'framing.hintHorizontal') : undefined}
+        accessibilityValue={axis ? { min: 0, max: 100, now: Math.round(along * 100) } : { text: t('framing.fits') }}
+        accessibilityActions={axis ? [{ name: 'increment' }, { name: 'decrement' }] : undefined}
+        onAccessibilityAction={(e) => {
+          if (!axis) return;
+          const step = e.nativeEvent.actionName === 'increment' ? FRAME_STEP : -FRAME_STEP;
+          onChange(axis === 'x' ? { ...at, x: clamp01(at.x + step) } : { ...at, y: clamp01(at.y + step) });
+        }}
+        style={[styles.window, { left: winLeft, top: winTop, width: win.width, height: win.height, borderColor: c.accent }]}
+      >
+        <View pointerEvents="none" style={[styles.third, { left: '33.33%', top: 0, bottom: 0, width: 1 }]} />
+        <View pointerEvents="none" style={[styles.third, { left: '66.66%', top: 0, bottom: 0, width: 1 }]} />
+        <View pointerEvents="none" style={[styles.third, { top: '33.33%', left: 0, right: 0, height: 1 }]} />
+        <View pointerEvents="none" style={[styles.third, { top: '66.66%', left: 0, right: 0, height: 1 }]} />
+        {axis && !drag ? (
+          <View pointerEvents="none" style={styles.dragHint}>
+            <Icon name={axis === 'y' ? 'dragVertical' : 'dragHorizontal'} color={brand.paper} size={16} />
+            <Text variant="bodySm" style={{ color: brand.paper, fontFamily: fontFamily.sansSemiBold }}>
+              {t('framing.drag')}
+            </Text>
+          </View>
+        ) : null}
+      </View>
+
+      {label ? <MediaTag label={label} style={styles.editorLabel} /> : null}
+      {axis ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('framing.centerLabel')}
+          accessibilityState={{ disabled: centered }}
+          disabled={centered}
+          onPress={() => onChange(CENTERED)}
+          style={({ pressed }) => [styles.recenter, (pressed || centered) && { opacity: centered ? 0.5 : 0.75 }]}
+        >
+          <Icon name="recenter" color={brand.paper} size={16} />
+          <Text variant="label" style={{ color: brand.paper }}>
+            {t('framing.center')}
+          </Text>
+        </Pressable>
+      ) : null}
+    </View>
+  );
+}
+
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /** Square dots under a pager; the current slide's is wide and ink. */
 export function PagerDots({ count, index }: { count: number; index: number }) {
@@ -568,6 +917,18 @@ const styles = StyleSheet.create({
   soundBadge: { right: 8, bottom: 36, paddingVertical: 4 },
   previewSound: { right: 12, bottom: 12, paddingVertical: 4 },
   previewLabel: { left: 12, bottom: 12 },
+  // The full-screen viewer opens from the top right; "1 / 3" moves beside it.
+  expand: { position: 'absolute', right: 8, top: 8, width: 32, height: 32, alignItems: 'center', justifyContent: 'center', backgroundColor: brand.ink },
+  countBesideExpand: { right: 46, top: 8, paddingVertical: 7 },
+  progressHit: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 28, justifyContent: 'flex-end', paddingHorizontal: space[4], paddingBottom: 10 },
+  progressTrack: { height: 4, backgroundColor: 'rgba(242,239,230,0.35)' },
+  progressFill: { height: 4, backgroundColor: brand.paper },
+  editor: { backgroundColor: brand.ink, overflow: 'hidden' },
+  window: { position: 'absolute', borderWidth: 3 },
+  third: { position: 'absolute', backgroundColor: 'rgba(250,248,242,0.5)' },
+  dragHint: { position: 'absolute', alignSelf: 'center', top: '50%', marginTop: -16, height: 32, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 10, backgroundColor: brand.ink },
+  editorLabel: { left: 12, top: 12 },
+  recenter: { position: 'absolute', right: 12, top: 12, minHeight: 32, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: 10, backgroundColor: brand.ink, borderWidth: stroke.hairline, borderColor: 'rgba(242,239,230,0.35)' },
   dots: { flexDirection: 'row', justifyContent: 'center', gap: 6 },
   dot: { width: 8, height: 8 },
   playButton: { width: 56, height: 56, alignItems: 'center', justifyContent: 'center', backgroundColor: brand.ink, borderWidth: stroke.rule, borderColor: brand.paper },

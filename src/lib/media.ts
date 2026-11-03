@@ -6,8 +6,11 @@
  *   upload, so HEIC and PNG come out as JPEG and every phone can show them.
  * - Clips go to Cloudflare Stream. On iOS the picker transcodes them to
  *   1080p HEVC first; Android uploads the original file.
- * - Nothing is ever cropped: width and height are stored per slide and
- *   layouts letterbox to the original aspect ratio.
+ * - Feeds crop to one frame shape per post (v2, Nov 2): the first slide
+ *   sets it, between 4:5 and 1.91:1, and each slide stores where it sits in
+ *   that frame (`frame_x`, `frame_y`). The full media is never lost: width
+ *   and height are stored per slide and the full-screen viewer shows it
+ *   uncropped.
  */
 import { Directory, File, Paths } from 'expo-file-system';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
@@ -256,23 +259,62 @@ export function videoThumbnailUrl(key: string, height = 480): string | null {
 
 /* Layout ---------------------------------------------------------------------- */
 
-/**
- * Tallest a slide may show, relative to its width (4:5, like Instagram's
- * tallest). Taller media is letterboxed at this height, never cropped.
- */
+/** Tallest a post's frame may be, relative to its width (4:5, like Instagram's tallest). */
 export const MAX_HEIGHT_RATIO = 1.25;
-/** Widest: 1.91:1. Wider media is letterboxed at this height. */
+/** Widest: 1.91:1. */
 export const MIN_HEIGHT_RATIO = 1 / 1.91;
 
-/** Display height for one slide at a given width. */
-export function slideHeight(width: number, media: { width: number; height: number }): number {
-  const ratio = media.height / media.width;
-  return width * Math.min(MAX_HEIGHT_RATIO, Math.max(MIN_HEIGHT_RATIO, ratio));
+type Size = { width: number; height: number };
+
+/**
+ * Where a slide sits in its frame, like CSS object-position: 0 shows the
+ * left (or top) edge of the media, 1 the right (or bottom), 0.5 the middle.
+ * Only the axis the media overflows on matters.
+ */
+export type FramePoint = { x: number; y: number };
+export const CENTERED: FramePoint = { x: 0.5, y: 0.5 };
+
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+/**
+ * A post's frame shape (height ÷ width). Every slide shares it, like
+ * Instagram: the first slide sets it, held between 4:5 and 1.91:1. Shapes
+ * in between show as they are.
+ */
+export function frameRatio(slides: Size[]): number {
+  const first = slides[0];
+  if (!first || first.width <= 0 || first.height <= 0) return 1;
+  return Math.min(MAX_HEIGHT_RATIO, Math.max(MIN_HEIGHT_RATIO, first.height / first.width));
 }
 
-/** A carousel takes its height from its tallest slide, within the cap. */
-export function carouselHeight(width: number, slides: { width: number; height: number }[]): number {
-  return slides.reduce((h, s) => Math.max(h, slideHeight(width, s)), 0);
+/** A post's frame height at a given width. */
+export function frameHeight(width: number, slides: Size[]): number {
+  return Math.round(width * frameRatio(slides));
+}
+
+/**
+ * Media scaled to cover a frame, placed at `at`. Returns the media's size
+ * and offset inside the frame (offsets are zero or negative). Media of
+ * unknown size fills the frame.
+ */
+export function coverRect(frame: Size, media: Size, at: FramePoint = CENTERED): Size & { left: number; top: number } {
+  if (media.width <= 0 || media.height <= 0) return { width: frame.width, height: frame.height, left: 0, top: 0 };
+  const scale = Math.max(frame.width / media.width, frame.height / media.height);
+  const width = media.width * scale;
+  const height = media.height * scale;
+  return {
+    width,
+    height,
+    left: (frame.width - width) * clamp01(at.x),
+    top: (frame.height - height) * clamp01(at.y),
+  };
+}
+
+/** "4:5", "1:1", "1.91:1": a frame shape (height ÷ width) for labels. */
+export function frameShapeLabel(ratio: number): string {
+  const named: [number, number][] = [[4, 5], [1, 1], [3, 4], [2, 3], [4, 3], [3, 2], [16, 9], [1.91, 1]];
+  for (const [w, h] of named) if (Math.abs(h / w - ratio) < 0.015) return `${w}:${h}`;
+  return `${(1 / ratio).toFixed(2)}:1`;
 }
 
 /** "0:14" for a clip length in seconds. */

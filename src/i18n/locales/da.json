@@ -182,7 +182,12 @@
     "missing": "Dette opslag er ikke tilgængeligt.",
     "videoUnavailable": "Klip kan ikke afspilles endnu: videoafspilning er ikke sat op.",
     "posted": "Delt {{date}}",
-    "notPosted": "Ikke delt endnu: uploader stadig"
+    "notPosted": "Ikke delt endnu: uploader stadig",
+    "position": "Klippets position",
+    "openClip": "Åbn hele klippet",
+    "openPhoto": "Åbn hele billedet",
+    "close": "Luk",
+    "slideOf": "Slide {{number}} af {{count}}"
   },
   "tabs": {
     "home": "Hjem",
@@ -993,5 +998,17 @@
       "too_many_reports": "Det er mange anmeldelser på en time. Prøv igen lidt senere.",
       "generic": "Det kunne ikke sendes. Tjek din forbindelse, og prøv igen."
     }
+  },
+  "framing": {
+    "frameLabel": "Feedets udsnit",
+    "hintVertical": "Træk op eller ned for at vælge, hvad feedet viser",
+    "hintHorizontal": "Træk til venstre eller højre for at vælge, hvad feedet viser",
+    "fits": "Passer i udsnittet",
+    "drag": "Træk for at vælge udsnit",
+    "center": "Centrér",
+    "centerLabel": "Sæt udsnittet tilbage i midten",
+    "note": "Feedet viser det lyserøde udsnit. Hele billedet eller klippet er et tryk væk.",
+    "shape": "Alle slides {{shape}} · bestemt af slide 1",
+    "title": "Udsnit"
   }
 }

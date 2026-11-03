@@ -8,7 +8,7 @@ import { brand, useColors } from '@/theme';
 
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
- * (new post, notifications, a post, a park and its photos, a profile, edit
+ * (new post, notifications, a post and its full-screen viewer, a park and its photos, a profile, edit
  * profile, settings and invites, plus M5's park info report, help, data
  * copy and account deletion). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
@@ -38,6 +38,10 @@ export default function AppLayout() {
       <Stack.Screen name="notifications" />
       <Stack.Screen name="post/[id]/index" />
       <Stack.Screen name="post/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
+      <Stack.Screen
+        name="post/[id]/view"
+        options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: brand.ink } }}
+      />
       <Stack.Screen name="park/[slug]/index" />
       <Stack.Screen name="park/[slug]/obstacle/[id]" />
       <Stack.Screen name="park/[slug]/report" options={{ presentation: 'modal' }} />
