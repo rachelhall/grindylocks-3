@@ -212,3 +212,5 @@ Switch it off by deleting `REVIEW_CODE` (the function answers 404
 `not_enabled` and the app shows "wrong code"). Rotate by changing it, then
 update App Store Connect. If a reviewer deletes the account, repeat steps 4
 and 5.
+
+Migration applied, secrets set and `review-sign-in` deployed Nov 3 (a wrong-code test answered 401 `wrong_code`).
