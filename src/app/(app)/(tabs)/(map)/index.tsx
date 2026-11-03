@@ -13,7 +13,17 @@ import { Button, Icon } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { openState } from '@/lib/hours';
-import { type Edge, edgePoint, type Frame, isOnScreen, overlaps, type Point, project, tagPosition } from '@/lib/map-edge';
+import {
+  type Edge,
+  edgePoint,
+  type Frame,
+  isOnScreen,
+  lngSpan,
+  overlaps,
+  type Point,
+  project,
+  tagPosition,
+} from '@/lib/map-edge';
 import { type MapFilters, matchesFilters, needsFacets, NO_FILTERS, useParkFacets } from '@/lib/map-filters';
 import {
   type Bounds,
@@ -58,15 +68,6 @@ function farRegion(here: LatLng): Region {
   return { ...here, latitudeDelta, longitudeDelta: latitudeDelta / shrink };
 }
 
-function toBounds(r: Region): Bounds {
-  return {
-    north: r.latitude + r.latitudeDelta / 2,
-    south: r.latitude - r.latitudeDelta / 2,
-    east: r.longitude + r.longitudeDelta / 2,
-    west: r.longitude - r.longitudeDelta / 2,
-  };
-}
-
 /**
  * The map: parks around you (or around your home city if location is off),
  * a search bar for cities and parks, and a preview card for the picked park.
@@ -84,7 +85,6 @@ export default function MapScreen() {
   const describe = useParkLine();
 
   const [bounds, setBounds] = useState<Bounds | null>(null);
-  const [region, setRegion] = useState<Region | null>(null);
   const [mapSize, setMapSize] = useState<{ width: number; height: number } | null>(null);
   const [filters, setFilters] = useState<MapFilters>(NO_FILTERS);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -98,19 +98,53 @@ export default function MapScreen() {
   const [farCardHeight, setFarCardHeight] = useState(180);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /* What's on screen -------------------------------------------------------- */
+
+  // The visible area comes from the map itself, after every move. The region
+  // in onRegionChangeComplete can lag behind moves the app makes (the
+  // locate button, Go to closest), which put edge markers in the wrong place.
+  const syncView = useCallback(async () => {
+    const b = await mapRef.current?.getMapBoundaries().catch(() => null);
+    if (!b) return;
+    setBounds({
+      north: b.northEast.latitude,
+      south: b.southWest.latitude,
+      east: b.northEast.longitude,
+      west: b.southWest.longitude,
+    });
+  }, []);
+
+  // Settles 250 ms after the map stops moving (or just after a move the app makes).
+  const scheduleSync = useCallback(
+    (delay = 250) => {
+      if (fetchTimer.current) clearTimeout(fetchTimer.current);
+      fetchTimer.current = setTimeout(() => void syncView(), delay);
+    },
+    [syncView],
+  );
+
+  const animateTo = useCallback(
+    (r: Region) => {
+      mapRef.current?.animateToRegion(r, 400);
+      scheduleSync(550);
+    },
+    [scheduleSync],
+  );
+
   /* Where to start ------------------------------------------------------- */
 
   const fitTo = useCallback((coords: LatLng[]) => {
     if (coords.length === 0) return;
     if (coords.length === 1) {
-      mapRef.current?.animateToRegion({ ...coords[0], latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA }, 400);
+      animateTo({ ...coords[0], latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
       return;
     }
     mapRef.current?.fitToCoordinates(coords, {
       edgePadding: { top: 140, right: 48, bottom: 260, left: 48 },
       animated: true,
     });
-  }, []);
+    scheduleSync(550);
+  }, [animateTo, scheduleSync]);
 
   // Your home city, or the metro area with the most parks if you haven't set one.
   const showHomeCity = useCallback(async () => {
@@ -168,31 +202,25 @@ export default function MapScreen() {
       const closest = near[0];
       if (closest && (closest.distance_m ?? distanceMeters(here, closest)) > FAR_M) {
         setFar(closest);
-        mapRef.current?.animateToRegion(farRegion(here), 400);
+        animateTo(farRegion(here));
       } else if (closest) {
         setSelected(near[0]);
         // Frame you and the nearest park together.
         fitTo([here, { latitude: near[0].latitude, longitude: near[0].longitude }]);
       } else {
-        mapRef.current?.animateToRegion({ ...here, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA }, 400);
+        animateTo({ ...here, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [mapReady, metro, fitTo, locate, showHomeCity]);
+  }, [mapReady, metro, fitTo, locate, showHomeCity, animateTo]);
 
   /* Pins for the visible area --------------------------------------------- */
 
-  // Settles 250 ms after the map stops moving; the cache keeps the last pins
-  // up while the new area loads, and panning back reuses earlier results.
-  const onRegionChangeComplete = useCallback((region: Region) => {
-    if (fetchTimer.current) clearTimeout(fetchTimer.current);
-    fetchTimer.current = setTimeout(() => {
-      setBounds(toBounds(region));
-      setRegion(region);
-    }, 250);
-  }, []);
+  // The cache keeps the last pins up while the new area loads, and panning
+  // back reuses earlier results.
+  const onRegionChangeComplete = useCallback(() => scheduleSync(), [scheduleSync]);
 
   useEffect(
     () => () => {
@@ -209,8 +237,14 @@ export default function MapScreen() {
 
   // The nearest parks to the middle of the map, for edge markers. Rounded to
   // about 1 km so small pans reuse the same answer.
-  const centre = region
-    ? { lat: Math.round(region.latitude * 100) / 100, lng: Math.round(region.longitude * 100) / 100 }
+  const middle = bounds
+    ? {
+        latitude: (bounds.north + bounds.south) / 2,
+        longitude: ((bounds.west + lngSpan(bounds) / 2 + 540) % 360) - 180,
+      }
+    : null;
+  const centre = middle
+    ? { lat: Math.round(middle.latitude * 100) / 100, lng: Math.round(middle.longitude * 100) / 100 }
     : null;
   const { data: nearCentre } = useQuery({
     queryKey: centre ? keys.parksNear(centre.lat, centre.lng, EDGE_CANDIDATES) : ['parks', 'near', 'none'],
@@ -257,9 +291,9 @@ export default function MapScreen() {
     const here = me ?? (await locate(true));
     if (here && far) {
       setSelected(null);
-      mapRef.current?.animateToRegion(farRegion(here), 400);
+      animateTo(farRegion(here));
     } else if (here) {
-      mapRef.current?.animateToRegion({ ...here, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA }, 400);
+      animateTo({ ...here, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
     } else {
       await showHomeCity();
     }
@@ -275,10 +309,7 @@ export default function MapScreen() {
   function goToClosest() {
     if (!far) return;
     setSelected(far);
-    mapRef.current?.animateToRegion(
-      { latitude: far.latitude, longitude: far.longitude, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA },
-      400,
-    );
+    animateTo({ latitude: far.latitude, longitude: far.longitude, latitudeDelta: NEAR_DELTA, longitudeDelta: NEAR_DELTA });
   }
 
   /* Card ----------------------------------------------------------------------- */
@@ -306,7 +337,7 @@ export default function MapScreen() {
   // under "No parks near you yet", which already names the closest park.
   const searchBottom = insets.top + space[2] + size.tapMin;
   const edgeTags = useMemo(() => {
-    if (!region || !mapSize || showFar || !nearCentre) return [];
+    if (!bounds || !mapSize || showFar || !nearCentre) return [];
     const { width: w, height: h } = mapSize;
     // Clear of the search bar at the top, and of the locate button (which
     // sits above the preview card while one is open) at the bottom.
@@ -317,15 +348,15 @@ export default function MapScreen() {
       bottom: h - (selected ? LOCATE_ABOVE_CARD : LOCATE_BOTTOM) - size.tapMin - space[3],
     };
     if (frame.right - frame.left < 120 || frame.bottom - frame.top < 120) return [];
-    const middle = { x: w / 2, y: h / 2 };
+    const mid = { x: w / 2, y: h / 2 };
     const placed: (Point & { park: ParkPin; width: number; height: number; angle: number; edge: Edge })[] = [];
     for (const park of nearCentre) {
       if (placed.length >= EDGE_MAX) break;
       if (park.id === selected?.id) continue;
-      const p = project(region, w, h, park);
+      const p = project(bounds, w, h, park);
       if (isOnScreen(p, w, h)) continue;
       if (!passes(park, filters)) continue;
-      const hit = edgePoint(middle, p, frame);
+      const hit = edgePoint(mid, p, frame);
       const tagSize = tagSizes[park.id] ?? EDGE_GUESS;
       const at = tagPosition(hit, tagSize, frame);
       const box = { ...at, ...tagSize };
@@ -333,23 +364,20 @@ export default function MapScreen() {
       placed.push({ park, ...box, angle: hit.angle, edge: hit.edge });
     }
     return placed;
-  }, [region, mapSize, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
+  }, [bounds, mapSize, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
 
   function goToEdgePark(park: ParkPin) {
     setSelected(park);
-    mapRef.current?.animateToRegion(
-      {
-        latitude: park.latitude,
-        longitude: park.longitude,
-        latitudeDelta: region?.latitudeDelta ?? NEAR_DELTA,
-        longitudeDelta: region?.longitudeDelta ?? NEAR_DELTA,
-      },
-      400,
-    );
+    animateTo({
+      latitude: park.latitude,
+      longitude: park.longitude,
+      latitudeDelta: bounds ? bounds.north - bounds.south : NEAR_DELTA,
+      longitudeDelta: bounds ? lngSpan(bounds) : NEAR_DELTA,
+    });
   }
 
   const edgeDistance = (park: ParkPin) => {
-    const from = me ?? (region ? { latitude: region.latitude, longitude: region.longitude } : null);
+    const from = me ?? middle;
     return from ? formatDistance(distanceMeters(from, park), metric, i18n.language) : null;
   };
 

@@ -3,11 +3,13 @@
  * an off-screen park's tag sits on the edge of the map, and which way its
  * arrow points. Pure geometry, no React.
  *
- * Screen positions come from the visible region the way the map draws it:
+ * Screen positions come from the map's own visible area (not the region we
+ * asked it to show, which it may adjust), the way the map draws it:
  * longitude is linear across the screen, latitude follows Web Mercator.
  */
 
-export type Region = { latitude: number; longitude: number; latitudeDelta: number; longitudeDelta: number };
+/** The map's visible area, as the map itself reports it. */
+export type View = { north: number; south: number; east: number; west: number };
 export type Point = { x: number; y: number };
 /** The part of the screen markers may sit in (clear of the search bar, buttons and cards). */
 export type Frame = { left: number; top: number; right: number; bottom: number };
@@ -16,15 +18,21 @@ export type Edge = 'top' | 'right' | 'bottom' | 'left';
 const RAD = Math.PI / 180;
 const mercY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (Math.max(-85, Math.min(85, lat)) * RAD) / 2));
 
-/** Where a coordinate falls on a w×h map showing `region` (may be off-screen). */
-export function project(region: Region, w: number, h: number, coord: { latitude: number; longitude: number }): Point {
-  let dLng = coord.longitude - region.longitude;
-  if (dLng > 180) dLng -= 360;
+/** Degrees of longitude across the view (it may cross the antimeridian). */
+export function lngSpan(v: View) {
+  return v.east >= v.west ? v.east - v.west : v.east + 360 - v.west;
+}
+
+/** Where a coordinate falls on a w×h map showing `view` (may be off-screen). */
+export function project(v: View, w: number, h: number, coord: { latitude: number; longitude: number }): Point {
+  let dLng = coord.longitude - v.west;
+  // Measure from the west edge the short way round, so the far side of the
+  // antimeridian lands to the right and not 360° away.
   if (dLng < -180) dLng += 360;
-  const x = w / 2 + (dLng / region.longitudeDelta) * w;
-  const top = mercY(region.latitude + region.latitudeDelta / 2);
-  const bottom = mercY(region.latitude - region.latitudeDelta / 2);
-  const y = h / 2 - ((mercY(coord.latitude) - mercY(region.latitude)) / (top - bottom)) * h;
+  if (dLng > 180 + lngSpan(v) / 2) dLng -= 360;
+  const x = (dLng / lngSpan(v)) * w;
+  const top = mercY(v.north);
+  const y = ((top - mercY(coord.latitude)) / (top - mercY(v.south))) * h;
   return { x, y };
 }
 
