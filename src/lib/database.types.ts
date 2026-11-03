@@ -2305,6 +2305,7 @@ export type Database = {
           username: string
         }[]
       }
+      my_going_privately_default: { Args: never; Returns: boolean }
       my_invite_count: { Args: never; Returns: number }
       my_invites: {
         Args: never
@@ -2576,6 +2577,10 @@ export type Database = {
           going_privately?: boolean
           remind_me?: boolean
         }
+        Returns: undefined
+      }
+      set_going_privately_default: {
+        Args: { value: boolean }
         Returns: undefined
       }
       set_meetup_repeat: {

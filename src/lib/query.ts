@@ -132,6 +132,18 @@ export const keys = {
   hereNow: (parkId: string) => ['here-now', parkId] as const,
   /** A member's current check-in, for their profile tag. */
   checkIn: (userId: string) => ['check-in', userId] as const,
+  /** One date of a meetup. Every meetup key starts with 'meetups'. */
+  meetup: (eventId: string) => ['meetups', 'event', eventId] as const,
+  /** A date's going list and count. */
+  meetupGoing: (eventId: string) => ['meetups', 'going', eventId] as const,
+  /** A date's comments. */
+  meetupComments: (eventId: string) => ['meetups', 'comments', eventId] as const,
+  /** Whether you follow a repeating meetup. */
+  seriesFollow: (seriesId: string, userId: string) => ['meetups', 'follow', seriesId, userId] as const,
+  /** Your Going privately default (Settings › Privacy). */
+  goingPrivately: (userId: string) => ['going-privately', userId] as const,
+  /** A signed URL for a meetup's cover photo. */
+  meetupCover: (path: string) => ['meetup-cover', path] as const,
   /** How many posts and park photos you have (Delete account). */
   myContentCounts: (userId: string) => ['content-counts', userId] as const,
 };

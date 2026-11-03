@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 're
 import { SafeAreaView } from '@/components/safe-area';
 
 import { FrameEditor, StripThumb } from '@/components/media';
+import { NewModeSwitch } from '@/components/meetup-compose';
 import { Button, Icon } from '@/components/ui';
 import { formatDuration, frameRatio, frameShapeLabel, MAX_SLIDES, pickFromLibrary, type Rejection } from '@/lib/media';
 import { usePostDraft } from '@/lib/post-draft';
@@ -31,7 +32,7 @@ export default function NewPostMedia() {
   const { t } = useTranslation();
   const c = useColors();
   const { width } = useWindowDimensions();
-  const { items, setItems, addMedia, setFrame } = usePostDraft();
+  const { items, setItems, addMedia, setFrame, park } = usePostDraft();
 
   const [selected, setSelected] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -111,6 +112,13 @@ export default function NewPostMedia() {
           style={styles.headerButton}
         />
       </View>
+
+      {items.length === 0 ? (
+        // Meetups (v2): New asks Post or Meetup, until media is picked.
+        <View style={styles.modeSwitch}>
+          <NewModeSwitch mode="post" park={park} />
+        </View>
+      ) : null}
 
       {items.length === 0 ? (
         <View style={styles.empty}>
@@ -300,6 +308,7 @@ const styles = StyleSheet.create({
     paddingBottom: space[3],
   },
   headerButton: { minWidth: 88, minHeight: 48 },
+  modeSwitch: { paddingHorizontal: space[4], paddingTop: space[2] },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space[4], padding: space[6] },
   emptyIcon: { width: 88, height: 88, alignItems: 'center', justifyContent: 'center' },
   emptyButton: { alignSelf: 'stretch' },

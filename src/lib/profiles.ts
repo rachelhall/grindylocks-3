@@ -444,6 +444,10 @@ export function useProfileSetting(userId: string | undefined) {
     onError: (_error, _vars, context) => {
       client.setQueryData(key, context?.previous);
     },
-    onSettled: () => client.invalidateQueries({ queryKey: keys.profiles() }),
+    onSettled: (_data, _error, { setting }) => {
+      void client.invalidateQueries({ queryKey: keys.profiles() });
+      // Going privately defaults to on for private accounts (Meetups v2).
+      if (setting === 'is_private' && userId) void client.invalidateQueries({ queryKey: keys.goingPrivately(userId) });
+    },
   });
 }

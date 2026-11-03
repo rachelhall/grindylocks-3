@@ -100,6 +100,16 @@ const icons = {
   // Meetups (v2 mockups).
   checkIn: { ios: 'mappin.and.ellipse', android: 'where_to_vote' },
   timer: { ios: 'timer', android: 'timer' },
+  calendar: { ios: 'calendar', android: 'calendar_today' },
+  clock: { ios: 'clock', android: 'schedule' },
+  repeat: { ios: 'repeat', android: 'repeat' },
+  coHost: { ios: 'person.badge.plus', android: 'group_add' },
+  titleText: { ios: 'textformat', android: 'title' },
+  skate: { ios: 'figure.roll', android: 'roller_skating' },
+  globe: { ios: 'globe', android: 'public' },
+  eye: { ios: 'eye', android: 'visibility' },
+  eyeOff: { ios: 'eye.slash', android: 'visibility_off' },
+  alarm: { ios: 'alarm', android: 'alarm' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
