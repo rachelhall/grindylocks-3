@@ -293,7 +293,9 @@ export default function MapScreen() {
       })
     : null;
   const farDistance = far && me ? formatDistance(far.distance_m ?? distanceMeters(me, far), metric, i18n.language) : null;
-  const showFar = far !== null && selected === null;
+  // Only while there's nothing on the map: once you've moved somewhere with
+  // parks, the card goes and the pins (and edge markers) take over.
+  const showFar = far !== null && selected === null && inView.length === 0;
   const distance =
     selected && me
       ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language)
@@ -479,7 +481,7 @@ export default function MapScreen() {
       </View>
 
       {/* No parks near you yet */}
-      {far && !selected ? (
+      {showFar && far ? (
         <View
           accessibilityRole="summary"
           onLayout={(e) => setFarCardHeight(e.nativeEvent.layout.height)}
