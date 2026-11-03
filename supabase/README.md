@@ -98,7 +98,8 @@ Turn it on in this order, so there's never a moment when anyone can sign up:
    invite gets an account.
 
 The hook also refuses accounts added by hand with **Add user** in the
-dashboard (they have no invite). To add a tester, make an invite in the app
+dashboard (they have no invite). Accounts made through the admin API with
+the secret key skip it (as `scripts/create-review-account.mjs` does). To add a tester, make an invite in the app
 (You → Invites) and send them the code instead.
 
 Codes are claimed by the first email that signs up with them. If someone
@@ -202,9 +203,9 @@ Setting it up:
    role only).
 2. Set `REVIEW_EMAIL` and `REVIEW_CODE` (Edge Functions → Secrets).
 3. `supabase functions deploy review-sign-in --no-verify-jwt`
-4. Make an invite in the app, then create the account:
-   `node scripts/create-review-account.mjs <invite code>` (see the script's
-   header for the secret key).
+4. Create the account: `node scripts/create-review-account.mjs` (see the
+   script's header for the secret key). Accounts made with the secret key
+   skip the invite hook, so it needs no invite.
 5. Sign in as `review@grindylocks.com` with the fixed code and finish
    onboarding.
 
