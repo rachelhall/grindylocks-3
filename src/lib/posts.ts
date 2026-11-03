@@ -15,7 +15,7 @@
 import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { Database } from './database.types';
-import { photoUrls } from './media';
+import { photoUrls, videoKeys } from './media';
 import type { ObstacleType } from './parks';
 import type { GridPost } from './profiles';
 import { fresh, keys } from './query';
@@ -47,6 +47,8 @@ export type PostSlide = {
   status: Enums['upload_status'];
   photoUrl?: string;
   videoId: string | null;
+  /** What goes in the clip's Stream URLs (a signed token); null if it can't play. */
+  videoKey: string | null;
   /** A specific obstacle at the park, if the viewer can see it. */
   obstacle: { id: string; name: string; type: ObstacleType } | null;
   /** Just a general type, when no specific obstacle was picked. */
@@ -115,7 +117,14 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
       .filter((s) => s.kind === 'photo' && s.upload_status === 'ready' && s.storage_path)
       .map((s) => s.storage_path!),
   );
-  const urls = await photoUrls(paths);
+  const [urls, clips] = await Promise.all([
+    photoUrls(paths),
+    videoKeys(
+      rows.flatMap((r) =>
+        r.post_slides.filter((s) => s.kind === 'video' && s.upload_status === 'ready').map((s) => s.stream_video_id),
+      ),
+    ),
+  ]);
   return rows.map((r) => ({
     id: r.id,
     authorId: r.author_id,
@@ -143,6 +152,7 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
         status: s.upload_status,
         photoUrl: s.storage_path ? urls[s.storage_path] : undefined,
         videoId: s.stream_video_id,
+        videoKey: s.stream_video_id ? (clips[s.stream_video_id] ?? null) : null,
         obstacle: s.obstacle ? { id: s.obstacle.id, name: s.obstacle.name, type: s.obstacle.general_type } : null,
         obstacleType: s.obstacle_type,
         obstacleId: s.obstacle_id,
@@ -167,6 +177,7 @@ export function toGridPost(post: Post): GridPost {
           durationS: s.durationS,
           photoUrl: s.photoUrl,
           videoId: s.videoId,
+          videoKey: s.videoKey,
         }
       : null,
   };

@@ -208,17 +208,50 @@ export async function photoUrls(
   return out;
 }
 
-/** HLS playback URL, or null until Stream is configured for the app. */
-export function videoPlaybackUrl(videoId: string): string | null {
-  const code = env.streamCustomerCode;
-  if (!code) return null;
-  return `https://customer-${code}.cloudflarestream.com/${videoId}/manifest/video.m3u8`;
+/** stream-token signs at most this many clips per call. */
+const TOKEN_BATCH = 100;
+
+/**
+ * Playback keys for clips the viewer is allowed to see: a signed Stream
+ * token per video ID (good for a few hours), which goes where the video ID
+ * would in a Stream URL. Every clip needs one to play, the way photos need
+ * a signed URL. A clip the viewer can't see gets no key.
+ *
+ * Before the signing key is set up (or if the call fails) this falls back
+ * to the plain video IDs, which play only while clips don't require signing.
+ */
+export async function videoKeys(videoIds: (string | null | undefined)[]): Promise<Record<string, string>> {
+  const ids = [...new Set(videoIds.filter((v): v is string => Boolean(v)))];
+  const out: Record<string, string> = {};
+  for (const id of ids) out[id] = id;
+  for (let i = 0; i < ids.length; i += TOKEN_BATCH) {
+    const batch = ids.slice(i, i + TOKEN_BATCH);
+    const { data, error } = await supabase.functions.invoke('stream-token', { body: { video_ids: batch } });
+    if (error || !data?.signed) continue;
+    const tokens = (data.tokens ?? {}) as Record<string, string>;
+    for (const id of batch) {
+      if (tokens[id]) out[id] = tokens[id];
+      else delete out[id];
+    }
+  }
+  return out;
 }
 
-export function videoThumbnailUrl(videoId: string, height = 480): string | null {
+/**
+ * HLS playback URL for a clip's key from `videoKeys`, or null until Stream
+ * is configured for the app.
+ */
+export function videoPlaybackUrl(key: string): string | null {
   const code = env.streamCustomerCode;
   if (!code) return null;
-  return `https://customer-${code}.cloudflarestream.com/${videoId}/thumbnails/thumbnail.jpg?time=1s&height=${height}`;
+  return `https://customer-${code}.cloudflarestream.com/${key}/manifest/video.m3u8`;
+}
+
+/** A frame from a clip, by its key from `videoKeys`. */
+export function videoThumbnailUrl(key: string, height = 480): string | null {
+  const code = env.streamCustomerCode;
+  if (!code) return null;
+  return `https://customer-${code}.cloudflarestream.com/${key}/thumbnails/thumbnail.jpg?time=1s&height=${height}`;
 }
 
 /* Layout ---------------------------------------------------------------------- */
