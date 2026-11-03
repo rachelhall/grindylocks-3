@@ -48,6 +48,10 @@ example
 # Terminal output saved for Claude to read (see cli-output/README in project instructions)
 cli-output/
 
+# Firebase service account keys (FCM V1). google-services.json is
+# git-ignored but deliberately NOT listed here, so local builds include it.
+*firebase-adminsdk*.json
+
 # EAS: this file replaces .gitignore for uploads, so it repeats it above.
 # The web admin is its own Next.js project; mobile builds don't need it.
 web/
