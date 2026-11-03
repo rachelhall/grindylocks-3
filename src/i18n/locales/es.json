@@ -537,6 +537,7 @@
     "title": "Invitaciones",
     "left_one": "invitación disponible",
     "left_other": "invitaciones disponibles",
+    "unlimited": "invitaciones ilimitadas",
     "body": "Cada enlace sirve una vez y caduca a los 7 días. Si se cancela o caduca sin usarse, recuperas la invitación. ¿Necesitas más? Pídeselas a tu admin de ciudad o de parque.",
     "make": "Crear enlace de invitación",
     "noneLeftTitle": "No te quedan invitaciones",

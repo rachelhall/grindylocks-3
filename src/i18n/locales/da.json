@@ -537,6 +537,7 @@
     "title": "Invitationer",
     "left_one": "invitation tilbage",
     "left_other": "invitationer tilbage",
+    "unlimited": "ubegrænsede invitationer",
     "body": "Hvert link virker én gang og udløber efter 7 dage. Bliver det annulleret eller udløber ubrugt, får du invitationen tilbage. Brug for flere? Spørg din by- eller parkadmin.",
     "make": "Lav et invitationslink",
     "noneLeftTitle": "Ingen invitationer tilbage",
