@@ -2111,7 +2111,7 @@ export type Database = {
         | "description"
         | "obstacle"
         | "other"
-      park_setting: "indoor" | "outdoor" | "covered_outdoor"
+      park_setting: "indoor" | "outdoor" | "indoor_outdoor" | "covered_outdoor"
       park_status:
         | "open"
         | "temporarily_closed"
@@ -2328,7 +2328,7 @@ export const Constants = {
         "obstacle",
         "other",
       ],
-      park_setting: ["indoor", "outdoor", "covered_outdoor"],
+      park_setting: ["indoor", "outdoor", "indoor_outdoor", "covered_outdoor"],
       park_status: [
         "open",
         "temporarily_closed",
