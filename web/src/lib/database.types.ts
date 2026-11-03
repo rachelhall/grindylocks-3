@@ -2061,6 +2061,7 @@ export type Database = {
         | "warning"
         | "suspension"
         | "role_vacated"
+        | "caption_mention"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -2274,6 +2275,7 @@ export const Constants = {
         "warning",
         "suspension",
         "role_vacated",
+        "caption_mention",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [
