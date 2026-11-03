@@ -1,8 +1,19 @@
 import type { ReactNode } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { Icon } from '@/components/ui';
+import { appConfig } from '@/lib/config';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
+
+/** Opens the mail app to the support address; if there isn't one, shows the address instead. */
+export async function openSupportMail(subject?: string) {
+  const url = `mailto:${appConfig.supportEmail}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
+  try {
+    await Linking.openURL(url);
+  } catch {
+    Alert.alert(appConfig.supportEmail);
+  }
+}
 
 /** A settings group: an uppercase label, then its rows. */
 export function SettingsSection({ title, children }: { title: string; children: ReactNode }) {

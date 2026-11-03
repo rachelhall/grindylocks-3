@@ -300,6 +300,8 @@ export function useBlock(userId: string | undefined) {
       void client.invalidateQueries({ queryKey: keys.following(userId ?? '') });
       void client.invalidateQueries({ queryKey: ['search'] });
       void client.invalidateQueries({ queryKey: ['posts'] });
+      // Their posts leave the Home feeds too (blocking from a post's menu, M5).
+      void client.invalidateQueries({ queryKey: ['feed'] });
     },
   });
 }

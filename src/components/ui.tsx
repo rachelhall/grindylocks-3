@@ -82,6 +82,14 @@ const icons = {
   badgeInvite: { ios: 'envelope.fill', android: 'mail' },
   badgeWave: { ios: 'hand.wave.fill', android: 'waving_hand' },
   badgePlane: { ios: 'airplane.arrival', android: 'flight_land' },
+  // Roles and safety (M5 mockups).
+  badgeRemoved: { ios: 'hammer.fill', android: 'gavel' },
+  badgeWarning: { ios: 'exclamationmark.triangle.fill', android: 'warning' },
+  badgeRole: { ios: 'shield.fill', android: 'shield_person' },
+  checkCircle: { ios: 'checkmark.circle.fill', android: 'check_circle' },
+  mail: { ios: 'envelope', android: 'mail' },
+  mailSent: { ios: 'envelope.open', android: 'mark_email_read' },
+  chevronUp: { ios: 'chevron.up', android: 'expand_less' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;
@@ -126,6 +134,8 @@ type ButtonProps = {
   loading?: boolean;
   /** Small second line, e.g. "Coming soon". */
   note?: string;
+  /** An icon before the label (Help's Email button). */
+  icon?: IconName;
   /** Override colors, for brand-layer screens that are always dark. */
   palette?: { fill: string; text: string; border: string };
   style?: ViewStyle;
@@ -142,6 +152,7 @@ export function Button({
   disabled,
   loading,
   note,
+  icon,
   palette,
   style,
 }: ButtonProps) {
@@ -172,9 +183,12 @@ export function Button({
         <ActivityIndicator color={text} />
       ) : (
         <View style={styles.buttonInner}>
-          <Text variant="headline" style={{ color: text, fontSize: 16 }}>
-            {label}
-          </Text>
+          <View style={styles.buttonLabel}>
+            {icon ? <Icon name={icon} color={text} size={20} /> : null}
+            <Text variant="headline" style={{ color: text, fontSize: 16 }}>
+              {label}
+            </Text>
+          </View>
           {note ? (
             <Text variant="label" style={{ color: text }}>
               {note}
@@ -234,7 +248,8 @@ export function StepHeader({ step, total, canGoBack }: { step: number; total: nu
 /* Action sheets ------------------------------------------------------------ */
 
 export type SheetAction = { label: string; onPress: () => void; destructive?: boolean };
-type SheetRequest = { title?: string; actions: SheetAction[] };
+/** `message` is a smaller line under the title (a role holder's report summary). */
+type SheetRequest = { title?: string; message?: string; actions: SheetAction[] };
 
 /**
  * A short list of actions for a More button: the native action sheet on
@@ -247,21 +262,22 @@ export function useActionSheet(): { sheet: ReactNode; show: (request: SheetReque
   const [request, setRequest] = useState<SheetRequest | null>(null);
 
   const show = useCallback(
-    ({ title, actions }: SheetRequest) => {
+    ({ title, message, actions }: SheetRequest) => {
       if (actions.length === 0) return;
       if (Platform.OS === 'ios') {
-        const destructive = actions.findIndex((a) => a.destructive);
+        const destructive = actions.flatMap((a, i) => (a.destructive ? [i] : []));
         ActionSheetIOS.showActionSheetWithOptions(
           {
             title,
+            message,
             options: [...actions.map((a) => a.label), t('common.cancel')],
             cancelButtonIndex: actions.length,
-            destructiveButtonIndex: destructive === -1 ? undefined : destructive,
+            destructiveButtonIndex: destructive.length ? destructive : undefined,
           },
           (i) => actions[i]?.onPress(),
         );
       } else {
-        setRequest({ title, actions });
+        setRequest({ title, message, actions });
       }
     },
     [t],
@@ -275,6 +291,11 @@ export function useActionSheet(): { sheet: ReactNode; show: (request: SheetReque
         {request?.title ? (
           <Text variant="label" color="textSecondary" style={styles.sheetTitle}>
             {request.title}
+          </Text>
+        ) : null}
+        {request?.message ? (
+          <Text variant="bodySm" color="textSecondary" style={styles.sheetMessage}>
+            {request.message}
           </Text>
         ) : null}
         {request?.actions.map((a) => (
@@ -433,14 +454,16 @@ export function ChoiceCard({
   );
 }
 
-/** A single-select row in a list (cities, parks). */
+/** A single-select row in a list (cities, parks), with an optional line under the title. */
 export function SelectRow({
   title,
+  subtitle,
   detail,
   selected,
   onPress,
 }: {
   title: string;
+  subtitle?: string;
   detail?: string;
   selected: boolean;
   onPress: () => void;
@@ -450,10 +473,11 @@ export function SelectRow({
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={detail ? `${title}, ${detail}` : title}
+      accessibilityLabel={[title, subtitle, detail].filter(Boolean).join(', ')}
       onPress={onPress}
       style={({ pressed }) => [
         styles.selectRow,
+        subtitle && styles.selectRowTall,
         {
           backgroundColor: selected ? c.accentSubtle : c.surfaceRaised,
           borderColor: selected ? c.border : c.borderSubtle,
@@ -461,9 +485,20 @@ export function SelectRow({
         pressed && styles.buttonPressed,
       ]}
     >
-      <Text variant="headline" style={{ flex: 1, color: selected ? c.onAccentSubtle : c.text }}>
-        {title}
-      </Text>
+      {subtitle ? (
+        <View style={styles.choiceText}>
+          <Text variant="headline" style={{ color: selected ? c.onAccentSubtle : c.text }}>
+            {title}
+          </Text>
+          <Text variant="bodySm" style={{ color: selected ? c.onAccentSubtleSecondary : c.textSecondary }}>
+            {subtitle}
+          </Text>
+        </View>
+      ) : (
+        <Text variant="headline" style={{ flex: 1, color: selected ? c.onAccentSubtle : c.text }}>
+          {title}
+        </Text>
+      )}
       {detail ? (
         <Text variant="label" style={{ color: selected ? c.onAccentSubtleSecondary : c.textSecondary }}>
           {detail}
@@ -519,6 +554,7 @@ const styles = StyleSheet.create({
   },
   buttonTertiary: { minHeight: size.tapMin },
   buttonInner: { alignItems: 'center', gap: 2 },
+  buttonLabel: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   buttonDisabled: { opacity: 0.45 },
   buttonPressed: { opacity: 0.75 },
   back: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
@@ -568,9 +604,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: space[3],
   },
+  selectRowTall: { paddingVertical: space[2] },
   sheetScrim: { flex: 1, backgroundColor: 'rgba(17,17,17,0.5)' },
   sheet: { borderTopWidth: stroke.rule, paddingHorizontal: space[4], paddingTop: space[3], paddingBottom: space[6] },
   sheetTitle: { paddingVertical: space[2] },
+  sheetMessage: { paddingBottom: space[2] },
   sheetRow: { minHeight: 56, justifyContent: 'center', borderTopWidth: stroke.hairline },
   sheetCancel: { marginTop: space[3] },
   toggle: { width: 50, height: 30, borderWidth: stroke.rule, padding: 1, justifyContent: 'center' },

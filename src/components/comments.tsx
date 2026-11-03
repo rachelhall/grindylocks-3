@@ -4,6 +4,7 @@
  * longer than two replies collapsed to "View N replies". Replying to a reply
  * stays in the same thread with an @mention of the person you're answering.
  * Comments can be deleted (your own, or any on your post), never edited.
+ * Anyone else's comment can be reported (M5), from the same line as Reply.
  */
 import { router } from 'expo-router';
 import { Fragment, type RefObject, useState } from 'react';
@@ -12,6 +13,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from
 
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
+import { useExplainRestriction, useReportSheet } from '@/components/safety';
 import { Icon } from '@/components/ui';
 import {
   type Comment,
@@ -73,12 +75,15 @@ function CommentRow({
   canDelete,
   onReply,
   onDelete,
+  onReport,
 }: {
   comment: Comment;
   reply: boolean;
   canDelete: boolean;
   onReply: () => void;
   onDelete: () => void;
+  /** Set for other people's comments. */
+  onReport?: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
@@ -150,6 +155,18 @@ function CommentRow({
               {t('comments.delete')}
             </Text>
           ) : null}
+          {onReport ? (
+            <Text
+              variant="caption"
+              color="textSecondary"
+              accessibilityRole="button"
+              accessibilityLabel={t('report.reportComment')}
+              onPress={onReport}
+              style={styles.metaAction}
+            >
+              {t('report.report')}
+            </Text>
+          ) : null}
         </View>
       </View>
     </View>
@@ -163,6 +180,7 @@ function ThreadView({
   canDelete,
   onReply,
   onDelete,
+  reportFor,
 }: {
   thread: Thread;
   expanded: boolean;
@@ -170,6 +188,8 @@ function ThreadView({
   canDelete: (comment: Comment) => boolean;
   onReply: (target: ReplyTarget) => void;
   onDelete: (comment: Comment) => void;
+  /** Opens the report sheet for a comment, or undefined when it can't be reported. */
+  reportFor: (comment: Comment) => (() => void) | undefined;
 }) {
   const { t } = useTranslation();
   const c = useColors();
@@ -192,6 +212,7 @@ function ThreadView({
             : onReply({ threadId: thread.comment.id, username: thread.comment.username, userId: null })
         }
         onDelete={() => onDelete(thread.comment)}
+        onReport={reportFor(thread.comment)}
       />
       {collapsed ? (
         <Pressable
@@ -213,6 +234,7 @@ function ThreadView({
             canDelete={canDelete(r)}
             onReply={() => !thread.comment.deleted && onReply(target(r))}
             onDelete={() => onDelete(r)}
+            onReport={reportFor(r)}
           />
         ))
       )}
@@ -242,10 +264,17 @@ export function CommentList({
   const c = useColors();
   const comments = useComments(postId);
   const remove = useDeleteComment(postId);
+  const report = useReportSheet();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const canDelete = (comment: Comment) =>
     !comment.deleted && Boolean(userId) && (comment.authorId === userId || postAuthorId === userId);
+
+  const reportFor = (comment: Comment) => {
+    const { authorId, username } = comment;
+    if (comment.deleted || !userId || !authorId || !username || authorId === userId) return undefined;
+    return () => report.open({ kind: 'comment', id: comment.id, personId: authorId, username });
+  };
 
   function confirmDelete(comment: Comment) {
     Alert.alert(t('comments.deleteTitle'), t('comments.deleteBody'), [
@@ -285,8 +314,10 @@ export function CommentList({
           canDelete={canDelete}
           onReply={onReply}
           onDelete={confirmDelete}
+          reportFor={reportFor}
         />
       ))}
+      {report.sheet}
     </View>
   );
 }
@@ -401,6 +432,7 @@ export function CommentComposer({
   const { t } = useTranslation();
   const c = useColors();
   const add = useAddComment(postId, userId);
+  const explainRestriction = useExplainRestriction();
   const [text, setText] = useState('');
   const [cursor, setCursor] = useState(0);
   const ready = text.trim().length > 0 && !add.isPending;
@@ -447,7 +479,8 @@ export function CommentComposer({
           onClearReply();
           onPosted(threadId);
         },
-        onError: (err) => {
+        onError: async (err) => {
+          if (await explainRestriction(err)) return;
           Sentry.captureException(err);
           Alert.alert(t('comments.failed'), t('errors.network'));
         },

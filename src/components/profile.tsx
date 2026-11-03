@@ -18,6 +18,7 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { MediaTag } from '@/components/media';
 import { ParkRow, useParkLine } from '@/components/parks';
+import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { formatDuration, videoThumbnailUrl } from '@/lib/media';
@@ -33,7 +34,7 @@ import {
   useProfilePosts,
   visibleBadge,
 } from '@/lib/profiles';
-import { useBlock, useFollow, useMyInvites } from '@/lib/social';
+import { useFollow, useMyInvites } from '@/lib/social';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 type Tab = 'posts' | 'tagged' | 'filmed' | 'saved';
@@ -215,7 +216,10 @@ function FollowButton({ viewerId, profile }: { viewerId: string; profile: Profil
   const { t } = useTranslation();
   const follow = useFollow(viewerId, profile);
   const status = profile.followStatus;
-  const onError = () => Alert.alert(t('errors.generic'), t('errors.network'));
+  const explainRestriction = useExplainRestriction();
+  const onError = async (err: unknown) => {
+    if (!(await explainRestriction(err))) Alert.alert(t('errors.generic'), t('errors.network'));
+  };
 
   function press() {
     if (!status) {
@@ -538,25 +542,10 @@ export function ProfileView({ username }: { username?: string }) {
   );
 
   const { sheet, show } = useActionSheet();
-  const block = useBlock(myId);
-  function confirmBlock(person: Profile) {
-    Alert.alert(t('block.title', { username: person.username }), t('block.body'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('block.block'),
-        style: 'destructive',
-        onPress: () =>
-          block.mutate(
-            { personId: person.id, block: true },
-            {
-              // They disappear for you, so there's nothing left to show here.
-              onSuccess: () => (router.canGoBack() ? router.back() : router.replace('/home')),
-              onError: () => Alert.alert(t('errors.generic'), t('errors.network')),
-            },
-          ),
-      },
-    ]);
-  }
+  // They disappear for you once blocked, so there's nothing left to show here.
+  const leave = () => (router.canGoBack() ? router.back() : router.replace('/home'));
+  const confirmBlock = useConfirmBlock();
+  const report = useReportSheet({ onBlocked: leave });
 
   const topBar = (
     <View style={[styles.topBar, { justifyContent: username ? 'space-between' : 'flex-end' }]}>
@@ -577,7 +566,14 @@ export function ProfileView({ username }: { username?: string }) {
           onPress={() =>
             show({
               title: profile.username,
-              actions: [{ label: t('block.block'), destructive: true, onPress: () => confirmBlock(profile) }],
+              actions: [
+                {
+                  label: t('report.reportPerson', { username: profile.username }),
+                  onPress: () =>
+                    report.open({ kind: 'person', id: profile.id, personId: profile.id, username: profile.username }),
+                },
+                { label: t('block.block'), destructive: true, onPress: () => confirmBlock(profile, leave) },
+              ],
             })
           }
           style={({ pressed }) => [styles.square, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
@@ -670,6 +666,7 @@ export function ProfileView({ username }: { username?: string }) {
         {body}
       </ScrollView>
       {sheet}
+      {report.sheet}
     </SafeAreaView>
   );
 }

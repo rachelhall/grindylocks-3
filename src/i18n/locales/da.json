@@ -8,7 +8,8 @@
     "signOut": "Log ud",
     "cancel": "Annuller",
     "close": "Luk",
-    "deletedUser": "slettet bruger"
+    "deletedUser": "slettet bruger",
+    "optional": "(valgfrit)"
   },
   "auth": {
     "welcome": {
@@ -341,7 +342,17 @@
     "someoneNew": "{{a}} er lige startet på Grindylocks i {{metro}}. Sig hej!",
     "visiting": "{{a}} er på besøg i {{metro}}",
     "visitingPark": "{{a}} er på besøg i {{metro}} og kommer forbi {{park}}",
-    "unreadLabel": "Ny: {{text}}"
+    "unreadLabel": "Ny: {{text}}",
+    "parkFixLive": "Din rettelse til {{park}} er live. Tak!",
+    "parkFixLiveBold": "Din rettelse til {{park}}",
+    "postRemoved": "Dit opslag blev fjernet efter en gennemgang.",
+    "postRemovedBold": "Dit opslag blev fjernet",
+    "commentRemoved": "Din kommentar blev fjernet efter en gennemgang.",
+    "commentRemovedBold": "Din kommentar blev fjernet",
+    "warning": "En advarsel fra admins",
+    "suspension": "Du er suspenderet",
+    "roleVacatedPark": "{{a}}s rolle som {{role}} i {{park}} er stoppet. Vælg en ny.",
+    "roleVacated": "{{a}}s rolle som {{role}} er stoppet. Vælg en ny."
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -779,5 +790,205 @@
     "askTitle": "Notifikationer er ikke slået til endnu",
     "askBody": "Få besked, når nogen kommenterer, tagger dig eller siger hej i nærheden.",
     "ask": "Slå notifikationer til"
+  },
+  "report": {
+    "report": "Anmeld",
+    "reportPost": "Anmeld opslag",
+    "reportComment": "Anmeld kommentar",
+    "reportPerson": "Anmeld @{{username}}",
+    "titlePost": "Anmeld dette opslag",
+    "titleComment": "Anmeld denne kommentar",
+    "titlePerson": "Anmeld @{{username}}",
+    "postBy": "Opslag af @{{username}}",
+    "commentBy": "Kommentar af @{{username}}",
+    "whatsWrong": "Hvad er der galt?",
+    "spam": "Spam",
+    "spamBody": "Reklamer, svindel eller det samme slået op igen og igen",
+    "harassment": "Chikane",
+    "toOwner": "Går direkte til Rachel",
+    "wrongPark": "Ikke i denne park",
+    "wrongParkBody": "Tagget i den forkerte park",
+    "minor": "Involverer en under 16",
+    "other": "Noget andet",
+    "details": "Noget at tilføje?",
+    "whoPost": "@{{username}} får ikke at vide, hvem der anmeldte det. En park- eller byadmin kigger på det; efter 3 anmeldelser skjules opslaget, indtil de har gjort det.",
+    "whoComment": "@{{username}} får ikke at vide, hvem der anmeldte det. En park- eller byadmin kigger på det.",
+    "whoPerson": "@{{username}} får ikke at vide, hvem der anmeldte dem. Rachel kigger på det.",
+    "send": "Send anmeldelse",
+    "sentTitle": "Tak, den er sendt",
+    "sentPark": "En admin for {{park}} kigger på det. Du hører ikke mere, medmindre de har brug for dig.",
+    "sentAdmin": "En admin kigger på det. Du hører ikke mere, medmindre de har brug for dig.",
+    "sentOwner": "Rachel kigger på det. Du hører ikke mere, medmindre hun har brug for dig.",
+    "blockToo": "Blokér også @{{username}}?",
+    "blockTooBody": "I kan ikke se hinandens opslag, kommentarer eller profiler. Personen får ikke besked.",
+    "blockPerson": "Blokér @{{username}}",
+    "done": "Færdig",
+    "gone": "Det er ikke tilgængeligt længere."
+  },
+  "moderation": {
+    "reported": {
+      "spam_one": "Anmeldt {{count}} gang for spam",
+      "spam_other": "Anmeldt {{count}} gange for spam",
+      "harassment_one": "Anmeldt {{count}} gang for chikane",
+      "harassment_other": "Anmeldt {{count}} gange for chikane",
+      "wrong_park_one": "Anmeldt {{count}} gang for ikke at være i denne park",
+      "wrong_park_other": "Anmeldt {{count}} gange for ikke at være i denne park",
+      "involves_minor_one": "Anmeldt {{count}} gang for at involvere en under 16",
+      "involves_minor_other": "Anmeldt {{count}} gange for at involvere en under 16",
+      "inappropriate_one": "Anmeldt {{count}} gang som upassende",
+      "inappropriate_other": "Anmeldt {{count}} gange som upassende",
+      "other_one": "Anmeldt {{count}} gang",
+      "other_other": "Anmeldt {{count}} gange"
+    },
+    "autoHidden": "Skjult automatisk",
+    "hidden": "Skjult",
+    "hiddenBody": "Skjult for alle, indtil du beslutter dig.",
+    "webAdmin": "Advarsler, suspenderinger og udelukkelser findes i webadmin.",
+    "keepHidden": "Hold skjult",
+    "keepHiddenTitle": "Hold @{{username}}s opslag skjult? De får besked om, at det blev fjernet efter en gennemgang.",
+    "dismiss": "Afvis anmeldelser",
+    "dismissTitle": "Afvis anmeldelserne? Opslaget vises for alle igen, og ingen får besked."
+  },
+  "restriction": {
+    "suspended": "Du er suspenderet indtil {{date}}",
+    "suspendedBody": "Du kan kigge rundt, men du kan ikke lave opslag, kommentere, like eller følge indtil da.",
+    "banned": "Din konto er udelukket",
+    "bannedBody": "Du kan kigge rundt, men du kan ikke lave opslag, kommentere, like eller følge.",
+    "questions": "Spørgsmål? Skriv til os"
+  },
+  "help": {
+    "title": "Hjælp",
+    "intro": "Grindylocks er en lille beta, og et rigtigt menneske læser hver e-mail.",
+    "email": "Skriv til {{email}}",
+    "emailBody": "Åbner din mail-app. Fejl, forkerte parkoplysninger, spørgsmål, hvad som helst.",
+    "howItWorks": "Sådan fungerer det",
+    "yourData": "Dine data",
+    "topics": {
+      "reporting": {
+        "title": "Anmeld et opslag, en kommentar eller en person",
+        "body": "Tryk på ··· og Anmeld. En park- eller byadmin kigger på det; chikane og alt, der involverer en under 16, går direkte til Rachel. Personen får ikke at vide, hvem der anmeldte dem."
+      },
+      "parkFix": {
+        "title": "Ret en parks oplysninger",
+        "body": "På parksiden trykker du på ··· og Anmeld en fejl, eller Foreslå en rettelse nederst. Vælg, hvad der er galt, og tilføj den rigtige værdi, en note eller et billede af skiltet. En parkadmin tjekker det, før noget ændres, og vi giver besked, når din rettelse er live."
+      },
+      "blocking": {
+        "title": "Blokér nogen",
+        "body": "Tryk på ··· på deres profil eller et af deres opslag, og vælg Blokér. I kan ikke se hinandens profiler, opslag eller kommentarer, og ingen af jer følger den anden. Personen får ikke besked. Du kan fjerne blokeringen i Indstillinger under Blokerede konti."
+      },
+      "whereISkate": {
+        "title": "Hvem kan se, hvor jeg skater",
+        "body": "Et opslag tagget i en park vises på parkens side. Stamgæstlister viser folk, der har parken som hjemmepark eller ofte laver opslag der; slå \"Vis mig på stamgæstlister\" fra i Indstillinger for at blive væk fra dem. Private konti vises aldrig på stamgæstlister."
+      }
+    }
+  },
+  "dataCopy": {
+    "body": "Vi sender alt, hvad Grindylocks gemmer om dig, til {{email}} som én fil, du kan åbne i enhver teksteditor:",
+    "included": {
+      "profile": "Din profil, dine opslag, billedtekster og kommentarer",
+      "social": "Likes, følgninger, blokeringer og gemte parker",
+      "credits": "Tags, filmer-krediteringer og parkbilleder",
+      "reports": "Anmeldelser, du har sendt, og eventuelle moderationsbeskeder"
+    },
+    "note": "Billeder og klip står som links, ikke vedhæftet. Én kopi om dagen.",
+    "send": "Send mine data",
+    "sentTitle": "På vej",
+    "sentBody": "Tjek {{email}} om et par minutter.",
+    "onceADay": "Du kan bede om én kopi om dagen. Prøv igen i morgen.",
+    "notSwitchedOn": "Dataeksport er ikke slået til endnu."
+  },
+  "deleteAccount": {
+    "row": "Slet konto",
+    "title": "Slet din konto",
+    "body": "Det kan ikke fortrydes. Det her sker:",
+    "profile": "Din profil, dine følgninger og gemte parker slettes.",
+    "tags": "Hvor du er tagget eller krediteret som filmer på andres opslag, står der \"slettet bruger\".",
+    "roleAt": "Din rolle som {{role}} i {{place}} stopper nu. {{next}}",
+    "role": "Din rolle som {{role}} stopper nu. {{next}}",
+    "nextParkAdmin": "Din parkadmin vælger en ny.",
+    "nextCityAdmin": "Din byadmin vælger en ny.",
+    "nextOwner": "Rachel vælger en ny.",
+    "invites_one": "Dit {{count}} ubrugte invitationslink holder op med at virke. Folk, du har inviteret, beholder deres konti.",
+    "invites_other": "Dine {{count}} ubrugte invitationslinks holder op med at virke. Folk, du har inviteret, beholder deres konti.",
+    "postCount_one": "{{count}} opslag",
+    "postCount_other": "{{count}} opslag",
+    "photoCount_one": "{{count}} parkbillede",
+    "photoCount_other": "{{count}} parkbilleder",
+    "postsAndPhotos": "Dine {{posts}} og {{photos}}",
+    "postsOnly": "Dine {{posts}}",
+    "yourPosts": "Dine opslag og parkbilleder",
+    "keep": "Lad dem blive, anonymiseret",
+    "keepBody": "De bliver på park- og forhindringssider som \"slettet bruger\", så de klip, folk har filmet med dig, ikke går tabt.",
+    "remove": "Slet dem",
+    "removeBody": "Dine opslag og parkbilleder fjernes for alle.",
+    "dataFirst": "Vil du have dine data først?",
+    "sendCode": "Send mig en kode til at bekræfte",
+    "sendCodeBody": "Vi sender en kode til {{email}}. Indtast den på næste skærm for at slette din konto.",
+    "cancel": "Behold min konto",
+    "codeTitle": "Indtast koden",
+    "codeBodyKeep": "Vi har sendt en 6-cifret kode til {{email}}. Når du indtaster den, slettes din konto, og dine opslag bliver som \"slettet bruger\".",
+    "codeBodyRemove": "Vi har sendt en 6-cifret kode til {{email}}. Når du indtaster den, slettes din konto og dine opslag.",
+    "confirm": "Slet min konto",
+    "codeExpired": "Koden er udløbet. Send en ny kode, og indtast den for at slette din konto."
+  },
+  "parkReport": {
+    "menu": "Anmeld en fejl",
+    "suggestFix": "Foreslå en rettelse",
+    "title": "Hvad er der galt?",
+    "fields": {
+      "hours": "Åbningstider",
+      "status": "Status",
+      "lighting": "Lys",
+      "location": "Adresse eller pin",
+      "fees": "Pris",
+      "disciplines": "Hvem må skate",
+      "helmet_rule": "Hjelmregel",
+      "description": "Beskrivelse",
+      "obstacle": "En forhindring",
+      "other": "Noget andet"
+    },
+    "fixLabel": {
+      "hours": "Rigtige åbningstider",
+      "status": "Rigtig status",
+      "lighting": "Rigtigt lys",
+      "location": "Rigtig adresse",
+      "fees": "Rigtig pris",
+      "disciplines": "Hvem må skate her",
+      "helmet_rule": "Rigtig hjelmregel",
+      "description": "Bedre beskrivelse",
+      "obstacle": "Hvad er der galt med den",
+      "other": "Hvad er der galt"
+    },
+    "whichObstacle": "Hvilken forhindring?",
+    "listedNow": "Står der nu",
+    "days": {
+      "daily": "Dagligt",
+      "weekdays": "Hverdage",
+      "weekends": "Weekender"
+    },
+    "opens": "Åbner",
+    "closes": "Lukker",
+    "atSunrise": "Ved solopgang",
+    "atSunset": "Ved solnedgang",
+    "timeFormat": "Brug 24-timers tid, fx 09:00 eller 22:30.",
+    "helmetYes": "Hjelm påkrævet",
+    "helmetNo": "Hjelm ikke påkrævet",
+    "address": "Adresse",
+    "fee": "Entrépris",
+    "feePlaceholder": "40 kr. pr. session",
+    "noDescription": "Ingen beskrivelse endnu.",
+    "note": "Note",
+    "addPhoto": "Tilføj et billede af skiltet",
+    "removePhoto": "Fjern billede",
+    "footnote": "En parkadmin tjekker det, før noget ændres. Vi giver besked, når din rettelse er live.",
+    "sentTitle": "Tak, den er sendt",
+    "sentBody": "En parkadmin tjekker det. Vi giver besked, når din rettelse er live.",
+    "errors": {
+      "say_what_is_wrong": "Foreslå den rigtige værdi, tilføj en note eller et billede, så admins ved, hvad de skal rette.",
+      "pick_an_obstacle": "Vælg den forhindring, der er forkert.",
+      "photo_not_uploaded": "Billedet blev ikke uploadet. Prøv igen, eller send uden billedet.",
+      "too_many_reports": "Det er mange anmeldelser på en time. Prøv igen lidt senere.",
+      "generic": "Det kunne ikke sendes. Tjek din forbindelse, og prøv igen."
+    }
   }
 }

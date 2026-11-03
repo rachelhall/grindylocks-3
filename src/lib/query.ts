@@ -124,6 +124,12 @@ export const keys = {
   recentParks: (userId: string) => ['recent-parks', userId] as const,
   /** One obstacle, for its feed page. */
   obstacle: (id: string) => ['obstacle', id] as const,
+  /** Your suspension or ban, if any (M5). */
+  restriction: (userId: string) => ['restriction', userId] as const,
+  /** Open reports on a post that you can act on (a role holder's post menu). */
+  reportDetail: (userId: string, postId: string) => ['report-detail', userId, postId] as const,
+  /** How many posts and park photos you have (Delete account). */
+  myContentCounts: (userId: string) => ['content-counts', userId] as const,
 };
 
 let started = false;

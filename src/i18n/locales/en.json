@@ -8,7 +8,8 @@
     "signOut": "Sign out",
     "cancel": "Cancel",
     "close": "Close",
-    "deletedUser": "deleted user"
+    "deletedUser": "deleted user",
+    "optional": "(optional)"
   },
   "auth": {
     "welcome": {
@@ -341,7 +342,17 @@
     "someoneNew": "{{a}} just joined Grindylocks in {{metro}}. Say hi!",
     "visiting": "{{a}} is visiting {{metro}}",
     "visitingPark": "{{a}} is visiting {{metro}} and will be at {{park}}",
-    "unreadLabel": "New: {{text}}"
+    "unreadLabel": "New: {{text}}",
+    "parkFixLive": "Your fix to {{park}} is live. Thanks.",
+    "parkFixLiveBold": "Your fix to {{park}}",
+    "postRemoved": "Your post was taken down after a review.",
+    "postRemovedBold": "Your post was taken down",
+    "commentRemoved": "Your comment was removed after a review.",
+    "commentRemovedBold": "Your comment was removed",
+    "warning": "A warning from the admins",
+    "suspension": "You're suspended",
+    "roleVacatedPark": "{{a}}'s {{role}} role at {{park}} ended. Pick someone new.",
+    "roleVacated": "{{a}}'s {{role}} role ended. Pick someone new."
   },
   "feed": {
     "newPost": "New post",
@@ -779,5 +790,205 @@
     "askTitle": "Notifications aren’t on yet",
     "askBody": "Get a buzz when someone comments, tags you or says hi nearby.",
     "ask": "Turn on notifications"
+  },
+  "report": {
+    "report": "Report",
+    "reportPost": "Report post",
+    "reportComment": "Report comment",
+    "reportPerson": "Report @{{username}}",
+    "titlePost": "Report this post",
+    "titleComment": "Report this comment",
+    "titlePerson": "Report @{{username}}",
+    "postBy": "Post by @{{username}}",
+    "commentBy": "Comment by @{{username}}",
+    "whatsWrong": "What's wrong?",
+    "spam": "Spam",
+    "spamBody": "Ads, scams or the same thing posted over and over",
+    "harassment": "Harassment",
+    "toOwner": "Goes straight to Rachel",
+    "wrongPark": "Not at this park",
+    "wrongParkBody": "Tagged at the wrong park",
+    "minor": "Involves someone under 16",
+    "other": "Something else",
+    "details": "Anything to add?",
+    "whoPost": "@{{username}} isn't told who reported it. A park or city admin reviews it; after 3 reports a post hides until they do.",
+    "whoComment": "@{{username}} isn't told who reported it. A park or city admin reviews it.",
+    "whoPerson": "@{{username}} isn't told who reported them. Rachel reviews it.",
+    "send": "Send report",
+    "sentTitle": "Thanks, it's sent",
+    "sentPark": "An admin for {{park}} will take a look. You won't hear back unless they need you.",
+    "sentAdmin": "An admin will take a look. You won't hear back unless they need you.",
+    "sentOwner": "Rachel will take a look. You won't hear back unless she needs you.",
+    "blockToo": "Block @{{username}} too?",
+    "blockTooBody": "You won't see each other's posts, comments or profiles. They aren't told.",
+    "blockPerson": "Block @{{username}}",
+    "done": "Done",
+    "gone": "This isn't available any more."
+  },
+  "moderation": {
+    "reported": {
+      "spam_one": "Reported {{count}} time for spam",
+      "spam_other": "Reported {{count}} times for spam",
+      "harassment_one": "Reported {{count}} time for harassment",
+      "harassment_other": "Reported {{count}} times for harassment",
+      "wrong_park_one": "Reported {{count}} time as not at this park",
+      "wrong_park_other": "Reported {{count}} times as not at this park",
+      "involves_minor_one": "Reported {{count}} time as involving someone under 16",
+      "involves_minor_other": "Reported {{count}} times as involving someone under 16",
+      "inappropriate_one": "Reported {{count}} time as inappropriate",
+      "inappropriate_other": "Reported {{count}} times as inappropriate",
+      "other_one": "Reported {{count}} time",
+      "other_other": "Reported {{count}} times"
+    },
+    "autoHidden": "Auto-hidden",
+    "hidden": "Hidden",
+    "hiddenBody": "Hidden for everyone until you decide.",
+    "webAdmin": "Warnings, suspensions and bans are on the web admin.",
+    "keepHidden": "Keep hidden",
+    "keepHiddenTitle": "Keep @{{username}}'s post hidden? They're told it was taken down after a review.",
+    "dismiss": "Dismiss reports",
+    "dismissTitle": "Dismiss the reports? The post shows for everyone again, and nobody is told."
+  },
+  "restriction": {
+    "suspended": "You're suspended until {{date}}",
+    "suspendedBody": "You can look around, but can't post, comment, like or follow until then.",
+    "banned": "Your account is banned",
+    "bannedBody": "You can look around, but can't post, comment, like or follow.",
+    "questions": "Questions? Email us"
+  },
+  "help": {
+    "title": "Help",
+    "intro": "Grindylocks is a small beta, and a real person reads every email.",
+    "email": "Email {{email}}",
+    "emailBody": "Opens your mail app. Bugs, park mistakes, questions, anything.",
+    "howItWorks": "How things work",
+    "yourData": "Your data",
+    "topics": {
+      "reporting": {
+        "title": "Reporting a post, comment or person",
+        "body": "Tap ··· and Report. A park or city admin reviews it; harassment and anything involving someone under 16 go straight to Rachel. They aren't told who reported them."
+      },
+      "parkFix": {
+        "title": "Fixing a park's details",
+        "body": "On the park page, tap ··· and Report something wrong, or Suggest a fix at the bottom. Pick what's wrong and add the right value, a note or a photo of the sign. A park admin checks it before anything changes, and we'll let you know when your fix goes live."
+      },
+      "blocking": {
+        "title": "Blocking someone",
+        "body": "Tap ··· on their profile or one of their posts and pick Block. You won't see each other's profiles, posts or comments, and neither of you follows the other. They aren't told. You can unblock them in Settings, under Blocked accounts."
+      },
+      "whereISkate": {
+        "title": "Who sees where I skate",
+        "body": "A post tagged at a park shows on that park's page. Regulars lists show people whose home park it is or who post there a lot; turn off \"Show me in regulars lists\" in Settings to leave them. Private accounts never appear in regulars lists."
+      }
+    }
+  },
+  "dataCopy": {
+    "body": "We'll email everything Grindylocks keeps about you to {{email}}, as one file you can open in any text editor:",
+    "included": {
+      "profile": "Your profile, posts, captions and comments",
+      "social": "Likes, follows, blocks and saved parks",
+      "credits": "Tags, filmer credits and park photos",
+      "reports": "Reports you sent and any moderation notices"
+    },
+    "note": "Photos and clips are listed by link, not attached. One copy a day.",
+    "send": "Email my data",
+    "sentTitle": "On its way",
+    "sentBody": "Check {{email}} in a few minutes.",
+    "onceADay": "You can ask for one copy a day. Try again tomorrow.",
+    "notSwitchedOn": "Data exports aren't switched on yet."
+  },
+  "deleteAccount": {
+    "row": "Delete account",
+    "title": "Delete your account",
+    "body": "This can't be undone. Here's what happens:",
+    "profile": "Your profile, follows and saved parks are deleted.",
+    "tags": "Where you're tagged or credited as filmer on other people's posts, it shows \"deleted user\".",
+    "roleAt": "Your role as {{role}} at {{place}} ends now. {{next}}",
+    "role": "Your role as {{role}} ends now. {{next}}",
+    "nextParkAdmin": "Your park admin will pick someone new.",
+    "nextCityAdmin": "Your city admin will pick someone new.",
+    "nextOwner": "Rachel will pick someone new.",
+    "invites_one": "Your {{count}} unused invite link stops working. People you invited keep their accounts.",
+    "invites_other": "Your {{count}} unused invite links stop working. People you invited keep their accounts.",
+    "postCount_one": "{{count}} post",
+    "postCount_other": "{{count}} posts",
+    "photoCount_one": "{{count}} park photo",
+    "photoCount_other": "{{count}} park photos",
+    "postsAndPhotos": "Your {{posts}} and {{photos}}",
+    "postsOnly": "Your {{posts}}",
+    "yourPosts": "Your posts and park photos",
+    "keep": "Leave them up, anonymized",
+    "keepBody": "They stay on park and obstacle pages as \"deleted user\", so the clips people filmed with you aren't lost.",
+    "remove": "Delete them",
+    "removeBody": "Your posts and park photos are removed for everyone.",
+    "dataFirst": "Want your data first?",
+    "sendCode": "Send me a code to confirm",
+    "sendCodeBody": "We'll email a code to {{email}}. Enter it on the next screen to delete your account.",
+    "cancel": "Keep my account",
+    "codeTitle": "Enter the code",
+    "codeBodyKeep": "We sent a 6-digit code to {{email}}. Entering it deletes your account and leaves your posts up as \"deleted user\".",
+    "codeBodyRemove": "We sent a 6-digit code to {{email}}. Entering it deletes your account and your posts.",
+    "confirm": "Delete my account",
+    "codeExpired": "That code has run out. Send a new code and enter it to delete your account."
+  },
+  "parkReport": {
+    "menu": "Report something wrong",
+    "suggestFix": "Suggest a fix",
+    "title": "What's wrong?",
+    "fields": {
+      "hours": "Hours",
+      "status": "Status",
+      "lighting": "Lights",
+      "location": "Address or pin",
+      "fees": "Fees",
+      "disciplines": "Who can skate",
+      "helmet_rule": "Helmet rule",
+      "description": "Description",
+      "obstacle": "An obstacle",
+      "other": "Something else"
+    },
+    "fixLabel": {
+      "hours": "Right hours",
+      "status": "Right status",
+      "lighting": "Right lighting",
+      "location": "Right address",
+      "fees": "Right fees",
+      "disciplines": "Who can skate here",
+      "helmet_rule": "Right helmet rule",
+      "description": "Better description",
+      "obstacle": "What's wrong with it",
+      "other": "What's wrong"
+    },
+    "whichObstacle": "Which obstacle?",
+    "listedNow": "Listed now",
+    "days": {
+      "daily": "Daily",
+      "weekdays": "Weekdays",
+      "weekends": "Weekends"
+    },
+    "opens": "Opens",
+    "closes": "Closes",
+    "atSunrise": "At sunrise",
+    "atSunset": "At sunset",
+    "timeFormat": "Use 24-hour times like 09:00 or 22:30.",
+    "helmetYes": "Helmets required",
+    "helmetNo": "Helmets not required",
+    "address": "Address",
+    "fee": "Entry fee",
+    "feePlaceholder": "$5 a session",
+    "noDescription": "No description yet.",
+    "note": "Note",
+    "addPhoto": "Add a photo of the sign",
+    "removePhoto": "Remove photo",
+    "footnote": "A park admin checks it before anything changes. We'll let you know when your fix goes live.",
+    "sentTitle": "Thanks, it's sent",
+    "sentBody": "A park admin will check it. We'll let you know when your fix goes live.",
+    "errors": {
+      "say_what_is_wrong": "Suggest the right value, add a note or add a photo, so the admins know what to fix.",
+      "pick_an_obstacle": "Pick the obstacle that's wrong.",
+      "photo_not_uploaded": "The photo didn't upload. Try again, or send it without the photo.",
+      "too_many_reports": "That's a lot of reports in an hour. Try again a bit later.",
+      "generic": "Couldn't send it. Check your connection and try again."
+    }
   }
 }

@@ -9,7 +9,8 @@
  *   edit one. Deleting erases the text; deleted comments with replies show
  *   as "Comment deleted".
  * - Notifications are written by the database (comments, replies, mentions,
- *   tags, filmer credit, invites, "someone new"); the app reads them, and
+ *   tags, filmer credit, invites, "someone new", and from M5 park fixes going
+ *   live, moderation notices and vacated roles); the app reads them, and
  *   opening Notifications clears the bell's dot.
  */
 import { type InfiniteData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -163,7 +164,14 @@ export type NotificationKind =
   | 'filmer_credit'
   | 'invite_used'
   | 'someone_new'
-  | 'visiting';
+  | 'visiting'
+  // M5: roles and safety.
+  | 'park_fix_live'
+  | 'post_removed'
+  | 'comment_removed'
+  | 'warning'
+  | 'suspension'
+  | 'role_vacated';
 
 export type NotificationPerson = { id: string; username: string | null; avatarPath: string | null };
 
@@ -177,7 +185,11 @@ export type AppNotification = {
   peopleCount: number;
   postId: string | null;
   commentId: string | null;
-  /** The start of the comment, for comments, replies and mentions. */
+  /**
+   * The start of the comment, for comments, replies and mentions. For
+   * moderation notices, the admin's message (may be null); for role_vacated,
+   * the role that ended (park_admin, park_contributor or city_admin).
+   */
   excerpt: string | null;
   /** "Someone new" visiting: the park they'll be at. */
   park: { slug: string; name: string } | null;
@@ -194,6 +206,12 @@ const KINDS = new Set<NotificationKind>([
   'invite_used',
   'someone_new',
   'visiting',
+  'park_fix_live',
+  'post_removed',
+  'comment_removed',
+  'warning',
+  'suspension',
+  'role_vacated',
 ]);
 
 export function useNotifications(userId: string | undefined) {

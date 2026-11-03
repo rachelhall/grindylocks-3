@@ -133,10 +133,18 @@ async function accessToken(): Promise<string> {
   return token;
 }
 
-/** Uploads one prepared JPEG to park-media; retries overwrite the same path. */
-async function uploadFile(uri: string, path: string) {
+/**
+ * Uploads one prepared JPEG to a storage bucket. Park photos overwrite the
+ * same path on a retry; report photos (M5) may only be added, never
+ * replaced, so they go up without upsert.
+ */
+export async function uploadJpeg(
+  uri: string,
+  path: string,
+  bucket: 'park-media' | 'report-photos' = 'park-media',
+) {
   const token = await accessToken();
-  const task = new File(uri).createUploadTask(`${env.supabaseUrl}/storage/v1/object/park-media/${path}`, {
+  const task = new File(uri).createUploadTask(`${env.supabaseUrl}/storage/v1/object/${bucket}/${path}`, {
     httpMethod: 'POST',
     uploadType: UploadType.BINARY_CONTENT,
     mimeType: 'image/jpeg',
@@ -144,12 +152,12 @@ async function uploadFile(uri: string, path: string) {
       Authorization: `Bearer ${token}`,
       apikey: env.supabasePublishableKey,
       'content-type': 'image/jpeg',
-      'x-upsert': 'true',
+      'x-upsert': bucket === 'park-media' ? 'true' : 'false',
     },
   });
   const res = await task.uploadAsync();
   if (!res || res.status < 200 || res.status >= 300) {
-    throw new Error(`park photo upload ${res?.status ?? 'failed'}`);
+    throw new Error(`${bucket} upload ${res?.status ?? 'failed'}`);
   }
 }
 
@@ -159,7 +167,7 @@ async function addParkPhoto(parkId: string, media: PickedMedia, credit: PhotoCre
   const path = `${parkId}/${id}.jpg`;
   const prepared = await prepareForUpload(media, id);
   try {
-    await uploadFile(prepared.uri, path);
+    await uploadJpeg(prepared.uri, path);
     const { error } = await supabase.from('park_photos').insert({
       id,
       park_id: parkId,

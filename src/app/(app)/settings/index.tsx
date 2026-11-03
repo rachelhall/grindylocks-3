@@ -15,25 +15,16 @@ import { useMyProfile, useProfileSetting } from '@/lib/profiles';
 import { usePushPermission, usePushSettings } from '@/lib/push';
 import { space, Text, useColors } from '@/theme';
 
-/** Opens the mail app; if there isn't one, shows the address instead. */
-async function openMail(subject?: string) {
-  const url = `mailto:${appConfig.supportEmail}${subject ? `?subject=${encodeURIComponent(subject)}` : ''}`;
-  try {
-    await Linking.openURL(url);
-  } catch {
-    Alert.alert(appConfig.supportEmail);
-  }
-}
-
 /**
  * Settings. Rows arrive with their features: blocked accounts came with
  * blocking, push notifications with push (M4b), and delete account comes
- * with M5, never as disabled placeholders.
+ * with M5, never as disabled placeholders. Help, a copy of your data and
+ * deleting the account each have their own screen (M5).
  */
 export default function Settings() {
   const { t } = useTranslation();
   const c = useColors();
-  const { session, profile: authProfile, signOut } = useAuth();
+  const { session, signOut } = useAuth();
   const userId = session?.user.id;
   const { data: profile } = useMyProfile(userId);
   const setting = useProfileSetting(userId);
@@ -170,7 +161,12 @@ export default function Settings() {
         </SettingsSection>
 
         <SettingsSection title={t('settings.help')}>
-          <SettingsRow first title={t('settings.contact')} trailing="external" onPress={() => void openMail()} />
+          <SettingsRow
+            first
+            title={t('settings.contact')}
+            trailing="chevron"
+            onPress={() => router.push('/settings/help')}
+          />
           <SettingsRow
             title={t('settings.privacyPolicy')}
             trailing="external"
@@ -179,10 +175,8 @@ export default function Settings() {
           <SettingsRow
             title={t('settings.dataCopy')}
             subtitle={t('settings.dataCopyBody')}
-            trailing="external"
-            onPress={() =>
-              void openMail(t('settings.dataCopySubject', { username: authProfile?.username ?? '' }))
-            }
+            trailing="chevron"
+            onPress={() => router.push('/settings/data')}
           />
           <SettingsRow
             title={t('settings.credits')}
@@ -194,6 +188,11 @@ export default function Settings() {
 
         <View style={styles.footer}>
           <Button label={t('common.signOut')} variant="secondary" onPress={signOut} />
+          <Button
+            label={t('deleteAccount.row')}
+            variant="tertiary"
+            onPress={() => router.push('/settings/delete-account')}
+          />
           <Text variant="caption" color="textSecondary" style={styles.version}>
             {t('settings.version', { version })}
           </Text>

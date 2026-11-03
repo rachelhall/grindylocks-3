@@ -9,7 +9,8 @@ import { brand, useColors } from '@/theme';
 /**
  * The signed-in, onboarded app: the tabs, plus screens that open over them
  * (new post, notifications, a post, a park and its photos, a profile, edit
- * profile, settings and invites). Starts the upload queue for this member, so
+ * profile, settings and invites, plus M5's park info report, help, data
+ * copy and account deletion). Starts the upload queue for this member, so
  * posts left uploading last time carry on as soon as the app opens.
  */
 export default function AppLayout() {
@@ -39,6 +40,7 @@ export default function AppLayout() {
       <Stack.Screen name="post/[id]/edit" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="park/[slug]/index" />
       <Stack.Screen name="park/[slug]/obstacle/[id]" />
+      <Stack.Screen name="park/[slug]/report" options={{ presentation: 'modal' }} />
       <Stack.Screen
         name="park/[slug]/photos"
         options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: brand.ink } }}
@@ -51,6 +53,10 @@ export default function AppLayout() {
       <Stack.Screen name="settings/credits" />
       <Stack.Screen name="settings/blocked" />
       <Stack.Screen name="settings/notifications" />
+      <Stack.Screen name="settings/help" />
+      <Stack.Screen name="settings/data" />
+      <Stack.Screen name="settings/delete-account" />
+      <Stack.Screen name="settings/delete-code" />
       <Stack.Screen name="invites" />
     </Stack>
   );
