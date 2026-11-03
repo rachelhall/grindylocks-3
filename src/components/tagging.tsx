@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Avatar } from '@/components/profile';
+import { Avatar } from '@/components/avatar';
 import { CheckBox, Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { type ObstacleType, useDirectorySearch, useMetro, useParksByIds } from '@/lib/parks';

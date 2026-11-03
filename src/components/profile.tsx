@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router, useFocusEffect } from 'expo-router';
 import { type ReactNode, useCallback, useMemo, useRef, useState } from 'react';
@@ -16,8 +17,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { Avatar } from '@/components/avatar';
 import { CheckInTag } from '@/components/check-in-tag';
 import { MediaTag } from '@/components/media';
+import { ProfileMeetups } from '@/components/park-meetups';
 import { ParkRow, useParkLine } from '@/components/parks';
 import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
@@ -29,51 +32,22 @@ import {
   type GridPost,
   type Profile,
   type RoleBadge,
-  useAvatarUrl,
   useMyProfile,
   useProfile,
   useProfilePosts,
   visibleBadge,
 } from '@/lib/profiles';
+import { keys } from '@/lib/query';
 import { useFollow, useMyInvites } from '@/lib/social';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
-type Tab = 'posts' | 'tagged' | 'filmed' | 'saved';
+type Tab = 'posts' | 'tagged' | 'filmed' | 'meetups' | 'saved';
 
 /* Avatar ------------------------------------------------------------------------------- */
 
-/** Square profile photo, or the first two letters of the username on a plain tile. */
-export function Avatar({
-  path,
-  username,
-  size: s = 84,
-  localUri,
-}: {
-  path: string | null;
-  username: string;
-  size?: number;
-  /** A photo picked but not saved yet (Edit profile). */
-  localUri?: string | null;
-}) {
-  const c = useColors();
-  const signed = useAvatarUrl(localUri ? null : path);
-  const uri = localUri ?? signed;
-  return (
-    <View
-      style={[styles.avatar, { width: s, height: s, backgroundColor: c.borderSubtle }]}
-      accessibilityElementsHidden
-      importantForAccessibility="no"
-    >
-      {uri ? (
-        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" accessibilityIgnoresInvertColors />
-      ) : (
-        <Text variant="display" style={{ fontSize: Math.round(s * 0.36), lineHeight: Math.round(s * 0.4) }}>
-          {username.slice(0, 2).toUpperCase()}
-        </Text>
-      )}
-    </View>
-  );
-}
+// Lives in its own file so screens that profile.tsx shows (the Meetups tab,
+// the check-in tag) can use it without an import cycle.
+export { Avatar };
 
 /* Header -------------------------------------------------------------------------------- */
 
@@ -260,7 +234,15 @@ function ProfileTabs({ tabs, current, onChange }: { tabs: Tab[]; current: Tab; o
   const { t } = useTranslation();
   const c = useColors();
   return (
-    <View accessibilityRole="tablist" style={[styles.tabs, { borderBottomColor: c.borderSubtle }]}>
+    // Scrolls sideways when the labels don't fit (five tabs on your own
+    // profile, in the longer languages).
+    <ScrollView
+      horizontal
+      accessibilityRole="tablist"
+      showsHorizontalScrollIndicator={false}
+      style={[styles.tabsBar, { borderBottomColor: c.borderSubtle }]}
+      contentContainerStyle={styles.tabs}
+    >
       {tabs.map((tab) => {
         const on = tab === current;
         const label = t(`profile.tabs.${tab}`);
@@ -287,7 +269,7 @@ function ProfileTabs({ tabs, current, onChange }: { tabs: Tab[]; current: Tab; o
           </Pressable>
         );
       })}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -476,6 +458,7 @@ export function ProfileView({ username }: { username?: string }) {
   const { width } = useWindowDimensions();
   const { session } = useAuth();
   const myId = session?.user.id;
+  const queryClient = useQueryClient();
 
   const mine = useMyProfile(username ? undefined : myId);
   const theirs = useProfile(username, myId);
@@ -496,7 +479,8 @@ export function ProfileView({ username }: { username?: string }) {
     setTab(next);
     setOpened((prev) => (prev.has(next) ? prev : new Set([...prev, next])));
   }
-  const tabs: Tab[] = isMe ? ['posts', 'tagged', 'filmed', 'saved'] : ['posts', 'tagged', 'filmed'];
+  // Meetups (v2): after Filmed; Saved stays last on your own.
+  const tabs: Tab[] = isMe ? ['posts', 'tagged', 'filmed', 'meetups', 'saved'] : ['posts', 'tagged', 'filmed', 'meetups'];
 
   // Your own data is checked again whenever the screen comes back into view.
   const refetchProfile = query.refetch;
@@ -520,6 +504,11 @@ export function ProfileView({ username }: { username?: string }) {
       canSeePosts ? posts.refetch() : null,
       canSeePosts && opened.has('tagged') ? tagged.refetch() : null,
       canSeePosts && opened.has('filmed') ? filmed.refetch() : null,
+      canSeePosts && opened.has('meetups') && profile
+        ? queryClient.invalidateQueries({ queryKey: keys.profileMeetups(profile.id) }).then(() =>
+            queryClient.invalidateQueries({ queryKey: keys.profilePastMeetups(profile.id) }),
+          )
+        : null,
     ]);
     setRefreshing(false);
   }
@@ -649,6 +638,8 @@ export function ProfileView({ username }: { username?: string }) {
                 width={width}
                 empty={isMe ? t('profile.emptyFilmedOwn') : t('profile.emptyFilmed', { username: name })}
               />
+            ) : tab === 'meetups' ? (
+              <ProfileMeetups userId={profile.id} isMe={isMe} username={name} />
             ) : myId ? (
               <SavedParks userId={myId} />
             ) : null}
@@ -683,7 +674,6 @@ const styles = StyleSheet.create({
   square: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
   loading: { marginTop: space[12] },
   more: { marginVertical: space[4] },
-  avatar: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   header: { paddingHorizontal: 20, paddingTop: space[1], gap: space[3] },
   identity: { flexDirection: 'row', alignItems: 'center', gap: space[4] },
   identityText: { flex: 1, minWidth: 0, gap: 6 },
@@ -697,16 +687,12 @@ const styles = StyleSheet.create({
   editButton: { minHeight: size.tapMin },
   actionRow: { flexDirection: 'row', gap: space[2] },
   ownButton: { minHeight: size.tapMin, flex: 1 },
-  tabs: {
-    flexDirection: 'row',
-    gap: space[2],
-    marginTop: space[4],
-    paddingHorizontal: space[3],
-    borderBottomWidth: stroke.rule,
-  },
+  tabsBar: { flexGrow: 0, marginTop: space[4], borderBottomWidth: stroke.rule },
+  tabs: { flexDirection: 'row', gap: space[2], paddingHorizontal: space[3] },
   tab: { minHeight: size.tapMin, minWidth: size.tapMin, paddingHorizontal: space[2], justifyContent: 'flex-end' },
   tabLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingBottom: space[2] },
-  tabLine: { height: 3, marginBottom: -stroke.rule },
+  // Sits on the bar's bottom rule (the scroll view would clip a negative margin).
+  tabLine: { height: 3 },
   grid: { flexDirection: 'row', gap: GRID_GAP, paddingTop: space[1], alignItems: 'flex-start' },
   column: { gap: GRID_GAP },
   tileEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
