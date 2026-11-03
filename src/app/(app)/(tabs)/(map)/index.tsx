@@ -336,8 +336,9 @@ export default function MapScreen() {
   // Only while there's nothing on the map: once you've moved somewhere with
   // parks, the card goes and the pins (and edge markers) take over.
   const showFar = far !== null && selected === null && inView.length === 0;
-  const distance =
-    selected && me ? formatDistance(selected.distance_m ?? distanceMeters(me, selected), metric, i18n.language) : null;
+  // Always from you. (A park reached from an edge marker carries a
+  // distance_m from the middle of the map, so it isn't used here.)
+  const distance = selected && me ? formatDistance(distanceMeters(me, selected), metric, i18n.language) : null;
 
   // The nearest one or two matching parks just off the map, as tags at its
   // edge. They sit above the preview card and the locate button, and hide
