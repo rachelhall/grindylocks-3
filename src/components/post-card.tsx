@@ -12,8 +12,10 @@ import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { Carousel } from '@/components/media';
 import { Avatar } from '@/components/profile';
+import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
 import { Icon, type SheetAction, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { fetchReportSummary, type ReportSummary, useModeratePost } from '@/lib/moderation';
 import { credits, isOnPost, type PersonRef, type Post, type PostSlide, useDeletePost, useRemoveMeFromPost } from '@/lib/posts';
 import { useToggleLike } from '@/lib/engagement';
 import { useIsActivePost } from '@/lib/playback';
@@ -131,25 +133,102 @@ export function CreditsLine({ slides }: { slides: PostSlide[] }) {
 
 /* More menu ------------------------------------------------------------------------------ */
 
+/** "Reported 3 times for spam · Auto-hidden", for a role holder's post menu. */
+function useReportSummaryTitle() {
+  const { t } = useTranslation();
+  return (summary: ReportSummary) => {
+    const reported = t(`moderation.reported.${summary.reason}`, { count: summary.count });
+    const status =
+      summary.status === 'auto_hidden'
+        ? t('moderation.autoHidden')
+        : summary.status === 'hidden'
+          ? t('moderation.hidden')
+          : null;
+    return status ? `${reported} · ${status}` : reported;
+  };
+}
+
 /**
  * The post's More menu: Edit and Delete for its author; "Take me off this
- * post" for someone tagged or credited. Reporting comes with M5.
+ * post" for someone tagged or credited; Report and Block for everyone else
+ * (M5). For a role holder, a post with open reports they can act on also
+ * gets the summary as the sheet's title, plus Keep hidden and Dismiss
+ * reports (Post-Menu-Role mockup). The native sheet can't show the mockup's
+ * card, so the summary goes in its title and message. The reports are
+ * fetched when the menu opens, never per card.
  */
-export function usePostMenu(post: Post | null | undefined, { afterDelete }: { afterDelete?: () => void } = {}) {
+export function usePostMenu(
+  post: Post | null | undefined,
+  { afterDelete, afterBlock }: { afterDelete?: () => void; afterBlock?: () => void } = {},
+) {
   const { t } = useTranslation();
   const { session } = useAuth();
   const userId = session?.user.id;
   const { sheet, show } = useActionSheet();
+  const report = useReportSheet({ onBlocked: afterBlock });
+  const confirmBlock = useConfirmBlock();
   const del = useDeletePost();
   const removeMe = useRemoveMeFromPost(userId);
+  const moderate = useModeratePost(userId);
+  const summaryTitle = useReportSummaryTitle();
 
   const isAuthor = Boolean(post && userId && post.authorId === userId);
   const onPost = Boolean(post && isOnPost(post, userId));
-  const available = isAuthor || onPost;
+  const available = Boolean(post && userId);
 
-  function open() {
-    if (!post) return;
+  function decide(postId: string, decision: 'keep_hidden' | 'dismiss', username: string) {
+    const [title, confirm] =
+      decision === 'keep_hidden'
+        ? [t('moderation.keepHiddenTitle', { username }), t('moderation.keepHidden')]
+        : [t('moderation.dismissTitle'), t('moderation.dismiss')];
+    Alert.alert(title, undefined, [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: confirm,
+        style: decision === 'keep_hidden' ? 'destructive' : 'default',
+        onPress: () =>
+          moderate.mutate(
+            { postId, decision },
+            {
+              onError: (err) => {
+                Sentry.captureException(err);
+                Alert.alert(t('errors.generic'), t('errors.network'));
+              },
+            },
+          ),
+      },
+    ]);
+  }
+
+  async function open() {
+    if (!post || !userId) return;
     const actions: SheetAction[] = [];
+    let title: string | undefined;
+    let message: string | undefined;
+    const username = post.author?.username ?? null;
+
+    if (!isAuthor) {
+      // Only role holders get anything back; a failed check just leaves the actions out.
+      const summary = await fetchReportSummary(userId, post.id).catch((err: unknown) => {
+        Sentry.captureException(err);
+        return null;
+      });
+      if (summary) {
+        title = summaryTitle(summary);
+        message = [
+          summary.status === 'auto_hidden' || summary.status === 'hidden' ? t('moderation.hiddenBody') : null,
+          t('moderation.webAdmin'),
+        ]
+          .filter(Boolean)
+          .join(' ');
+        const name = username ?? t('common.deletedUser');
+        actions.push(
+          { label: t('moderation.keepHidden'), destructive: true, onPress: () => decide(post.id, 'keep_hidden', name) },
+          { label: t('moderation.dismiss'), onPress: () => decide(post.id, 'dismiss', name) },
+        );
+      }
+    }
+
     if (isAuthor) {
       actions.push({
         label: t('postCard.edit'),
@@ -175,31 +254,55 @@ export function usePostMenu(post: Post | null | undefined, { afterDelete }: { af
             },
           ]),
       });
-    } else if (onPost) {
-      actions.push({
-        label: t('postCard.removeMe'),
-        destructive: true,
-        onPress: () =>
-          Alert.alert(t('postCard.removeMeTitle'), t('postCard.removeMeBody'), [
-            { text: t('common.cancel'), style: 'cancel' },
-            {
-              text: t('postCard.removeMeConfirm'),
-              style: 'destructive',
-              onPress: () =>
-                removeMe.mutate(post, {
-                  onError: (err) => {
-                    Sentry.captureException(err);
-                    Alert.alert(t('errors.generic'));
-                  },
-                }),
-            },
-          ]),
-      });
+    } else {
+      if (onPost) {
+        actions.push({
+          label: t('postCard.removeMe'),
+          destructive: true,
+          onPress: () =>
+            Alert.alert(t('postCard.removeMeTitle'), t('postCard.removeMeBody'), [
+              { text: t('common.cancel'), style: 'cancel' },
+              {
+                text: t('postCard.removeMeConfirm'),
+                style: 'destructive',
+                onPress: () =>
+                  removeMe.mutate(post, {
+                    onError: (err) => {
+                      Sentry.captureException(err);
+                      Alert.alert(t('errors.generic'));
+                    },
+                  }),
+              },
+            ]),
+        });
+      }
+      // A deleted account or an anonymized post has nobody to report or block.
+      if (username) {
+        actions.push({
+          label: t('report.reportPost'),
+          onPress: () =>
+            report.open({ kind: 'post', id: post.id, personId: post.authorId, username, parkName: post.park?.name ?? null }),
+        });
+        actions.push({
+          label: t('report.blockPerson', { username }),
+          destructive: true,
+          onPress: () => confirmBlock({ id: post.authorId, username }, afterBlock),
+        });
+      }
     }
-    show({ actions });
+    show({ title, message, actions });
   }
 
-  return { sheet, open, available };
+  return {
+    sheet: (
+      <>
+        {sheet}
+        {report.sheet}
+      </>
+    ),
+    open: () => void open(),
+    available,
+  };
 }
 
 export function MoreButton({ onPress, label }: { onPress: () => void; label: string }) {
@@ -228,6 +331,7 @@ export function PostActions({ post, onComment }: { post: Post; onComment: () => 
   const c = useColors();
   const { session } = useAuth();
   const like = useToggleLike(session?.user.id);
+  const explainRestriction = useExplainRestriction();
   const liked = post.likedByMe;
   const published = Boolean(post.publishedAt);
 
@@ -242,7 +346,11 @@ export function PostActions({ post, onComment }: { post: Post; onComment: () => 
           like.mutate(
             { postId: post.id, like: !liked },
             {
-              onError: (err: unknown) => Sentry.captureException(err),
+              onError: (err: unknown) => {
+                void explainRestriction(err).then((explained) => {
+                  if (!explained) Sentry.captureException(err);
+                });
+              },
             },
           )
         }

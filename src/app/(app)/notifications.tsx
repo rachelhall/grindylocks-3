@@ -8,6 +8,7 @@ import { SafeAreaView } from '@/components/safe-area';
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { BackButton, Button, Icon, type IconName } from '@/components/ui';
+import { RestrictionBanner } from '@/components/safety';
 import { useAuth } from '@/lib/auth';
 import {
   type AppNotification,
@@ -17,6 +18,7 @@ import {
   useNotifications,
   usePostCovers,
 } from '@/lib/engagement';
+import { useRestriction } from '@/lib/moderation';
 import { type FollowRequest, useAnswerFollowRequest, useFollowRequests } from '@/lib/social';
 import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
@@ -32,6 +34,12 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  *   relying on color. Post notifications show the post's first slide on the
  *   right and open the post; people notifications (invite used, says hi,
  *   visiting) have no thumbnail and open the profile.
+ * - M5 (Notices mockup): a suspended or banned member gets the ink banner
+ *   at the top. Moderation notices (post or comment removed, a warning, a
+ *   suspension) and park fixes going live have no person, so their avatar
+ *   is a plain square with the badge's icon; a removed post opens (its
+ *   author still sees it), a fix opens the park. A vacated role shows the
+ *   person whose role ended and opens their profile.
  */
 
 const BADGES: Record<NotificationKind, IconName> = {
@@ -43,9 +51,18 @@ const BADGES: Record<NotificationKind, IconName> = {
   invite_used: 'badgeInvite',
   someone_new: 'badgeWave',
   visiting: 'badgePlane',
+  park_fix_live: 'pin',
+  post_removed: 'badgeRemoved',
+  comment_removed: 'badgeRemoved',
+  warning: 'badgeWarning',
+  suspension: 'badgeWarning',
+  role_vacated: 'badgeRole',
 };
 
 const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'tag', 'filmer_credit']);
+
+/** Notices from the admins or about a park: no person, so no avatar. */
+const NOTICE_KINDS = new Set<NotificationKind>(['park_fix_live', 'post_removed', 'comment_removed', 'warning', 'suspension']);
 
 /** Splits a sentence so the usernames in it can be set in bold. */
 function withBoldNames(text: string, names: string[]): { text: string; bold: boolean }[] {
@@ -67,6 +84,7 @@ export default function Notifications() {
   const list = useNotifications(userId);
   const answer = useAnswerFollowRequest(userId);
   const markSeen = useMarkNotificationsSeen(userId);
+  const restriction = useRestriction(userId);
 
   // Clear the dot once the list has loaded (so its New marks are kept).
   const marked = useRef(false);
@@ -98,7 +116,16 @@ export default function Notifications() {
         return;
       case 'tag':
       case 'filmer_credit':
+      case 'post_removed':
         if (n.postId) router.push({ pathname: '/post/[id]', params: { id: n.postId } });
+        return;
+      case 'park_fix_live':
+        if (n.park) router.push({ pathname: '/park/[slug]', params: { slug: n.park.slug } });
+        return;
+      case 'comment_removed':
+      case 'warning':
+      case 'suspension':
+        // Nothing to open; the message is on the row.
         return;
       default: {
         const first = n.people[0]?.username;
@@ -133,12 +160,48 @@ export default function Notifications() {
         return n.park
           ? t('notifications.visitingPark', { a, metro: n.metroName ?? '', park: n.park.name })
           : t('notifications.visiting', { a, metro: n.metroName ?? '' });
+      case 'park_fix_live':
+        return t('notifications.parkFixLive', { park: n.park?.name ?? '' });
+      case 'post_removed':
+        return t('notifications.postRemoved');
+      case 'comment_removed':
+        return t('notifications.commentRemoved');
+      case 'warning':
+        return t('notifications.warning');
+      case 'suspension':
+        return t('notifications.suspension');
+      case 'role_vacated': {
+        const role = t(`profile.role.${n.excerpt === 'city_admin' || n.excerpt === 'park_admin' ? n.excerpt : 'park_contributor'}`);
+        return n.park
+          ? t('notifications.roleVacatedPark', { a, role, park: n.park.name })
+          : t('notifications.roleVacated', { a, role });
+      }
+    }
+  }
+
+  /** The words set in bold: usernames, or a notice's opening ("Your post was taken down"). */
+  function boldParts(n: AppNotification): string[] {
+    switch (n.kind) {
+      case 'park_fix_live':
+        return [t('notifications.parkFixLiveBold', { park: n.park?.name ?? '' })];
+      case 'post_removed':
+        return [t('notifications.postRemovedBold')];
+      case 'comment_removed':
+        return [t('notifications.commentRemovedBold')];
+      case 'warning':
+      case 'suspension':
+        return [describe(n)];
+      default:
+        return n.people.map((p) => p.username ?? '');
     }
   }
 
   function Row({ n }: { n: AppNotification }) {
     const text = describe(n);
     const person = n.people[0];
+    const notice = NOTICE_KINDS.has(n.kind);
+    // role_vacated's excerpt is the role, already in the sentence.
+    const excerpt = n.kind === 'role_vacated' ? null : n.excerpt;
     const when = timeAgo(n.createdAt, t, i18n.language);
     const isPost = POST_KINDS.has(n.kind);
     const cover: PostCover | undefined = isPost && n.postId ? covers.data?.[n.postId] : undefined;
@@ -156,17 +219,22 @@ export default function Notifications() {
         style={({ pressed }) => [styles.row, pressed && styles.pressed]}
       >
         <View style={styles.avatar}>
-          <Avatar path={person?.avatarPath ?? null} username={person?.username ?? '?'} size={40} />
-          <View style={[styles.badge, { backgroundColor: badgeFill }]}>
-            <Icon name={BADGES[n.kind]} color={badgeIcon} size={12} />
-          </View>
+          {notice ? (
+            <View style={[styles.noticeIcon, { backgroundColor: badgeFill }]}>
+              <Icon name={BADGES[n.kind]} color={badgeIcon} size={20} />
+            </View>
+          ) : (
+            <>
+              <Avatar path={person?.avatarPath ?? null} username={person?.username ?? '?'} size={40} />
+              <View style={[styles.badge, { backgroundColor: badgeFill }]}>
+                <Icon name={BADGES[n.kind]} color={badgeIcon} size={12} />
+              </View>
+            </>
+          )}
         </View>
         <View style={styles.rowText}>
           <Text variant="bodySm" style={{ color: ink }}>
-            {withBoldNames(
-              text,
-              n.people.map((p) => p.username ?? ''),
-            ).map((part, i) =>
+            {withBoldNames(text, boldParts(n)).map((part, i) =>
               part.bold ? (
                 <Text key={i} variant="bodySm" style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
                   {part.text}
@@ -176,9 +244,9 @@ export default function Notifications() {
               ),
             )}
           </Text>
-          {n.excerpt ? (
-            <Text variant="bodySm" numberOfLines={2} style={{ color: secondary }}>
-              “{n.excerpt}”
+          {excerpt ? (
+            <Text variant="bodySm" numberOfLines={notice ? 4 : 2} style={{ color: secondary }}>
+              “{excerpt}”
             </Text>
           ) : null}
           <Text variant="caption" style={{ color: secondary }}>
@@ -248,12 +316,15 @@ export default function Notifications() {
             onRefresh={() => {
               void requests.refetch();
               void list.refetch();
+              void restriction.refetch();
               markSeen.mutate();
             }}
             tintColor={c.text}
           />
         }
       >
+        {restriction.data ? <RestrictionBanner restriction={restriction.data} /> : null}
+
         {requests.isError || list.isError ? (
           <Text variant="bodySm" color="statusClosed" style={styles.pad}>
             {t('errors.network')}
@@ -324,6 +395,7 @@ const styles = StyleSheet.create({
   section: { paddingHorizontal: space[4], paddingTop: 14, paddingBottom: 2 },
   row: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3], paddingHorizontal: space[4], paddingVertical: space[3], minHeight: 56 },
   avatar: { width: 40, height: 40 },
+  noticeIcon: { width: 40, height: 40, alignItems: 'center', justifyContent: 'center' },
   badge: { position: 'absolute', right: -4, bottom: -4, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
   rowText: { flex: 1, minWidth: 0, gap: 2 },
   thumb: { width: 44, height: 44, overflow: 'hidden' },

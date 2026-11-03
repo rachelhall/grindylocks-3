@@ -8,7 +8,8 @@
     "signOut": "Abmelden",
     "cancel": "Abbrechen",
     "close": "Schließen",
-    "deletedUser": "gelöschtes Konto"
+    "deletedUser": "gelöschtes Konto",
+    "optional": "(optional)"
   },
   "auth": {
     "welcome": {
@@ -341,7 +342,17 @@
     "someoneNew": "{{a}} ist neu bei Grindylocks in {{metro}}. Sag hallo!",
     "visiting": "{{a}} ist zu Besuch in {{metro}}",
     "visitingPark": "{{a}} ist zu Besuch in {{metro}} und kommt zu {{park}}",
-    "unreadLabel": "Neu: {{text}}"
+    "unreadLabel": "Neu: {{text}}",
+    "parkFixLive": "Deine Korrektur für {{park}} ist online. Danke!",
+    "parkFixLiveBold": "Deine Korrektur für {{park}}",
+    "postRemoved": "Dein Post wurde nach einer Prüfung entfernt.",
+    "postRemovedBold": "Dein Post wurde entfernt",
+    "commentRemoved": "Dein Kommentar wurde nach einer Prüfung entfernt.",
+    "commentRemovedBold": "Dein Kommentar wurde entfernt",
+    "warning": "Eine Verwarnung von den Admins",
+    "suspension": "Du bist gesperrt",
+    "roleVacatedPark": "Die Rolle von {{a}} als {{role}} in {{park}} ist beendet. Such jemand Neues aus.",
+    "roleVacated": "Die Rolle von {{a}} als {{role}} ist beendet. Such jemand Neues aus."
   },
   "feed": {
     "newPost": "Neuer Beitrag",
@@ -779,5 +790,205 @@
     "askTitle": "Mitteilungen sind noch nicht an",
     "askBody": "Erfahre es, wenn jemand kommentiert, dich markiert oder in der Nähe hallo sagt.",
     "ask": "Mitteilungen einschalten"
+  },
+  "report": {
+    "report": "Melden",
+    "reportPost": "Post melden",
+    "reportComment": "Kommentar melden",
+    "reportPerson": "@{{username}} melden",
+    "titlePost": "Diesen Post melden",
+    "titleComment": "Diesen Kommentar melden",
+    "titlePerson": "@{{username}} melden",
+    "postBy": "Post von @{{username}}",
+    "commentBy": "Kommentar von @{{username}}",
+    "whatsWrong": "Was ist los?",
+    "spam": "Spam",
+    "spamBody": "Werbung, Betrug oder immer wieder dasselbe gepostet",
+    "harassment": "Belästigung",
+    "toOwner": "Geht direkt an Rachel",
+    "wrongPark": "Nicht in diesem Park",
+    "wrongParkBody": "Im falschen Park markiert",
+    "minor": "Betrifft jemanden unter 16",
+    "other": "Etwas anderes",
+    "details": "Noch etwas hinzuzufügen?",
+    "whoPost": "@{{username}} erfährt nicht, wer es gemeldet hat. Ein Park- oder Stadt-Admin prüft es; nach 3 Meldungen wird ein Post ausgeblendet, bis das passiert ist.",
+    "whoComment": "@{{username}} erfährt nicht, wer es gemeldet hat. Ein Park- oder Stadt-Admin prüft es.",
+    "whoPerson": "@{{username}} erfährt nicht, wer die Meldung geschickt hat. Rachel prüft es.",
+    "send": "Meldung senden",
+    "sentTitle": "Danke, ist gesendet",
+    "sentPark": "Ein Admin für {{park}} schaut sich das an. Du hörst nichts mehr, außer sie brauchen dich.",
+    "sentAdmin": "Ein Admin schaut sich das an. Du hörst nichts mehr, außer sie brauchen dich.",
+    "sentOwner": "Rachel schaut sich das an. Du hörst nichts mehr, außer sie braucht dich.",
+    "blockToo": "@{{username}} auch blockieren?",
+    "blockTooBody": "Ihr seht gegenseitig keine Posts, Kommentare oder Profile mehr. Die Person wird nicht benachrichtigt.",
+    "blockPerson": "@{{username}} blockieren",
+    "done": "Fertig",
+    "gone": "Das ist nicht mehr verfügbar."
+  },
+  "moderation": {
+    "reported": {
+      "spam_one": "{{count}}-mal wegen Spam gemeldet",
+      "spam_other": "{{count}}-mal wegen Spam gemeldet",
+      "harassment_one": "{{count}}-mal wegen Belästigung gemeldet",
+      "harassment_other": "{{count}}-mal wegen Belästigung gemeldet",
+      "wrong_park_one": "{{count}}-mal als nicht in diesem Park gemeldet",
+      "wrong_park_other": "{{count}}-mal als nicht in diesem Park gemeldet",
+      "involves_minor_one": "{{count}}-mal gemeldet, weil es jemanden unter 16 betrifft",
+      "involves_minor_other": "{{count}}-mal gemeldet, weil es jemanden unter 16 betrifft",
+      "inappropriate_one": "{{count}}-mal als unangemessen gemeldet",
+      "inappropriate_other": "{{count}}-mal als unangemessen gemeldet",
+      "other_one": "{{count}}-mal gemeldet",
+      "other_other": "{{count}}-mal gemeldet"
+    },
+    "autoHidden": "Automatisch ausgeblendet",
+    "hidden": "Ausgeblendet",
+    "hiddenBody": "Für alle ausgeblendet, bis du entscheidest.",
+    "webAdmin": "Verwarnungen, Sperren und Ausschlüsse gibt es im Web-Admin.",
+    "keepHidden": "Ausgeblendet lassen",
+    "keepHiddenTitle": "Den Post von @{{username}} ausgeblendet lassen? Die Person erfährt, dass er nach einer Prüfung entfernt wurde.",
+    "dismiss": "Meldungen verwerfen",
+    "dismissTitle": "Meldungen verwerfen? Der Post ist wieder für alle sichtbar, und niemand wird benachrichtigt."
+  },
+  "restriction": {
+    "suspended": "Du bist bis {{date}} gesperrt",
+    "suspendedBody": "Du kannst dich umsehen, aber bis dahin nichts posten, kommentieren, liken oder folgen.",
+    "banned": "Dein Konto ist ausgeschlossen",
+    "bannedBody": "Du kannst dich umsehen, aber nichts posten, kommentieren, liken oder folgen.",
+    "questions": "Fragen? Schreib uns"
+  },
+  "help": {
+    "title": "Hilfe",
+    "intro": "Grindylocks ist eine kleine Beta, und jede E-Mail liest ein echter Mensch.",
+    "email": "E-Mail an {{email}}",
+    "emailBody": "Öffnet deine Mail-App. Bugs, falsche Parkinfos, Fragen, alles.",
+    "howItWorks": "So funktioniert's",
+    "yourData": "Deine Daten",
+    "topics": {
+      "reporting": {
+        "title": "Einen Post, Kommentar oder eine Person melden",
+        "body": "Tipp auf ··· und Melden. Ein Park- oder Stadt-Admin prüft es; Belästigung und alles, was jemanden unter 16 betrifft, geht direkt an Rachel. Niemand erfährt, wer gemeldet hat."
+      },
+      "parkFix": {
+        "title": "Parkinfos korrigieren",
+        "body": "Tipp auf der Parkseite auf ··· und Fehler melden, oder ganz unten auf Korrektur vorschlagen. Wähl aus, was falsch ist, und gib den richtigen Wert, eine Notiz oder ein Foto vom Schild an. Ein Park-Admin prüft es, bevor sich etwas ändert, und wir sagen dir Bescheid, wenn deine Korrektur online ist."
+      },
+      "blocking": {
+        "title": "Jemanden blockieren",
+        "body": "Tipp auf ··· im Profil oder bei einem Post der Person und wähl Blockieren. Ihr seht gegenseitig keine Profile, Posts oder Kommentare mehr, und niemand von euch folgt dem anderen. Die Person wird nicht benachrichtigt. Aufheben kannst du das in den Einstellungen unter Blockierte Konten."
+      },
+      "whereISkate": {
+        "title": "Wer sieht, wo ich skate",
+        "body": "Ein Post, der in einem Park markiert ist, erscheint auf der Seite des Parks. Stammgast-Listen zeigen Leute, für die es der Homepark ist oder die dort oft posten; schalt „In Stammgast-Listen zeigen“ in den Einstellungen aus, um nicht mehr drin zu sein. Private Konten erscheinen nie in Stammgast-Listen."
+      }
+    }
+  },
+  "dataCopy": {
+    "body": "Wir schicken alles, was Grindylocks über dich speichert, an {{email}}, als eine Datei, die du in jedem Texteditor öffnen kannst:",
+    "included": {
+      "profile": "Dein Profil, deine Posts, Bildtexte und Kommentare",
+      "social": "Likes, Follows, Blockierungen und gespeicherte Parks",
+      "credits": "Markierungen, Filmer-Credits und Parkfotos",
+      "reports": "Meldungen, die du geschickt hast, und Moderationshinweise"
+    },
+    "note": "Fotos und Clips stehen als Links drin, nicht als Anhang. Eine Kopie pro Tag.",
+    "send": "Meine Daten mailen",
+    "sentTitle": "Ist unterwegs",
+    "sentBody": "Schau in ein paar Minuten in {{email}} nach.",
+    "onceADay": "Du kannst eine Kopie pro Tag anfordern. Versuch es morgen wieder.",
+    "notSwitchedOn": "Der Datenexport ist noch nicht eingeschaltet."
+  },
+  "deleteAccount": {
+    "row": "Konto löschen",
+    "title": "Dein Konto löschen",
+    "body": "Das lässt sich nicht rückgängig machen. Das passiert:",
+    "profile": "Dein Profil, deine Follows und gespeicherten Parks werden gelöscht.",
+    "tags": "Wo du in Posts anderer markiert oder als Filmer:in genannt bist, steht „gelöschtes Konto“.",
+    "roleAt": "Deine Rolle als {{role}} in {{place}} endet jetzt. {{next}}",
+    "role": "Deine Rolle als {{role}} endet jetzt. {{next}}",
+    "nextParkAdmin": "Dein Park-Admin sucht jemand Neues aus.",
+    "nextCityAdmin": "Dein Stadt-Admin sucht jemand Neues aus.",
+    "nextOwner": "Rachel sucht jemand Neues aus.",
+    "invites_one": "Dein {{count}} unbenutzter Einladungslink funktioniert nicht mehr. Leute, die du eingeladen hast, behalten ihre Konten.",
+    "invites_other": "Deine {{count}} unbenutzten Einladungslinks funktionieren nicht mehr. Leute, die du eingeladen hast, behalten ihre Konten.",
+    "postCount_one": "{{count}} Post",
+    "postCount_other": "{{count}} Posts",
+    "photoCount_one": "{{count}} Parkfoto",
+    "photoCount_other": "{{count}} Parkfotos",
+    "postsAndPhotos": "Deine {{posts}} und {{photos}}",
+    "postsOnly": "Deine {{posts}}",
+    "yourPosts": "Deine Posts und Parkfotos",
+    "keep": "Anonymisiert stehen lassen",
+    "keepBody": "Sie bleiben auf Park- und Obstacle-Seiten als „gelöschtes Konto“, damit die Clips, die andere mit dir gefilmt haben, nicht verloren gehen.",
+    "remove": "Löschen",
+    "removeBody": "Deine Posts und Parkfotos werden für alle entfernt.",
+    "dataFirst": "Willst du vorher deine Daten?",
+    "sendCode": "Code zum Bestätigen schicken",
+    "sendCodeBody": "Wir schicken einen Code an {{email}}. Gib ihn auf dem nächsten Bildschirm ein, um dein Konto zu löschen.",
+    "cancel": "Konto behalten",
+    "codeTitle": "Code eingeben",
+    "codeBodyKeep": "Wir haben einen 6-stelligen Code an {{email}} geschickt. Wenn du ihn eingibst, wird dein Konto gelöscht, und deine Posts bleiben als „gelöschtes Konto“ stehen.",
+    "codeBodyRemove": "Wir haben einen 6-stelligen Code an {{email}} geschickt. Wenn du ihn eingibst, werden dein Konto und deine Posts gelöscht.",
+    "confirm": "Mein Konto löschen",
+    "codeExpired": "Der Code ist abgelaufen. Lass dir einen neuen schicken und gib ihn ein, um dein Konto zu löschen."
+  },
+  "parkReport": {
+    "menu": "Fehler melden",
+    "suggestFix": "Korrektur vorschlagen",
+    "title": "Was ist falsch?",
+    "fields": {
+      "hours": "Öffnungszeiten",
+      "status": "Status",
+      "lighting": "Licht",
+      "location": "Adresse oder Pin",
+      "fees": "Preise",
+      "disciplines": "Wer darf skaten",
+      "helmet_rule": "Helmregel",
+      "description": "Beschreibung",
+      "obstacle": "Ein Obstacle",
+      "other": "Etwas anderes"
+    },
+    "fixLabel": {
+      "hours": "Richtige Öffnungszeiten",
+      "status": "Richtiger Status",
+      "lighting": "Richtiges Licht",
+      "location": "Richtige Adresse",
+      "fees": "Richtige Preise",
+      "disciplines": "Wer hier skaten darf",
+      "helmet_rule": "Richtige Helmregel",
+      "description": "Bessere Beschreibung",
+      "obstacle": "Was damit nicht stimmt",
+      "other": "Was falsch ist"
+    },
+    "whichObstacle": "Welches Obstacle?",
+    "listedNow": "Steht gerade drin",
+    "days": {
+      "daily": "Täglich",
+      "weekdays": "Werktags",
+      "weekends": "Am Wochenende"
+    },
+    "opens": "Öffnet",
+    "closes": "Schließt",
+    "atSunrise": "Bei Sonnenaufgang",
+    "atSunset": "Bei Sonnenuntergang",
+    "timeFormat": "Nutze 24-Stunden-Zeiten wie 09:00 oder 22:30.",
+    "helmetYes": "Helmpflicht",
+    "helmetNo": "Keine Helmpflicht",
+    "address": "Adresse",
+    "fee": "Eintritt",
+    "feePlaceholder": "5 € pro Session",
+    "noDescription": "Noch keine Beschreibung.",
+    "note": "Notiz",
+    "addPhoto": "Foto vom Schild hinzufügen",
+    "removePhoto": "Foto entfernen",
+    "footnote": "Ein Park-Admin prüft es, bevor sich etwas ändert. Wir sagen dir Bescheid, wenn deine Korrektur online ist.",
+    "sentTitle": "Danke, ist gesendet",
+    "sentBody": "Ein Park-Admin prüft es. Wir sagen dir Bescheid, wenn deine Korrektur online ist.",
+    "errors": {
+      "say_what_is_wrong": "Schlag den richtigen Wert vor, füg eine Notiz oder ein Foto hinzu, damit die Admins wissen, was sie korrigieren sollen.",
+      "pick_an_obstacle": "Wähl das Obstacle aus, das nicht stimmt.",
+      "photo_not_uploaded": "Das Foto wurde nicht hochgeladen. Versuch es noch mal oder schick es ohne Foto.",
+      "too_many_reports": "Das sind viele Meldungen in einer Stunde. Versuch es etwas später noch mal.",
+      "generic": "Konnte nicht gesendet werden. Prüf deine Verbindung und versuch es noch mal."
+    }
   }
 }

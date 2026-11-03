@@ -35,7 +35,8 @@ type HoursLine = { key: string; season: string | null; days: string; time: strin
  * (on its first photo, photocopied, or on ink), then what's there, when it's
  * open, who can skate, and its obstacles. People with a role at the park
  * add photos from here. Then its regulars and latest posts (M4a). Each
- * obstacle opens its own feed. Info reports come with M5.
+ * obstacle opens its own feed. Anyone can report wrong info (M5) from the
+ * More menu or the "Suggest a fix" link by the last-verified line.
  */
 export default function ParkScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
@@ -185,6 +186,8 @@ export default function ParkScreen() {
     }
   };
 
+  const reportInfo = () => router.push({ pathname: '/park/[slug]/report', params: { slug: park.slug } });
+
   const more = () =>
     showActions({
       title: park.display_name,
@@ -192,6 +195,7 @@ export default function ParkScreen() {
         ...(photos.length > 0 ? [{ label: t('parkPhotos.see'), onPress: openGallery }] : []),
         ...(canContribute && remaining > 0 ? [{ label: t('parkPhotos.addPark'), onPress: () => void addPhotos() }] : []),
         { label: t('park.directions'), onPress: () => openDirections(park) },
+        { label: t('parkReport.menu'), onPress: reportInfo },
       ],
     });
 
@@ -410,7 +414,16 @@ export default function ParkScreen() {
           <Text variant="bodySm" color="textSecondary">
             {park.verified_at
               ? t('park.lastVerified', { date: dateFmt.format(new Date(park.verified_at)) })
-              : t('park.notVerified')}
+              : t('park.notVerified')}{' '}
+            <Text
+              variant="bodySm"
+              color="accentText"
+              accessibilityRole="link"
+              onPress={reportInfo}
+              style={{ fontFamily: fontFamily.sansSemiBold }}
+            >
+              {t('parkReport.suggestFix')}
+            </Text>
           </Text>
           <Text
             variant="caption"

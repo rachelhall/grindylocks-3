@@ -24,6 +24,10 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
   - `push-send`: sends waiting push notifications through Expo's push
     service. The database pings it (pg_net); JWT verification is off
     because it only drains the queue. Needs no secrets.
+  - `export-data`: "Get a copy of my data". Emails the member a JSON file
+    from `export_my_data()` (once a day) through Resend. JWT verification on.
+  - `delete-account`: runs `delete_my_account()` as the member, then removes
+    their files and Stream clips and their sign-in. JWT verification on.
 
 ## Secrets the functions need (Edge Functions → Secrets)
 
@@ -34,9 +38,10 @@ Project `grindylocks` (ref `ytfdgacofenkehnbbhsc`, us-east-1).
 | `CLOUDFLARE_STREAM_WEBHOOK_SECRET` | the `secret` returned when the Stream webhook is created |
 | `STREAM_SIGNING_KEY_ID` | Stream signing key ID (`scripts/stream-signing-key.sh` sets both) |
 | `STREAM_SIGNING_KEY_JWK` | the base64 `jwk` Stream returns with that key |
+| `RESEND_API_KEY` | Resend API key, for export-data's email; the same Resend account as the auth emails |
 
-Until these are set the functions answer 503 `video_not_configured` and the
-app says clip uploads aren't switched on yet. Photos don't need any of this.
+Until the Cloudflare ones are set the video functions answer 503
+`video_not_configured` and the app says clip uploads aren't switched on yet. Photos don't need any of this.
 
 The app also needs `EXPO_PUBLIC_CLOUDFLARE_STREAM_CUSTOMER_CODE` in `.env`
 to play clips.
@@ -149,3 +154,27 @@ Delivery on iOS goes through Expo, which needs the app's APNs key: EAS
 creates one on the first build after `expo-notifications` is added (answer
 yes when it asks to set up push notifications). Android needs FCM
 credentials uploaded to EAS before Android pushes work.
+
+## Roles and safety (migration `moderation`)
+
+Adds moderation notices and the moderation log (`moderation_actions`),
+`private.end_roles()`, member reports (`file_report()`, and
+`report_park_info()` with an optional photo in the private `report-photos`
+bucket), the moderation queue and report detail, `moderate_reports()`
+(dismiss, keep hidden, warn, suspend 1/7/30 days, escalate, ban),
+`review_park_info()`, `review_obstacle()`, `set_park_verified()`,
+`my_restriction()`, and the members' own `delete_my_account()` and
+`export_my_data()`. Additive only.
+
+Checked with `tests/moderation_check.sql` (76 checks, rolled back) and
+applied Nov 2.
+
+The two account functions need deploying, from the repo root:
+
+1. Set `RESEND_API_KEY` (Edge Functions → Secrets). Until it's set,
+   `export-data` answers 503 `email_not_configured` without using up the
+   member's daily export.
+2. `supabase functions deploy export-data`
+3. `supabase functions deploy delete-account`
+
+Both keep JWT verification on (the caller is a signed-in member).

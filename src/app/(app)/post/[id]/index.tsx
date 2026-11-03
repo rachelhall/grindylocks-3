@@ -28,8 +28,8 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  * Post detail (Post-Detail mockup): the author and park, the slides with
  * each one's obstacle and people, like and comment, the caption, credits and
  * date, then the comments, with the comment box at the bottom (M4b). The More
- * menu has Edit and Delete for the author, and "take me off this post" for
- * people on it. Opened with `comments=1` (the comment button, a comment
+ * menu has Edit and Delete for the author, "take me off this post" for
+ * people on it, and Report and Block for everyone else (M5). Opened with `comments=1` (the comment button, a comment
  * notification), it scrolls to the comments.
  */
 export default function PostScreen() {
@@ -47,7 +47,7 @@ export default function PostScreen() {
   const { data, isError } = usePost(id);
   // undefined while loading; null when the post is gone or couldn't load.
   const post = data ?? (isError ? null : undefined);
-  const menu = usePostMenu(post, { afterDelete: () => router.back() });
+  const menu = usePostMenu(post, { afterDelete: () => router.back(), afterBlock: () => router.back() });
   const people = useActionSheet();
   const [index, setIndex] = useState(0);
 
