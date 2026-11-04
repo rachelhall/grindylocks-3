@@ -62,9 +62,11 @@ function rowTitle(item: QueueItem): { title: string; sub: string } {
     const times = item.reportCount > 1 ? ` ${item.reportCount} times` : "";
     const reason = reasonLabel[item.reason ?? ""] ?? "Reported";
     if (item.target === "person") return { title: `${who} reported${times}`, sub: reason };
+    const thing =
+      item.target === "meetup" ? "Meetup" : item.target === "meetup_comment" ? "Meetup comment" : item.target === "comment" ? "Comment" : "Post";
     return {
-      title: `${item.target === "comment" ? "Comment" : "Post"} reported${times}`,
-      sub: `${reason} · ${who}`,
+      title: `${thing} reported${times}`,
+      sub: item.target === "meetup" && item.label ? `${reason} · “${item.label}” · ${who}` : `${reason} · ${who}`,
     };
   }
   if (item.kind === "park_info") {
