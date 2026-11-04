@@ -1458,5 +1458,93 @@
     "moreBrands_other": "+{{count}} mere",
     "moreBrandsLabel_one": "Vis {{count}} mærke mere",
     "moreBrandsLabel_other": "Vis {{count}} mærker mere"
+  },
+  "catalog": {
+    "title": "Produkter",
+    "pastHidden_one": "{{count}} tidligere model skjult",
+    "pastHidden_other": "{{count}} tidligere modeller skjult",
+    "showingPast_one": "Viser {{count}} tidligere model",
+    "showingPast_other": "Viser {{count}} tidligere modeller",
+    "showPast": "Vis tidligere udstyr",
+    "past": "Tidligere",
+    "collabs": "Samarbejder",
+    "collabsNote": "Lavet med {{name}}, solgt af et andet mærke",
+    "partBy": "{{part}} · fra {{brand}}",
+    "builtOn": "Bygget på {{name}}",
+    "missing": "Mangler der noget, eller er noget forkert?",
+    "suggestChange": "Foreslå en ændring",
+    "gone": "Dette produkt er ikke længere i kataloget.",
+    "entryTypes": {
+      "model": "Model",
+      "pro": "Pro",
+      "collab": "Samarbejde",
+      "special_edition": "Udgave"
+    },
+    "entryTypeNames": {
+      "model": "Model",
+      "pro": "Pro-model",
+      "collab": "Samarbejde",
+      "special_edition": "Specialudgave"
+    },
+    "proRider": "Pro-rider",
+    "with": "Med",
+    "edition": "Udgave",
+    "firstOut": "Kom ud",
+    "status": "Status",
+    "stillMade": "Laves stadig",
+    "noLongerMade": "Laves ikke længere",
+    "for": "Til",
+    "stockSetup": "Standardopsætning",
+    "partOfBoot": "En del af støvlen",
+    "pros": "Pro-modeller",
+    "collabsAndEditions": "Samarbejder og udgaver",
+    "prosAndCollabs": "Pro-modeller og samarbejder",
+    "suggest": {
+      "label": "{{name}} · produkter",
+      "title": "Foreslå en ændring",
+      "kind": "Hvilken slags ændring",
+      "kinds": {
+        "missing_model": "Manglende model",
+        "wrong_name": "Forkert navn",
+        "wrong_year": "Forkert år",
+        "no_longer_made": "Laves ikke længere",
+        "stock_parts": "Standarddele",
+        "something_else": "Noget andet"
+      },
+      "which": "Hvilken?",
+      "change": "Skift",
+      "valueLabel": {
+        "missing_model": "Hvad hedder den?",
+        "wrong_name": "Hvad er det rigtige navn?",
+        "wrong_year": "Hvornår kom den ud?",
+        "stock_parts": "Hvad følger med?",
+        "something_else": "Hvad er forkert?"
+      },
+      "modelPlaceholder": "Modelnavn, eller rideren for en pro-model",
+      "yearPlaceholder": "2019, eller ca. 2019",
+      "part": "Del",
+      "otherPart": "Andet",
+      "where": "Hvor så du den?",
+      "wherePlaceholder": "Et link eller en note",
+      "note": "Vi tjekker hvert forslag, før listen ændres, og giver dig besked, når det er live.",
+      "send": "Send forslag",
+      "sentTitle": "Tak, det er sendt",
+      "sentBody": "Vi giver dig besked, når listen ændres.",
+      "tooMany": "Det er mange forslag på én dag. Prøv igen i morgen."
+    },
+    "partTypes": {
+      "boot": "Støvle",
+      "frame": "Skinne",
+      "plate": "Plade",
+      "trucks": "Trucks",
+      "deck": "Deck",
+      "wheels": "Hjul",
+      "bearings": "Kugleleje",
+      "liner": "Inderstøvle",
+      "soulplate": "Soulplate",
+      "toe_stop": "Stopklods",
+      "slide_blocks": "Slide blocks",
+      "laces": "Snørebånd"
+    }
   }
 }

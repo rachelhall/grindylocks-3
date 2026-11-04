@@ -1,0 +1,15 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+5f540b89-e344-4297-9973-cfaf37fa2d9e,boot,Tactical V1,Tactical,,,model,,inline,2022,current,,,"Faction's first boot: heat-moldable carbon shell, nubuck upper, hinged cuff, removable liner. Presale Jan 2022; first run of about 200. A later new-cuff revision is the same model.",be-mag.com; oneblademag.com; thisissoul.com; inlinewarehouse.com
+e20494fb-44db-498b-bc48-e17a8dd8108f,boot,Tactical V1,Tactical,Jimmy Cisz,,pro,,inline,,current,,,Cisz tested the Tactical before launch.,inlinewarehouse.com; be-mag.com
+5139ee1c-87a7-4060-8e56-520be3c8dcd6,boot,Tactical V1,Tactical,Shredpool,,pro,,inline,2023,unknown,,,Tactical SP V1.,thisissoul.com; rollernews.com
+4b63548d-a5e3-4805-a03c-a0c0d58d2716,boot,Urban V1,Urban,Cameron Card,,pro,,inline,2024,current,,,"Carbon urban/aggressive hybrid with a front-back adjustable mount (165mm, UFS and 180mm frames). Completes ship on an Endless Blading frame. No non-pro Urban found.",rollernews.com; thisissoul.com; locoskates.com
+7c9fc0a2-840b-4126-865a-48ef93275fed,boot,Plastiks V1,Plastiks,,,model,,inline,c. 2025,current,,,Faction's first injection-molded plastic boot; entry level and UFS.,inlinewarehouse.com; bigwheelblading.com; thisissoul.com
+7f5d5725-7c3f-4f95-9b3d-77c443a40f31,liner,Performance Liner,,,,model,,inline,,current,,,Replacement liner for Faction boots.,periodicdistribution.com
+98160204-dffc-4f0d-86b4-1b0ad4e81152,soulplate,V1 Soleplate,,,,model,,inline,2022,current,,,Glass-filled nylon soulplate that comes on the Tactical V1.,thisissoul.com; periodicdistribution.com
+0e8a242c-695c-4dca-af99-bd2b5ca9b2b3,soulplate,Stealth Soleplate,,,,model,,inline,,current,,,Alternative soulplate shape.,thisissoul.com; periodicdistribution.com
+60c1a73d-d019-41b3-b099-811344029d08,wheels,Pro wheel,,Cameron Card,,pro,,inline,c. 2024,current,,,84mm wheel paired with the Urban CC.,periodicdistribution.com
+01178da8-618a-4d3a-b33c-9c00a57ba8ba,wheels,Pro wheel,,Jimmy Cisz,,pro,,inline,,current,,,Made with Sic Urethane; matching anti-rocker too.,periodicdistribution.com
+e907feca-04fd-478a-811b-c436d69e187f,wheels,Pro wheel,,Shredpool,,pro,,inline,,current,,,,periodicdistribution.com
+23a16d73-8837-4e51-aba7-9bd7f891e872,wheels,FSC Wheel,,,,model,,inline,,current,,,Stock wheel.,periodicdistribution.com
+9d2c15f5-a925-40fd-866c-ff4c94f87d8f,wheels,FSC Wheel,,,The Compound,collab,,inline,c. 2022,current,,,Tied to The Compound (Clark Kirkman's Maryland ramp facility).,periodicdistribution.com; oneblademag.com
+66094691-6278-4ac3-a64a-2e1c33e32a21,bearings,ABEC 9,,,,model,,inline,,current,,,,periodicdistribution.com

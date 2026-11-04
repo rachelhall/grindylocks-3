@@ -222,7 +222,7 @@ export function PageMentionRows({
 
 /* Bottom sheet frame ---------------------------------------------------------------------- */
 
-function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
+export function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () => void; children: ReactNode }) {
   const { t } = useTranslation();
   const c = useColors();
   const insets = useSafeAreaInsets();
@@ -239,7 +239,7 @@ function Sheet({ visible, onClose, children }: { visible: boolean; onClose: () =
   );
 }
 
-function SheetHead({ label, title, onClose }: { label?: string | null; title: string; onClose: () => void }) {
+export function SheetHead({ label, title, onClose }: { label?: string | null; title: string; onClose: () => void }) {
   const { t } = useTranslation();
   const c = useColors();
   return (

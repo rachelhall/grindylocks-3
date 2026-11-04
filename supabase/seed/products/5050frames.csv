@@ -1,0 +1,15 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+bf4fb806-7ac5-4386-861f-59574e03e77e,frame,Original frames,,,,model,,inline,,discontinued,,,Original-era replaceable aggressive frames; models not named in sources.,rollernews.com; thisissoul.com
+09b03094-74c1-451b-bda9-a061b913f5b3,frame,Balance,Balance,,,model,,inline,2018,discontinued,,,Revival frame made from the original manufacturer's molds.,rollernews.com; thisissoul.com
+e7ccf609-0c5a-40d1-a6ee-fc96caf590f0,frame,Balance,Balance,Jon Fromm,,pro,,inline,,discontinued,,,50/50's first pro frame in years.,thisissoul.com
+e56d4f82-c0e1-4ed1-9882-5daa7f9a85da,frame,Balance 2,Balance,,,model,,inline,c. 2022,current,,,,thisissoul.com
+48cf56c3-92b8-485d-9549-1007e96ec722,frame,Balance 2,Balance,Scott Crawford,,pro,,inline,,unknown,,,,thisissoul.com
+12217e46-bfa1-4562-b957-8bf22fe426fd,frame,Balance 2,Balance,Yandriel Silverio,,pro,,inline,2022,unknown,,,,rollernews.com; thisissoul.com
+ab439108-d1fe-4ff0-960d-ad8134388c60,frame,Balance 2,Balance,Jon Cooley,,pro,,inline,,unknown,,,,thisissoul.com
+ad41ff52-bb6f-4549-b0de-45fcf56086b1,frame,Prime,Prime,,,model,,inline,2021,current,,,Aluminium core with glass-filled nylon walls; anti-rocker or flat.,rollernews.com; inlinewarehouse.com
+9d593830-c46f-48b7-bdaa-0dfc1739ec6f,frame,Prime,Prime,Jon Fromm,,pro,,inline,,current,,,His second 50/50 pro frame.,bladeville.com; hedonskate.com
+e3b290ff-262e-436e-9f40-07bd4521c7c1,frame,Prime,Prime,Chad Tannehill,,pro,,inline,2023,current,,,,rollernews.com; inlinewarehouse.com
+8721edfd-ea17-409c-a3da-851f3cca649d,frame,Prime,Prime,Chris Farmer,,pro,,inline,c. 2021,unknown,,,On clearance.,intuitionskate.com; rollernews.com
+0f20b8d9-8e3e-4793-bd62-f3d7e9464523,frame,Prime,Prime,Sacha Lopez,,pro,,inline,,current,,,,bladeville.com; thisissoul.com
+2b085656-aa6e-4405-8f9b-b86e1ca3c01e,wheels,Team,,,,model,,inline,c. 2021,current,,,,clic-n-roll.com; inlinewarehouse.com
+6d4b5a52-cf92-451a-8ede-2bfa1e732373,wheels,Antirocker,,,,model,,inline,c. 2021,current,,,46mm UHMW anti-rocker.,thisissoul.com

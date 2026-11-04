@@ -1458,5 +1458,93 @@
     "moreBrands_other": "+{{count}} more",
     "moreBrandsLabel_one": "Show {{count}} more brand",
     "moreBrandsLabel_other": "Show {{count}} more brands"
+  },
+  "catalog": {
+    "title": "Products",
+    "pastHidden_one": "{{count}} past model hidden",
+    "pastHidden_other": "{{count}} past models hidden",
+    "showingPast_one": "Showing {{count}} past model",
+    "showingPast_other": "Showing {{count}} past models",
+    "showPast": "Show past gear",
+    "past": "Past",
+    "collabs": "Collabs",
+    "collabsNote": "Made with {{name}}, sold by another brand",
+    "partBy": "{{part}} · by {{brand}}",
+    "builtOn": "Built on the {{name}}",
+    "missing": "Something missing or wrong?",
+    "suggestChange": "Suggest a change",
+    "gone": "This product isn't in the catalog anymore.",
+    "entryTypes": {
+      "model": "Model",
+      "pro": "Pro",
+      "collab": "Collab",
+      "special_edition": "Edition"
+    },
+    "entryTypeNames": {
+      "model": "Model",
+      "pro": "Pro model",
+      "collab": "Collab",
+      "special_edition": "Special edition"
+    },
+    "proRider": "Pro rider",
+    "with": "With",
+    "edition": "Edition",
+    "firstOut": "First out",
+    "status": "Status",
+    "stillMade": "Still made",
+    "noLongerMade": "No longer made",
+    "for": "For",
+    "stockSetup": "Stock setup",
+    "partOfBoot": "Part of the boot",
+    "pros": "Pro models",
+    "collabsAndEditions": "Collabs and editions",
+    "prosAndCollabs": "Pro models and collabs",
+    "suggest": {
+      "label": "{{name}} · products",
+      "title": "Suggest a change",
+      "kind": "What kind of change",
+      "kinds": {
+        "missing_model": "Missing model",
+        "wrong_name": "Wrong name",
+        "wrong_year": "Wrong year",
+        "no_longer_made": "No longer made",
+        "stock_parts": "Stock parts",
+        "something_else": "Something else"
+      },
+      "which": "Which one?",
+      "change": "Change",
+      "valueLabel": {
+        "missing_model": "What's it called?",
+        "wrong_name": "What's the right name?",
+        "wrong_year": "When did it first come out?",
+        "stock_parts": "What does it come with?",
+        "something_else": "What's wrong?"
+      },
+      "modelPlaceholder": "Model name, or the rider for a pro model",
+      "yearPlaceholder": "2019, or c. 2019",
+      "part": "Part",
+      "otherPart": "Other",
+      "where": "Where did you see it?",
+      "wherePlaceholder": "A link, or a note",
+      "note": "We check every suggestion before the list changes, and let you know when it's live.",
+      "send": "Send suggestion",
+      "sentTitle": "Thanks, it's sent",
+      "sentBody": "We'll let you know when the list changes.",
+      "tooMany": "That's a lot of suggestions for one day. Try again tomorrow."
+    },
+    "partTypes": {
+      "boot": "Boot",
+      "frame": "Frame",
+      "plate": "Plate",
+      "trucks": "Trucks",
+      "deck": "Deck",
+      "wheels": "Wheels",
+      "bearings": "Bearings",
+      "liner": "Liner",
+      "soulplate": "Soulplate",
+      "toe_stop": "Toe stop",
+      "slide_blocks": "Slide blocks",
+      "laces": "Laces"
+    }
   }
 }

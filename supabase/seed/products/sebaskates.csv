@@ -1,0 +1,16 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+370e5e8e-743b-4169-9da4-531dd217bcbf,boot,High,High,,,model,,inline,2005,discontinued,,,"Seba's first skate, a freestyle/freeskate hardboot widely used for urban skating.",rollerenligne.com; bladeville.com
+7c7ebc9d-c4ee-4dba-bb6c-91b796ca08e4,boot,High Light,High,,,model,,inline,,current,,,Lighter High.,rollerenligne.com; bladeville.com
+9eba4ae8-5915-479a-be35-54d629d54c11,boot,High Light Carbon,High,,,model,,inline,,current,,,Carbon top tier of the High.,bladeville.com
+01bc3deb-5829-47b2-8858-cd15c7ee1621,boot,High Deluxe,High,,,model,,inline,,discontinued,,,,rollerenligne.com; bladeville.com
+7b96db7e-0808-463c-9bcc-1800e85bc81b,boot,Trix,Trix,,,model,,inline,c. 2014,current,,,Carbon freestyle and urban skate.,bladeville.com; rollerenligne.com
+86c5a90f-13b8-4d0d-8a1b-58ed4e86aa15,boot,Trix 2,Trix,,,model,,inline,,current,,,,bladeville.com
+afa12299-ff0c-4383-badb-f2eb1f28cd65,boot,Trix Pro,Trix,,,model,,inline,,current,,,,bladeville.com
+514eea38-8b80-49d7-8aec-e45df8e472cd,boot,GT,,,,model,,inline,,current,,,Urban skate in 4x80 and 3x110.,bladeville.com
+4f91b81d-62ee-4777-abb2-8d000bcecab0,boot,SX,SX,,,model,,inline,c. 2015,discontinued,,,Freeride and powerblading hardboot with an integrated liner.,hedonskate.com; bladeville.com
+5fbc26a3-627a-4750-982c-2bfc1ac124c1,boot,SX 2 Street,SX,,,model,,inline,,discontinued,,,Aggressive complete of the SX 2.,bladeville.com; thisissoul.com
+05fe8f02-6829-441c-8e15-9df72727a3bc,boot,CJ,CJ,CJ Wellsmore,,pro,,inline,2013,discontinued,,,Seba's first aggressive skate: hybrid UFS boot with a carbon frame and integrated liner. Also called CJ Pro or CJ Carbon; a carbon CJ is still sold boot-only.,bladeville.com; thisissoul.com; sebaskates.com
+a095f82c-33dd-4150-b83b-36de1ed34d09,boot,CJ2,CJ,CJ Wellsmore,,pro,,inline,2019,current,,,Composite shell replaced carbon.,bladeville.com; sebaskates.com
+00086742-0edf-4ccf-a0f5-4d4110cd91ce,boot,CJ2 Prime,CJ,CJ Wellsmore,,pro,,inline,,current,,,CJ2 with a removable liner.,bladeville.com; sebaskates.com
+9f10e66c-d295-4a3c-a94d-5b48af9425e0,frame,Street UFS,,,,model,,inline,,current,,,Seba's aggressive UFS frame.,bladeville.com
+276ef521-a518-46b2-913d-06fe5113bc15,frame,Deluxe,Deluxe,,,model,,inline,,current,,,CNC aluminium freeskate frame; flat and rockered versions.,bladeville.com; clic-n-roll.com

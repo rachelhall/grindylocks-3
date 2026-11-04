@@ -1,0 +1,15 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+53a0204f-5d1c-4160-a941-5d104d10fe32,boot,FR1,FR,,,model,,inline,c. 2007,current,,,Top-tier freeskate hardboot; started inside Seba's lineup as the Seba FR1.,bladeville.com; inlinewarehouse.com; thisissoul.com
+e782cbe1-1adf-4e0a-b25b-cbe6e5debbd8,boot,FR2,FR,,,model,,inline,,current,,,,bladeville.com; inlinewarehouse.com
+5d8ec322-1c86-48c4-985e-97531c4d9b53,boot,FR3,FR,,,model,,inline,,current,,,Entry-level FR.,bladeville.com; inlinewarehouse.com
+5a97b599-1ed0-427c-b720-b83327a2253d,boot,FRX,FRX,,,model,,inline,,current,,,Popular budget urban skate; first sold as the Seba FRX.,bladeville.com; inlinewarehouse.com
+ec78b65d-441d-4032-9b58-e84b65eda9d4,boot,FRXP,FRX,,,model,,inline,c. 2023,current,,,Simpler FRX close to the original.,bladeville.com; inlinewarehouse.com
+5cf571b6-409d-4411-b4c0-41e3f8ec7706,boot,FRW,FRX,,,model,,inline,,current,,,Women's FRX.,bladeville.com
+06adb8d4-0c40-4d2a-afdb-36801a92f2fe,boot,UFR,UFR,,,model,,inline,,current,,,FR freeskate shell with a UFS mount; swaps between freeride and aggressive frames.,bladeville.com; thisissoul.com
+fd96d402-037c-4532-abee-3e75f52c2f0b,boot,UFR Street,UFR,,,model,,inline,,current,,,Aggressive UFR on UFS street frames.,thisissoul.com; inlinewarehouse.com
+e186c480-f75f-4855-bf4c-260c4d74252f,boot,UFR Street,UFR,Antony Pottier,,pro,,inline,2021,current,,,FR's first street pro skate; a converted Freeride shell with a removable soulplate.,rollernews.com; be-mag.com; bladeville.com
+beb574b2-6c38-4a6c-902f-9b20c49104b3,boot,UFR Street,UFR,Antony Pottier,Intuition,pro,Intuition,inline,2022,current,,,With an Intuition liner.,rollernews.com; bladeville.com
+8d95f858-0c80-4a21-a9a2-b2d4e2bd71e1,boot,UFR Street,UFR,Diako Diaby,,pro,,inline,,current,,,,inlinewarehouse.com
+9e6b553e-0f46-4ab6-9e63-e23988702c77,frame,Freeride UFS,,,,model,,inline,,current,,,UFS freeride frames for UFR boots.,clic-n-roll.com; bladeville.com
+5c1e496f-2cc4-4e22-b36d-ff8b714a4eaf,frame,UFS Street,,,Oysi,collab,Oysi,inline,,current,,,4x60 street frame made with Oysi.,inlinewarehouse.com; bladeville.com
+ae8a9452-c7d5-4a13-8845-a0e0471186fb,frame,Deluxe V3,Deluxe,,,model,,inline,,current,,,Continues Seba's Deluxe frame line.,inlinewarehouse.com; thisissoul.com

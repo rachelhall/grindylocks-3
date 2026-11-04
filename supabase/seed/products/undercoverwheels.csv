@@ -1,0 +1,33 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+bc462b8a-3e38-476d-96d5-353a7e5e4705,wheels,Team,Team,,,model,,inline,,current,,,Core wheel in aggressive and big urban sizes.,powerslide.com; bladeville.com; thisissoul.com
+a755dbfd-96e5-4747-aa4d-a1d1acdea17f,wheels,Team Blank,Team,,,model,,inline,,current,,,No-graphic Team wheel.,inlinewarehouse.com
+663432d7-83a3-40c8-b359-930bc02033bc,wheels,Team Anti-Rocker,Team,,,model,,inline,,current,,,Small hard wheel for anti-rocker middle positions.,inlinewarehouse.com; powerslide.com
+971dac17-3130-4553-af23-581ae11dc6dd,wheels,Team Pro,Team,,,model,,inline,,current,,,Higher-grade urban Team wheel.,inlinewarehouse.com; clic-n-roll.com
+5ac59138-3d88-4733-b76c-36bdcff3a19e,wheels,Raw,,,,model,,inline,,current,,,Plain aggressive wheel; also in urban sizes.,inlinewarehouse.com
+5d5320df-2340-4290-a21d-daca9de1fca5,wheels,Apex,,,,model,,inline,,current,,,Aggressive wheel with a metal core.,powerslide.com; thisissoul.com; bladeville.com
+0049412a-487f-4768-8a30-040348f021f2,wheels,Vortex,Vortex,,,model,,inline,,current,,,Aggressive and urban sizes.,inlinewarehouse.com; clic-n-roll.com
+c36d6a6f-5d52-46c3-8908-d004ed0756fb,wheels,Vortex 20Six,Vortex,,,model,,inline,,unknown,,,May be a special Vortex.,bladeville.com
+700cfad4-6776-472e-b5db-aca365c55ac9,wheels,Cosmic Eclipse,Cosmic,,,model,,inline,,current,,,Urban wheel.,powerslide.com; bladeville.com
+03b36b23-6565-49e4-b3e9-9e0be848208b,wheels,Cosmic Pulse,Cosmic,,,model,,inline,,unknown,,,,bladeville.com
+bb703a57-e208-4ec1-b206-db2a621f6bdd,wheels,Earth,,,,model,,inline,,current,,,,powerslide.com; bladeville.com
+b9af9d80-15a1-475a-bb90-84d50d01c33f,wheels,UC IT,,,,model,,inline,,current,,,,powerslide.com
+28dee0fe-d72b-4ff3-8f0a-9fa45b26e911,wheels,Circus Line,Pro Wheel,Carlos Bernal,,pro,,inline,2018,discontinued,,,Street wheel with a full-radius profile.,rollernews.com; bladeville.com
+4901f992-6930-4ffd-886a-a3b64cff65b1,wheels,TV Line,Pro Wheel,Carlos Bernal,,pro,,inline,2021,discontinued,,,,rollernews.com; thisissoul.com
+f95e67fd-bbe1-4cb3-bfb1-618cab758828,wheels,Movie Line,Pro Wheel,Carlos Bernal,,pro,,inline,2023,unknown,,,,rollernews.com; oneblademag.com
+f1d6597d-b73b-4565-9137-5f13c10b24d7,wheels,TV Line,Pro Wheel,Mushroom Blading,,pro,,inline,2020,discontinued,,,For Todd McInerney and Joey McGarry; described as the first 100mm pro wheel.,be-mag.com; bladeville.com
+91aad89f-a4d5-4edb-a3a6-f9ddb97f6702,wheels,TV Line,Pro Wheel,Nick Lomax,,pro,,inline,,discontinued,,,Big urban wheel.,bladeville.com
+9c668163-1f23-4d45-b904-4d990a65f3d8,wheels,Movie Line,Pro Wheel,Nick Lomax,,pro,,inline,,unknown,,,Urban wheel.,inlinewarehouse.com
+c4365be3-de71-4f6a-977c-fa3263745600,wheels,Movie Line,Pro Wheel,Nick Lomax,II,pro,,inline,,current,,,,inlinewarehouse.com
+3d10ecbe-b8b6-43bb-ab2f-25b3873fcfba,wheels,TV Line,Pro Wheel,Sam Crofts,,pro,,inline,,unknown,,,,thisissoul.com
+a9a4ec65-50dc-4037-adda-f3af7caa86af,wheels,Movie Line,Pro Wheel,Sam Crofts,,pro,,inline,,unknown,,,,hedonskate.com; thisissoul.com
+d6b46774-d75f-4237-905a-6d26f086fb0c,wheels,TV Line,Pro Wheel,Chris Calkins,,pro,,inline,,unknown,,,,rollernco.com
+4cb5f324-93e5-4fce-9b2e-1f6bfca9c222,wheels,Movie Line,Pro Wheel,Joey Lunger,,pro,,inline,c. 2023,current,,,,powerslide.com; rollernews.com
+f08c5e8e-9aee-42d7-9551-5859f11609d1,wheels,Movie Line,Pro Wheel,Mery Muñoz,,pro,,inline,2023,unknown,,,,rollernews.com
+d8a82792-9922-43e5-8630-5abf7b9b145e,wheels,Movie Line,Pro Wheel,Eugen Enin,,pro,,inline,2023,current,,,,rollernews.com; powerslide.com
+87b86415-001c-490e-beab-ea44faf44fa6,wheels,Movie Line,Pro Wheel,Nicoly Machado,,pro,,inline,2023,unknown,,,,rollernews.com
+e960e897-9fd9-4292-ac96-7b6ae3483d5c,wheels,Movie Line,Pro Wheel,Takeshi Yasutoko,,pro,,inline,,current,,,,powerslide.com
+85f08da9-ac9c-4662-b683-1eff85f77c2e,wheels,Movie Line,Pro Wheel,Miriam Fatmi,,pro,,inline,,unknown,,,,bladeville.com
+1f26b1f9-bf27-4cb9-9d7c-c9aefae2c792,wheels,Movie Line,Pro Wheel,Nicola Torelli,,pro,,inline,,unknown,,,Urban wheel.,bladeville.com
+a6c9fe94-04e7-44c2-b8d3-59f68a25ea59,wheels,Signature,Pro Wheel,Bobi Spassov,,pro,,inline,,current,,,Long-time UnderCover pro.,powerslide.com; inlinewarehouse.com
+13f69365-24fa-4c76-bb3c-7607e6af4a1c,wheels,Signature,Pro Wheel,Jay Yoon,,pro,,inline,,current,,,,powerslide.com; inlinewarehouse.com
+c7ea5580-76c8-4563-a296-968c56a7eb99,wheels,Signature,Pro Wheel,Lauric Picard,,pro,,inline,,current,,,,powerslide.com; inlinewarehouse.com

@@ -1,0 +1,22 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+4cacaef0-3826-4c95-9929-cf4899926d39,boot,908,,,,model,,inline,2018,discontinued,,,First Them skate. Used old Sabotage molds with a new soulplate; boot only at launch. Very flexy shell.,bladeville.com; hedonskate.com
+bf8d2189-3cd9-42b6-b211-2aa8c3e0cab7,boot,909,,,,model,,inline,c. 2019,current,,frame: Them / Street; wheels: Them / Them wheels; liner: Them / Them liner,"First boot mold designed and owned by a company run only by aggressive skaters; designed by Kyle Sola. Height-adjustable cuff. Sold boot-only or complete, with a stock or Intuition liner.",bladeville.com; thisissoul.com; hedonskate.com
+cc990b39-59d3-4d0a-92ee-15a2fca98af5,boot,909,,Danny Beer,,pro,,inline,,unknown,,,First complete Them 909 pro skate.,hedonskate.com
+91e7205c-aae5-4c3d-bf89-1b03088cebb1,boot,909,,Marius Gaile,,pro,,inline,2021,unknown,,,"Second Them pro model (Winter 2021), with his pro liner.",hedonskate.com; be-mag.com
+6124e5f1-4d15-4f40-a1ca-d7666ab8be5a,boot,909,,Patrick Ridder,,pro,,inline,2021,unknown,,,Closed the 2021 season; colors nod to the 90s Salomon ST9. Debuted Soulplate 3.0.,hedonskate.com; be-mag.com
+ffbae1ba-b261-4d47-ac88-9ba498df1ea1,boot,909,,,Brain Dead,collab,,inline,2021,discontinued,,,Limited collab with streetwear brand Brain Dead; each pair unique. Debuted the V4 Them liner.,hedonskate.com; rollernews.com
+e9ab4563-e03c-4eac-b0f2-8b87012ccb92,boot,909,,,Clarks,collab,,inline,,unknown,,,Collab with Clarks footwear.,hedonskate.com; bladeville.com
+72156f4f-c251-476c-ae91-c9ba1c785aa8,boot,909,,,WKND,collab,,inline,,unknown,,,Also sold as the 909 WKND 80 complete on 80mm wheels.,hedonskate.com
+b8c9177a-132b-431d-b3e7-3bc6332758df,boot,901,,,,model,,inline,,current,,frame: Them / 901; wheels: Them / Them wheels,Third Them boot. Lower-priced PP shell with the 909 cuff; parts swap with the 909. Six shell sizes.,clic-n-roll.com; locoskates.com; thisissoul.com
+9ff50668-5d76-4675-a6f4-f30b78d16fcc,boot,Dem 80,,,,model,,inline,,unknown,,,Hybrid of aggressive and bigger-wheel setups.,thisissoul.com
+afa397fb-a115-4e16-8b64-711993586df3,frame,Street,,,,model,,inline,,current,,,"UFS frame by Kyle Sola and Jon Julio; glass-filled nylon, 250 or 270mm, flat up to 58mm. Stock on the 909; also sold ready-to-roll with wheels.",hedonskate.com; bladeville.com; intuitionskate.com
+024baf5e-5596-48ca-b3d4-2bb1c512229b,frame,80's,,,,model,,inline,c. 2022,current,,,Big-wheel (80mm) frame with an integrated slim soulplate; fits every 909. Teased for a spring release after the 2021 pro models.,bladeville.com; be-mag.com
+45203c9b-9dab-4b7a-97ac-d0eaa72bb2da,frame,901,,,,model,,inline,,current,,,"Stock on the 901; anti-rocker, also takes 58mm flat. Fits the 909.",locoskates.com; clic-n-roll.com
+a38543da-8b93-4410-8a86-23ff1b6da18b,wheels,Them wheels,,,,model,,inline,,current,,,Stock wheels: 58mm/90A on 909 completes; 57mm/90A on the 901.,thisissoul.com; clic-n-roll.com
+97165028-5f02-494d-8368-f4415a03e87f,wheels,CommunitE,,,,model,,inline,,unknown,,,56mm/90A; came with ready-to-roll Street frames.,intuitionskate.com
+e61249b2-0a72-4649-9dbc-7ca10d6a57dc,liner,Them liner,,,,model,,inline,2018,current,,,"Stock liner, now on V4 (debuted 2021: no collar, stretch neoprene toe).",hedonskate.com
+f85af776-b2bc-4520-80c9-040884e768ed,liner,Them Intuition liner,,,,model,,inline,2019,current,,,Made with Intuition (collab began 2019); heat moldable.,bladeville.com; usa.shop-task.com
+11f97df2-67a6-4250-8f47-6e6f6aeba71f,soulplate,Them soulplate,,,,model,,inline,2018,current,,,"Versions to 3.0: 2.0 added bridge hardware, 3.0 (2021) a wider heel. The 901 soulplate is wider again and fits the 909.",hedonskate.com; usa.shop-task.com; clic-n-roll.com
+e23d7965-aee3-4957-bd1a-924ef23047f8,boot,909,,,BaceThem,collab,Bacemint,inline,2023,discontinued,,,With Bacemint (Sean and Colin Kelso); comes with Intuition BaceThem liners.,rollernews.com; bigwheelblading.com; intuitionskate.com
+161fe1c0-f76a-4e70-8188-f5ed26e37c6f,boot,909,,,BaceThem Standard,collab,Bacemint,inline,2023,discontinued,,,Cheaper BaceThem with Them V4 liners.,inlinewarehouse.com
+c82c1a19-3907-48a8-a879-ad02d8e0f12a,wheels,Them wheels,,,BaceThem,collab,Bacemint,inline,2023,unknown,,,Came with the BaceThem 909.,intuitionskate.com; bigwheelblading.com

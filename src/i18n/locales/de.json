@@ -1458,5 +1458,93 @@
     "moreBrands_other": "+{{count}} weitere",
     "moreBrandsLabel_one": "{{count}} weitere Marke zeigen",
     "moreBrandsLabel_other": "{{count}} weitere Marken zeigen"
+  },
+  "catalog": {
+    "title": "Produkte",
+    "pastHidden_one": "{{count}} früheres Modell ausgeblendet",
+    "pastHidden_other": "{{count}} frühere Modelle ausgeblendet",
+    "showingPast_one": "{{count}} früheres Modell wird gezeigt",
+    "showingPast_other": "{{count}} frühere Modelle werden gezeigt",
+    "showPast": "Früheres Material zeigen",
+    "past": "Früher",
+    "collabs": "Kollaborationen",
+    "collabsNote": "Mit {{name}} gemacht, von einer anderen Marke verkauft",
+    "partBy": "{{part}} · von {{brand}}",
+    "builtOn": "Basiert auf dem {{name}}",
+    "missing": "Fehlt etwas oder stimmt etwas nicht?",
+    "suggestChange": "Änderung vorschlagen",
+    "gone": "Dieses Produkt ist nicht mehr im Katalog.",
+    "entryTypes": {
+      "model": "Modell",
+      "pro": "Pro",
+      "collab": "Kollab",
+      "special_edition": "Edition"
+    },
+    "entryTypeNames": {
+      "model": "Modell",
+      "pro": "Pro-Modell",
+      "collab": "Kollaboration",
+      "special_edition": "Sonderedition"
+    },
+    "proRider": "Pro-Rider",
+    "with": "Mit",
+    "edition": "Edition",
+    "firstOut": "Erschienen",
+    "status": "Status",
+    "stillMade": "Wird noch hergestellt",
+    "noLongerMade": "Wird nicht mehr hergestellt",
+    "for": "Für",
+    "stockSetup": "Serienausstattung",
+    "partOfBoot": "Teil des Schuhs",
+    "pros": "Pro-Modelle",
+    "collabsAndEditions": "Kollaborationen und Editionen",
+    "prosAndCollabs": "Pro-Modelle und Kollaborationen",
+    "suggest": {
+      "label": "{{name}} · Produkte",
+      "title": "Änderung vorschlagen",
+      "kind": "Art der Änderung",
+      "kinds": {
+        "missing_model": "Modell fehlt",
+        "wrong_name": "Falscher Name",
+        "wrong_year": "Falsches Jahr",
+        "no_longer_made": "Nicht mehr hergestellt",
+        "stock_parts": "Serienteile",
+        "something_else": "Etwas anderes"
+      },
+      "which": "Welches?",
+      "change": "Ändern",
+      "valueLabel": {
+        "missing_model": "Wie heißt es?",
+        "wrong_name": "Wie lautet der richtige Name?",
+        "wrong_year": "Wann ist es erschienen?",
+        "stock_parts": "Was ist dabei?",
+        "something_else": "Was stimmt nicht?"
+      },
+      "modelPlaceholder": "Modellname, oder der Rider bei einem Pro-Modell",
+      "yearPlaceholder": "2019, oder ca. 2019",
+      "part": "Teil",
+      "otherPart": "Anderes",
+      "where": "Wo hast du es gesehen?",
+      "wherePlaceholder": "Ein Link oder eine Notiz",
+      "note": "Wir prüfen jeden Vorschlag, bevor sich die Liste ändert, und sagen dir Bescheid, wenn er live ist.",
+      "send": "Vorschlag senden",
+      "sentTitle": "Danke, ist gesendet",
+      "sentBody": "Wir sagen dir Bescheid, wenn sich die Liste ändert.",
+      "tooMany": "Das sind viele Vorschläge für einen Tag. Versuch es morgen wieder."
+    },
+    "partTypes": {
+      "boot": "Schuh",
+      "frame": "Schiene",
+      "plate": "Platte",
+      "trucks": "Achsen",
+      "deck": "Deck",
+      "wheels": "Rollen",
+      "bearings": "Kugellager",
+      "liner": "Innenschuh",
+      "soulplate": "Soulplate",
+      "toe_stop": "Stopper",
+      "slide_blocks": "Slide Blocks",
+      "laces": "Schnürsenkel"
+    }
   }
 }

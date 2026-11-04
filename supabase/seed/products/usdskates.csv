@@ -1,0 +1,49 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+41cd2dc8-d7a2-434e-a903-402cac7cb515,boot,Damocles,,,,model,,inline,1997,discontinued,,,"USD's first skate, launched with the brand (then UpSideDown). Many interchangeable parts.",bladeville.com; inlinewarehouse.com
+a1a776d9-12e1-4af2-bb8d-de070bda7c8a,boot,Classic Throne,Throne,,,model,,inline,1998,discontinued,,,Fully customizable and open to other brands' frames and parts. Its mold was later revived by Mesmer.,powerslide.com; slideinline.com; thisissoul.com
+5482a78f-08d9-4b1a-a295-354620eb7f69,boot,Classic Throne,Throne,Aaron Feinberg,,pro,,inline,,discontinued,,,His first pro skate; USD made three more iterations.,bladeville.com
+e064324e-9ec2-4cc0-b973-966ae37c2653,boot,Classic Throne,Throne,Brian Shima,,pro,,inline,,discontinued,,,Shima joined USD in 1999.,slideinline.com; vinted.co.uk
+a150e996-f41f-45dd-a082-47f339cbdee0,boot,Classic Throne,Throne,Billy O'Neill,,pro,,inline,,discontinued,,,O'Neill later co-founded Mesmer.,vinted.co.uk; clic-n-roll.com
+e6993868-f74a-4fd1-9a76-7ea3aff6b845,boot,Classic Throne,Throne,Rachard Johnson,,pro,,inline,2007,discontinued,,,Red Throne for USD's 10th anniversary.,slideinline.com
+eb10ec26-1d6f-4d17-a8e0-1b5eced2f6fa,boot,UFS Throne,Throne,,,model,,inline,2002,discontinued,,,First USD boot with a UFS mount and flat sole.,powerslide.com
+5429c800-8eb8-4927-8b96-f8a0eca0e8e7,boot,Psirus,,,,model,,inline,2000,discontinued,,,Two-color look; its soul wings introduced a negative soul.,powerslide.com; slideinline.com
+0b61d3a7-fd51-406a-b9eb-1a43cf596907,boot,Legacy,,,,model,,inline,2005,discontinued,,,Softboot/hardboot hybrid with adjustable soulplates.,slideinline.com
+5f1e79a2-6c19-4f8a-b945-5e774080fd8d,boot,Transformer,,,,model,,inline,2005,current,,,First size-adjustable aggressive skate for kids.,powerslide.com; rollernews.com
+7bdba619-6e3f-481f-9003-d6bfeb824e2f,boot,Carbon,Carbon,,,model,,inline,,discontinued,,,Billed as the first aggressive skate with a carbon fiber shell.,powerslide.com
+e25efc83-1dbe-465c-9056-bf1b567e9553,boot,Carbon II,Carbon,,,model,,inline,2010,unknown,,,"Developed from Deshi's best skate after Powerslide folded Deshi. 2010 per Bladeville, 2011 per Powerslide.",bladeville.com; powerslide.com
+689a3a57-d921-4d60-b879-67e4e55a90a0,boot,Carbon III,Carbon,,,model,,inline,,unknown,,,,bladeville.com
+a15e769a-c01c-4c21-aae7-b89f1bcd9586,boot,Carbon Free,Carbon,,,model,,inline,,unknown,,,"Lower-cost carbon, fibreglass and nylon take on the Carbon II/III build.",bladeville.com
+778a9752-d6ff-47d8-ac28-dbd60bc2dfa6,boot,Carbon Free,Carbon,Eugen Enin,,pro,,inline,2017,discontinued,,,His first pro skate.,bladeville.com
+2010cacb-40d5-40ea-a4c8-a05c33c329ca,boot,Carbon Free,Carbon,Carlos Bernal,,pro,,inline,,unknown,,,,bladeville.com
+b33d10d7-b6bb-42d2-b009-8ea63e141b67,boot,Carbon Free Plus,Carbon,Montre Livingston,,pro,,inline,,unknown,,,,bladeville.com
+d42efad6-5a2f-4fd0-9643-4077e9cfa366,boot,Carbon,Carbon,Franky Morales,,pro,,inline,,discontinued,,,His USD Carbon pros came before his GAWDS skates; versions not confirmed.,rollernews.com
+63c57875-2812-448b-a34d-3bbd9c4bd16c,boot,VII,,,,model,,inline,,unknown,,,Rigid boot; a 20th-anniversary version came out in 2017.,rollerenligne.com
+37df20fa-f241-4fb3-a58d-09bcea1c457c,boot,VII,,Roman Abrate,,pro,,inline,c. 2017,unknown,,,Built on the anniversary VII.,rollerenligne.com
+8508808c-1753-4f28-bb6a-18626185a438,boot,Grycon,,,,model,,inline,,unknown,,,,rollernews.com
+db1b25f2-1e29-4bb6-869f-6038ce639b63,boot,Aeon 60,Aeon,,,model,,inline,c. 2015,current,yes,,"First unibody aggressive skate: shell, soulplates and frame are one molded piece.",bladeville.com; thisissoul.com; inlinewarehouse.com
+807058b1-7306-4685-abf9-55f9095bd316,boot,Aeon 72,Aeon,,,model,,inline,,unknown,yes,,Unibody; takes a full flat 72mm setup.,rollernews.com; bladeville.com
+c97a70b1-6878-437f-a331-513f791a09ca,boot,Aeon 80,Aeon,,,model,,inline,c. 2022,unknown,yes,,Unibody; sold as the Aeon 80 Team on 4x80mm.,oneblademag.com
+40e8db4a-8cc1-47bf-8177-376579ac3301,boot,Aeon 60,Aeon,Nick Lomax,,pro,,inline,2021,unknown,,,"Cool grey, MYFIT 2nd Skin liner.",rollernews.com; inlinewarehouse.com
+aaf8034b-3ffb-4f8b-866d-d5b473cb4d13,boot,Aeon 60,Aeon,Mery Muñoz,,pro,,inline,,unknown,,,At least two versions (II exists).,inlinewarehouse.com
+1378a83a-2d90-49e9-aa44-7c34894bff01,boot,Aeon 60,Aeon,Sam Crofts,,pro,,inline,,unknown,,,Several pro models (at least II and IV); II was a vegan skinned Aeon.,inlinewarehouse.com; rollernews.com
+e5df59a4-1831-4c58-9e69-5de71bee9b3f,boot,Aeon 60,Aeon,Richie Eisler,,pro,,inline,,unknown,,,Fully reflective.,inlinewarehouse.com
+1d26fce4-85b3-495b-85c4-7a8f2b071dd4,boot,Aeon 60,Aeon,Jay Yoon,,pro,,inline,,unknown,,,,thisissoul.com
+8da1e9dd-604c-47fa-aa2e-9c1afacf5e50,boot,Aeon 60,Aeon,Aaron Feinberg,,pro,,inline,2022,unknown,,,USD 25th anniversary; nods to his first pro Classic Throne.,rollernews.com; bladeville.com
+79ccc505-6b1f-4350-a279-d402e269e41c,boot,Aeon 68,Aeon,Takeshi Yasutoko,,pro,,inline,2022,unknown,,,Second 25th-anniversary pro skate; park-focused 68mm setup.,rollernews.com; inlinewarehouse.com
+778bf870-8216-490b-842a-a6c55feec362,boot,Aeon 60,Aeon,,Allstar,special edition,,inline,c. 2022,unknown,,,"Tribute designs for Billy O'Neill, Carlos Pianowski, Albert Hooi and Rachard Johnson.",rollernews.com
+477ceb21-b2a0-4d05-ab61-2bf608f44164,boot,Sway,,,,model,,inline,,current,,,Started as an entry-level skate and became a base for pro models. Throne-inspired look; its soulplate is widely reused.,bladeville.com; powerslide.com
+9acaaf95-36d0-4f65-a84f-1652e4734416,boot,Sway,,Chris Farmer,,pro,,inline,,unknown,,,Giraffe-print soulplate.,inlinewarehouse.com
+121a9ce0-ccac-46ca-bae4-35348a8f38e1,boot,Sway,,Chris Farmer,II,pro,,inline,2022,unknown,,,"New soulplate and MYFIT Crown liner, developed with Farmer.",rollernews.com
+76a3d3c7-661e-4e35-a62b-5d4eaaf693c4,boot,Sway,,Carlos Bernal,,pro,,inline,,unknown,,,At least V1 and V2.,icewarehouse.com; inlinewarehouse.com
+2a54f9f9-c25c-4665-bf89-dc9b20d3ab96,boot,Sway,,Michael Witzemann,,pro,,inline,,unknown,,,At least I and II.,inlinewarehouse.com
+e33cda2f-efc2-42b0-a3c4-87971039c9a0,boot,Sway,,Rachard Johnson,,pro,,inline,,unknown,,,Throwback to the Throne era.,icewarehouse.com
+de6a166a-f189-4f04-8d70-bf19a9af6e7e,boot,Sway,,Montre Livingston,,pro,,inline,,unknown,,,,vinted.co.uk
+87c3401a-95ad-4e67-8760-2e8ca154443e,boot,Sway,,Dominic Sagona,,pro,,inline,,unknown,,,A re-release was announced.,bladeville.com
+927f8ec3-c915-482a-912c-eaaa126f7aa1,boot,Sway,,,Allstar 2000,special edition,,inline,2022,unknown,,,,rollernews.com
+1950c22b-a1c6-4135-96af-b96efcb54e64,boot,Shadow,Xsjado,,,model,,inline,,current,,,An Xsjado design brought under USD; reworked as the new Shadow in 2021.,powerslide.com; rollernews.com
+1ceaf43b-6e32-4f3c-9ee0-7eae1ab0aba6,boot,Shadow,Xsjado,Eugen Enin,,pro,,inline,2021,unknown,,,,rollernews.com
+1cdfa3e7-9074-4b26-a3c9-6545bc3e54c4,boot,Shadow,Xsjado,Eugen Enin,II,pro,,inline,2022,unknown,,,,rollernews.com
+09e69e8a-0c7f-4766-b148-d030e0843b90,boot,Xsjado,Xsjado,Dustin Latimer,,pro,,inline,,unknown,,,Sold as USD Latimer Xsjado. Latimer was a USD pro before Xsjado.,bladeville.com; powerslide.com
+cf7887b6-3b13-4893-b948-3de9c60c789b,boot,Glitch,,,,model,,inline,,unknown,,,Kids skate.,bladeville.com
+6d1b8373-1863-48a4-9c7f-b0445ea40944,wheels,Team,,,,model,,inline,,current,,,Budget aggressive wheel with a flat profile; maker not stated.,powerslide.com; bladeville.com
+9737cc1a-5c80-4a20-a16f-ba0850b1e9c3,wheels,Team,,,20th Anniversary,special edition,,inline,c. 2017,unknown,,,For USD's 20th anniversary.,inlinewarehouse.com; rollerenligne.com

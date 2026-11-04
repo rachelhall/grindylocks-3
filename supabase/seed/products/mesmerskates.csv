@@ -1,0 +1,13 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+a91e5b46-2b45-412b-a00c-64660d9cf611,boot,Throne,Throne,,,model,,inline,c. 2021,current,,,"Revival of the USD Classic Throne mold, licensed from USD via Powerslide. Each pro gets its own shell, cuff and soulplate parts.",rollernews.com; bladeville.com; thisissoul.com
+4a371ece-cd85-4b61-962e-799c3c0622c6,boot,Throne,Throne,John Bolino,,pro,,inline,2021,discontinued,,,"Mesmer's first skate; announced Nov 2021, shipped c. 2022.",rollernews.com; bladeville.com; thisissoul.com
+49403fcd-53f0-4b20-8391-6ae2fcdddc21,boot,Throne,Throne,John Bolino,V2,pro,,inline,c. 2025,current,,,New cuff and Mesmer x MyFit Slayer liner.,powerslide.com; locoskates.com; hedonskate.com
+1683dd3b-0eee-44ec-9761-23e5e0794a8c,boot,Throne,Throne,John Bolino,Junior,special edition,,inline,,discontinued,,,Kids' sizes of the Bolino pro.,thisissoul.com
+13a7e5ec-1ea3-446e-9026-5166cc7ed41f,boot,Throne,Throne,Dominic Bruce,,pro,,inline,2022,discontinued,,,,rollernews.com; powerslide.com
+978e7e62-afa0-4500-8d4e-d8660399bb2e,boot,Throne,Throne,Levi van Rijn,,pro,,inline,2024,current,,,Redesigned shell with more forefoot room.,be-mag.com; powerslide.com; thisissoul.com
+ed0db01e-e8cd-48dc-9d4c-72c48cfceab3,boot,Throne,Throne,Billy O'Neill,,pro,,inline,2025,current,,,Founder's pro skate.,b2b.powerslide.com; inlinewarehouse.com; clic-n-roll.com
+af143300-d4d2-4291-ae51-c392bc49418a,boot,Eclipse TS,Eclipse,,,model,,inline,2026,current,,,"New mold inspired by the Throne: wider fit, flat bottom, adjustable cuff height. Sold flat (Kizer Lowrider), anti-rocker (Fluid IV), boot only or as a shell kit.",powerslide.com; inlinewarehouse.com; thisissoul.com
+a83dbe7a-0375-4078-8793-c2357947ea81,liner,Mesmer x MyFit liner,,,MyFit,collab,,inline,,current,,,"V1 (memory foam) and V2; the Throne pros' ""Slayer"" liner may be V2.",powerslide.com; skatepro.com
+507a7d75-e173-4996-afb9-3645f64b84b7,soulplate,Souls,,John Bolino,,pro,,inline,,current,,,One-piece Throne soulplate.,powerslide.com; clic-n-roll.com
+d5439faa-75fa-422f-9ad4-5b686ac89812,soulplate,Souls,,Dominic Bruce,,pro,,inline,,current,,,,powerslide.com
+e92a762d-532e-4b43-aa29-f048f82d5b0c,wheels,Team,,,,model,,inline,,current,,,Stock wheels on Mesmer completes; anti-rockers sold too.,b2b.powerslide.com; inlinewarehouse.com

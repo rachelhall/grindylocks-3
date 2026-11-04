@@ -1,0 +1,40 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+f405aa31-4200-4a83-a497-774e4b85de3b,boot,Melrose,Melrose,,,model,,quad,,current,,,Entry lifestyle and outdoor skate.,powerslide.com; icewarehouse.com
+71d38581-ba52-4093-9c36-59cdc9b065a9,boot,Melrose Deluxe,Melrose,,,model,,quad,,current,,,Melrose on an aluminium plate.,powerslide.com; bladeville.com
+7eeee7f8-c2a0-4392-98c6-fd4e658f98c6,boot,Melrose Elite,Melrose,,,model,,quad,,current,,,Melrose on the Shari plate.,powerslide.com; icewarehouse.com
+607f3fff-a8b2-4db1-893b-42506e8473fc,boot,Melrose Premium,Melrose,,,model,,quad,,current,,,Top Melrose tier.,powerslide.com; rollersnakes.co.uk
+063c66a0-8048-406e-9f58-eaad6d9a4b3c,boot,Cozy,,,,model,,quad,,current,,,Lifestyle skate with a deep rear V-cut.,powerslide.com; icewarehouse.com
+ea276535-dc38-4f70-bb7c-e74bb9be267f,boot,Jump 2.0,,,,model,,quad,,current,,,Sneaker-look skate on the Shari plate; takes a grind block for park.,powerslide.com; inlinewarehouse.com; rollersnakes.co.uk
+e890c9d2-efb1-4b70-813b-47a1fe490bc9,boot,Chameleon High,,,,model,,quad,,current,,,Jam and dance skate with swappable colour flaps.,bladeville.com; icewarehouse.com
+e669027e-3ee0-4cce-bb58-94bb3a77ec48,boot,Karma Pro,,,,model,,quad,,current,,,Park skate with a heat-moldable shell and Karma block. In closeout.,powerslide.com; skatepro.com; inlinewarehouse.com
+2c818dee-9aca-4942-858d-515dd0e46777,boot,Kismet,Kismet,Barbie Luciana,Gold,pro,,quad,,current,,,Barbie Luciana's (Barbiepatin) pro park skate.,powerslide.com; inlinewarehouse.com; pigeonskates.com
+22e94c30-5f24-49db-9cb2-49aede838ec4,boot,Kismet,Kismet,Barbie Luciana,Black,pro,,quad,,current,,,Later Kismet edition with Pro Park trucks and the Diamond Slider.,powerslide.com; rollersnakes.co.uk; inlinewarehouse.com
+51ccdf7e-7f96-46e6-be8b-c9383164b949,boot,Nomade,,,,model,,quad,,current,,,Sneaker-like park and street skate; also sold boot-only.,inlinewarehouse.com; powerslide.com
+caed30cf-540d-4651-9ad5-95fc953cc506,boot,Park Dark Soul,,,,model,,quad,,current,,,Heeled park skate.,powerslide.com; inlinewarehouse.com
+edcc7193-ce9c-4b93-b11e-2a9867e4dc99,boot,Ruby,,,,model,,quad,,current,,,Beginner derby skate.,powerslide.com; bladeville.com; clic-n-roll.com
+edfc3974-1931-47c9-9e99-cf99d90e8554,boot,Jade,,,,model,,quad,,current,,,Low-cut derby skate with a heat-moldable shell.,b2b.powerslide.com; powerslide.com; bladeville.com
+4f1ec146-a590-403d-869d-e20db67eef25,boot,Topaz,,,,model,,quad,,current,,,Derby skate for newer players.,powerslide.com; skatepro.ca
+ddf63afc-ed09-434e-bad2-823ddcf17ae4,boot,Onyx,,,,model,,quad,,current,,,Carbon and glass-fibre derby boot.,powerslide.com; icewarehouse.com
+182dea2f-3b90-4a58-8efd-4b94dfce88d4,boot,Eclipse,,,,model,,quad,,current,,,Top derby skate; also sold boot-only.,powerslide.com; bladeville.com; skatepro.com
+5ec1929e-0ae8-498d-9249-d173eb044502,plate,Shari,,,,model,,quad,,current,,,Composite plate; stock on most Chaya park skates.,powerslide.com; skatepro.ca
+8f934f76-6f87-4a23-bd8b-1f4751687ebb,plate,Zena,,,,model,,quad,,current,,,CNC aluminium plate.,inlinewarehouse.com; skatepro.ca
+f89b7249-533f-40e5-b83c-9087ec1b2b1c,plate,Ophira,,,,model,,quad,,current,,,Aluminium derby plate.,b2b.powerslide.com; skatepro.ca
+c3cba6ad-e5f7-4b7f-bcb3-8a60e2916659,plate,Shiva,,,,model,,quad,,current,,,Top aluminium derby plate.,b2b.powerslide.com; skatepro.ca
+b8d4a9b5-5feb-41a8-8ff3-750a8c928813,trucks,Standard,,,,model,,quad,,current,,,Cast aluminium truck.,powerslide.com
+2ede7277-b0ed-4a90-bf86-16ab8e44fb92,trucks,XTNDR,,,,model,,quad,,current,,,Forged truck with swappable axles for a wider stance.,powerslide.com
+93da32a9-7d1c-4a38-932b-d91495817087,trucks,Pro Park,,,,model,,quad,,current,,,Forged wide-stance park truck.,inlinewarehouse.com; powerslide.com
+61683f86-8d0d-403a-b118-682eb1586b9b,toe stop,Cherry Bomb,,,,model,,quad,,current,,,Natural-rubber adjustable stop.,inlinewarehouse.com; powerslide.com
+15699774-5ee8-41ed-9ba3-613b7f9d6719,toe stop,Controller,,,,model,,quad,,current,,,Offset flat stop.,powerslide.com; inlinewarehouse.com
+276a44b5-ded8-469a-915b-8d1f917df177,slide blocks,Karma Grind Block,,,,model,,quad,,current,,,Asymmetric grind block.,inlinewarehouse.com; powerslide.com
+6333eb95-a8f6-4016-8ee8-fc884cb38b08,slide blocks,Diamond Slider,,,,model,,quad,,current,,,Wide grooved UHMW block.,inlinewarehouse.com; powerslide.com
+04b4eed1-3c64-4771-8014-8e157c417c71,wheels,Firebolt,,,,model,,quad,,current,,,Park wheel.,powerslide.com
+70493367-baa4-44b7-9fd1-72bdf7d0ed79,wheels,Pro wheel,,Barbie Luciana,,pro,,quad,,current,,,Hard park signature wheel.,inlinewarehouse.com; rollersnakes.co.uk
+94bf23be-d503-4e59-819b-26fd577214ea,wheels,G-Force,,,,model,,quad,,current,,,Indoor derby wheel.,powerslide.com; bladeville.com
+9f783707-b41e-4a76-8919-0f89a738ae65,wheels,Ground Control,,,,model,,quad,,current,,,All-purpose derby wheel. Not the inline frame brand.,inlinewarehouse.com; clic-n-roll.com
+d6be7a19-0bc1-4a79-b602-2bbe23c888f4,wheels,Drift,,,,model,,quad,,current,,,Jam and dance wheel.,rollersnakes.co.uk; bladeville.com
+43b35e3f-8fda-4a9a-a848-5e301baf3282,wheels,Big Softies,,,,model,,quad,,current,,,Soft outdoor wheel.,inlinewarehouse.com; rollersnakes.co.uk
+0a1f55f8-7e8c-4490-87a7-dea6396a325c,wheels,Sugar Rush,,,,model,,quad,,current,,,Outdoor wheel.,powerslide.com; bladeville.com
+01e4dcb9-3ba7-4f8a-9111-7eff45c08067,wheels,Neon,,,,model,,quad,,current,,,Light-up outdoor wheel.,powerslide.com; inlinewarehouse.com
+a82db1f9-49da-41df-a7ec-d0da27014285,wheels,Octo Paseo,Octo,,,model,,quad,,current,,,Outdoor wheel.,powerslide.com
+6ef7dc4b-8953-4adc-b4c1-eb96cb2f2d83,wheels,Octo Propel,Octo,,,model,,quad,,current,,,Indoor and outdoor versions.,powerslide.com; skatepro.ca
+ff54cccd-1710-4cd5-9abc-7c2957d461cd,wheels,Octo Edge,Octo,,,model,,quad,,current,,,Indoor derby wheel.,powerslide.com

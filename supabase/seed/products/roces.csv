@@ -1,0 +1,30 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+7789fc80-c067-4c6d-9c73-b9d846717b4b,boot,M12,M12,,,model,,inline,1996,current,,,"Majestic 12, billed as the first true aggressive skate. Built on Roces' PRO hardboot shell; the original high cuff was lowered in the late 90s.",thisissoul.com; bladeville.com; roces.com
+9279088c-9db0-44a2-90c8-5518f4918b39,boot,M12 UFS Recycle,M12,,,model,,inline,,current,,,Entry M12 with a partly recycled boot.,roces.com; thisissoul.com
+7dd21865-5814-401b-9f4b-303709127788,boot,M12 LO,M12,,,model,,inline,,current,,,Lower-cuff M12; base for most current pro skates.,roces.com; bladeville.com
+9858978a-f0c9-4eb6-9b52-9fc835d2a811,boot,M12 LO Team,M12,,,model,,inline,,current,,,Sold in rotating named colors.,roces.com; inlinewarehouse.com
+34102125-f1cd-49e6-8d73-704d56f895a1,boot,M12 LO Plus,M12,,,model,,inline,,current,,,Upgraded M12 LO used for pro editions; how it differs isn't stated.,roces.com; inlinewarehouse.com
+9e0a214f-d04d-4a7e-8077-16e5f76e652b,boot,Dogma,M12,,,model,,inline,,current,,,A skin over the M12 LO shell.,roces.com; inlinewarehouse.com
+47461f9a-77ab-4c33-8d34-df5cf5391eef,boot,M12,M12,Joe Atkinson,,pro,,inline,2018,discontinued,,,Listing doesn't confirm it was a pro skate.,hedonskate.com
+c75b09c5-2d32-4acf-a788-6933d7f8530b,boot,M12,M12,Nils Jansons,,pro,,inline,2019,discontinued,,,,rollernews.com; bladeville.com
+47401212-4715-4c8d-838b-4dcca570daa7,boot,M12,M12,Nils Jansons,Storm,pro,,inline,2021,discontinued,,,Released on both M12 and 5th Element.,thisissoul.com; bladeville.com
+11335359-c629-4064-80b0-d4b7ec7a2b5b,boot,M12 LO Plus,M12,Nils Jansons,Peace,pro,,inline,,current,,,,roces.com; inlinewarehouse.com
+bb5ef2a3-4aba-402a-a1c4-75d66f11877b,boot,M12 LO,M12,Grant Hazelton,,pro,,inline,2021,unknown,,,About three years in development; recycled-material boot.,rollernews.com; bladeville.com; skatepro.com
+5dc8d614-1248-4c76-a9af-fc00ed923779,boot,M12 LO Plus,M12,Yuto Goto,'60 Impala,pro,,inline,,current,,,,roces.com; inlinewarehouse.com
+0d4fe7d1-56b3-4716-bfc7-add4ac2c7586,boot,M12 LO,M12,Yuto Goto,Namikaze,pro,,inline,2024,unknown,,,His fourth Roces pro skate.,rollernews.com; inlinewarehouse.com
+c79fc2fe-6fe2-420e-8dee-fe96b0a43bf1,boot,M12,M12,Bobi Spassov,Domestic Punk,pro,,inline,,discontinued,,,His first Roces pro skate.,hedonskate.com; rollernews.com
+7bf50108-5a1f-47ba-82df-58b7a68097c1,boot,Dogma,M12,Bobi Spassov,Domestic Punk 2.0,pro,,inline,2022,current,,,,inlinewarehouse.com; rollernews.com
+33c61db2-e9bf-44d7-ad60-9d2eb9a92ee6,boot,Dogma,M12,Bobi Spassov,Candy,pro,,inline,c. 2023,current,,,,thisissoul.com; rollernews.com
+ff2708e0-47ad-4e3f-b65c-e73198fac41e,boot,M12 LO Plus,M12,Bobi Spassov,Inferno,pro,,inline,,current,,,,roces.com; inlinewarehouse.com
+397c0efb-c872-4ee0-bd0b-4b2103c72395,boot,M12 LO Plus,M12,Bobi Spassov,Inferno 2.0,pro,,inline,,current,,,,roces.com
+78a50b87-823e-414f-87f4-3aa5a3b804e3,boot,M12 LO Plus,M12,Kate Bedrata,Viridian Odyssey,pro,,inline,,current,,,Pro skate or collab not confirmed; spelled Badrata on Rollernews.,roces.com; inlinewarehouse.com; rollernews.com
+189210ac-21a7-485d-9543-00b881a878fe,boot,M12 LO,M12,,70/30 Anniversary,special edition,,inline,2022,unknown,,,Roces' 70 years and 30 years of inline; numbered run of 700.,inlinewarehouse.com; bladeville.com
+91da4488-6232-4d40-9df6-e6560ab080d6,boot,5th Element,5th Element,,,model,,inline,1998,current,,,Roomier shell than the M12. Relaunched in modern form around 2019 after Valo ended.,thisissoul.com; rollernews.com; roces.com
+91b3ca03-f639-48ce-b133-f1787de1a1a1,boot,5th Element,5th Element,Yuto Goto,,pro,,inline,2019,discontinued,,,,rollernews.com; intuitionskate.com
+c890ff9c-e373-400e-bcc2-19d6e4b66d0c,boot,5th Element,5th Element,Yuto Goto,Asayake,pro,,inline,2022,unknown,,,,inlinewarehouse.com; bladeville.com
+ebca56d6-588c-4577-a8f6-666ba9eeea54,boot,5th Element,5th Element,Nils Jansons,Breeze,pro,,inline,2020,discontinued,,,,bladeville.com
+e46410e8-5c94-4a76-9116-a70b2b43cf0f,boot,5th Element,5th Element,Nils Jansons,Storm,pro,,inline,2021,discontinued,,,,thisissoul.com
+a3e91ffa-1d30-41f9-9fbd-c5ab9f68859d,boot,5th Element,5th Element,Nils Jansons,Saule,pro,,inline,c. 2022,current,,,,rollernews.com; hedonskate.com
+81070277-efe1-406b-b2ed-b1f8816cf53b,boot,5th Element,5th Element,Ilia Savosin,Fire,pro,,inline,2025,current,,,,inlinewarehouse.com; bladeville.com
+d58be3a0-fec9-47e9-b092-f910c717a406,boot,5th Element,5th Element,Jo Zenk,Mana,pro,,inline,2026,current,,,Comes on RF1 frames.,inlinewarehouse.com; bladeville.com
+6b454f80-072a-4103-b549-013d24b3a8b8,frame,RF1,,,,model,,inline,,current,,,Roces' aggressive UFS frame.,inlinewarehouse.com

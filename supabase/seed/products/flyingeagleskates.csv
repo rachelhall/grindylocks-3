@@ -1,0 +1,10 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+ef557103-68db-45fd-a133-95427f9e5d0b,boot,F5S Eclipse,Eclipse,,,model,,inline,,current,,,Entry urban skate.,inlinewarehouse.com
+3bc1a255-77eb-46ff-8580-e935ebed7d06,boot,F110+ Eclipse,Eclipse,,,model,,inline,2023,current,,,Eclipse on the 3x110 Supersonic frame.,inlinewarehouse.com
+067ca2c8-dc56-45db-8678-31d845385cbb,boot,F6 Falcon,Falcon,,,model,,inline,c. 2015,current,,,Eagle-shaped frames.,oneblademag.com; inlinewarehouse.com
+8529fa5f-5b65-4b93-af27-a4acc6c30efb,boot,F6S Falcon,Falcon,,,model,,inline,,current,,,,inlinewarehouse.com
+0ac2ee2e-2078-4a76-b2e8-c99feefd0df6,boot,F7 Optimum,,,,model,,inline,c. 2018,current,,,Urban hardboot.,bigwheelblading.com
+b689ffb3-2aa8-4f3e-b13f-a18204b7df1b,boot,Shrike,,,,model,,inline,,current,,,"Urban line (X1 Lite, X3, X5 Pro).",inlinewarehouse.com; clic-n-roll.com
+f53d2a3c-ddcd-4562-93c5-52276c882d4a,boot,X7 Reaver,,,,model,,inline,,current,,,Urban hardboot.,inlinewarehouse.com
+4bbd496b-d4c5-4e01-9482-05b4be081460,boot,BKB,,,BKB,collab,,inline,,current,,,Co-branded urban skates.,clic-n-roll.com; inlinewarehouse.com
+1cc0a8a8-1089-487c-8606-f879718c588f,frame,Supersonic,,,,model,,inline,c. 2015,current,,,3x110 urban frame.,oneblademag.com; clic-n-roll.com

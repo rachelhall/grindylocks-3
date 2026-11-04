@@ -1,0 +1,28 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+a7e1947c-fb15-40d9-892c-7f01ff5e19c0,boot,AG10,AG,,,model,,inline,c. 2022,unknown,,,Part of Iqon's first wave through Disroyal.,bigwheelblading.com; bladeville.com
+8ad7e615-c962-4f4f-a96c-8bd30c63e48f,boot,AG20,AG,,,model,,inline,c. 2022,unknown,,,Tested by Montre Livingston in 2021.,rollernews.com; bigwheelblading.com
+1b2b093a-9bf0-48f8-a378-d8a4985b1471,boot,AG20,AG,Tim Marsh,,pro,,inline,,current,,,,inlinewarehouse.com; thisissoul.com
+94495cf2-ff99-4ff6-a4d7-fad4a10053f6,boot,AG15,AG,Montre Livingston,,pro,,inline,,current,,,His pro skate after moving from USD to Iqon.,inlinewarehouse.com; bladeville.com
+3eac46b9-a5cb-4b2c-80b9-9c080802c4f5,boot,AG30,AG,,,model,,inline,,current,,,,bladeville.com
+6552b62e-1e91-489d-b18f-30bfec682a38,boot,AG30 Lite,AG,,,model,,inline,,current,,,,bladeville.com; inlinewarehouse.com
+e7b760c5-dcb4-44eb-93a7-e0c13e33e7f2,boot,TR10,TR,,,model,,inline,c. 2022,unknown,,,Trinity-mount urban skate.,bigwheelblading.com
+3528ad4f-7771-4176-8f8e-04ae4af460c5,boot,CL10,CL,,,model,,inline,,unknown,,,165mm-mount urban skate.,bladeville.com
+34d633f6-1572-4425-8865-86e2eea55552,boot,CL15,CL,,,model,,inline,,current,,,,powerslide.com; bladeville.com
+bcf07a46-73a3-4ed2-8c26-19b739259947,boot,CL20,CL,,,model,,inline,,current,,,,bladeville.com
+df2fabd5-2397-428e-bc7d-79933798f88a,boot,CL20 Lite,CL,,,model,,inline,,current,,,,bladeville.com
+4025d861-3585-420f-8cba-bd5c976a19d3,boot,ACT Interlink,ACT,,,model,,inline,c. 2025,current,,,"One boot whose Interlink base takes UFS, 165mm and Trinity frames. Sold as ACT AG, CL, WZ (Wizard-style, not a Wizard collab) and TRI setups.",thisissoul.com; inlinewarehouse.com; be-mag.com
+442cdbbc-e2e9-40f8-9f6b-6407296ae3e2,boot,ACT PDS Interlink,ACT,,,model,,inline,,current,,,,inlinewarehouse.com; powerslide.com
+5e7c0285-0f44-40fc-8dfd-b3ad202da5f8,boot,ACT Interlink,ACT,Jaro Frijn,,pro,,inline,c. 2025,current,,,Sold as ACT AG.,inlinewarehouse.com; thisissoul.com
+64c19bd1-6cba-4399-8a1d-c08b92c1948d,boot,ACT Interlink,ACT,Chad Hornish,,pro,,inline,c. 2025,current,,,Sold as ACT AG.,powerslide.com; clic-n-roll.com
+8c131151-5d76-4f32-9c9e-694ec7246cc9,frame,AG Decode Pro,Decode Pro,,,model,,inline,,current,,,UFS urban frame without bearing bosses; needs Decode bearings.,inlinewarehouse.com; bladeville.com
+83d0fd26-61f4-4175-bceb-3cc44ebe5b75,frame,CL Decode Pro,Decode Pro,,,model,,inline,,current,,,,bladeville.com; inlinewarehouse.com
+a74c41b4-257c-434a-9f9d-68e1549f79f6,frame,TR Decode Pro,Decode Pro,,,model,,inline,,current,,,,inlinewarehouse.com; bladeville.com
+e9979732-5e90-4f41-8f84-6d1a4d610aae,frame,AG60,AG60,,,model,,inline,,current,,,Aggressive UFS frame designed by Justin Thursday.,inlinewarehouse.com; bladeville.com
+42228226-4f06-4a28-b4ce-5e37c5f40766,frame,AG60 C,AG60,,,model,,inline,,current,,,Carbon-fibre AG60.,inlinewarehouse.com
+2470df0e-35a3-47c8-93e9-ee40a66ed374,frame,Code,,,,model,,inline,,current,,,165mm urban frame.,inlinewarehouse.com
+d465b9bd-4f04-4143-a7d4-c652f235a67f,wheels,Access,,,,model,,inline,,current,,,,bladeville.com; clic-n-roll.com
+5f2c7cae-a9c4-4d51-8d0d-eeb799652171,wheels,EQO,,,,model,,inline,,current,,,,bladeville.com
+c9b1dae8-d4e6-4516-96e4-265cac1724d1,wheels,Pro wheel,,Chad Hornish,,pro,,inline,2023,unknown,,,,rollernews.com
+14877ba1-427a-4b72-a53f-2ac750795462,bearings,Decode,,,,model,,inline,,current,,,Built-in spacers for Decode frames.,bladeville.com; inlinewarehouse.com
+279a175c-64bc-4551-999a-cb00c9899b18,soulplate,ACT AG Soulplate,,,,model,,inline,,current,,,,clic-n-roll.com
+0a95ab4c-da85-404d-8f15-d0e63589fab5,soulplate,Flat Soulplate,,,GAWDS,collab,GAWDS,inline,,current,,,,clic-n-roll.com

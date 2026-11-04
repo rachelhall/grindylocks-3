@@ -1,0 +1,8 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+a525d091-ab2d-421e-8155-fbc22e24c184,liner,Skate V1,Skate,,,model,,inline,,unknown,,,Used with the Them 908.,rollerenligne.com
+84f7bf9d-7def-48dc-9824-d3f39ad34207,liner,Skate V2,Skate,,,model,,inline,,current,,,Swappable ankle foam.,bladeville.com; rollerenligne.com
+e28d9939-3a4b-4e4d-b925-9e56d1057002,liner,Skate Premium,Skate,,,model,,inline,,current,,,,locoskates.com
+7bc1b6cb-9691-410c-a7e6-8a52dc6134cc,liner,BaceThem,,,Them,collab,Them,inline,,current,,,Low-volume liner first sold in BaceThem 909s. See also the Them Intuition liner.,bladeville.com; bigwheelblading.com
+38461113-a7b2-48d3-b4e1-edb6ae781173,liner,UFR,,,FR Skates,collab,FR Skates,inline,c. 2021,current,,,First sold only in FR UFR skates.,hedonskate.com
+3b1cc6fc-69c8-4741-8471-d6401724bf5e,liner,Base,Base,,Wizard,collab,Wizard,inline,,current,,,For the Wizard Base shell.,bladeville.com
+13bcb5f9-b2cc-4f75-ad51-426ed606659c,liner,Base High,Base,,Wizard,collab,Wizard,inline,,current,,,,bladeville.com

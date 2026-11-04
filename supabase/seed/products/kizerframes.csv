@@ -1,0 +1,35 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+43d80e12-7f50-4748-ab69-c4329c478e99,frame,Stream,,,,model,,inline,c. 2000,discontinued,,,First Kizer UFS frame.,bladeville.com
+1778f013-e2b7-4da9-a135-eecdc95f73bc,frame,Fluid I,Fluid,,,model,,inline,c. 2000,discontinued,,,Harder symmetric frame that fixed the Stream's problems.,bladeville.com
+561810ea-2964-4977-bf6d-7fb17c4419fc,frame,Fluid II,Fluid,,,model,,inline,c. 2002,discontinued,,,Cult frame; good for flat setups.,bladeville.com
+41c512c8-b855-4199-b16a-163a590243c5,frame,Fluid II,Fluid,Ranier Piramide,,pro,,inline,,discontinued,,,Fluid version not confirmed.,bladeville.com
+fd57c62e-45fa-427f-bd61-18632498852a,frame,Fluid II,Fluid,Aaron Feinberg,,pro,,inline,,discontinued,,,Fluid version not confirmed.,bladeville.com
+5a6aa154-3f57-4a39-8fb7-c217a9fb95a0,frame,Fluid III,Fluid,,,model,,inline,,discontinued,,,New mold with a deep wide groove; sold poorly.,bladeville.com
+04fe5627-7937-4099-bbc8-ff44b6520306,frame,Fluid IV,Fluid,,,model,,inline,,current,,,Anti-rocker frame; stock on many USD and GAWDS skates.,bladeville.com; thisissoul.com; powerslide.com
+8a8117f6-76a8-4971-812c-cd45028c6ebe,frame,Fluid IV Superfluid,Fluid,,,model,,inline,,current,,,Fluid IV in nylon and carbon.,powerslide.com; inlinewarehouse.com
+b41c67ad-b404-4e9a-83e1-d162821c160b,frame,Fluid IV,Fluid,,Mesmer,collab,Mesmer,inline,,unknown,,,,clic-n-roll.com
+ca4536c3-bf6e-473e-aca9-59f294cdbdad,frame,Fluid V,Fluid,,,model,,inline,2020,current,,,Flat frame with a slimmer groove.,bladeville.com; inlinewarehouse.com; thisissoul.com
+b72dfb9d-0ce6-4c0e-8871-42e7921c1906,frame,Fluid V Superfluid,Fluid,,,model,,inline,,current,,,Fluid V in nylon and carbon.,inlinewarehouse.com
+274f9324-4303-47c1-adfe-5bf2f7196461,frame,Fluid V,Fluid,,Mesmer,collab,Mesmer,inline,,current,,,Reworked groove; stock on Mesmer Throne completes.,clic-n-roll.com; thisissoul.com
+442f551c-59e6-4a40-922c-956b15881738,frame,Fluid V,Fluid,Dominic Bruce,Mesmer,pro,Mesmer,inline,,current,,,Dominic Bruce version of the Mesmer Fluid V.,powerslide.com
+639e1615-1df7-4e91-977a-4d2cdc56f9bd,frame,Lowrider UFS+,Lowrider,,Mesmer,collab,Mesmer,inline,,current,,,"CNC nylon, 4x58 flat; billed as the first aftermarket UFS+ frame. Stock on the Mesmer Eclipse.",powerslide.com; thisissoul.com
+ad6162a5-e3e1-4318-afb6-d9afe4e0fdc9,frame,Lowrider UFS 2.0,Lowrider,,Mesmer,collab,Mesmer,inline,,current,,,May be the same frame as the UFS+.,inlinewarehouse.com
+e2ef2d85-043d-447a-b1a5-1b97096c9874,frame,Armortech,,,,model,,inline,,discontinued,,,Remembered as a failed product.,bladeville.com
+b8bd0d05-ae16-4e16-8f5e-8bab396d6153,frame,Suspension (original),Suspension,,,model,,inline,,discontinued,,,Early frame with suspension arms.,bladeville.com; powerslide.com
+25373793-7cf9-46e4-a016-7e5eb7cc1aa4,frame,Suspension,Suspension,,,model,,inline,,current,,,Revival: flat frame with an aluminium arm per wheel; Superfluid and Skeleton versions.,powerslide.com; thisissoul.com
+adbb9d64-8435-49f7-b3d1-85056c27556e,frame,Element,Element,,,model,,inline,,discontinued,,,Early aluminium frame.,bladeville.com
+fc0e67ae-6fd3-4627-a867-50fdebc6e95c,frame,Element II,Element,,,model,,inline,,current,,,UFS hybrid with bigger outer wheels.,bladeville.com
+c3cf7d33-7d21-438b-9a2e-edcb596d6434,frame,Element 80,Element,,,model,,inline,,unknown,,,,bladeville.com
+b20b4709-881c-4c4e-8ade-d8b208472121,frame,Slimline,Slimline,,,model,,inline,,discontinued,,,Built for 8-wheel grinding; briefly Kizer's flagship.,bladeville.com
+bfb0b704-ea8c-4097-b40e-9a3eb0e78a52,frame,Slimline II,Slimline,,,model,,inline,,unknown,,,,powerslide.com; bladeville.com
+f69b3f8c-1fd4-4d6d-8007-bceb34eea9d2,frame,Type M,Type M,,,model,,inline,c. 2009,discontinued,,,Freestyle UFS frame.,bladeville.com
+462580b9-f324-477d-82d4-263f27d8628e,frame,Type M II,Type M,,,model,,inline,,current,,,,inlinewarehouse.com; bladeville.com
+2f8864c2-0654-427f-8522-e5a398d42d6c,frame,Shift Unlimited,,,,model,,inline,,current,,,One UFS base with swappable flat / anti-rocker / freestyle blocks.,powerslide.com; inlinewarehouse.com
+aceabd57-c991-4e4d-9f58-57112eb57748,frame,Soulframe,,,,model,,inline,,current,,,Anti-rocker frame with a built-in soulplate; Superfluid version.,powerslide.com; bladeville.com
+78cbc3f9-5adb-42da-8ee7-55b7ed970059,frame,Powerblade Arrow,Powerblade,,,model,,inline,c. 2011,discontinued,,,"Early powerblading frame, made with Powerhouse Barcelona.",thisissoul.com; be-mag.com
+84b9ca99-9148-44d5-a1c6-fe9b0e4dff2c,frame,Level II,Level,,,model,,inline,,discontinued,,,Iconic flat 76mm powerblading frame.,bladeville.com; thisissoul.com
+89bb2464-cb5a-4dc6-9f08-3065419d988a,frame,Level III,Level,,,model,,inline,,unknown,,,72mm flat UFS.,bladeville.com
+df43fe7f-5c19-4dd8-ac2a-e6db8291e130,frame,Advance,Powerblade,,,model,,inline,,current,,,Powerblading frame; once sold as Powerblade Advance.,bladeville.com; inlinewarehouse.com
+f5b7fd6e-7f4e-4a2a-a7d7-efbb61347107,frame,Edge NT,,,,model,,inline,,current,,,UFS urban freeride frame.,bladeville.com; inlinewarehouse.com
+363b3812-469b-452e-adde-04b557859363,frame,Flux,,,,model,,inline,,unknown,,,Trinity freeskate frame with mini soulplates.,bladeville.com
+4b1e0fce-8249-4f80-8b07-ec1f94703ce1,frame,SUV 125,,,,model,,inline,,current,,,UFS 125mm off-road frame.,inlinewarehouse.com; bladeville.com

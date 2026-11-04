@@ -1,0 +1,21 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+6417aeaa-f42e-4181-a668-74978cb0f666,boot,Franky Morales,Franky Morales,Franky Morales,,pro,,inline,2017,discontinued,,,"First GAWDS skate, made with USD and Powerslide; hybrid half-hardboot with its own cuff mold.",rollernews.com; thisissoul.com; hedonskate.com
+2232adfd-98f1-4afc-9fd7-e3b99a30d588,boot,Franky Morales,Franky Morales,Franky Morales,II,pro,,inline,,discontinued,,,Injected nylon composite shell.,thisissoul.com
+52a91b57-2ac0-4e3d-96da-8162bbe33b23,boot,Franky Morales,Franky Morales,Franky Morales,III,pro,,inline,2021,discontinued,,,,rollernews.com; be-mag.com; powerslide.com
+066ad092-d733-48a9-aeeb-8fe809472ba8,boot,Franky Morales,Franky Morales,Franky Morales,IV,pro,,inline,2022,discontinued,,,Hybrid composite on Kizer Fluid IV.,rollernews.com; bladeville.com
+0c9ecd48-b95d-469e-b2e0-719d9baf5815,boot,Franky Morales,Franky Morales,Franky Morales,V,pro,,inline,c. 2025,current,,,Reportedly built on the GAWDS 1 shell.,powerslide.com; bladeville.com; clic-n-roll.com
+072e74f9-06dd-49a8-b05c-29ffed6195a5,boot,Michel Prado,Michel Prado,Michel Prado,,pro,,inline,2019,discontinued,,,Hybrid hard/soft boot; soulplate grew out of the USD VII's.,rollernews.com
+1cd21147-0a81-4934-a85b-a6ffa6e3e3a0,boot,Michel Prado,Michel Prado,Michel Prado,II,pro,,inline,2023,current,,,Hybrid composite boot.,rollernews.com; powerslide.com; bladeville.com
+af06cfec-c1b5-4637-921a-f227547a2647,boot,Tim Franken,,Tim Franken,,pro,,inline,2021,discontinued,,,Classic hardboot shape rather than the hybrid.,be-mag.com; powerslide.com; thisissoul.com
+175ca3f8-2be0-40e8-b3a9-b1fd80ed94d3,boot,GAWDS 1,,Martina Svobodova,,pro,,inline,2024,current,,,Hand-lasted hybrid composite with a built-in liner.,b2b.powerslide.com; powerslide.com; inlinewarehouse.com
+a1973598-e21d-4420-add3-f197390d2350,boot,Team 2,,,,model,,inline,2022,unknown,,,TPU hardboot sold as a DIY boot and frame. A Team 1 isn't confirmed.,powerslide.com; thisissoul.com; hedonskate.com
+61d6a113-168f-4384-910e-ddfade6fcbb5,wheels,Pro wheel,,,,model,,inline,c. 2014,unknown,,,GAWDS began as a wheel brand.,oneblademag.com
+2df3f6bc-09e1-4e9f-b70e-4ad0241cb2fe,wheels,Pro wheel,,Franky Morales,,pro,,inline,,current,,,,bladeville.com; clic-n-roll.com
+7de45474-333a-469a-9953-6882ce1598ab,wheels,Pro wheel,,Chino Sin,,pro,,inline,,current,,,,bladeville.com; clic-n-roll.com
+8b0a506d-a123-421b-87c7-07bdf78b5eb5,wheels,Pro wheel,,Michel Prado,,pro,,inline,2022,unknown,,,,rollernews.com
+b6507721-cc0b-41bd-8947-b7659fa0791f,wheels,Pro wheel,,Martina Svobodova,,pro,,inline,2022,unknown,,,,rollernews.com
+fb2c02f1-ede8-4e61-8bc5-5a93b8de9778,wheels,Pro wheel,,Tim Franken,,pro,,inline,2021,discontinued,,,Stock on his pro skate.,be-mag.com; powerslide.com
+e10d01ee-be6d-4788-af49-414a42773571,wheels,Team Weed,,,III,special edition,,inline,,discontinued,,,Earlier versions not confirmed.,bladeville.com
+48fc480e-fb72-4d0f-9789-97b9738d83be,soulplate,UHMW Soulplate,,,,model,,inline,,current,,,,bladeville.com; clic-n-roll.com
+730267ac-68ce-48e0-a0b8-6865ef6ed57e,liner,GAWDS x MyFit Prime,,,MyFit,collab,,inline,,current,,,Stock in several GAWDS pro skates.,bladeville.com; be-mag.com
+503934c3-41d1-470d-b530-5c76f78a9de4,liner,Basic liner,,,,model,,inline,,unknown,,,Stock in Team 2.,powerslide.com

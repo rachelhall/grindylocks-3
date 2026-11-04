@@ -1458,5 +1458,93 @@
     "moreBrands_other": "+{{count}} más",
     "moreBrandsLabel_one": "Mostrar {{count}} marca más",
     "moreBrandsLabel_other": "Mostrar {{count}} marcas más"
+  },
+  "catalog": {
+    "title": "Productos",
+    "pastHidden_one": "{{count}} modelo antiguo oculto",
+    "pastHidden_other": "{{count}} modelos antiguos ocultos",
+    "showingPast_one": "Mostrando {{count}} modelo antiguo",
+    "showingPast_other": "Mostrando {{count}} modelos antiguos",
+    "showPast": "Ver material antiguo",
+    "past": "Antiguo",
+    "collabs": "Colaboraciones",
+    "collabsNote": "Hecho con {{name}}, lo vende otra marca",
+    "partBy": "{{part}} · de {{brand}}",
+    "builtOn": "Basado en el {{name}}",
+    "missing": "¿Falta algo o hay un error?",
+    "suggestChange": "Sugerir un cambio",
+    "gone": "Este producto ya no está en el catálogo.",
+    "entryTypes": {
+      "model": "Modelo",
+      "pro": "Pro",
+      "collab": "Colab",
+      "special_edition": "Edición"
+    },
+    "entryTypeNames": {
+      "model": "Modelo",
+      "pro": "Modelo pro",
+      "collab": "Colaboración",
+      "special_edition": "Edición especial"
+    },
+    "proRider": "Rider pro",
+    "with": "Con",
+    "edition": "Edición",
+    "firstOut": "Salió en",
+    "status": "Estado",
+    "stillMade": "Se sigue fabricando",
+    "noLongerMade": "Ya no se fabrica",
+    "for": "Para",
+    "stockSetup": "Montaje de serie",
+    "partOfBoot": "Integrado en la bota",
+    "pros": "Modelos pro",
+    "collabsAndEditions": "Colaboraciones y ediciones",
+    "prosAndCollabs": "Modelos pro y colaboraciones",
+    "suggest": {
+      "label": "{{name}} · productos",
+      "title": "Sugerir un cambio",
+      "kind": "Qué tipo de cambio",
+      "kinds": {
+        "missing_model": "Falta un modelo",
+        "wrong_name": "Nombre incorrecto",
+        "wrong_year": "Año incorrecto",
+        "no_longer_made": "Ya no se fabrica",
+        "stock_parts": "Piezas de serie",
+        "something_else": "Otra cosa"
+      },
+      "which": "¿Cuál?",
+      "change": "Cambiar",
+      "valueLabel": {
+        "missing_model": "¿Cómo se llama?",
+        "wrong_name": "¿Cuál es el nombre correcto?",
+        "wrong_year": "¿Cuándo salió?",
+        "stock_parts": "¿Con qué viene?",
+        "something_else": "¿Qué está mal?"
+      },
+      "modelPlaceholder": "Nombre del modelo, o el rider si es un modelo pro",
+      "yearPlaceholder": "2019, o c. 2019",
+      "part": "Pieza",
+      "otherPart": "Otra",
+      "where": "¿Dónde lo viste?",
+      "wherePlaceholder": "Un enlace o una nota",
+      "note": "Revisamos cada sugerencia antes de cambiar la lista y te avisamos cuando esté publicada.",
+      "send": "Enviar sugerencia",
+      "sentTitle": "Gracias, está enviada",
+      "sentBody": "Te avisaremos cuando cambie la lista.",
+      "tooMany": "Son muchas sugerencias para un día. Vuelve a intentarlo mañana."
+    },
+    "partTypes": {
+      "boot": "Bota",
+      "frame": "Chasis",
+      "plate": "Placa",
+      "trucks": "Ejes",
+      "deck": "Tabla",
+      "wheels": "Ruedas",
+      "bearings": "Rodamientos",
+      "liner": "Botín",
+      "soulplate": "Soulplate",
+      "toe_stop": "Freno",
+      "slide_blocks": "Slide blocks",
+      "laces": "Cordones"
+    }
   }
 }

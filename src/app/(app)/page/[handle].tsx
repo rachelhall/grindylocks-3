@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
 import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
@@ -12,6 +13,7 @@ import { SafeAreaView } from '@/components/safe-area';
 import { useExplainRestriction } from '@/components/safety';
 import { BackButton, Button, Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { usePageCatalog } from '@/lib/catalog';
 import {
   isArchive,
   isOfficial,
@@ -47,9 +49,13 @@ import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } 
  * with open-now and location-type chips, Directions beside Follow, the
  * hours card on the shop's own clock and Brands we carry.
  *
- * Coming with later PRs: the Products tab (PR 4), Claim this page (PR 5),
- * the page's own posts (PR 8) and its meetups (PR 9). Until then a managed
- * page's Posts section is empty.
+ * Products (PR 4, Brand-Products and Brand-Products-Bones): a managed page
+ * gets Posts and Products tabs; other pages with products show a Products
+ * section (unofficial and retired pages have no posts). A page with no
+ * products shows neither.
+ *
+ * Coming with later PRs: Claim this page (PR 5), the page's own posts (PR 8)
+ * and its meetups (PR 9). Until then a managed page's Posts section is empty.
  */
 export default function PageScreen() {
   const { handle } = useLocalSearchParams<{ handle: string }>();
@@ -97,6 +103,8 @@ function PageBody({ page }: { page: Page }) {
   const explainRestriction = useExplainRestriction();
   const menu = usePageMenu();
   const [pastHeader, setPastHeader] = useState(false);
+  const catalog = usePageCatalog(page.id);
+  const [tab, setTab] = useState<'posts' | 'products'>('posts');
 
   const name = page.displayName;
   const kind = pageKind(page);
@@ -170,6 +178,19 @@ function PageBody({ page }: { page: Page }) {
         : nameOnly
           ? t('page.nameOnly')
           : null;
+
+  const showPosts = page.state === 'managed' || page.state === 'closed';
+  const hasProducts = (catalog.data?.length ?? 0) > 0;
+  const products = catalog.data ? (
+    <ProductsList page={{ id: page.id, displayName: name }} entries={catalog.data} archive={archive} />
+  ) : null;
+  const postsEmpty = (
+    <View style={[styles.empty, { borderColor: c.borderSubtle }]}>
+      <Text variant="body" color="textSecondary">
+        {t('page.noPosts')}
+      </Text>
+    </View>
+  );
 
   const descriptionBlock = description ? (
     <Text variant="body" style={styles.description}>
@@ -281,16 +302,41 @@ function PageBody({ page }: { page: Page }) {
         {shop ? <ShopHours page={page} /> : null}
         {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
 
-        {page.state === 'managed' || page.state === 'closed' ? (
+        {showPosts && hasProducts ? (
+          <View style={styles.section}>
+            <View accessibilityRole="tablist" style={[styles.tabs, { borderColor: c.borderSubtle }]}>
+              {(['posts', 'products'] as const).map((k) => {
+                const on = tab === k;
+                return (
+                  <Pressable
+                    key={k}
+                    accessibilityRole="tab"
+                    accessibilityState={{ selected: on }}
+                    onPress={() => setTab(k)}
+                    style={[styles.tab, on && { borderColor: c.text, borderBottomWidth: 3 }]}
+                  >
+                    <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold, color: on ? c.text : c.textSecondary }}>
+                      {t(k === 'posts' ? 'page.posts' : 'catalog.title')}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+            {tab === 'posts' ? postsEmpty : products}
+          </View>
+        ) : showPosts ? (
           <View style={styles.section}>
             <Text variant="title" accessibilityRole="header">
               {t('page.posts')}
             </Text>
-            <View style={[styles.empty, { borderColor: c.borderSubtle }]}>
-              <Text variant="body" color="textSecondary">
-                {t('page.noPosts')}
-              </Text>
-            </View>
+            {postsEmpty}
+          </View>
+        ) : hasProducts ? (
+          <View style={styles.section}>
+            <Text variant="title" accessibilityRole="header">
+              {t('catalog.title')}
+            </Text>
+            {products}
           </View>
         ) : null}
       </ScrollView>
@@ -406,5 +452,7 @@ const styles = StyleSheet.create({
   },
   section: { paddingHorizontal: space[4], paddingTop: space[6], gap: space[3] },
   empty: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4] },
+  tabs: { flexDirection: 'row', gap: 22, borderBottomWidth: stroke.rule },
+  tab: { minHeight: size.tapMin, justifyContent: 'center', marginBottom: -stroke.rule, borderColor: 'transparent', borderBottomWidth: 3 },
   note: { marginHorizontal: space[4], marginTop: space[4], padding: space[3], flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
 });
