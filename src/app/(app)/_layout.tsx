@@ -55,6 +55,8 @@ export default function AppLayout() {
       <Stack.Screen name="page/[handle]" />
       <Stack.Screen name="page-edit/[handle]" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="page-brands/[handle]" />
+      <Stack.Screen name="page-address/[handle]" />
+      <Stack.Screen name="page-hours/[handle]" />
       <Stack.Screen name="page-team/[handle]" />
       <Stack.Screen name="page-inbox/[handle]" />
       <Stack.Screen name="edit-profile" options={{ presentation: 'fullScreenModal' }} />

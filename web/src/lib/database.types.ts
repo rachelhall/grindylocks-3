@@ -3304,6 +3304,11 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_page_location: {
+        Args: { address: string; latitude: number; longitude: number; page: string }
+        Returns: undefined
+      }
+      set_page_hours: { Args: { hours: Json; page: string }; Returns: undefined }
       set_page_temp_closed: {
         Args: { closed: boolean; closed_until?: string; note?: string; page: string }
         Returns: undefined

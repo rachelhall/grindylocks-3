@@ -11,6 +11,7 @@ import { openSupportMail } from '@/components/settings';
 import { BackButton, Button, Icon, Toggle, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { pickLogo, useSetPageLogo } from '@/lib/claims';
+import { dayRanges, weekdayName } from '@/lib/hours';
 import {
   MAX_DESCRIPTION,
   MAX_PAGE_LINKS,
@@ -51,7 +52,9 @@ function languageName(code: string, inLanguage: string): string {
  * - The owner: "Mark … as closed for good" (a shop) or "… no longer making
  *   gear" (a brand), each asking first.
  *
- * Address and pin, and hours, come with PR 7b once their screens are mocked.
+ * PR 7b adds Address and pin (managers and the owner; storefronts, and
+ * by-appointment shops that show their pin) and Hours (everyone on the team;
+ * storefronts), each on its own screen.
  */
 export default function PageEditScreen() {
   const { t } = useTranslation();
@@ -257,6 +260,18 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
       ],
     );
   };
+
+  // Address and pin: managers, for shops whose pin shows. Hours: everyone, for storefronts.
+  const showAddress = manager && (locationType === 'storefront' || (locationType === 'by_appointment' && showPin));
+  const showHours = (manager ? locationType : page.locationType) === 'storefront';
+  const hoursValue =
+    page.hours.length === 0
+      ? t('pageEdit.notSet')
+      : page.hours.some((h) => h.season_start_month)
+        ? t('pageHours.withSeasons')
+        : dayRanges([...new Set(page.hours.flatMap((h) => h.days))])
+            .map(([a, b]) => (a === b ? weekdayName(a, i18n.language) : `${weekdayName(a, i18n.language)}–${weekdayName(b, i18n.language)}`))
+            .join(', ');
 
   const logoUrl = pageImageUrl(page.logoPath);
   const headerUrl = pageImageUrl(page.headerPath);
@@ -505,7 +520,28 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
               </>
             ) : null}
             <View>
-              <NavRow first title={t('pageEdit.closedForAWhile')} value={closedValue} onPress={() => closedSheet.open(page)} />
+              {showAddress ? (
+                <NavRow
+                  first
+                  title={t('pageAddress.title')}
+                  value={page.address?.split(/[,\n]/)[0]?.trim() || t('pageEdit.notSet')}
+                  onPress={() => router.push({ pathname: '/page-address/[handle]', params: { handle: page.handle } })}
+                />
+              ) : null}
+              {showHours ? (
+                <NavRow
+                  first={!showAddress}
+                  title={t('pageHours.title')}
+                  value={hoursValue}
+                  onPress={() => router.push({ pathname: '/page-hours/[handle]', params: { handle: page.handle } })}
+                />
+              ) : null}
+              <NavRow
+                first={!showAddress && !showHours}
+                title={t('pageEdit.closedForAWhile')}
+                value={closedValue}
+                onPress={() => closedSheet.open(page)}
+              />
               {manager ? (
                 <NavRow
                   title={t('shop.brandsWeCarry')}

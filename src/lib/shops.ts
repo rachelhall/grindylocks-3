@@ -126,19 +126,11 @@ function clockMinutes(time: string | null): number | null {
 /**
  * Monday to Sunday, with days that share their hours run together:
  * Bo's reads Mon closed, Tue–Wed 12–18, Thu closed, Fri 12–18, Sat–Sun 11–17.
- * Only clock times and this season's rows; shops don't keep sunrise hours.
+ * Only clock times; shops don't keep sunrise hours.
  */
-export function weekLines(hours: HoursRow[], timeZone: string | null, now = new Date()): WeekLine[] {
-  const today = localNow(now, timeZone);
-  const v = today.month * 100 + today.day;
-  const current = hours.filter((r) => {
-    if (!r.season_start_month || !r.season_end_month) return true;
-    const start = r.season_start_month * 100 + (r.season_start_day ?? 1);
-    const end = r.season_end_month * 100 + (r.season_end_day ?? 31);
-    return start <= end ? v >= start && v <= end : v >= start || v <= end;
-  });
+export function weekLinesFor(rows: HoursRow[]): WeekLine[] {
   const spansFor = (day: number) =>
-    current
+    rows
       .filter((r) => r.days.includes(day))
       .map((r) => ({ start: clockMinutes(r.start_time), end: clockMinutes(r.end_time) }))
       .filter((s): s is { start: number; end: number } => s.start !== null && s.end !== null)
@@ -152,6 +144,79 @@ export function weekLines(hours: HoursRow[], timeZone: string | null, now = new 
     else out.push({ from: day, to: day, spans });
   }
   return out;
+}
+
+type SeasonDates = { startMonth: number; startDay: number; endMonth: number; endDay: number };
+
+function seasonOf(r: HoursRow): SeasonDates | null {
+  if (!r.season_start_month || !r.season_end_month) return null;
+  return {
+    startMonth: r.season_start_month,
+    startDay: r.season_start_day ?? 1,
+    endMonth: r.season_end_month,
+    endDay: r.season_end_day ?? 31,
+  };
+}
+
+const sameSeason = (a: SeasonDates | null, b: SeasonDates | null) =>
+  a === b || (a !== null && b !== null && a.startMonth === b.startMonth && a.startDay === b.startDay && a.endMonth === b.endMonth && a.endDay === b.endDay);
+
+function covers(s: SeasonDates | null, month: number, day: number): boolean {
+  if (!s) return true;
+  const v = month * 100 + day;
+  const start = s.startMonth * 100 + s.startDay;
+  const end = s.endMonth * 100 + s.endDay;
+  return start <= end ? v >= start && v <= end : v >= start || v <= end;
+}
+
+export type ShopWeek = {
+  /** Today's hours, run together by day; empty when no hours cover today. */
+  lines: WeekLine[];
+  /** The dates today's hours run to, when they change with the seasons. */
+  until: { month: number; day: number } | null;
+  /** The next set of hours, when they change with the seasons. */
+  next: { from: { month: number; day: number }; lines: WeekLine[] } | null;
+};
+
+/**
+ * The hours card's week, on the shop's own clock (PR 7b): the hours for
+ * today's date, and when they change with the seasons, when they run to and
+ * the next set. Dates no set covers read Closed for the season.
+ */
+export function shopWeek(hours: HoursRow[], timeZone: string | null, now = new Date()): ShopWeek {
+  const today = localNow(now, timeZone);
+  const current = hours.filter((r) => covers(seasonOf(r), today.month, today.day));
+  const seasons: SeasonDates[] = [];
+  for (const r of hours) {
+    const s = seasonOf(r);
+    if (s && !seasons.some((x) => sameSeason(x, s))) seasons.push(s);
+  }
+  if (seasons.length === 0) return { lines: weekLinesFor(current), until: null, next: null };
+
+  const nowSeason = current.map(seasonOf).find((s): s is SeasonDates => s !== null) ?? null;
+  // The next season to start after today, wrapping into next year.
+  const v = today.month * 100 + today.day;
+  const startOf = (s: SeasonDates) => s.startMonth * 100 + s.startDay;
+  const later = seasons.filter((s) => !sameSeason(s, nowSeason));
+  const nextSeason =
+    later.filter((s) => startOf(s) > v).sort((a, b) => startOf(a) - startOf(b))[0] ??
+    later.sort((a, b) => startOf(a) - startOf(b))[0] ??
+    null;
+  return {
+    lines: current.length ? weekLinesFor(current) : [],
+    until: nowSeason ? { month: nowSeason.endMonth, day: nowSeason.endDay } : null,
+    next: nextSeason
+      ? {
+          from: { month: nextSeason.startMonth, day: nextSeason.startDay },
+          lines: weekLinesFor(hours.filter((r) => sameSeason(seasonOf(r), nextSeason))),
+        }
+      : null,
+  };
+}
+
+/** Today's week only (the map card and older callers). */
+export function weekLines(hours: HoursRow[], timeZone: string | null, now = new Date()): WeekLine[] {
+  return shopWeek(hours, timeZone, now).lines;
 }
 
 /** The city the hours card names ("HOURS · COPENHAGEN TIME"): the time zone's own city. */
