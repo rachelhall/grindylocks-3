@@ -292,18 +292,22 @@ $$;
 
 -- A handle or username is taken by a page: a page's handle, or an old handle
 -- still redirecting.
-create or replace function private.handle_used_by_page(name text, except_page uuid default null)
+-- (citext comparisons name extensions.= explicitly: with an empty
+-- search_path a bare = falls back to case-sensitive text.)
+create or replace function private.handle_used_by_page(candidate text, except_page uuid default null)
 returns boolean
 language sql stable security definer
 set search_path = ''
 as $$
   select exists (
       select 1 from public.pages p
-      where p.handle = trim(name)::extensions.citext and p.id is distinct from except_page
+      where p.handle operator(extensions.=) trim(candidate)::extensions.citext
+        and p.id is distinct from except_page
     )
     or exists (
       select 1 from public.page_aliases a
-      where a.handle = trim(name)::extensions.citext and a.redirect_until > now()
+      where a.handle operator(extensions.=) trim(candidate)::extensions.citext
+        and a.redirect_until > now()
         and a.page_id is distinct from except_page
     );
 $$;
@@ -352,20 +356,20 @@ begin
   end if;
 
   if tg_op = 'INSERT' or new.handle is distinct from old.handle then
-    if exists (select 1 from public.profiles p where p.username = new.handle) then
+    if exists (select 1 from public.profiles p where p.username operator(extensions.=) new.handle) then
       raise exception using errcode = '23505', message = 'handle_taken',
         detail = 'A member already has this as their username.';
     end if;
     if exists (
       select 1 from public.reserved_usernames r
-      where r.username = new.handle and r.reserved_until > now()
+      where r.username operator(extensions.=) new.handle and r.reserved_until > now()
     ) then
       raise exception using errcode = '23505', message = 'handle_taken',
         detail = 'This username is held for a member who changed away from it.';
     end if;
     if exists (
       select 1 from public.page_aliases a
-      where a.handle = new.handle and a.redirect_until > now() and a.page_id <> new.id
+      where a.handle operator(extensions.=) new.handle and a.redirect_until > now() and a.page_id <> new.id
     ) then
       raise exception using errcode = '23505', message = 'handle_taken',
         detail = 'Another page''s old handle still redirects here.';
@@ -435,12 +439,12 @@ as $$
     and position('official' in lower(coalesce(trim(name), ''))) = 0
     and not exists (
       select 1 from public.profiles p
-      where p.username = trim(name)::extensions.citext
+      where p.username operator(extensions.=) trim(name)::extensions.citext
         and p.id is distinct from (select auth.uid())
     )
     and not exists (
       select 1 from public.reserved_usernames r
-      where r.username = trim(name)::extensions.citext
+      where r.username operator(extensions.=) trim(name)::extensions.citext
         and r.reserved_until > now()
         and r.user_id is distinct from (select auth.uid())
     )
