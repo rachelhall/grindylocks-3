@@ -109,4 +109,4 @@ export const radius = { none: 0 } as const;
 
 export const stroke = { hairline: 1, rule: 2 } as const;
 
-export const size = { tapMin: 48, icon: 24 } as const;
+export const size = { tapMin: 48, icon: 24, barRow: 64 } as const;
