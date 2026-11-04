@@ -7,23 +7,29 @@ import { AnnounceCard, HomePicker } from '@/components/home-picker';
 import { FormScreen } from '@/components/screen';
 import { Button, StepHeader } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { ONBOARDING_STEPS, useOnboarding } from '@/lib/onboarding';
+import { useOnboarding, useOnboardingSteps } from '@/lib/onboarding';
+import { pageKind } from '@/lib/pages';
 import { useDirectory } from '@/lib/parks';
 import { supabase } from '@/lib/supabase';
-import { space, Text } from '@/theme';
+import { brand, space, Text } from '@/theme';
 
 /**
  * Home city (required) and home park (optional). Also asks whether to
  * announce the new member to that city.
+ *
+ * Shop staff joining through a page (Onboard-City-Shop) start with the
+ * shop's city filled in, marked FROM 8SET; brand staff pick their own.
  */
 export default function CityStep() {
   const { t } = useTranslation();
-  const { session, profile, refreshProfile } = useAuth();
+  const { session, profile, refreshProfile, pageJoin } = useAuth();
+  const steps = useOnboardingSteps();
+  const shopMetro = pageJoin && pageKind(pageJoin) === 'shop' ? pageJoin.metroAreaId : null;
   const { announce, setAnnounce, setAnnounceAsked } = useOnboarding();
   const directory = useDirectory();
 
   const [home, setHome] = useState({
-    metroId: profile?.home_metro_area_id ?? null,
+    metroId: profile?.home_metro_area_id ?? shopMetro,
     parkId: profile?.home_park_id ?? null,
   });
   const [showErrors, setShowErrors] = useState(false);
@@ -54,7 +60,7 @@ export default function CityStep() {
 
   return (
     <FormScreen
-      header={<StepHeader step={3} total={ONBOARDING_STEPS} canGoBack={router.canGoBack()} />}
+      header={<StepHeader step={3} total={steps} canGoBack={router.canGoBack()} />}
       footer={
         <>
           {saveError ? (
@@ -71,9 +77,17 @@ export default function CityStep() {
           {t('onboarding.city.title')}
         </Text>
         <Text variant="body" color="textSecondary">
-          {t('onboarding.city.body')}
+          {shopMetro ? t('onboarding.page.cityFromShop', { name: pageJoin?.displayName ?? '' }) : t('onboarding.city.body')}
         </Text>
       </View>
+
+      {shopMetro && home.metroId === shopMetro ? (
+        <View style={styles.fromTape}>
+          <Text variant="label" style={styles.fromText}>
+            {t('onboarding.page.from', { name: pageJoin?.displayName ?? '' }).toUpperCase()}
+          </Text>
+        </View>
+      ) : null}
 
       <HomePicker metroId={home.metroId} parkId={home.parkId} onChange={setHome} showErrors={showErrors} />
 
@@ -85,4 +99,6 @@ export default function CityStep() {
 
 const styles = StyleSheet.create({
   intro: { gap: space[3] },
+  fromTape: { alignSelf: 'flex-start', backgroundColor: brand.pink, paddingHorizontal: space[2], paddingVertical: 2, transform: [{ rotate: '-2deg' }] },
+  fromText: { color: brand.ink },
 });

@@ -6,9 +6,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { FormScreen } from '@/components/screen';
 import { Button, StepHeader } from '@/components/ui';
-import { announceArrival } from '@/lib/announcements';
 import { useAuth } from '@/lib/auth';
-import { ONBOARDING_STEPS, useOnboarding } from '@/lib/onboarding';
+import { useFinishOnboarding, useOnboardingSteps } from '@/lib/onboarding';
 import { fresh, keys } from '@/lib/query';
 import { supabase } from '@/lib/supabase';
 import { space, Text, useColors } from '@/theme';
@@ -20,8 +19,9 @@ import { space, Text, useColors } from '@/theme';
 export default function RegularsStep() {
   const { t } = useTranslation();
   const c = useColors();
-  const { session, profile, refreshProfile } = useAuth();
-  const { announce, announceAsked } = useOnboarding();
+  const { session, profile, pageJoin } = useAuth();
+  const finishOnboarding = useFinishOnboarding();
+  const steps = useOnboardingSteps();
   const [saving, setSaving] = useState<'show' | 'hide' | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -44,30 +44,22 @@ export default function RegularsStep() {
 
   async function finish(hide: boolean) {
     if (!session || !profile?.home_metro_area_id) return;
-    setSaving(hide ? 'hide' : 'show');
-    setError(null);
-    const { error: saveError } = await supabase
-      .from('profiles')
-      .update({ hide_from_regulars: hide, onboarded_at: new Date().toISOString() })
-      .eq('id', session.user.id);
-    if (saveError) {
-      setSaving(null);
-      setError(t('errors.generic'));
+    // An owner joining through a page adds the logo last; that step finishes.
+    if (pageJoin?.needsLogo) {
+      router.push({ pathname: '/logo', params: { hide: hide ? '1' : '0' } });
       return;
     }
-
-    // Only announce if they saw the toggle in this run and left it on.
-    if (announceAsked && announce) {
-      await announceArrival(session.user.id, profile.home_metro_area_id, homeParkId);
+    setSaving(hide ? 'hide' : 'show');
+    setError(null);
+    if (!(await finishOnboarding(hide))) {
+      setSaving(null);
+      setError(t('errors.generic'));
     }
-
-    // Once onboarded_at is set, the root layout switches to the app.
-    await refreshProfile();
   }
 
   return (
     <FormScreen
-      header={<StepHeader step={4} total={ONBOARDING_STEPS} canGoBack={router.canGoBack()} />}
+      header={<StepHeader step={4} total={steps} canGoBack={router.canGoBack()} />}
       footer={
         <>
           {error ? (

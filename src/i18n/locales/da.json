@@ -115,6 +115,12 @@
       "point3": "Du kan altid skjule dig under indstillinger.",
       "gotIt": "Forstået",
       "hideMe": "Skjul mig fra listerne over stamgæster"
+    },
+    "page": {
+      "joining": "Du bliver en del af {{name}} som {{role}}",
+      "noSkating": "Lad dem stå tomme, hvis du ikke skater. Du kan tilføje dem senere under Redigér profil.",
+      "cityFromShop": "Vi har udfyldt {{name}}s by. Skift den, hvis du bor et andet sted. Kun medlemmer, der er logget ind, kan se den.",
+      "from": "Fra {{name}}"
     }
   },
   "home": {
@@ -419,7 +425,34 @@
     "meetupCommentMany_other": "{{a}}, {{b}} og {{count}} andre kommenterede {{meetup}}",
     "meetupReply": "{{a}} svarede dig på {{meetup}}",
     "meetupMention": "{{a}} nævnte dig på {{meetup}}",
-    "meetupHidden": "Parkens admins skjulte {{meetup}} {{date}}"
+    "meetupHidden": "Parkens admins skjulte {{meetup}} {{date}}",
+    "page": {
+      "invites": "Invitationer fra sider",
+      "teamInvite": "{{name}} har inviteret dig med på sit team som {{role}}",
+      "ownership": "{{a}} vil gøre dig til ejer af {{name}}",
+      "claimInvite": "{{name}} har inviteret dig til at styre sin side",
+      "ownershipNote": "Du ville styre teamet og kunne fjerne managere. Siger du nej, vælger Grindylocks den nye ejer.",
+      "becomeOwner": "Bliv ejer",
+      "from": "Fra {{username}}",
+      "youAre": {
+        "staff": "Du er medarbejder nu",
+        "manager": "Du er manager nu",
+        "owner": "Du er ejer nu"
+      },
+      "inviteClosed": "Denne invitation er ikke åben længere.",
+      "inviteSuspended": "Du kan ikke komme med på en sides team, mens din konto er suspenderet.",
+      "claimApproved": "Din anmodning om {{name}} er godkendt. Tilføj et logo, så siden bliver officiel.",
+      "claimDeclined": "Din anmodning om {{name}} blev ikke godkendt",
+      "claimTaken": "En anden fra {{name}} styrer nu siden",
+      "tryAgain": "Du kan prøve igen med et andet bevis.",
+      "madeRole": "{{name}} har gjort dig til {{role}}",
+      "removed": "Du er ikke længere på {{name}}s team",
+      "owner": "Du er nu ejer af {{name}}",
+      "joined": "{{name}} er nu på Grindylocks",
+      "joinedNote": "Du fulgte deres side, før den var officiel.",
+      "suggestionLive": "Dit forslag til {{name}} er nu live",
+      "suggestionLiveWhat": "Dit forslag til {{name}} er nu live: {{what}}"
+    }
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -867,7 +900,19 @@
     "askBody": "Få besked, når nogen kommenterer, tagger dig eller siger hej i nærheden.",
     "ask": "Slå notifikationer til",
     "meetups": "Meetups",
-    "meetupsBody": "Ændringer, aflysninger og påmindelser om meetups, du kommer til"
+    "meetupsBody": "Ændringer, aflysninger og påmindelser om meetups, du kommer til",
+    "groupYou": "Dig",
+    "groupPages": "Sider",
+    "groupInboxes": "Indbakker for sider, du styrer",
+    "fixes": "Rettelser og forslag",
+    "fixesBody": "Når din parkrettelse, eller et brand eller produkt, du har foreslået, går live",
+    "teamsClaims": "Teams og anmodninger",
+    "teamsClaimsBody": "Teaminvitationer, rolleskift, ejerskab og svar på dine anmodninger",
+    "pagesJoining": "Sider du følger kommer med",
+    "pagesJoiningBody": "Én gang pr. side, når et brand eller en butik, du følger, overtager sin side",
+    "inbox": "{{name}}s indbakke",
+    "inboxBody": "Kommentarer på {{name}}s opslag og @omtaler af {{name}}",
+    "inboxNote": "Slået fra som standard, og kun for dig: hver person på teamet vælger selv."
   },
   "report": {
     "report": "Anmeld",
@@ -1545,6 +1590,111 @@
       "toe_stop": "Stopklods",
       "slide_blocks": "Slide blocks",
       "laces": "Snørebånd"
+    }
+  },
+  "claim": {
+    "workAt": "Arbejder du hos {{name}}?",
+    "claimLink": "Overtag siden",
+    "title": "Overtag siden",
+    "intro": "Styr {{name}}s side på Grindylocks: skriv som {{name}}, hold produkterne rigtige og byg et team. Vi tjekker hver anmodning i hånden.",
+    "role": "Din rolle hos {{name}}",
+    "rolePlaceholder": "Teammanager",
+    "roleNeeded": "Skriv hvad du laver der.",
+    "howCheck": "Hvordan kan vi tjekke det?",
+    "workEmail": "Arbejdsmail",
+    "workEmailBody": "En adresse hos {{name}}. Vi sender den en kode.",
+    "matches": "Passer med {{name}}s hjemmeside",
+    "noMatch": "Passer ikke med {{name}}s hjemmeside. Du kan stadig sende den; så kigger vi nærmere.",
+    "postCode": "Læg en kode op",
+    "postCodeBody": "Vi giver dig en kort kode, som du lægger op på {{name}}s Instagram eller hjemmeside.",
+    "note": "Noget vi skal vide?",
+    "notePlaceholder": "Hvem du er, hvem der ellers driver {{name}}",
+    "afterApproval": "Når den er godkendt, tilføjer du {{name}}s logo, og siden bliver officiel.",
+    "sendCode": "Send mig en kode",
+    "getCode": "Giv mig min kode",
+    "step2": "Overtag {{name}} · 2 af 2",
+    "inboxTitle": "Tjek din indbakke",
+    "inboxBody": "Vi har sendt en 6-cifret kode til {{email}}.",
+    "codeNote": "Koden viser kun, at du kan læse denne indbakke. Din anmodning går stadig til os til tjek.",
+    "send": "Send anmodning",
+    "postTitle": "Læg denne kode op",
+    "postBody": "Sæt den i et opslag, en story eller bioen på {{name}}s Instagram, eller et sted på {{name}}s hjemmeside. Lad den blive, til vi har tjekket.",
+    "share": "Del",
+    "shareCode": "Del koden",
+    "codeValid": "Koden virker indtil {{date}} og kun til denne anmodning.",
+    "where": "Hvor har du lagt den op?",
+    "wherePlaceholder": "Et link til opslaget eller siden",
+    "whereNeeded": "Tilføj et link til, hvor koden er eller bliver lagt op.",
+    "postLater": "Du kan sende anmodningen nu og lægge koden op senere. Vi kigger, når den er oppe.",
+    "pendingTitle": "Din anmodning venter",
+    "pendingEmail": "Sendt {{date}} med din arbejdsmail. Vi giver besked under klokken, når den er afgjort.",
+    "pendingPosted": "Sendt {{date}} med en opslået kode. Vi giver besked under klokken, når den er afgjort.",
+    "onlyYou": "Kun du kan se dette.",
+    "withdraw": "Træk anmodningen tilbage",
+    "withdrawTitle": "Træk din anmodning om {{name}} tilbage?",
+    "withdrawBody": "Du kan overtage siden igen senere.",
+    "declinedTitle": "Din anmodning blev ikke godkendt",
+    "takenReason": "En anden fra {{name}} styrer nu denne side.",
+    "tryAgain": "Prøv igen med et andet bevis",
+    "logoTitle": "Tilføj {{name}}s logo",
+    "logoBody": "Siden er uofficiel, indtil den har et.",
+    "result": {
+      "wrong_code": "Koden er forkert. Tjek mailen, og prøv igen.",
+      "code_expired": "Koden er udløbet. Send en ny.",
+      "too_many_tries": "For mange forkerte koder. Send en ny.",
+      "wait": "Vent et minut, før du sender en ny kode."
+    },
+    "error": {
+      "claim_pending": "Du har allerede en anmodning, der venter, til denne side.",
+      "too_many_claims": "Det er mange anmodninger på én dag. Prøv igen i morgen.",
+      "invalid_email": "Tjek e-mailadressen.",
+      "too_many_codes": "Vi har sendt nok koder til denne anmodning. Start forfra i morgen, eller læg en kode op i stedet.",
+      "not_claimable": "Siden kan ikke overtages lige nu.",
+      "invalid_link": "Tilføj et link til, hvor koden er eller bliver lagt op.",
+      "invalid_role": "Skriv hvad du laver der."
+    }
+  },
+  "pageLogo": {
+    "title": "Tilføj {{name}}s logo",
+    "body": "Logoet er, hvordan skatere ved, at en side virkelig er {{name}}. Det gør siden officiel.",
+    "previewLabel": "Forhåndsvisning af {{name}}s header med logoet",
+    "logo": "LOGO",
+    "preview": "Forhåndsvisning: sådan ser {{name}}s header ud med logoet.",
+    "choose": "Vælg et logo",
+    "change": "Vælg et andet",
+    "hint": "Et kvadratisk billede er bedst, mindst 400 px. Du kan skifte det når som helst.",
+    "skipNote": "Har du ikke logoet ved hånden? Spring over, så forbliver {{name}}",
+    "skip": "Spring over for nu",
+    "failed": "Logoet blev ikke gemt"
+  },
+  "pageInvite": {
+    "runTape": "Du er inviteret til at styre {{name}}",
+    "invitedTape": "{{name}} har inviteret dig",
+    "owner": "EJER",
+    "claimShop": "Skriv som {{name}}, hold åbningstiderne rigtige og hold meetups.",
+    "claimBrand": "Skriv som {{name}}, hold produkterne rigtige og hold meetups.",
+    "claimTeam": "Byg et team af managere og medarbejdere.",
+    "claimChecked": "Vi har allerede tjekket, at det er dig, så der er ingen anmodning at vente på. Til sidst tilføjer du {{name}}s logo.",
+    "teamShop": "Skriv og kommentér som {{name}}, hold meetups og opdatér åbningstider.",
+    "teamBrand": "Skriv og kommentér som {{name}}, og hold meetups.",
+    "teamOwnAccount": "Du får også din egen gratis konto. Du behøver ikke at skate.",
+    "wantsYou": "{{username}} vil have dig med på {{name}}s team som {{role}}.",
+    "wantsYouNoName": "Du er inviteret med på {{name}}s team som {{role}}.",
+    "claimFoot": "Allerede på Grindylocks? Log ind med den mail, så bliver {{name}} føjet til din konto. Invitationen virker én gang og udløber om {{days}} dage.",
+    "teamFoot": "Sendt til {{email}}. Allerede på Grindylocks? Log ind og acceptér fra dine notifikationer. Udløber om {{days}} dage.",
+    "teamFootNoEmail": "Allerede på Grindylocks? Log ind og acceptér fra dine notifikationer. Udløber om {{days}} dage.",
+    "role": {
+      "staff": "medarbejder",
+      "manager": "manager"
+    },
+    "roleA": {
+      "staff": "medarbejder",
+      "manager": "manager"
+    },
+    "roleAs": {
+      "staff": "medarbejder",
+      "manager": "manager",
+      "owner": "ejer"
     }
   }
 }

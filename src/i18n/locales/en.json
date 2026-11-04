@@ -115,6 +115,12 @@
       "point3": "You can hide yourself any time in settings.",
       "gotIt": "Got it",
       "hideMe": "Hide me from regulars lists"
+    },
+    "page": {
+      "joining": "Joining {{name}} as {{role}}",
+      "noSkating": "Leave these blank if you don't skate. You can add them later in Edit profile.",
+      "cityFromShop": "We filled in {{name}}'s city. Change it if you live somewhere else. Only signed-in members see it.",
+      "from": "From {{name}}"
     }
   },
   "home": {
@@ -419,7 +425,34 @@
     "meetupCommentMany_other": "{{a}}, {{b}} and {{count}} others commented on {{meetup}}",
     "meetupReply": "{{a}} replied to you on {{meetup}}",
     "meetupMention": "{{a}} mentioned you on {{meetup}}",
-    "meetupHidden": "Park admins hid {{meetup}} on {{date}}"
+    "meetupHidden": "Park admins hid {{meetup}} on {{date}}",
+    "page": {
+      "invites": "Page invites",
+      "teamInvite": "{{name}} invited you to join its team as {{role}}",
+      "ownership": "{{a}} wants to make you the owner of {{name}}",
+      "claimInvite": "{{name}} invited you to manage its page",
+      "ownershipNote": "You'd handle the team and could remove managers. If you decline, Grindylocks picks the new owner.",
+      "becomeOwner": "Become owner",
+      "from": "From {{username}}",
+      "youAre": {
+        "staff": "You're staff now",
+        "manager": "You're a manager now",
+        "owner": "You're the owner now"
+      },
+      "inviteClosed": "This invite isn't open any more.",
+      "inviteSuspended": "You can't join a page's team while your account is suspended.",
+      "claimApproved": "Your claim for {{name}} was approved. Add a logo to make the page official.",
+      "claimDeclined": "Your claim for {{name}} wasn't approved",
+      "claimTaken": "Someone else from {{name}} now runs its page",
+      "tryAgain": "You can try again with another proof.",
+      "madeRole": "{{name}} made you {{role}}",
+      "removed": "You were removed from {{name}}'s team",
+      "owner": "You're now the owner of {{name}}",
+      "joined": "{{name}} is now on Grindylocks",
+      "joinedNote": "You followed their page before it was official.",
+      "suggestionLive": "Your suggestion for {{name}} is live",
+      "suggestionLiveWhat": "Your suggestion for {{name}} is live: {{what}}"
+    }
   },
   "feed": {
     "newPost": "New post",
@@ -867,7 +900,19 @@
     "askBody": "Get a buzz when someone comments, tags you or says hi nearby.",
     "ask": "Turn on notifications",
     "meetups": "Meetups",
-    "meetupsBody": "Changes, cancellations and reminders for meetups you're going to"
+    "meetupsBody": "Changes, cancellations and reminders for meetups you're going to",
+    "groupYou": "You",
+    "groupPages": "Pages",
+    "groupInboxes": "Inboxes of pages you manage",
+    "fixes": "Fixes and suggestions",
+    "fixesBody": "When your park fix, or a brand or product you suggested, goes live",
+    "teamsClaims": "Teams and claims",
+    "teamsClaimsBody": "Team invites, role changes, ownership and your claim decisions",
+    "pagesJoining": "Pages you follow joining",
+    "pagesJoiningBody": "Once per page, when a brand or shop you follow takes over its page",
+    "inbox": "{{name}} inbox",
+    "inboxBody": "Comments on {{name}}'s posts and @mentions of {{name}}",
+    "inboxNote": "Off by default, and only for you: each person on the team picks their own."
   },
   "report": {
     "report": "Report",
@@ -1545,6 +1590,111 @@
       "toe_stop": "Toe stop",
       "slide_blocks": "Slide blocks",
       "laces": "Laces"
+    }
+  },
+  "claim": {
+    "workAt": "Work at {{name}}?",
+    "claimLink": "Claim this page",
+    "title": "Claim this page",
+    "intro": "Run {{name}}'s page on Grindylocks: post as {{name}}, keep its products right and build a team. We check every claim by hand.",
+    "role": "Your role at {{name}}",
+    "rolePlaceholder": "Team manager",
+    "roleNeeded": "Say what you do there.",
+    "howCheck": "How can we check?",
+    "workEmail": "Work email",
+    "workEmailBody": "An address at {{name}}. We send it a code.",
+    "matches": "Matches {{name}}'s website",
+    "noMatch": "Doesn't match {{name}}'s website. You can still send it; we'll look more closely.",
+    "postCode": "Post a code",
+    "postCodeBody": "We give you a short code to post on {{name}}'s Instagram or website.",
+    "note": "Anything we should know?",
+    "notePlaceholder": "Who you are, who else runs {{name}}",
+    "afterApproval": "Once it's approved, you add {{name}}'s logo and the page becomes official.",
+    "sendCode": "Send me a code",
+    "getCode": "Get my code",
+    "step2": "Claim {{name}} · 2 of 2",
+    "inboxTitle": "Check your inbox",
+    "inboxBody": "We sent a 6-digit code to {{email}}.",
+    "codeNote": "The code only proves you can read this inbox. Your claim still goes to us to check.",
+    "send": "Send claim",
+    "postTitle": "Post this code",
+    "postBody": "Put it in a post, story or bio on {{name}}'s Instagram, or anywhere on {{name}}'s website. Leave it up until we've checked.",
+    "share": "Share",
+    "shareCode": "Share the code",
+    "codeValid": "This code works until {{date}} and only for this claim.",
+    "where": "Where did you post it?",
+    "wherePlaceholder": "A link to the post or page",
+    "whereNeeded": "Add a link to where the code is, or will be.",
+    "postLater": "You can send your claim now and post the code later. We'll look once it's up.",
+    "pendingTitle": "Your claim is pending",
+    "pendingEmail": "Sent {{date}} with your work email. We'll tell you under the bell when it's decided.",
+    "pendingPosted": "Sent {{date}} with a posted code. We'll tell you under the bell when it's decided.",
+    "onlyYou": "Only you see this.",
+    "withdraw": "Withdraw claim",
+    "withdrawTitle": "Withdraw your claim for {{name}}?",
+    "withdrawBody": "You can claim it again later.",
+    "declinedTitle": "Your claim wasn't approved",
+    "takenReason": "Someone else from {{name}} now runs this page.",
+    "tryAgain": "Try again with other proof",
+    "logoTitle": "Add {{name}}'s logo",
+    "logoBody": "The page stays unofficial until it has one.",
+    "result": {
+      "wrong_code": "That code isn't right. Check the email and try again.",
+      "code_expired": "That code has run out. Send a new one.",
+      "too_many_tries": "Too many wrong codes. Send a new one.",
+      "wait": "Wait a minute before sending another code."
+    },
+    "error": {
+      "claim_pending": "You already have a claim waiting for this page.",
+      "too_many_claims": "That's a lot of claims for one day. Try again tomorrow.",
+      "invalid_email": "Check the email address.",
+      "too_many_codes": "We've sent this claim enough codes. Start again tomorrow, or post a code instead.",
+      "not_claimable": "This page can't be claimed right now.",
+      "invalid_link": "Add a link to where the code is, or will be.",
+      "invalid_role": "Say what you do there."
+    }
+  },
+  "pageLogo": {
+    "title": "Add {{name}}'s logo",
+    "body": "The logo is how skaters know a page is really {{name}}. It turns the page official.",
+    "previewLabel": "Preview of {{name}}'s header with the logo",
+    "logo": "LOGO",
+    "preview": "Preview: how {{name}}'s header looks once the logo is in.",
+    "choose": "Choose a logo",
+    "change": "Choose another",
+    "hint": "A square image works best, at least 400 px. You can change it any time.",
+    "skipNote": "No logo to hand? Skip it and {{name}} stays",
+    "skip": "Skip for now",
+    "failed": "The logo didn't save"
+  },
+  "pageInvite": {
+    "runTape": "You're invited to run {{name}}",
+    "invitedTape": "{{name}} invited you",
+    "owner": "OWNER",
+    "claimShop": "Post as {{name}}, keep its hours right and plan meetups.",
+    "claimBrand": "Post as {{name}}, keep its products right and plan meetups.",
+    "claimTeam": "Build a team of managers and staff.",
+    "claimChecked": "We've already checked it's you, so there's no claim to wait on. You'll add {{name}}'s logo at the end.",
+    "teamShop": "Post and comment as {{name}}, host meetups and update hours.",
+    "teamBrand": "Post and comment as {{name}} and host meetups.",
+    "teamOwnAccount": "You also get your own free account. You don't have to skate.",
+    "wantsYou": "{{username}} wants you on {{name}}'s team as {{role}}.",
+    "wantsYouNoName": "You're invited onto {{name}}'s team as {{role}}.",
+    "claimFoot": "Already on Grindylocks? Sign in with that email and {{name}} is added to your account. This invite works once and expires in {{days}} days.",
+    "teamFoot": "Sent to {{email}}. Already on Grindylocks? Sign in and accept from your notifications. Expires in {{days}} days.",
+    "teamFootNoEmail": "Already on Grindylocks? Sign in and accept from your notifications. Expires in {{days}} days.",
+    "role": {
+      "staff": "staff",
+      "manager": "manager"
+    },
+    "roleA": {
+      "staff": "staff",
+      "manager": "a manager"
+    },
+    "roleAs": {
+      "staff": "staff",
+      "manager": "manager",
+      "owner": "owner"
     }
   }
 }

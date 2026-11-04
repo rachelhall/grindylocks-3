@@ -1,3 +1,4 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useRef } from 'react';
@@ -5,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { PageTile } from '@/components/pages';
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { BackButton, Button, Icon, type IconName } from '@/components/ui';
@@ -18,7 +20,16 @@ import {
   useNotifications,
   usePostCovers,
 } from '@/lib/engagement';
+import {
+  type MyPageInvite,
+  type PageNotice,
+  useAnswerPageInvite,
+  useMyPageInvites,
+  useMyPageNotifications,
+} from '@/lib/claims';
 import { useRestriction } from '@/lib/moderation';
+import { isOfficial, pageKind } from '@/lib/pages';
+import { keys } from '@/lib/query';
 import { type FollowRequest, useAnswerFollowRequest, useFollowRequests } from '@/lib/social';
 import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
@@ -45,6 +56,13 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  *   people going, changes, cancellations and the 1-hour reminder; the
  *   co-host invite; replies and mentions in meetup comments; and, for hosts,
  *   a date hidden by park admins. They all open the meetup.
+ * - Pages (brand and shop accounts, PR 5; Notifications-Pages): a Page
+ *   invites box at the top, above Follow requests, with team invites and
+ *   ownership hand-overs (Accept and Decline; Become owner for ownership).
+ *   Page rows use the page's logo tile (or an ink first-letter tile) with a
+ *   type badge: claim approved (opens the logo screen), claim declined with
+ *   Rachel's reason (opens the page to try again), a followed page joining,
+ *   team changes and a suggestion going live.
  */
 
 const BADGES: Record<NotificationKind, IconName> = {
@@ -73,6 +91,11 @@ const BADGES: Record<NotificationKind, IconName> = {
   meetup_mention: 'badgeMention',
   meetup_hidden: 'badgeRemoved',
 };
+
+/** A row in the list: a person notification, or one about a page (PR 5). */
+type Entry =
+  | { type: 'person'; n: AppNotification; at: string; unread: boolean; id: string }
+  | { type: 'page'; p: PageNotice; at: string; unread: boolean; id: string };
 
 const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'caption_mention', 'tag', 'filmer_credit']);
 
@@ -108,10 +131,14 @@ export default function Notifications() {
   const answer = useAnswerFollowRequest(userId);
   const markSeen = useMarkNotificationsSeen(userId);
   const restriction = useRestriction(userId);
+  const pageInvites = useMyPageInvites(userId);
+  const pageNotices = useMyPageNotifications(userId);
+  const answerInvite = useAnswerPageInvite(userId);
+  const qc = useQueryClient();
 
   // Clear the dot once the list has loaded (so its New marks are kept).
   const marked = useRef(false);
-  const loaded = list.isSuccess;
+  const loaded = list.isSuccess && !pageNotices.isPending;
   const mark = markSeen.mutate;
   useEffect(() => {
     if (!loaded || marked.current) return;
@@ -121,10 +148,17 @@ export default function Notifications() {
 
   const pending = requests.data ?? [];
   const items = list.data ?? [];
+  const invites = pageInvites.data ?? [];
   const covers = usePostCovers(items.filter((n) => POST_KINDS.has(n.kind) && n.postId).map((n) => n.postId!));
-  const fresh = items.filter((n) => n.unread);
-  const older = items.filter((n) => !n.unread);
-  const empty = !requests.isPending && !list.isPending && pending.length === 0 && items.length === 0;
+  // People rows and page rows in one list, newest first.
+  const rows: Entry[] = [
+    ...items.map((n): Entry => ({ type: 'person', n, at: n.createdAt, unread: n.unread, id: n.id })),
+    ...(pageNotices.data ?? []).map((p): Entry => ({ type: 'page', p, at: p.createdAt, unread: p.unread, id: p.id })),
+  ].sort((a, b) => b.at.localeCompare(a.at));
+  const fresh = rows.filter((e) => e.unread);
+  const older = rows.filter((e) => !e.unread);
+  const empty =
+    !requests.isPending && !list.isPending && !pageInvites.isPending && pending.length === 0 && rows.length === 0 && invites.length === 0;
 
   const openProfile = (username: string) => router.push({ pathname: '/profile/[username]', params: { username } });
   const reply = (followerId: string, accept: boolean) =>
@@ -346,6 +380,186 @@ export default function Notifications() {
     );
   }
 
+  function PageNoticeRow({ p }: { p: PageNotice }) {
+    const name = p.page.displayName;
+    const when = timeAgo(p.createdAt, t, i18n.language);
+    const ink = p.unread ? c.onAccentSubtle : c.text;
+    const secondary = p.unread ? c.onAccentSubtle : c.textSecondary;
+    const badgeFill = p.unread ? brand.ink : c.text;
+    const badgeIcon = p.unread ? brand.paper : c.surface;
+    const taken = p.kind === 'page_claim_declined' && p.message === 'another_claim_approved';
+    let text: string;
+    let icon: IconName;
+    switch (p.kind) {
+      case 'page_claim_approved':
+        text = t('notifications.page.claimApproved', { name });
+        icon = 'verified';
+        break;
+      case 'page_claim_declined':
+        text = taken ? t('notifications.page.claimTaken', { name }) : t('notifications.page.claimDeclined', { name });
+        icon = 'block';
+        break;
+      case 'page_team_change':
+        text =
+          p.message === 'removed'
+            ? t('notifications.page.removed', { name })
+            : p.message === 'owner'
+              ? t('notifications.page.owner', { name })
+              : t('notifications.page.madeRole', { name, role: t(`pageInvite.roleA.${p.message === 'role:manager' ? 'manager' : 'staff'}`) });
+        icon = 'badgeRole';
+        break;
+      case 'page_claimed':
+        text = t('notifications.page.joined', { name });
+        icon = 'storefront';
+        break;
+      case 'suggestion_live':
+        text = p.message ? t('notifications.page.suggestionLiveWhat', { name, what: p.message }) : t('notifications.page.suggestionLive', { name });
+        icon = 'check';
+        break;
+    }
+    const excerpt = p.kind === 'page_claim_declined' && !taken && p.message ? p.message : null;
+    const after =
+      p.kind === 'page_claim_declined' && !taken
+        ? t('notifications.page.tryAgain')
+        : p.kind === 'page_claimed'
+          ? t('notifications.page.joinedNote')
+          : null;
+    const open = () => {
+      if (p.kind === 'page_claim_approved' && !isOfficial(p.page)) {
+        router.push({ pathname: '/page-logo/[handle]', params: { handle: p.page.handle } });
+      } else {
+        router.push({ pathname: '/page/[handle]', params: { handle: p.page.handle } });
+      }
+    };
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${p.unread ? t('notifications.unreadLabel', { text }) : text}, ${when}`}
+        onPress={open}
+        style={({ pressed }) => [styles.row, pressed && styles.pressed]}
+      >
+        <View style={styles.avatar}>
+          <PageTile page={p.page} size={40} />
+          <View style={[styles.badge, { backgroundColor: badgeFill }]}>
+            <Icon name={icon} color={badgeIcon} size={12} />
+          </View>
+        </View>
+        <View style={styles.rowText}>
+          <Text variant="bodySm" style={{ color: ink }}>
+            {withBoldNames(text, [name]).map((part, i) =>
+              part.bold ? (
+                <Text key={i} variant="bodySm" style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
+                  {part.text}
+                </Text>
+              ) : (
+                part.text
+              ),
+            )}
+          </Text>
+          {excerpt ? (
+            <Text variant="bodySm" numberOfLines={4} style={{ color: secondary }}>
+              “{excerpt}”
+            </Text>
+          ) : null}
+          {after ? (
+            <Text variant="bodySm" style={{ color: secondary }}>
+              {after}
+            </Text>
+          ) : null}
+          <Text variant="caption" style={{ color: secondary }}>
+            {when}
+          </Text>
+        </View>
+      </Pressable>
+    );
+  }
+
+  const answer2 = (invite: MyPageInvite, accept: boolean) =>
+    answerInvite.mutate(
+      { inviteId: invite.id, accept },
+      {
+        onSuccess: (handle) => {
+          if (accept && handle) router.push({ pathname: '/page/[handle]', params: { handle } });
+        },
+        onError: (err) => {
+          const message = (err as { message?: string }).message;
+          if (message === 'invite_closed' || message === 'not_found') {
+            Alert.alert(t('notifications.page.inviteClosed'));
+            void qc.invalidateQueries({ queryKey: keys.myPageInvites(userId ?? '') });
+          } else if (message === 'suspended') {
+            Alert.alert(t('notifications.page.inviteSuspended'));
+          } else {
+            Alert.alert(t('errors.generic'), t('errors.network'));
+          }
+        },
+      },
+    );
+
+  function PageInviteRow({ invite, last }: { invite: MyPageInvite; last: boolean }) {
+    const name = invite.page.displayName;
+    const by = invite.inviterUsername;
+    const when = timeAgo(invite.createdAt, t, i18n.language);
+    const text =
+      invite.kind === 'ownership'
+        ? t('notifications.page.ownership', { a: by ?? t('common.deletedUser'), name })
+        : invite.kind === 'claim'
+          ? t('notifications.page.claimInvite', { name })
+          : t('notifications.page.teamInvite', { name, role: t(`pageInvite.role.${invite.role === 'manager' ? 'manager' : 'staff'}`) });
+    const sub =
+      invite.kind === 'ownership'
+        ? [invite.myRole ? t(`notifications.page.youAre.${invite.myRole}`) : null, when].filter(Boolean).join(' · ')
+        : [by && invite.kind === 'team' ? t('notifications.page.from', { username: by }) : null, when].filter(Boolean).join(' · ');
+    return (
+      <View style={[styles.invite, last && styles.requestLast]}>
+        <View style={styles.inviteHead}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={name}
+            onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: invite.page.handle } })}
+            style={styles.avatar}
+          >
+            <PageTile page={invite.page} size={40} />
+            <View style={[styles.badge, { backgroundColor: c.text }]}>
+              <Icon name={invite.kind === 'ownership' ? 'key' : pageKind(invite.page) === 'shop' ? 'storefront' : 'coHost'} color={c.surface} size={12} />
+            </View>
+          </Pressable>
+          <View style={styles.rowText}>
+            <Text variant="bodySm">
+              {withBoldNames(text, [name, by ?? '']).map((part, i) =>
+                part.bold ? (
+                  <Text key={i} variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
+                    {part.text}
+                  </Text>
+                ) : (
+                  part.text
+                ),
+              )}
+            </Text>
+            <Text variant="caption" color="textSecondary">
+              {sub}
+            </Text>
+            {invite.kind === 'ownership' ? (
+              <Text variant="bodySm" color="textSecondary">
+                {t('notifications.page.ownershipNote')}
+              </Text>
+            ) : null}
+          </View>
+        </View>
+        <View style={styles.inviteButtons}>
+          <Button
+            label={invite.kind === 'ownership' ? t('notifications.page.becomeOwner') : t('follow.accept')}
+            onPress={() => answer2(invite, true)}
+            palette={{ fill: c.accent, text: c.onAccent, border: c.border }}
+            style={StyleSheet.flatten([styles.small, styles.grow])}
+          />
+          <Button label={t('follow.decline')} variant="secondary" onPress={() => answer2(invite, false)} style={StyleSheet.flatten([styles.small, styles.grow])} />
+        </View>
+      </View>
+    );
+  }
+
+  const renderEntry = (e: Entry) => (e.type === 'person' ? <Row key={e.id} n={e.n} /> : <PageNoticeRow key={e.id} p={e.p} />);
+
   function RequestRow({ r, last }: { r: FollowRequest; last: boolean }) {
     const disciplines = (r.disciplines ?? []).map((d) => t(`disciplines.${d}`)).join(' · ');
     return (
@@ -394,11 +608,13 @@ export default function Notifications() {
         contentContainerStyle={styles.content}
         refreshControl={
           <RefreshControl
-            refreshing={requests.isRefetching || list.isRefetching}
+            refreshing={requests.isRefetching || list.isRefetching || pageInvites.isRefetching}
             onRefresh={() => {
               void requests.refetch();
               void list.refetch();
               void restriction.refetch();
+              void pageInvites.refetch();
+              void pageNotices.refetch();
               markSeen.mutate();
             }}
             tintColor={c.text}
@@ -411,6 +627,17 @@ export default function Notifications() {
           <Text variant="bodySm" color="statusClosed" style={styles.pad}>
             {t('errors.network')}
           </Text>
+        ) : null}
+
+        {invites.length > 0 ? (
+          <View style={[styles.requests, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.requestsTitle}>
+              {`${t('notifications.page.invites')} · ${invites.length}`}
+            </Text>
+            {invites.map((inv, i) => (
+              <PageInviteRow key={inv.id} invite={inv} last={i === invites.length - 1} />
+            ))}
+          </View>
         ) : null}
 
         {pending.length > 0 ? (
@@ -433,9 +660,7 @@ export default function Notifications() {
             >
               {t('notifications.new')}
             </Text>
-            {fresh.map((n) => (
-              <Row key={n.id} n={n} />
-            ))}
+            {fresh.map(renderEntry)}
           </View>
         ) : null}
 
@@ -444,9 +669,7 @@ export default function Notifications() {
             <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.section}>
               {t('notifications.older')}
             </Text>
-            {older.map((n) => (
-              <Row key={n.id} n={n} />
-            ))}
+            {older.map(renderEntry)}
           </View>
         ) : null}
 
@@ -472,6 +695,10 @@ const styles = StyleSheet.create({
   requestLast: { paddingBottom: space[3] },
   person: { flex: 1, minWidth: 0, flexDirection: 'row', alignItems: 'center', gap: 10, minHeight: 48 },
   small: { minHeight: 48, height: 48, paddingHorizontal: space[3], borderWidth: stroke.rule },
+  grow: { flex: 1 },
+  invite: { paddingHorizontal: space[3], paddingVertical: space[2], gap: space[2] },
+  inviteHead: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  inviteButtons: { flexDirection: 'row', gap: space[2], paddingLeft: 40 + space[3] },
   newBlock: { marginTop: space[4], borderTopWidth: stroke.rule, borderBottomWidth: stroke.rule, paddingBottom: 2 },
   newTitle: { paddingTop: space[3] },
   section: { paddingHorizontal: space[4], paddingTop: 14, paddingBottom: 2 },

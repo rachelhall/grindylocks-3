@@ -17,8 +17,9 @@ import { Text } from '@/theme';
  */
 export default function EmailSignIn() {
   const { t } = useTranslation();
-  const { invite } = useLocalSearchParams<{ invite?: string }>();
-  const [email, setEmail] = useState('');
+  // `address`: an emailed page invite fills in the address it was sent to.
+  const { invite, address: invited } = useLocalSearchParams<{ invite?: string; address?: string }>();
+  const [email, setEmail] = useState(invited ?? '');
   const [error, setError] = useState<string | null>(null);
   const [sending, setSending] = useState(false);
 
@@ -72,7 +73,7 @@ export default function EmailSignIn() {
         autoComplete="email"
         autoCapitalize="none"
         autoCorrect={false}
-        autoFocus
+        autoFocus={!invited}
         returnKeyType="send"
         onSubmitEditing={send}
         error={error}

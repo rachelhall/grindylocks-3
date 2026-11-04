@@ -1,0 +1,62 @@
+{
+  "en": {
+    "brand": "brand",
+    "shop": "shop",
+    "staff": "staff",
+    "manager": "a manager",
+    "codeSubject": "Your code for claiming {{page}}: {{code}}",
+    "codeBody": "Here's the code to confirm this address for your claim on {{page}}'s page on Grindylocks:\n\n{{code}}\n\nIt works for 30 minutes. The code only shows you can read this inbox; we still check every claim by hand.\n\nIf you didn't ask for this, you can ignore this email.",
+    "teamSubject": "{{inviter}} invited you to {{page}}'s team on Grindylocks",
+    "teamBody": "{{inviter}} wants you on {{page}}'s team on Grindylocks as {{role}}: posting and commenting as {{page}}, hosting meetups and keeping its details right. You also get your own free account, and you don't have to skate.",
+    "claimSubject": "Run {{page}}'s page on Grindylocks",
+    "claimBody": "You're invited to manage {{page}}'s page on Grindylocks, the app for skaters to find parks, post clips and meet up. We've already checked it's you, so there's no claim to wait on: once you're in, you're the page's owner, and you'll add {{page}}'s logo at the end.",
+    "howTo": "Your invite code: {{code}}\n\nOn your phone, open this link with Grindylocks installed: {{link}}\nOr open Grindylocks, tap \"I have an invite code\" and type the code. Sign in with this email address ({{email}}). Already on Grindylocks? Sign in with this address and the invite is waiting under the bell.\n\nThe invite works once and expires on {{expires}}.",
+    "beta": "Grindylocks is in beta. Don't have the app yet? Reply to this email and we'll get you set up.",
+    "ignore": "If this wasn't meant for you, you can ignore it."
+  },
+  "es": {
+    "brand": "marca",
+    "shop": "tienda",
+    "staff": "personal",
+    "manager": "gerente",
+    "codeSubject": "Tu código para reclamar {{page}}: {{code}}",
+    "codeBody": "Este es el código para confirmar esta dirección en tu solicitud de la página de {{page}} en Grindylocks:\n\n{{code}}\n\nFunciona durante 30 minutos. El código solo demuestra que puedes leer este correo; aun así revisamos cada solicitud a mano.\n\nSi no lo pediste, puedes ignorar este correo.",
+    "teamSubject": "{{inviter}} te invitó al equipo de {{page}} en Grindylocks",
+    "teamBody": "{{inviter}} te quiere en el equipo de {{page}} en Grindylocks como {{role}}: publicar y comentar como {{page}}, organizar quedadas y mantener sus datos al día. También tienes tu propia cuenta gratis, y no hace falta que patines.",
+    "claimSubject": "Gestiona la página de {{page}} en Grindylocks",
+    "claimBody": "Te invitamos a gestionar la página de {{page}} en Grindylocks, la app para que los patinadores encuentren parques, compartan clips y quedan. Ya hemos comprobado que eres tú, así que no hay solicitud que esperar: al entrar serás el propietario de la página, y al final añadirás el logo de {{page}}.",
+    "howTo": "Tu código de invitación: {{code}}\n\nEn tu móvil, abre este enlace con Grindylocks instalado: {{link}}\nO abre Grindylocks, toca \"Tengo un código de invitación\" y escribe el código. Inicia sesión con este correo ({{email}}). ¿Ya estás en Grindylocks? Inicia sesión con este correo y la invitación te espera bajo la campana.\n\nLa invitación funciona una vez y caduca el {{expires}}.",
+    "beta": "Grindylocks está en beta. ¿Aún no tienes la app? Responde a este correo y te ayudamos.",
+    "ignore": "Si esto no era para ti, puedes ignorarlo."
+  },
+  "da": {
+    "brand": "brand",
+    "shop": "butik",
+    "staff": "medarbejder",
+    "manager": "manager",
+    "codeSubject": "Din kode til at overtage {{page}}: {{code}}",
+    "codeBody": "Her er koden, der bekræfter denne adresse til din anmodning om {{page}}s side på Grindylocks:\n\n{{code}}\n\nDen virker i 30 minutter. Koden viser kun, at du kan læse denne indbakke; vi tjekker stadig hver anmodning i hånden.\n\nHar du ikke bedt om den, kan du se bort fra denne mail.",
+    "teamSubject": "{{inviter}} har inviteret dig med på {{page}}s team på Grindylocks",
+    "teamBody": "{{inviter}} vil have dig med på {{page}}s team på Grindylocks som {{role}}: skrive og kommentere som {{page}}, holde meetups og holde oplysningerne opdateret. Du får også din egen gratis konto, og du behøver ikke at skate.",
+    "claimSubject": "Styr {{page}}s side på Grindylocks",
+    "claimBody": "Du er inviteret til at styre {{page}}s side på Grindylocks, appen hvor skatere finder parker, deler klip og mødes. Vi har allerede tjekket, at det er dig, så der er ingen anmodning at vente på: når du er inde, ejer du siden, og til sidst tilføjer du {{page}}s logo.",
+    "howTo": "Din invitationskode: {{code}}\n\nÅbn dette link på din telefon med Grindylocks installeret: {{link}}\nEller åbn Grindylocks, tryk på \"Jeg har en invitationskode\" og skriv koden. Log ind med denne e-mailadresse ({{email}}). Er du allerede på Grindylocks? Log ind med denne adresse, så venter invitationen under klokken.\n\nInvitationen virker én gang og udløber {{expires}}.",
+    "beta": "Grindylocks er i beta. Har du ikke appen endnu? Svar på denne mail, så hjælper vi dig i gang.",
+    "ignore": "Var den ikke til dig, kan du se bort fra den."
+  },
+  "de": {
+    "brand": "Marke",
+    "shop": "Shop",
+    "staff": "Mitarbeiter",
+    "manager": "Manager",
+    "codeSubject": "Dein Code, um {{page}} zu übernehmen: {{code}}",
+    "codeBody": "Hier ist der Code, der diese Adresse für deine Anfrage zur Seite von {{page}} auf Grindylocks bestätigt:\n\n{{code}}\n\nEr gilt 30 Minuten. Der Code zeigt nur, dass du dieses Postfach lesen kannst; wir prüfen trotzdem jede Anfrage von Hand.\n\nWenn du ihn nicht angefordert hast, kannst du diese E-Mail ignorieren.",
+    "teamSubject": "{{inviter}} hat dich ins Team von {{page}} auf Grindylocks eingeladen",
+    "teamBody": "{{inviter}} möchte dich im Team von {{page}} auf Grindylocks, als {{role}}: als {{page}} posten und kommentieren, Meetups ausrichten und die Angaben aktuell halten. Du bekommst auch dein eigenes kostenloses Konto, und du musst nicht skaten.",
+    "claimSubject": "Betreue die Seite von {{page}} auf Grindylocks",
+    "claimBody": "Du bist eingeladen, die Seite von {{page}} auf Grindylocks zu betreuen, der App, in der Skater Parks finden, Clips teilen und sich treffen. Wir haben schon geprüft, dass du es bist, also musst du auf keine Anfrage warten: Sobald du drin bist, gehört dir die Seite, und zum Schluss fügst du das Logo von {{page}} hinzu.",
+    "howTo": "Dein Einladungscode: {{code}}\n\nÖffne diesen Link auf deinem Handy mit installiertem Grindylocks: {{link}}\nOder öffne Grindylocks, tippe auf \"Ich habe einen Einladungscode\" und gib den Code ein. Melde dich mit dieser E-Mail-Adresse an ({{email}}). Schon auf Grindylocks? Melde dich mit dieser Adresse an, dann wartet die Einladung unter der Glocke.\n\nDie Einladung funktioniert einmal und läuft am {{expires}} ab.",
+    "beta": "Grindylocks ist in der Beta. Du hast die App noch nicht? Antworte auf diese E-Mail, dann helfen wir dir.",
+    "ignore": "Wenn das nicht für dich war, kannst du es ignorieren."
+  }
+}

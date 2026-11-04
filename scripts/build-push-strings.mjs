@@ -14,6 +14,10 @@ const keys = [
   // Meetups (PR 5).
   'meetupChanged', 'meetupCancelled', 'meetupEnded', 'meetupReminder', 'meetupCommentOne', 'meetupReply', 'meetupMention',
 ];
+/** Brand and shop pages (PR 5), from `notifications.page`, as page_<key>. */
+const pageKeys = ['teamInvite', 'ownership', 'claimApproved', 'claimDeclined', 'claimTaken', 'madeRole', 'removed', 'owner', 'joined', 'suggestionLive'];
+/** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
+const roles = ['staff', 'manager'];
 /** Cancel reasons, from `meetup.reason`, as reason_<key>. */
 const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other'];
 
@@ -24,6 +28,9 @@ export function pushStrings() {
     out[lang] = {
       ...Object.fromEntries(keys.map((k) => [k, file.notifications[k]])),
       ...Object.fromEntries(reasons.map((r) => [`reason_${r}`, file.meetup.reason[r]])),
+      ...Object.fromEntries(pageKeys.map((k) => [`page_${k}`, file.notifications.page[k]])),
+      ...Object.fromEntries(roles.map((r) => [`role_${r}`, file.pageInvite.role[r]])),
+      ...Object.fromEntries(roles.map((r) => [`roleA_${r}`, file.pageInvite.roleA[r]])),
     };
   }
   return JSON.stringify(out, null, 2) + '\n';

@@ -176,6 +176,16 @@ export const keys = {
   product: (id: string) => ['catalog', 'product', id] as const,
   /** Search's Pages filter and the @ list's Pages heading. */
   pageSearch: (q: string, forMention: boolean) => ['page-search', forMention ? 'mention' : 'search', q] as const,
+  /** Your latest claim on a page (Claim this page, PR 5). */
+  myPageClaim: (userId: string, pageId: string) => ['page', 'claim', userId, pageId] as const,
+  /** Your open page invites, for the bell's Page invites box. */
+  myPageInvites: (userId: string) => ['page-invites', userId] as const,
+  /** Page notifications in the bell (claims decided, team changes, pages joining). */
+  myPageNotifications: (userId: string) => ['notifications', 'pages', userId] as const,
+  /** The pages you're on, with your role and each inbox's push switch. */
+  myPages: (userId: string) => ['my-pages', userId] as const,
+  /** What an emailed page invite code is for, before signing in. */
+  pageInvitePreview: (code: string) => ['page-invite-preview', code] as const,
   /** How many posts and park photos you have (Delete account). */
   myContentCounts: (userId: string) => ['content-counts', userId] as const,
 };

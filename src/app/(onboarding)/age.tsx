@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { FormScreen } from '@/components/screen';
 import { Button, StepHeader } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { ONBOARDING_STEPS } from '@/lib/onboarding';
+import { redeemMyPageInvite } from '@/lib/claims';
+import { useOnboardingSteps } from '@/lib/onboarding';
 import { Sentry } from '@/lib/sentry';
 import { redeemMyInvite } from '@/lib/social';
 import { supabase } from '@/lib/supabase';
@@ -19,6 +20,7 @@ import { Text } from '@/theme';
 export default function AgeStep() {
   const { t } = useTranslation();
   const { session, refreshProfile, signOut } = useAuth();
+  const steps = useOnboardingSteps();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tooYoung, setTooYoung] = useState(false);
@@ -39,6 +41,8 @@ export default function AgeStep() {
     // tell them. Does nothing for accounts made without an invite, and is
     // safe to repeat. A failure here doesn't hold up onboarding.
     await redeemMyInvite().catch((e: unknown) => Sentry.captureException(e));
+    // Or, for an account made with an emailed page invite, join the page.
+    await redeemMyPageInvite().catch((e: unknown) => Sentry.captureException(e));
     await refreshProfile();
     setSaving(false);
     router.push('/username');
@@ -61,7 +65,7 @@ export default function AgeStep() {
 
   return (
     <FormScreen
-      header={<StepHeader step={1} total={ONBOARDING_STEPS} canGoBack={false} />}
+      header={<StepHeader step={1} total={steps} canGoBack={false} />}
       footer={
         <>
           <Button label={t('onboarding.age.yes')} onPress={confirm} loading={saving} />

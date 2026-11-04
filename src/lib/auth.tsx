@@ -1,6 +1,7 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 
+import { fetchMyPageOnboarding, type PageJoin } from './claims';
 import type { Database } from './database.types';
 import { forgetThisPhone } from './push';
 import { supabase } from './supabase';
@@ -30,6 +31,12 @@ type AuthState = {
   ageConfirmed: boolean;
   /** Set when the profile couldn't be loaded (usually no connection). */
   profileError: boolean;
+  /**
+   * The page the account was created to join (an emailed claim or team
+   * invite), for onboarding through a page: disciplines are optional, a
+   * shop fills in the home city, and an owner adds the logo last.
+   */
+  pageJoin: PageJoin | null;
   onboarded: boolean;
   onboardingStep: OnboardingStep;
   refreshProfile: () => Promise<void>;
@@ -41,9 +48,10 @@ const AuthContext = createContext<AuthState | null>(null);
 const PROFILE_COLUMNS =
   'id, username, disciplines, home_metro_area_id, home_park_id, onboarded_at' as const;
 
-function stepFor(profile: MyProfile | null, ageConfirmed: boolean): OnboardingStep {
+function stepFor(profile: MyProfile | null, ageConfirmed: boolean, pageJoin: PageJoin | null): OnboardingStep {
   if (!profile || !ageConfirmed) return 'age';
-  if (!profile.username || profile.disciplines.length === 0) return 'username';
+  // Someone joining through a page may not skate, so disciplines are optional for them.
+  if (!profile.username || (profile.disciplines.length === 0 && !pageJoin)) return 'username';
   if (!profile.home_metro_area_id) return 'city';
   return 'regulars';
 }
@@ -52,21 +60,25 @@ type LoadedProfile = {
   uid: string;
   profile: MyProfile | null;
   ageConfirmed: boolean;
+  pageJoin: PageJoin | null;
   error: boolean;
 };
 
 async function fetchProfile(uid: string): Promise<LoadedProfile> {
-  const [profileRes, accountRes] = await Promise.all([
+  const [profileRes, accountRes, pageJoin] = await Promise.all([
     supabase.from('profiles').select(PROFILE_COLUMNS).eq('id', uid).maybeSingle(),
     supabase.rpc('my_account'),
+    // Only for accounts made through a page invite; a failure here never blocks.
+    fetchMyPageOnboarding().catch(() => null),
   ]);
   if (profileRes.error || accountRes.error) {
-    return { uid, profile: null, ageConfirmed: false, error: true };
+    return { uid, profile: null, ageConfirmed: false, pageJoin: null, error: true };
   }
   return {
     uid,
     profile: profileRes.data,
     ageConfirmed: Boolean(accountRes.data?.[0]?.age_confirmed_at),
+    pageJoin,
     error: false,
   };
 }
@@ -128,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const profile = current?.profile ?? null;
   const ageConfirmed = current?.ageConfirmed ?? false;
   const profileError = current?.error ?? false;
+  const pageJoin = current?.pageJoin ?? null;
   const ready = sessionChecked && (!userId || current !== null);
   const onboarded = Boolean(profile?.onboarded_at);
 
@@ -139,8 +152,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         profile,
         ageConfirmed,
         profileError,
+        pageJoin,
         onboarded,
-        onboardingStep: stepFor(profile, ageConfirmed),
+        onboardingStep: stepFor(profile, ageConfirmed, pageJoin),
         refreshProfile,
         signOut,
       }}

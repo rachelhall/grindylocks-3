@@ -4,22 +4,29 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { FormScreen } from '@/components/screen';
-import { Button, ChoiceCard, StepHeader, TextField } from '@/components/ui';
+import { Button, ChoiceCard, Icon, StepHeader, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
-import { ONBOARDING_STEPS } from '@/lib/onboarding';
+import { useOnboardingSteps } from '@/lib/onboarding';
+import { pageKind } from '@/lib/pages';
 import { type Discipline, PROFILE_DISCIPLINES } from '@/lib/profiles';
 import { supabase } from '@/lib/supabase';
 import { useUsernameCheck } from '@/lib/username';
-import { fontFamily, space, stroke, Text, useColors } from '@/theme';
+import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
 
 /**
  * Username and disciplines. The name is checked live as it's typed; a name
  * the member already saved (coming back to this step) counts as free.
+ *
+ * Someone joining through a page (Onboard-Username-Page) sees a "Joining
+ * 8SET as staff" strip, and disciplines are optional: a shop's bookkeeper
+ * may not skate.
  */
 export default function UsernameStep() {
   const { t } = useTranslation();
   const c = useColors();
-  const { session, profile, refreshProfile } = useAuth();
+  const { session, profile, refreshProfile, pageJoin } = useAuth();
+  const steps = useOnboardingSteps();
+  const disciplinesOptional = Boolean(pageJoin);
   const [username, setUsername] = useState(profile?.username ?? '');
   const [disciplines, setDisciplines] = useState<Discipline[]>(profile?.disciplines ?? []);
   const [showErrors, setShowErrors] = useState(false);
@@ -38,7 +45,7 @@ export default function UsernameStep() {
   async function save() {
     setShowErrors(true);
     setSaveError(null);
-    if (!myId || availability !== 'free' || disciplines.length === 0) return;
+    if (!myId || availability !== 'free' || (disciplines.length === 0 && !disciplinesOptional)) return;
     setSaving(true);
     const { error } = await supabase
       .from('profiles')
@@ -80,7 +87,7 @@ export default function UsernameStep() {
 
   return (
     <FormScreen
-      header={<StepHeader step={2} total={ONBOARDING_STEPS} canGoBack={router.canGoBack()} />}
+      header={<StepHeader step={2} total={steps} canGoBack={router.canGoBack()} />}
       footer={
         <>
           {saveError ? (
@@ -92,6 +99,14 @@ export default function UsernameStep() {
         </>
       }
     >
+      {pageJoin ? (
+        <View style={styles.joining}>
+          <Icon name={pageKind(pageJoin) === 'shop' ? 'storefront' : 'badgeRole'} color={brand.paper} size={16} />
+          <Text variant="bodySm" style={styles.joiningText}>
+            {t('onboarding.page.joining', { name: pageJoin.displayName, role: t(`pageInvite.roleAs.${pageJoin.role}`) })}
+          </Text>
+        </View>
+      ) : null}
       <Text variant="display" accessibilityRole="header">
         {t('onboarding.username.title')}
       </Text>
@@ -112,7 +127,9 @@ export default function UsernameStep() {
       <View style={styles.group} accessibilityRole="list">
         <Text variant="bodySm" style={styles.legend}>
           {t('onboarding.username.disciplinesLegend')}
-          <Text variant="bodySm" color="textSecondary">{`  ${t('onboarding.username.pickAll')}`}</Text>
+          <Text variant="bodySm" color="textSecondary">
+            {`  ${disciplinesOptional ? t('common.optional') : t('onboarding.username.pickAll')}`}
+          </Text>
         </Text>
         {PROFILE_DISCIPLINES.map((d) => (
           <ChoiceCard
@@ -123,7 +140,12 @@ export default function UsernameStep() {
             onToggle={() => toggle(d)}
           />
         ))}
-        {showErrors && disciplines.length === 0 ? (
+        {disciplinesOptional ? (
+          <Text variant="bodySm" color="textSecondary">
+            {t('onboarding.page.noSkating')}
+          </Text>
+        ) : null}
+        {showErrors && disciplines.length === 0 && !disciplinesOptional ? (
           <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
             {t('onboarding.username.pickOne')}
           </Text>
@@ -137,4 +159,14 @@ const styles = StyleSheet.create({
   badge: { borderWidth: stroke.rule, paddingHorizontal: 6, paddingVertical: 2 },
   group: { gap: space[2] },
   legend: { fontFamily: fontFamily.sansSemiBold, marginBottom: space[1] },
+  joining: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[2],
+    backgroundColor: brand.ink,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  joiningText: { color: brand.paper, fontFamily: fontFamily.sansSemiBold },
 });
