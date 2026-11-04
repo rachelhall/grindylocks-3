@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
+import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
 import { SafeAreaView } from '@/components/safe-area';
 import { useExplainRestriction } from '@/components/safety';
 import { BackButton, Button, Icon, type IconName } from '@/components/ui';
@@ -42,9 +43,13 @@ import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } 
  *   with a line saying what it does. The page's own team sees no menu yet;
  *   Edit page comes with running a page (PR 7).
  *
- * Coming with later PRs: the shop's address, hours and brands carried (PR 3),
- * the Products tab (PR 4), Claim this page (PR 5) and the page's own posts
- * (PR 8). Until then a managed page's Posts section is empty.
+ * Shops (PR 3, the Shop-8SET and Shop-TempClosed mockups) add the address
+ * with open-now and location-type chips, Directions beside Follow, the
+ * hours card on the shop's own clock and Brands we carry.
+ *
+ * Coming with later PRs: the Products tab (PR 4), Claim this page (PR 5),
+ * the page's own posts (PR 8) and its meetups (PR 9). Until then a managed
+ * page's Posts section is empty.
  */
 export default function PageScreen() {
   const { handle } = useLocalSearchParams<{ handle: string }>();
@@ -155,6 +160,8 @@ function PageBody({ page }: { page: Page }) {
   // Unofficial pages show their website; managed ones their own links (up to 3).
   const links = nameOnly ? [] : official || page.state === 'managed' ? page.links : page.website ? [page.website] : [];
   const canShowFollow = !archive && !nameOnly && !onTeam;
+  const shop = kind === 'shop' && !archive;
+  const shopButtons = shop && (shopHasDirections(page) || links.length > 0);
   const statusLine =
     page.state === 'unofficial' || (page.state === 'managed' && !official)
       ? t(kind === 'shop' ? 'page.unofficialShop' : 'page.unofficialBrand')
@@ -163,6 +170,33 @@ function PageBody({ page }: { page: Page }) {
         : nameOnly
           ? t('page.nameOnly')
           : null;
+
+  const descriptionBlock = description ? (
+    <Text variant="body" style={styles.description}>
+      {description}
+    </Text>
+  ) : null;
+
+  const followButton =
+    canShowFollow && state && !state.blocked && (state.following || state.canFollow) ? (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ selected: state.following }}
+        onPress={() => toggle('follow', !state.following)}
+        style={({ pressed }) => [
+          styles.follow,
+          state.following
+            ? { backgroundColor: 'transparent', borderColor: c.border }
+            : { backgroundColor: c.text, borderColor: c.text },
+          pressed && styles.pressed,
+        ]}
+      >
+        <Icon name={state.following ? 'check' : 'add'} color={state.following ? c.text : c.surface} size={18} />
+        <Text variant="headline" style={{ color: state.following ? c.text : c.surface, fontSize: 15 }}>
+          {state.following ? t('page.following') : t('page.follow')}
+        </Text>
+      </Pressable>
+    ) : null;
 
   return (
     <View style={[styles.screen, { backgroundColor: c.surface }]}>
@@ -207,15 +241,12 @@ function PageBody({ page }: { page: Page }) {
           ) : null}
         </View>
 
-        {kind === 'shop' && page.tempClosedAt && !archive ? <ClosedUntil page={page} /> : null}
+        {shop ? <ShopPlace page={page} /> : null}
+        {shop && page.tempClosedAt && page.tempClosedNote ? <ClosedNote page={page} /> : null}
 
-        {description ? (
-          <Text variant="body" style={styles.description}>
-            {description}
-          </Text>
-        ) : null}
+        {shop ? null : descriptionBlock}
 
-        {links.length > 0 ? (
+        {!shop && links.length > 0 ? (
           <View style={styles.links}>
             {links.map((url) => (
               <LinkButton key={url} url={url} />
@@ -223,41 +254,32 @@ function PageBody({ page }: { page: Page }) {
           </View>
         ) : null}
 
-        {canShowFollow && state ? (
-          state.blocked ? (
-            <View style={styles.followBlock}>
-              <Text variant="bodySm" color="textSecondary">
-                {t('page.blocked', { name })}
-              </Text>
-              <Button label={t('page.unblock')} variant="secondary" onPress={() => toggle('block', false)} />
-            </View>
-          ) : state.following || state.canFollow ? (
-            <View style={styles.followBlock}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityState={{ selected: state.following }}
-                onPress={() => toggle('follow', !state.following)}
-                style={({ pressed }) => [
-                  styles.follow,
-                  state.following
-                    ? { backgroundColor: 'transparent', borderColor: c.border }
-                    : { backgroundColor: c.text, borderColor: c.text },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <Icon name={state.following ? 'check' : 'add'} color={state.following ? c.text : c.surface} size={18} />
-                <Text variant="headline" style={{ color: state.following ? c.text : c.surface, fontSize: 15 }}>
-                  {state.following ? t('page.following') : t('page.follow')}
-                </Text>
-              </Pressable>
-              {page.state === 'unofficial' ? (
-                <Text variant="bodySm" color="textSecondary">
-                  {t('page.followHint', { name })}
-                </Text>
-              ) : null}
-            </View>
-          ) : null
+        {state?.blocked && canShowFollow ? (
+          <View style={styles.followBlock}>
+            <Text variant="bodySm" color="textSecondary">
+              {t('page.blocked', { name })}
+            </Text>
+            <Button label={t('page.unblock')} variant="secondary" onPress={() => toggle('block', false)} />
+          </View>
         ) : null}
+
+        {followButton || shopButtons ? (
+          <View style={styles.followBlock}>
+            <View style={styles.actionRow}>
+              {followButton}
+              {shopButtons ? <ShopButtons page={page} links={links} /> : null}
+            </View>
+            {followButton && page.state === 'unofficial' ? (
+              <Text variant="bodySm" color="textSecondary">
+                {t('page.followHint', { name })}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
+
+        {shop ? descriptionBlock : null}
+        {shop ? <ShopHours page={page} /> : null}
+        {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
 
         {page.state === 'managed' || page.state === 'closed' ? (
           <View style={styles.section}>
@@ -310,34 +332,19 @@ function ArchiveNote({ page }: { page: Page }) {
   );
 }
 
-/** A shop away for a while: the warning chip and the team's note (Shop-TempClosed). */
-function ClosedUntil({ page }: { page: Page }) {
-  const { t, i18n } = useTranslation();
+/** A shop away for a while: the team's note under the "Closed until" chip (Shop-TempClosed). */
+function ClosedNote({ page }: { page: Page }) {
+  const { t } = useTranslation();
   const c = useColors();
-  const until = page.tempClosedUntil
-    ? new Intl.DateTimeFormat(i18n.language, { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(
-        new Date(`${page.tempClosedUntil}T00:00:00Z`),
-      )
-    : null;
-  const chip = until ? t('page.closedUntil', { date: until }) : t('page.closedForNow');
   return (
-    <View style={styles.closedBlock}>
-      <View style={[styles.warningChip, { borderColor: c.warning }]}>
-        <Text variant="label" style={{ color: c.warning }}>
-          {chip}
+    <View style={[styles.note, { backgroundColor: c.surfaceSunk }]}>
+      <Icon name="calendarOff" color={c.textSecondary} size={20} />
+      <View style={styles.flex}>
+        <Text variant="bodySm">{page.tempClosedNote}</Text>
+        <Text variant="caption" color="textSecondary">
+          {t('page.closedSetBy', { name: page.displayName })}
         </Text>
       </View>
-      {page.tempClosedNote ? (
-        <View style={[styles.note, styles.noteFlush, { backgroundColor: c.surfaceSunk }]}>
-          <Icon name="calendarOff" color={c.textSecondary} size={20} />
-          <View style={styles.flex}>
-            <Text variant="bodySm">{page.tempClosedNote}</Text>
-            <Text variant="caption" color="textSecondary">
-              {t('page.closedSetBy', { name: page.displayName })}
-            </Text>
-          </View>
-        </View>
-      ) : null}
     </View>
   );
 }
@@ -387,7 +394,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   followBlock: { paddingHorizontal: space[4], paddingTop: space[4], gap: space[2] },
+  actionRow: { flexDirection: 'row', gap: space[2] },
   follow: {
+    flex: 1,
     height: size.tapMin,
     borderWidth: stroke.rule,
     flexDirection: 'row',
@@ -398,7 +407,4 @@ const styles = StyleSheet.create({
   section: { paddingHorizontal: space[4], paddingTop: space[6], gap: space[3] },
   empty: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4] },
   note: { marginHorizontal: space[4], marginTop: space[4], padding: space[3], flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
-  noteFlush: { marginHorizontal: 0, marginTop: 0, alignSelf: 'stretch' },
-  closedBlock: { paddingHorizontal: space[4], paddingTop: 14, gap: 10, alignItems: 'flex-start' },
-  warningChip: { borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: space[1] },
 });

@@ -164,6 +164,12 @@ export const keys = {
   pageHandle: (handle: string) => ['page', 'id-for', handle.toLowerCase().replace(/^@+/, '')] as const,
   /** Your follow, mute and block of a page. */
   pageState: (userId: string, pageId: string) => ['page', 'state', userId, pageId] as const,
+  /**
+   * Shop pins in the visible map area (part A, PR 3). Per member, since shops
+   * you blocked leave the map; every key starts with 'shops'.
+   */
+  shopsInBounds: (userId: string, b: { north: number; south: number; east: number; west: number }) =>
+    ['shops', 'bounds', userId, ...[b.north, b.south, b.east, b.west].map((n) => Math.round(n * 1000) / 1000)] as const,
   /** Search's Pages filter and the @ list's Pages heading. */
   pageSearch: (q: string, forMention: boolean) => ['page-search', forMention ? 'mention' : 'search', q] as const,
   /** How many posts and park photos you have (Delete account). */

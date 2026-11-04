@@ -10,12 +10,18 @@
  * Setting and lights are on every map pin already. Who can skate, free and
  * open now need a park's sessions, fee and time zone, fetched as "facets"
  * only while one of those filters is on (or the sheet is open).
+ *
+ * Shops (part A, PR 3; the Map-Filters-Shops mockup): Show shops is on by
+ * default, and turning it off counts as a filter. Open now covers parks and
+ * shops, each on its own clock; every other filter is park-only and the
+ * sheet labels it so, so a park filter never hides shops by surprise.
  */
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { openState, type SessionRow } from './hours';
 import type { Discipline, ParkPin, ParkSetting, ParkStatus } from './parks';
 import { fresh } from './query';
+import { type ShopPin, shopOpenState } from './shops';
 import { supabase } from './supabase';
 
 /** The disciplines with chips in the sheet (v1's three). */
@@ -30,13 +36,24 @@ export type MapFilters = {
   openNow: boolean;
   free: boolean;
   lit: boolean;
+  /** Shop pins next to parks; on by default. */
+  showShops: boolean;
 };
 
-export const NO_FILTERS: MapFilters = { disciplines: [], settings: [], openNow: false, free: false, lit: false };
+export const NO_FILTERS: MapFilters = {
+  disciplines: [],
+  settings: [],
+  openNow: false,
+  free: false,
+  lit: false,
+  showShops: true,
+};
 
 /** How many chips and boxes are on: the number on the filter button's badge. */
 export function filterCount(f: MapFilters) {
-  return f.disciplines.length + f.settings.length + Number(f.openNow) + Number(f.free) + Number(f.lit);
+  return (
+    f.disciplines.length + f.settings.length + Number(f.openNow) + Number(f.free) + Number(f.lit) + Number(!f.showShops)
+  );
 }
 
 /** Filters that need a park's sessions, fee or time zone. */
@@ -145,5 +162,15 @@ export function matchesFilters(
     );
     if (state.kind !== 'open') return false;
   }
+  return true;
+}
+
+/**
+ * Does a shop pass the filters? Only Show shops and Open now apply to shops;
+ * the rest are park-only. A shop with no hours yet isn't "open now".
+ */
+export function shopMatchesFilters(shop: ShopPin, f: MapFilters, now = new Date()): boolean {
+  if (!f.showShops) return false;
+  if (f.openNow) return shopOpenState(shop, now)?.kind === 'open';
   return true;
 }

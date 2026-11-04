@@ -213,9 +213,9 @@
       "button": "Filtre",
       "buttonOn": "Filtre, {{count}} slået til",
       "title": "Filtre",
-      "whoCanSkate": "HVEM MÅ KØRE",
+      "whoCanSkate": "HVEM MÅ KØRE · PARKER",
       "whoCanSkateHint": "Parker, der tillader en af dem, du vælger.",
-      "setting": "OMGIVELSER",
+      "setting": "OMGIVELSER · PARKER",
       "settings": {
         "indoor": "Indendørs",
         "covered": "Overdækket",
@@ -224,20 +224,33 @@
       "settingHint": "Parker med både indendørs og udendørs del vises for begge.",
       "onlyShow": "VIS KUN",
       "openNow": "Åben nu",
-      "openNowHint": "Efter hver parks åbningstider, i dens egen tid",
+      "openNowHint": "Parker og butikker, hver i sin egen tid",
       "free": "Gratis",
       "lit": "Lys om aftenen",
-      "litHint": "Vi ved ikke, om nogle parker har lys, så de skjules",
+      "litHint": "Kun parker. Vi ved ikke, om nogle parker har lys, så de skjules",
       "clear": "Nulstil",
       "show_one": "Vis {{count}} park",
       "show_other": "Vis {{count}} parker",
-      "showLoading": "Tæller parker…"
+      "showLoading": "Tæller…",
+      "onTheMap": "PÅ KORTET",
+      "showShops": "Vis butikker",
+      "showShopsHint": "Skatebutikker, du kan gå ind i",
+      "freeHint": "Kun parker",
+      "parks_one": "{{count}} park",
+      "parks_other": "{{count}} parker",
+      "shops_one": "{{count}} butik",
+      "shops_other": "{{count}} butikker",
+      "showBoth": "Vis {{parks}} · {{shops}}"
     },
     "edge": {
       "label": "{{park}}, {{distance}} væk, uden for kortet",
       "labelNoDistance": "{{park}}, uden for kortet",
       "hint": "Flytter kortet til parken"
-    }
+    },
+    "shopPin": "Butik: {{shop}}",
+    "shopPinSelected": "Butik: {{shop}}, valgt",
+    "closeCard": "Luk kort",
+    "viewShop": "Se butik"
   },
   "search": {
     "back": "Tilbage til kortet",
@@ -318,7 +331,8 @@
     "nothingPostedBody": "Har du skatet {{park}}? Tag parken i dit næste opslag, så vises det her.",
     "postHere": "Del et klip herfra",
     "postHereToo": "Del også et klip herfra",
-    "morePosts": "Flere opslag"
+    "morePosts": "Flere opslag",
+    "runBy": "Drives af {{name}}"
   },
   "disciplines": {
     "inline": "Inline",
@@ -1425,5 +1439,24 @@
     },
     "closed": "Butikken er lukket. Siden bliver stående som arkiv med sine opslag.",
     "logo": "{{name}}s logo"
+  },
+  "shop": {
+    "type": {
+      "storefront": "Fysisk butik",
+      "by_appointment": "Efter aftale",
+      "online_only": "Kun online"
+    },
+    "directions": "Rutevejledning",
+    "hours": "Åbningstider",
+    "usualHours": "Normale åbningstider",
+    "hoursIn": "Åbningstider · {{city}}-tid",
+    "usualHoursIn": "Normale åbningstider · {{city}}-tid",
+    "closed": "Lukket",
+    "dayRange": "{{from}}–{{to}}",
+    "brandsWeCarry": "Mærker vi fører",
+    "moreBrands_one": "+{{count}} mere",
+    "moreBrands_other": "+{{count}} mere",
+    "moreBrandsLabel_one": "Vis {{count}} mærke mere",
+    "moreBrandsLabel_other": "Vis {{count}} mærker mere"
   }
 }

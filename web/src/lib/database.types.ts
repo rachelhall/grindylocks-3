@@ -2186,6 +2186,7 @@ export type Database = {
           official_name: string | null
           park_type: Database["public"]["Enums"]["park_type"]
           region: string | null
+          run_by_page_id: string | null
           setting: Database["public"]["Enums"]["park_setting"] | null
           size_m2: number | null
           slug: string
@@ -2214,6 +2215,7 @@ export type Database = {
           official_name?: string | null
           park_type?: Database["public"]["Enums"]["park_type"]
           region?: string | null
+          run_by_page_id?: string | null
           setting?: Database["public"]["Enums"]["park_setting"] | null
           size_m2?: number | null
           slug: string
@@ -2242,6 +2244,7 @@ export type Database = {
           official_name?: string | null
           park_type?: Database["public"]["Enums"]["park_type"]
           region?: string | null
+          run_by_page_id?: string | null
           setting?: Database["public"]["Enums"]["park_setting"] | null
           size_m2?: number | null
           slug?: string
@@ -2257,6 +2260,13 @@ export type Database = {
             columns: ["metro_area_id"]
             isOneToOne: false
             referencedRelation: "metro_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "parks_run_by_page_id_fkey"
+            columns: ["run_by_page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
             referencedColumns: ["id"]
           },
           {
@@ -3690,6 +3700,26 @@ export type Database = {
           slide: string
         }
         Returns: undefined
+      }
+      shops_in_bounds: {
+        Args: { east: number; north: number; south: number; west: number }
+        Returns: {
+          address: string | null
+          city: string | null
+          country: string | null
+          display_name: string
+          handle: string
+          hours: Json
+          id: string
+          latitude: number
+          location_type: Database["public"]["Enums"]["shop_location_type"]
+          logo_path: string | null
+          longitude: number
+          state: Database["public"]["Enums"]["page_state"]
+          temp_closed_at: string | null
+          temp_closed_until: string | null
+          timezone: string | null
+        }[]
       }
       suggest_page: {
         Args: {

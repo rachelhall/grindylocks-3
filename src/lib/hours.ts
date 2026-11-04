@@ -26,6 +26,9 @@ export type SessionRow = Pick<
   | 'note'
 >;
 
+/** A row of opening hours without its disciplines: shops' hours (page_hours) have none. */
+export type HoursRow = Omit<SessionRow, 'disciplines'>;
+
 type ParkStatus = Database['public']['Enums']['park_status'];
 
 /* The park's clock ------------------------------------------------------------ */
@@ -114,7 +117,7 @@ function clockMinutes(time: string | null): number | null {
 
 /** Start or end of a session in local minutes on a given local date. */
 function resolveMinutes(
-  anchor: SessionRow['start_anchor'],
+  anchor: HoursRow['start_anchor'],
   time: string | null,
   date: { year: number; month: number; day: number },
   place: Place,
@@ -130,7 +133,7 @@ function resolveMinutes(
 }
 
 /** Whether a month/day falls in a session's season (seasons can wrap the new year). */
-function inSeason(row: SessionRow, month: number, day: number): boolean {
+function inSeason(row: HoursRow, month: number, day: number): boolean {
   if (!row.season_start_month || !row.season_end_month) return true;
   const v = month * 100 + day;
   const start = row.season_start_month * 100 + (row.season_start_day ?? 1);
@@ -143,11 +146,11 @@ function shiftDate(date: { year: number; month: number; day: number }, days: num
   return { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate() };
 }
 
-type Window = { start: number; end: number; row: SessionRow };
+type Window = { start: number; end: number; row: HoursRow };
 
 /** Today's opening windows, in local minutes (end may pass 24:00). */
 function windowsFor(
-  rows: SessionRow[],
+  rows: HoursRow[],
   date: { year: number; month: number; day: number },
   isoWeekday: number,
   place: Place,
@@ -175,7 +178,7 @@ export type OpenState =
  * Open or closed right now, by the park's own clock. Times in the result
  * are local minutes past midnight (may be over 1440 for "until 02:00").
  */
-export function openState(status: ParkStatus, rows: SessionRow[], place: Place, now = new Date()): OpenState {
+export function openState(status: ParkStatus, rows: HoursRow[], place: Place, now = new Date()): OpenState {
   if (status !== 'open') return { kind: 'status', status };
   const hasTimes = rows.some((r) => r.start_anchor || r.start_time);
   if (!hasTimes) return { kind: 'unknown' };
