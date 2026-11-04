@@ -1060,6 +1060,559 @@ export type Database = {
           },
         ]
       }
+      page_aliases: {
+        Row: {
+          created_at: string
+          handle: string | null
+          id: string
+          name: string
+          page_id: string
+          redirect_until: string | null
+        }
+        Insert: {
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name: string
+          page_id: string
+          redirect_until?: string | null
+        }
+        Update: {
+          created_at?: string
+          handle?: string | null
+          id?: string
+          name?: string
+          page_id?: string
+          redirect_until?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_aliases_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_blocks: {
+        Row: {
+          blocked_by: string | null
+          created_at: string
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          page_id: string
+          user_id: string
+        }
+        Insert: {
+          blocked_by?: string | null
+          created_at?: string
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          page_id: string
+          user_id: string
+        }
+        Update: {
+          blocked_by?: string | null
+          created_at?: string
+          id?: string
+          lifted_at?: string | null
+          lifted_by?: string | null
+          page_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_blocks_blocked_by_fkey"
+            columns: ["blocked_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_blocks_lifted_by_fkey"
+            columns: ["lifted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_blocks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_brands_carried: {
+        Row: {
+          brand_id: string
+          position: number
+          shop_id: string
+        }
+        Insert: {
+          brand_id: string
+          position?: number
+          shop_id: string
+        }
+        Update: {
+          brand_id?: string
+          position?: number
+          shop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_brands_carried_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_brands_carried_shop_id_fkey"
+            columns: ["shop_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_descriptions: {
+        Row: {
+          body: string
+          locale: string
+          page_id: string
+          source: Database["public"]["Enums"]["text_source"]
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body: string
+          locale: string
+          page_id: string
+          source?: Database["public"]["Enums"]["text_source"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          locale?: string
+          page_id?: string
+          source?: Database["public"]["Enums"]["text_source"]
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_descriptions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_descriptions_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_follows: {
+        Row: {
+          created_at: string
+          page_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          page_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          page_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_follows_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_follows_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_hours: {
+        Row: {
+          days: number[]
+          end_anchor: Database["public"]["Enums"]["time_anchor"]
+          end_time: string | null
+          id: string
+          note: string | null
+          page_id: string
+          season_end_day: number | null
+          season_end_month: number | null
+          season_start_day: number | null
+          season_start_month: number | null
+          start_anchor: Database["public"]["Enums"]["time_anchor"]
+          start_time: string | null
+        }
+        Insert: {
+          days: number[]
+          end_anchor?: Database["public"]["Enums"]["time_anchor"]
+          end_time?: string | null
+          id?: string
+          note?: string | null
+          page_id: string
+          season_end_day?: number | null
+          season_end_month?: number | null
+          season_start_day?: number | null
+          season_start_month?: number | null
+          start_anchor?: Database["public"]["Enums"]["time_anchor"]
+          start_time?: string | null
+        }
+        Update: {
+          days?: number[]
+          end_anchor?: Database["public"]["Enums"]["time_anchor"]
+          end_time?: string | null
+          id?: string
+          note?: string | null
+          page_id?: string
+          season_end_day?: number | null
+          season_end_month?: number | null
+          season_start_day?: number | null
+          season_start_month?: number | null
+          start_anchor?: Database["public"]["Enums"]["time_anchor"]
+          start_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_hours_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_invites: {
+        Row: {
+          accepted_at: string | null
+          cancelled_at: string | null
+          created_at: string
+          declined_at: string | null
+          email: string | null
+          expires_at: string
+          id: string
+          invited_by: string | null
+          invitee_id: string | null
+          kind: Database["public"]["Enums"]["page_invite_kind"]
+          page_id: string
+          role: Database["public"]["Enums"]["page_member_role"] | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          invitee_id?: string | null
+          kind: Database["public"]["Enums"]["page_invite_kind"]
+          page_id: string
+          role?: Database["public"]["Enums"]["page_member_role"] | null
+        }
+        Update: {
+          accepted_at?: string | null
+          cancelled_at?: string | null
+          created_at?: string
+          declined_at?: string | null
+          email?: string | null
+          expires_at?: string
+          id?: string
+          invited_by?: string | null
+          invitee_id?: string | null
+          kind?: Database["public"]["Enums"]["page_invite_kind"]
+          page_id?: string
+          role?: Database["public"]["Enums"]["page_member_role"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_invites_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_invites_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_links: {
+        Row: {
+          page_id: string
+          position: number
+          url: string
+        }
+        Insert: {
+          page_id: string
+          position: number
+          url: string
+        }
+        Update: {
+          page_id?: string
+          position?: number
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_links_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_members: {
+        Row: {
+          invited_by: string | null
+          joined_at: string
+          page_id: string
+          role: Database["public"]["Enums"]["page_member_role"]
+          user_id: string
+        }
+        Insert: {
+          invited_by?: string | null
+          joined_at?: string
+          page_id: string
+          role: Database["public"]["Enums"]["page_member_role"]
+          user_id: string
+        }
+        Update: {
+          invited_by?: string | null
+          joined_at?: string
+          page_id?: string
+          role?: Database["public"]["Enums"]["page_member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_members_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_members_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_mutes: {
+        Row: {
+          created_at: string
+          page_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          page_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          page_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_mutes_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_mutes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          address: string | null
+          city: string | null
+          closed_at: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          display_name: string
+          ended_label: string | null
+          founded_label: string | null
+          founding_partner_at: string | null
+          frozen_at: string | null
+          handle: string
+          header_path: string | null
+          id: string
+          latitude: number | null
+          location: unknown | null
+          location_type: Database["public"]["Enums"]["shop_location_type"] | null
+          logo_path: string | null
+          longitude: number | null
+          main_language: string
+          managed_at: string | null
+          metro_area_id: string | null
+          region: string | null
+          roles: Database["public"]["Enums"]["page_role"][]
+          show_pin: boolean
+          state: Database["public"]["Enums"]["page_state"]
+          suspended_at: string | null
+          suspended_reason: string | null
+          temp_closed_at: string | null
+          temp_closed_note: string | null
+          temp_closed_until: string | null
+          timezone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          closed_at?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          ended_label?: string | null
+          founded_label?: string | null
+          founding_partner_at?: string | null
+          frozen_at?: string | null
+          handle: string
+          header_path?: string | null
+          id?: string
+          latitude?: number | null
+          location?: unknown | null
+          location_type?: Database["public"]["Enums"]["shop_location_type"] | null
+          logo_path?: string | null
+          longitude?: number | null
+          main_language?: string
+          managed_at?: string | null
+          metro_area_id?: string | null
+          region?: string | null
+          roles: Database["public"]["Enums"]["page_role"][]
+          show_pin?: boolean
+          state?: Database["public"]["Enums"]["page_state"]
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          temp_closed_at?: string | null
+          temp_closed_note?: string | null
+          temp_closed_until?: string | null
+          timezone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          closed_at?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          ended_label?: string | null
+          founded_label?: string | null
+          founding_partner_at?: string | null
+          frozen_at?: string | null
+          handle?: string
+          header_path?: string | null
+          id?: string
+          latitude?: number | null
+          location?: unknown | null
+          location_type?: Database["public"]["Enums"]["shop_location_type"] | null
+          logo_path?: string | null
+          longitude?: number | null
+          main_language?: string
+          managed_at?: string | null
+          metro_area_id?: string | null
+          region?: string | null
+          roles?: Database["public"]["Enums"]["page_role"][]
+          show_pin?: boolean
+          state?: Database["public"]["Enums"]["page_state"]
+          suspended_at?: string | null
+          suspended_reason?: string | null
+          temp_closed_at?: string | null
+          temp_closed_note?: string | null
+          temp_closed_until?: string | null
+          timezone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pages_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pages_metro_area_id_fkey"
+            columns: ["metro_area_id"]
+            isOneToOne: false
+            referencedRelation: "metro_areas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       park_admin_notes: {
         Row: {
           notes: string | null
@@ -2062,6 +2615,39 @@ export type Database = {
           },
         ]
       }
+      user_page_blocks: {
+        Row: {
+          created_at: string
+          page_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          page_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          page_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_page_blocks_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_page_blocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       park_regulars: {
@@ -2518,6 +3104,7 @@ export type Database = {
         }
       }
       obstacle_review_detail: { Args: { obstacle: string }; Returns: Json }
+      page_follower_count: { Args: { page: string }; Returns: number }
       park_here_now: {
         Args: { park: string }
         Returns: {
@@ -2965,6 +3552,10 @@ export type Database = {
         | "rainbow_bench"
         | "other"
         | "street_plaza"
+      page_invite_kind: "team" | "ownership"
+      page_member_role: "staff" | "manager" | "owner"
+      page_role: "brand" | "shop"
+      page_state: "unofficial" | "name_only" | "managed" | "out_of_business" | "closed"
       park_field:
         | "hours"
         | "status"
@@ -3001,6 +3592,7 @@ export type Database = {
       report_status: "open" | "dismissed" | "actioned" | "escalated"
       review_status: "open" | "accepted" | "rejected"
       role_name: "owner" | "city_admin" | "park_admin" | "park_contributor"
+      shop_location_type: "storefront" | "by_appointment" | "online_only"
       text_source: "author" | "machine"
       time_anchor: "clock" | "sunrise" | "sunset"
       upload_status: "uploading" | "processing" | "ready" | "failed"
@@ -3198,6 +3790,10 @@ export const Constants = {
         "other",
         "street_plaza",
       ],
+      page_invite_kind: ["team", "ownership"],
+      page_member_role: ["staff", "manager", "owner"],
+      page_role: ["brand", "shop"],
+      page_state: ["unofficial", "name_only", "managed", "out_of_business", "closed"],
       park_field: [
         "hours",
         "status",
@@ -3238,6 +3834,7 @@ export const Constants = {
       report_status: ["open", "dismissed", "actioned", "escalated"],
       review_status: ["open", "accepted", "rejected"],
       role_name: ["owner", "city_admin", "park_admin", "park_contributor"],
+      shop_location_type: ["storefront", "by_appointment", "online_only"],
       text_source: ["author", "machine"],
       time_anchor: ["clock", "sunrise", "sunset"],
       upload_status: ["uploading", "processing", "ready", "failed"],
