@@ -143,22 +143,27 @@ function ReportSheetContent({
   const heading =
     target.kind === 'post'
       ? { label: t('report.postBy', { username }), title: t('report.titlePost') }
-      : target.kind === 'comment'
+      : target.kind === 'comment' || target.kind === 'meetup_comment'
         ? { label: t('report.commentBy', { username }), title: t('report.titleComment') }
-        : { label: null, title: t('report.titlePerson', { username }) };
+        : target.kind === 'meetup'
+          ? { label: t('report.meetupBy', { username }), title: t('report.titleMeetup') }
+          : { label: null, title: t('report.titlePerson', { username }) };
 
   const who =
     target.kind === 'person'
       ? t('report.whoPerson', { username })
       : target.kind === 'post'
         ? t('report.whoPost', { username })
-        : t('report.whoComment', { username });
+        : target.kind === 'meetup'
+          ? t('report.whoMeetup', { username })
+          : t('report.whoComment', { username });
 
+  const parkName = target.kind === 'post' || target.kind === 'meetup' || target.kind === 'meetup_comment' ? target.parkName : null;
   const sentBody =
     reason && goesToOwner(target.kind, reason)
       ? t('report.sentOwner')
-      : target.kind === 'post' && target.parkName
-        ? t('report.sentPark', { park: target.parkName })
+      : parkName
+        ? t('report.sentPark', { park: parkName })
         : t('report.sentAdmin');
 
   return (

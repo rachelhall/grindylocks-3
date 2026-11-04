@@ -59,15 +59,15 @@ function fill(template: string, values: Record<string, string>): string {
 
 const LOCALES: Record<string, string> = { en: 'en-US', es: 'es', da: 'da-DK', de: 'de-DE' };
 
-/** "Thu, Nov 5, 7:00 PM" (or just "7:00 PM"), on the park's clock, in the reader's language. */
-function meetupTime(row: Claimed, language: string, withDay: boolean): string {
+/** "Thu, Nov 5", "Thu, Nov 5, 7:00 PM" or "7:00 PM", on the park's clock, in the reader's language (as the bell writes them). */
+function meetupTime(row: Claimed, language: string, style: 'date' | 'dateTime' | 'time'): string {
   if (!row.event_starts_at) return '';
+  const day: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const time: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
   try {
     return new Intl.DateTimeFormat(LOCALES[language] ?? 'en-US', {
       timeZone: row.event_timezone ?? 'UTC',
-      ...(withDay ? { weekday: 'short', month: 'short', day: 'numeric' } : {}),
-      hour: 'numeric',
-      minute: '2-digit',
+      ...(style === 'time' ? time : style === 'date' ? day : { ...day, ...time }),
     }).format(new Date(row.event_starts_at));
   } catch {
     return '';
@@ -88,7 +88,6 @@ function compose(row: Claimed, language: string): { title?: string; body: string
   const lang = language in strings ? language : 'en';
   const meetup = row.event_title ?? row.park_name ?? '';
   const park = row.park_name ?? '';
-  const when = meetupTime(row, lang, true);
   const reasonOf = (r: string) => {
     const key = `reason_${r}` as keyof Sentences;
     return key in s ? s[key] : s.reason_other;
@@ -116,25 +115,24 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { body: row.park_name ? say('visitingPark', { park: row.park_name }) : say('visiting') };
     case 'park_report_accepted':
       return row.park_name ? { body: say('parkFixLive', { park: row.park_name }) } : null;
+    // Meetups: the bell's sentence, with times on the park's clock.
     case 'meetup_changed':
-      return meetup ? { title: say('meetupChanged', { meetup }), body: say('meetupChangedBody', { when, park }) } : null;
+      return meetup ? { body: say('meetupChanged', { meetup, when: meetupTime(row, lang, 'dateTime'), park }) } : null;
     case 'meetup_cancelled': {
       if (!meetup) return null;
       const [reason, scope] = (row.detail ?? 'other').split(':');
       return scope === 'series'
-        ? { title: say('meetupEnded', { meetup }), body: say('meetupEndedBody', { when, reason: reasonOf(reason) }) }
-        : { title: say('meetupCancelled', { meetup }), body: say('meetupCancelledBody', { when, reason: reasonOf(reason) }) };
+        ? { body: say('meetupEnded', { meetup, reason: reasonOf(reason) }) }
+        : { body: say('meetupCancelled', { meetup, date: meetupTime(row, lang, 'date'), reason: reasonOf(reason) }) };
     }
     case 'meetup_reminder':
-      return meetup
-        ? { title: say('meetupReminder', { meetup }), body: say('meetupReminderBody', { time: meetupTime(row, lang, false), park }) }
-        : null;
+      return meetup ? { body: say('meetupReminder', { meetup, time: meetupTime(row, lang, 'time'), park }) } : null;
     case 'meetup_comment':
-      return { title: say('meetupComment'), body: row.comment_body ?? '' };
+      return { title: say('meetupCommentOne', { meetup }), body: row.comment_body ?? '' };
     case 'meetup_reply':
-      return { title: say('reply'), body: row.comment_body ?? '' };
+      return { title: say('meetupReply', { meetup }), body: row.comment_body ?? '' };
     case 'meetup_mention':
-      return { title: say('meetupMention'), body: row.comment_body ?? '' };
+      return { title: say('meetupMention', { meetup }), body: row.comment_body ?? '' };
     default:
       return null;
   }

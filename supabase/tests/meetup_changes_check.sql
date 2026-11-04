@@ -46,7 +46,8 @@ begin;
 --     queue, the detail pane and moderate_reports() handle them; keeping a
 --     meetup hidden hides that date, a meetup comment is removed.
 --  6. hide_meetup(): park admins (and the city admin and owner) hide or
---     unhide a date at their park, logged in moderation_actions.
+--     unhide a date at their park, logged in moderation_actions;
+--     can_hide_meetup() tells the app whether to offer it.
 --
 -- Replaced, same signatures: private.can_see_series_as(),
 -- private.can_review_report(), private.reports_for(), private.hide_target(),
@@ -1603,6 +1604,17 @@ end $$;
 
 /* Grants ------------------------------------------------------------------------- */
 
+-- Whether the caller may hide this date (it decides whether the app offers Hide).
+create or replace function public.can_hide_meetup(event uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from events e where e.id = can_hide_meetup.event and private.can_moderate_park(e.park_id));
+$$;
+
 revoke all on function private.notify_meetup(uuid, public.notification_kind, uuid, uuid, uuid, uuid, text) from public, anon, authenticated;
 revoke all on function private.notify_co_host_invite() from public, anon, authenticated;
 revoke all on function private.notify_meetup_going() from public, anon, authenticated;
@@ -1629,7 +1641,8 @@ begin
     'public.moderation_queue(uuid)',
     'public.moderation_report_detail(text, uuid)',
     'public.moderate_reports(text, uuid, text, text, integer, boolean)',
-    'public.hide_meetup(uuid, boolean)'
+    'public.hide_meetup(uuid, boolean)',
+    'public.can_hide_meetup(uuid)'
   ] loop
     execute format('revoke all on function %s from public, anon', f);
     execute format('grant execute on function %s to authenticated', f);
@@ -1910,6 +1923,11 @@ insert into t_results select 'deleted meetup: nothing left in anyone''s bell', c
 insert into t_results select 'anon can''t call the @ list', not has_function_privilege('anon', 'public.meetup_mention_people(uuid, text)', 'execute'), '';
 insert into t_results select 'members can''t claim pushes', not has_function_privilege('authenticated', 'public.push_claim(integer)', 'execute'), '';
 insert into t_results select 'members can file reports', has_function_privilege('authenticated', 'public.file_report(uuid, uuid, uuid, public.report_reason, text, uuid, uuid)', 'execute'), '';
+insert into t_results select 'can_hide_meetup: park admin yes, stranger no',
+  (select set_config('request.jwt.claims', '{"sub":"d5000000-0000-4000-8000-0000000000a5","role":"authenticated"}', true) is not null
+   and can_hide_meetup((select id from t_ids where name = 'pub')))
+  and (select set_config('request.jwt.claims', '{"sub":"d5000000-0000-4000-8000-0000000000a4","role":"authenticated"}', true) is not null
+   and not can_hide_meetup((select id from t_ids where name = 'pub'))), '';
 insert into t_results select 'members can call hide_meetup (it checks the role)', has_function_privilege('authenticated', 'public.hide_meetup(uuid, boolean)', 'execute'), '';
 
 do $$ begin raise exception 'RESULTS ok=% of %; failed: %', (select count(*) filter (where ok) from t_results), (select count(*) from t_results),

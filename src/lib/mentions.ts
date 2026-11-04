@@ -23,7 +23,7 @@ import { searchPeople } from './people';
 import type { Post } from './posts';
 import { fresh, keys } from './query';
 
-export type MentionReason = 'posted' | 'filmed' | 'tagged' | 'commented' | 'following' | 'regular' | 'other';
+export type MentionReason = 'posted' | 'filmed' | 'tagged' | 'commented' | 'following' | 'regular' | 'host' | 'other';
 
 export type MentionCandidate = {
   id: string;

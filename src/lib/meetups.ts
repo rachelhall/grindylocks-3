@@ -1,5 +1,6 @@
 /**
- * Meetups (v2): reading a meetup, going, comments, making one, covers.
+ * Meetups (v2): reading a meetup, going, comments, making one, covers, and
+ * (PR 5) changing, cancelling, deleting and hiding one.
  *
  * The rules live in the database (migrations `meetups` and `meetup_covers`):
  * who can see a meetup, who's named on the going list, what hosts and
@@ -38,7 +39,7 @@ export const COVER_BUCKET = 'meetup-covers';
 
 const MEETUP_SELECT = `
   id, series_id, park_id, starts_at, ends_at, disciplines, title, note, cover_path,
-  status, cancel_reason, cancel_note, went_count,
+  status, cancel_reason, cancel_note, went_count, hidden_at,
   series:event_series!inner(id, host_id, visibility, weekdays, ended_at),
   park:parks!inner(id, slug, display_name, latitude, longitude, metro:metro_areas(timezone))
 `;
@@ -57,6 +58,8 @@ export type Meetup = {
   cancel_reason: MeetupCancelReason | null;
   cancel_note: string | null;
   went_count: number | null;
+  /** Hidden by park admins: then only hosts and moderators see it. */
+  hidden_at: string | null;
   series: { id: string; host_id: string; visibility: MeetupVisibility; weekdays: number[]; ended_at: string | null };
   park: {
     id: string;
@@ -599,4 +602,200 @@ export async function fetchCheckInParks(latitude: number, longitude: number): Pr
   const { data, error } = await supabase.rpc('check_in_parks', { latitude, longitude });
   if (error) throw error;
   return data ?? [];
+}
+
+/* Changing, cancelling and deleting (PR 5) ------------------------------------------- */
+
+/** The fields an edit can change; only the ones that changed are sent. */
+export type MeetupChanges = {
+  park?: string;
+  starts_at?: string;
+  ends_at?: string;
+  title?: string;
+  note?: string;
+  disciplines?: Discipline[];
+  visibility?: MeetupVisibility;
+  /** An empty string removes the cover. */
+  cover_path?: string;
+};
+
+/**
+ * Edits a date, or (scope 'upcoming') this date and every later one of the
+ * series. Hosts and co-hosts. A change to the day, time or park tells the
+ * people going (the database does that).
+ */
+export function useUpdateMeetup(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ scope, changes }: { scope: 'date' | 'upcoming'; changes: MeetupChanges }) => {
+      const { error } = await supabase.rpc('update_meetup', { event: eventId!, scope, changes: changes as never });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/** Cancels this date, or (scope 'series', the host only) every date from this one on, ending the series. */
+export function useCancelMeetup(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (args: { reason: MeetupCancelReason; scope: 'date' | 'series'; note: string }) => {
+      const { error } = await supabase.rpc('cancel_meetup', {
+        event: eventId!,
+        reason: args.reason,
+        scope: args.scope,
+        note: args.note.trim() || undefined,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/** Whether Delete is still offered: the host, nobody else going, before it starts. */
+export function useCanDeleteMeetup(eventId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['meetups', 'can-delete', eventId ?? ''],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('can_delete_meetup', { event: eventId! });
+      if (error) throw error;
+      return Boolean(data);
+    },
+    enabled: Boolean(eventId) && enabled,
+    staleTime: 0,
+  });
+}
+
+export function useDeleteMeetup(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('delete_meetup', { event: eventId! });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/** Hosts quietly take someone off Going (they aren't told). */
+export function useRemoveFromGoing(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (personId: string) => {
+      const { error } = await supabase.rpc('remove_from_going', { event: eventId!, person: personId });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/* Co-hosts after the meetup is made (the host only) ----------------------------------- */
+
+export type CoHostRow = { user_id: string; username: string | null; avatar_path: string | null; accepted: boolean };
+
+/** The co-hosts of a series, accepted and invited (the host sees both). */
+export function useCoHosts(seriesId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: ['meetups', 'co-hosts', seriesId ?? ''],
+    queryFn: async (): Promise<CoHostRow[]> => {
+      const { data, error } = await supabase
+        .from('event_hosts')
+        .select('user_id, accepted_at, person:profiles!event_hosts_user_id_fkey(username, avatar_path)')
+        .eq('series_id', seriesId!)
+        .eq('role', 'co_host')
+        .order('created_at');
+      if (error) throw error;
+      return ((data ?? []) as unknown as {
+        user_id: string;
+        accepted_at: string | null;
+        person: { username: string | null; avatar_path: string | null } | null;
+      }[]).map((r) => ({
+        user_id: r.user_id,
+        username: r.person?.username ?? null,
+        avatar_path: r.person?.avatar_path ?? null,
+        accepted: r.accepted_at !== null,
+      }));
+    },
+    enabled: Boolean(seriesId) && enabled,
+    staleTime: fresh.mine,
+  });
+}
+
+export function useInviteCoHosts(seriesId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (people: string[]) => {
+      const { error } = await supabase.rpc('invite_co_hosts', { series: seriesId!, people });
+      if (error) throw error;
+    },
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+export function useRemoveCoHost(seriesId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (person: string) => {
+      const { error } = await supabase.rpc('remove_co_host', { series: seriesId!, person });
+      if (error) throw error;
+    },
+    onSettled: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/* Park admins hiding a date ------------------------------------------------------------ */
+
+/**
+ * Whether you moderate this date's park (its park admins, the city admin and
+ * the owner). Members whose own profile is cached without a role skip the call.
+ */
+export function useCanHideMeetup(eventId: string | undefined, hasRoles: boolean) {
+  return useQuery({
+    queryKey: ['meetups', 'can-hide', eventId ?? ''],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('can_hide_meetup', { event: eventId! });
+      if (error) throw error;
+      return Boolean(data);
+    },
+    enabled: Boolean(eventId) && hasRoles,
+    staleTime: fresh.mine,
+  });
+}
+
+export function useHideMeetup(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (hide: boolean) => {
+      const { error } = await supabase.rpc('hide_meetup', { event: eventId!, hide });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/* The @ list in meetup comments ------------------------------------------------------- */
+
+export type MeetupMentionPerson = { id: string; username: string; avatarPath: string | null; reason: 'host' | 'commented' | 'following' | 'other' };
+
+/**
+ * People to suggest after @ in a meetup's comments: only people who can see
+ * the meetup (the database checks), hosts and commenters first.
+ */
+export function useMeetupMentionPeople(eventId: string | undefined, q: string | null) {
+  return useQuery({
+    queryKey: ['meetups', 'mention', eventId ?? '', (q ?? '').toLowerCase()],
+    queryFn: async (): Promise<MeetupMentionPerson[]> => {
+      const { data, error } = await supabase.rpc('meetup_mention_people', { event: eventId!, q: q ?? '' });
+      if (error) throw error;
+      return (data ?? []).map((p) => ({
+        id: p.id,
+        username: p.username as string,
+        avatarPath: p.avatar_path,
+        reason: p.reason as MeetupMentionPerson['reason'],
+      }));
+    },
+    enabled: Boolean(eventId) && q !== null,
+    staleTime: fresh.search,
+    placeholderData: keepPreviousData,
+  });
 }

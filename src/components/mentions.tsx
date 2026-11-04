@@ -95,6 +95,8 @@ export function MentionList({
         return t('comments.mentionFollowing');
       case 'regular':
         return parkName ? t('comments.mentionRegular', { park: parkName }) : null;
+      case 'host':
+        return t('comments.mentionHost');
       default:
         return null;
     }

@@ -40,6 +40,11 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  *   is a plain square with the badge's icon; a removed post opens (its
  *   author still sees it), a fix opens the park. A vacated role shows the
  *   person whose role ended and opens their profile.
+ * - Meetups (PR 5): for hosts, one row per date for people going ("Ana and
+ *   3 others are going to Thursday at Fælled") and one for comments; for
+ *   people going, changes, cancellations and the 1-hour reminder; the
+ *   co-host invite; replies and mentions in meetup comments; and, for hosts,
+ *   a date hidden by park admins. They all open the meetup.
  */
 
 const BADGES: Record<NotificationKind, IconName> = {
@@ -58,12 +63,29 @@ const BADGES: Record<NotificationKind, IconName> = {
   warning: 'badgeWarning',
   suspension: 'badgeWarning',
   role_vacated: 'badgeRole',
+  meetup_going: 'check',
+  meetup_changed: 'calendar',
+  meetup_cancelled: 'calendarOff',
+  meetup_reminder: 'alarm',
+  co_host_invite: 'coHost',
+  meetup_comment: 'badgeComment',
+  meetup_reply: 'badgeReply',
+  meetup_mention: 'badgeMention',
+  meetup_hidden: 'badgeRemoved',
 };
 
 const POST_KINDS = new Set<NotificationKind>(['comment', 'reply', 'mention', 'caption_mention', 'tag', 'filmer_credit']);
 
 /** Notices from the admins or about a park: no person, so no avatar. */
-const NOTICE_KINDS = new Set<NotificationKind>(['park_fix_live', 'post_removed', 'comment_removed', 'warning', 'suspension']);
+const NOTICE_KINDS = new Set<NotificationKind>([
+  'park_fix_live',
+  'post_removed',
+  'comment_removed',
+  'warning',
+  'suspension',
+  'meetup_reminder',
+  'meetup_hidden',
+]);
 
 /** Splits a sentence so the usernames in it can be set in bold. */
 function withBoldNames(text: string, names: string[]): { text: string; bold: boolean }[] {
@@ -109,6 +131,10 @@ export default function Notifications() {
     answer.mutate({ followerId, accept }, { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) });
 
   function open(n: AppNotification) {
+    if (n.meetup) {
+      router.push({ pathname: '/meetup/[id]', params: { id: n.meetup.id } });
+      return;
+    }
     switch (n.kind) {
       case 'comment':
       case 'reply':
@@ -136,10 +162,57 @@ export default function Notifications() {
     }
   }
 
+  /** "Thursday blade night", or "Meetup at Memo" without a title or line. */
+  const meetupName = (n: AppNotification) => n.meetup?.title ?? t('meetup.fallbackTitle', { park: n.park?.name ?? '' });
+  /** On the park's clock: "Thursday", "Thu, Nov 5", "7:00 PM". */
+  const meetupWhen = (n: AppNotification, style: 'day' | 'date' | 'dateTime' | 'time') => {
+    if (!n.meetup) return '';
+    const opts: Intl.DateTimeFormatOptions =
+      style === 'day'
+        ? { weekday: 'long' }
+        : style === 'date'
+          ? { weekday: 'short', month: 'short', day: 'numeric' }
+          : style === 'dateTime'
+            ? { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }
+            : { hour: 'numeric', minute: '2-digit' };
+    return new Intl.DateTimeFormat(i18n.language, { ...opts, timeZone: n.meetup.timeZone ?? undefined }).format(new Date(n.meetup.startsAt));
+  };
+
   function describe(n: AppNotification): string {
     const name = (i: number) => n.people[i]?.username ?? t('common.deletedUser');
     const a = name(0);
+    const park = n.park?.name ?? '';
     switch (n.kind) {
+      case 'meetup_going': {
+        const when = meetupWhen(n, 'day');
+        if (n.peopleCount <= 1) return t('notifications.meetupGoingOne', { a, when, park });
+        if (n.peopleCount === 2) return t('notifications.meetupGoingTwo', { a, b: name(1), when, park });
+        return t('notifications.meetupGoingMany', { a, count: n.peopleCount - 1, when, park });
+      }
+      case 'meetup_changed':
+        return t('notifications.meetupChanged', { meetup: meetupName(n), when: meetupWhen(n, 'dateTime'), park });
+      case 'meetup_cancelled': {
+        const [reason, scope] = (n.detail ?? 'other').split(':');
+        const key = (['rained_out', 'park_closed', 'something_came_up'] as const).find((r) => r === reason) ?? 'other';
+        const why = t(`meetup.reason.${key}`);
+        return scope === 'series'
+          ? t('notifications.meetupEnded', { meetup: meetupName(n), reason: why })
+          : t('notifications.meetupCancelled', { meetup: meetupName(n), date: meetupWhen(n, 'date'), reason: why });
+      }
+      case 'meetup_reminder':
+        return t('notifications.meetupReminder', { meetup: meetupName(n), time: meetupWhen(n, 'time'), park });
+      case 'co_host_invite':
+        return t('notifications.coHostInvite', { a, meetup: meetupName(n) });
+      case 'meetup_comment':
+        if (n.peopleCount <= 1) return t('notifications.meetupCommentOne', { a, meetup: meetupName(n) });
+        if (n.peopleCount === 2) return t('notifications.meetupCommentTwo', { a, b: name(1), meetup: meetupName(n) });
+        return t('notifications.meetupCommentMany', { a, b: name(1), count: n.peopleCount - 2, meetup: meetupName(n) });
+      case 'meetup_reply':
+        return t('notifications.meetupReply', { a, meetup: meetupName(n) });
+      case 'meetup_mention':
+        return t('notifications.meetupMention', { a, meetup: meetupName(n) });
+      case 'meetup_hidden':
+        return t('notifications.meetupHidden', { meetup: meetupName(n), date: meetupWhen(n, 'date') });
       case 'comment':
         if (n.peopleCount <= 1) return t('notifications.commentOne', { a });
         if (n.peopleCount === 2) return t('notifications.commentTwo', { a, b: name(1) });
@@ -195,6 +268,11 @@ export default function Notifications() {
       case 'warning':
       case 'suspension':
         return [describe(n)];
+      case 'meetup_changed':
+      case 'meetup_cancelled':
+      case 'meetup_reminder':
+      case 'meetup_hidden':
+        return [meetupName(n)];
       default:
         return n.people.map((p) => p.username ?? '');
     }

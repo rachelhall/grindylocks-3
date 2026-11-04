@@ -389,7 +389,23 @@
     "warning": "A warning from the admins",
     "suspension": "You're suspended",
     "roleVacatedPark": "{{a}}'s {{role}} role at {{park}} ended. Pick someone new.",
-    "roleVacated": "{{a}}'s {{role}} role ended. Pick someone new."
+    "roleVacated": "{{a}}'s {{role}} role ended. Pick someone new.",
+    "meetupGoingOne": "{{a}} is going to {{when}} at {{park}}",
+    "meetupGoingTwo": "{{a}} and {{b}} are going to {{when}} at {{park}}",
+    "meetupGoingMany_one": "{{a}} and {{count}} other are going to {{when}} at {{park}}",
+    "meetupGoingMany_other": "{{a}} and {{count}} others are going to {{when}} at {{park}}",
+    "meetupChanged": "{{meetup}} changed: now {{when}} at {{park}}",
+    "meetupCancelled": "{{meetup}} on {{date}} is cancelled: {{reason}}",
+    "meetupEnded": "{{meetup}} has ended: {{reason}}",
+    "meetupReminder": "{{meetup}} starts at {{time}} at {{park}}",
+    "coHostInvite": "{{a}} invited you to co-host {{meetup}}",
+    "meetupCommentOne": "{{a}} commented on {{meetup}}",
+    "meetupCommentTwo": "{{a}} and {{b}} commented on {{meetup}}",
+    "meetupCommentMany_one": "{{a}}, {{b}} and {{count}} other commented on {{meetup}}",
+    "meetupCommentMany_other": "{{a}}, {{b}} and {{count}} others commented on {{meetup}}",
+    "meetupReply": "{{a}} replied to you on {{meetup}}",
+    "meetupMention": "{{a}} mentioned you on {{meetup}}",
+    "meetupHidden": "Park admins hid {{meetup}} on {{date}}"
   },
   "feed": {
     "newPost": "New post",
@@ -793,7 +809,8 @@
     "mentionTagged": "Tagged in this post",
     "mentionCommented": "Commented here",
     "mentionFollowing": "Following",
-    "mentionRegular": "Regular at {{park}}"
+    "mentionRegular": "Regular at {{park}}",
+    "mentionHost": "Hosting"
   },
   "clip": {
     "play": "Play clip",
@@ -830,7 +847,9 @@
     "openSettings": "Open phone settings",
     "askTitle": "Notifications aren’t on yet",
     "askBody": "Get a buzz when someone comments, tags you or says hi nearby.",
-    "ask": "Turn on notifications"
+    "ask": "Turn on notifications",
+    "meetups": "Meetups",
+    "meetupsBody": "Changes, cancellations and reminders for meetups you're going to"
   },
   "report": {
     "report": "Report",
@@ -864,7 +883,10 @@
     "blockTooBody": "You won't see each other's posts, comments or profiles. They aren't told.",
     "blockPerson": "Block @{{username}}",
     "done": "Done",
-    "gone": "This isn't available any more."
+    "gone": "This isn't available any more.",
+    "titleMeetup": "Report this meetup",
+    "meetupBy": "Meetup hosted by @{{username}}",
+    "whoMeetup": "@{{username}} isn't told who reported it. This park's admins review it."
   },
   "moderation": {
     "reported": {
@@ -1139,7 +1161,15 @@
       "park_closed": "Park closed",
       "something_came_up": "Something came up",
       "other": "Other"
-    }
+    },
+    "hiddenTitle": "HIDDEN BY PARK ADMINS",
+    "hiddenBody": "Only its hosts and this park's admins can see this date.",
+    "remove": "Remove",
+    "removeLabel": "Remove @{{username}} from Going",
+    "removeTitle": "Take @{{username}} off Going?",
+    "removeBody": "They aren't told. They can't see who else is going once they're off the list.",
+    "report": "Report",
+    "reportComment": "Report @{{username}}'s comment"
   },
   "meetupCompose": {
     "newTitle": "New",
@@ -1233,5 +1263,66 @@
     "linked": "From {{day}}'s meetup",
     "note": "You were going to {{meetup}} here. Linking puts this post on the meetup.",
     "linkedNote": "This post shows on {{meetup}}. Tap to remove it."
+  },
+  "meetupMenu": {
+    "open": "Meetup options",
+    "yourMeetup": "Your meetup",
+    "title": "Meetup",
+    "edit": "Edit meetup",
+    "coHosts": "Co-hosts",
+    "cancel": "Cancel meetup",
+    "cancelDetail": "Stays on the park page, crossed out",
+    "delete": "Delete meetup",
+    "deleteDetail": "Removes it completely. Only until someone else is going or it starts.",
+    "report": "Report meetup",
+    "hide": "Hide this date",
+    "hideDetail": "Only its hosts and park admins will see it",
+    "unhide": "Show this date again",
+    "unhideDetail": "Everyone who could see it will again",
+    "deleteTitle": "Delete this meetup?",
+    "deleteBody": "It's removed completely, as if you never posted it. Use this for mistakes, like the wrong park or day.",
+    "deleteNote": "Once someone else says they're going, or it starts, you can only cancel it.",
+    "keepIt": "Keep it",
+    "deleteFailed": "Couldn't delete it",
+    "deleteFailedBody": "Someone may have just said they're going. You can still cancel it.",
+    "hideTitle": "Hide this date?",
+    "hideBody": "Only its hosts and this park's admins will see it. The hosts are told it was hidden."
+  },
+  "meetupCancel": {
+    "title": "Cancel meetup",
+    "whichDates": "WHICH DATES",
+    "thisDate": "This date · {{date}}",
+    "wholeSeries": "The whole series",
+    "wholeSeriesDetail": "Ends it. Past dates stay.",
+    "why": "WHY",
+    "note": "NOTE (OPTIONAL)",
+    "notePlaceholder": "Bowl's flooded. See you next week",
+    "footnote_one": "The {{count}} person going gets a push. It stays on the park page, crossed out, with your reason.",
+    "footnote_other": "The {{count}} people going get a push. It stays on the park page, crossed out, with your reason.",
+    "footnoteNobody": "It stays on the park page, crossed out, with your reason.",
+    "confirmSeries": "End the series",
+    "confirmDate": "Cancel {{day}}"
+  },
+  "coHosts": {
+    "body": "Co-hosts can edit, cancel dates and remove people from Going. They accept before they're listed.",
+    "invited": "Invited, hasn't answered yet",
+    "none": "No co-hosts yet.",
+    "invite": "Invite co-hosts",
+    "remove": "Remove",
+    "withdraw": "Withdraw",
+    "removeTitle": "Remove @{{username}}?",
+    "removeBody": "They stop co-hosting this meetup. They aren't told.",
+    "inviteFailed": "Couldn't send the invites. A meetup can have up to 10 co-hosts."
+  },
+  "meetupEdit": {
+    "title": "Edit meetup",
+    "save": "Save",
+    "footer": "People going hear about changes to the day, time or park.",
+    "scopeTitle": "Change which dates?",
+    "scopeBody": "This meetup repeats.",
+    "thisDate": "This date",
+    "allUpcoming": "All upcoming",
+    "failed": "Couldn't save your changes",
+    "seasonsPark": "This meetup's park comes from its seasons, so change the park for this date only."
   }
 }

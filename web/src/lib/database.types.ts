@@ -318,6 +318,7 @@ export type Database = {
           event_id: string
           going_privately: boolean
           remind_me: boolean
+          reminded_at: string | null
           user_id: string
         }
         Insert: {
@@ -325,6 +326,7 @@ export type Database = {
           event_id: string
           going_privately?: boolean
           remind_me?: boolean
+          reminded_at?: string | null
           user_id: string
         }
         Update: {
@@ -332,6 +334,7 @@ export type Database = {
           event_id?: string
           going_privately?: boolean
           remind_me?: boolean
+          reminded_at?: string | null
           user_id?: string
         }
         Relationships: [
@@ -795,6 +798,8 @@ export type Database = {
           actor_id: string
           comment_id: string | null
           created_at: string
+          event_comment_id: string | null
+          event_id: string | null
           id: string
           message: string | null
           obstacle_id: string | null
@@ -811,6 +816,8 @@ export type Database = {
           actor_id: string
           comment_id?: string | null
           created_at?: string
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           message?: string | null
           obstacle_id?: string | null
@@ -827,6 +834,8 @@ export type Database = {
           actor_id?: string
           comment_id?: string | null
           created_at?: string
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           message?: string | null
           obstacle_id?: string | null
@@ -895,6 +904,8 @@ export type Database = {
           actor_id: string | null
           comment_id: string | null
           created_at: string
+          event_comment_id: string | null
+          event_id: string | null
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
           message: string | null
@@ -902,11 +913,14 @@ export type Database = {
           post_id: string | null
           read_at: string | null
           recipient_id: string
+          series_id: string | null
         }
         Insert: {
           actor_id?: string | null
           comment_id?: string | null
           created_at?: string
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
           message?: string | null
@@ -914,11 +928,14 @@ export type Database = {
           post_id?: string | null
           read_at?: string | null
           recipient_id: string
+          series_id?: string | null
         }
         Update: {
           actor_id?: string | null
           comment_id?: string | null
           created_at?: string
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
           message?: string | null
@@ -926,6 +943,7 @@ export type Database = {
           post_id?: string | null
           read_at?: string | null
           recipient_id?: string
+          series_id?: string | null
         }
         Relationships: [
           {
@@ -1745,6 +1763,8 @@ export type Database = {
           comment_id: string | null
           created_at: string
           details: string | null
+          event_comment_id: string | null
+          event_id: string | null
           id: string
           post_id: string | null
           reason: Database["public"]["Enums"]["report_reason"]
@@ -1759,6 +1779,8 @@ export type Database = {
           comment_id?: string | null
           created_at?: string
           details?: string | null
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           post_id?: string | null
           reason: Database["public"]["Enums"]["report_reason"]
@@ -1773,6 +1795,8 @@ export type Database = {
           comment_id?: string | null
           created_at?: string
           details?: string | null
+          event_comment_id?: string | null
+          event_id?: string | null
           id?: string
           post_id?: string | null
           reason?: Database["public"]["Enums"]["report_reason"]
@@ -2052,6 +2076,7 @@ export type Database = {
     Functions: {
       before_user_created: { Args: { event: Json }; Returns: Json }
       can_delete_meetup: { Args: { event: string }; Returns: boolean }
+      can_hide_meetup: { Args: { event: string }; Returns: boolean }
       cancel_invite: { Args: { invite: string }; Returns: undefined }
       cancel_meetup: {
         Args: {
@@ -2225,6 +2250,8 @@ export type Database = {
         Args: {
           comment?: string
           details?: string
+          meetup?: string
+          meetup_comment?: string
           person?: string
           post?: string
           reason?: Database["public"]["Enums"]["report_reason"]
@@ -2270,6 +2297,7 @@ export type Database = {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: number
       }
+      hide_meetup: { Args: { event: string; hide?: boolean }; Returns: undefined }
       host_list: {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: Json
@@ -2301,6 +2329,15 @@ export type Database = {
       meetup_comment_count: {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: number
+      }
+      meetup_mention_people: {
+        Args: { event: string; q?: string }
+        Returns: {
+          avatar_path: string
+          id: string
+          reason: string
+          username: string
+        }[]
       }
       meetup_comments: {
         Args: { event: string }
@@ -2403,6 +2440,11 @@ export type Database = {
           comment_body: string | null
           comment_id: string | null
           created_at: string
+          detail: string | null
+          event_id: string | null
+          event_starts_at: string | null
+          event_timezone: string | null
+          event_title: string | null
           id: string
           kind: string
           metro_name: string | null
@@ -2422,6 +2464,7 @@ export type Database = {
           comments: boolean
           filmer_credits: boolean
           invites: boolean
+          meetups: boolean
           mentions: boolean
           park_fixes: boolean
           someone_new: boolean
@@ -2678,7 +2721,12 @@ export type Database = {
         Returns: {
           actor_username: string | null
           comment_body: string | null
+          detail: string | null
           devices: Json
+          event_id: string | null
+          event_starts_at: string | null
+          event_timezone: string | null
+          event_title: string | null
           kind: string
           metro_name: string | null
           outbox_id: number
@@ -2879,6 +2927,13 @@ export type Database = {
         | "suspension"
         | "role_vacated"
         | "caption_mention"
+        | "meetup_changed"
+        | "meetup_cancelled"
+        | "meetup_reminder"
+        | "meetup_going"
+        | "co_host_invite"
+        | "meetup_comment"
+        | "meetup_hidden"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -3103,6 +3158,13 @@ export const Constants = {
         "suspension",
         "role_vacated",
         "caption_mention",
+        "meetup_changed",
+        "meetup_cancelled",
+        "meetup_reminder",
+        "meetup_going",
+        "co_host_invite",
+        "meetup_comment",
+        "meetup_hidden",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [

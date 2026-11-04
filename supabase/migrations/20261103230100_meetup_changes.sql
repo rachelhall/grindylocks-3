@@ -40,7 +40,8 @@
 --     queue, the detail pane and moderate_reports() handle them; keeping a
 --     meetup hidden hides that date, a meetup comment is removed.
 --  6. hide_meetup(): park admins (and the city admin and owner) hide or
---     unhide a date at their park, logged in moderation_actions.
+--     unhide a date at their park, logged in moderation_actions;
+--     can_hide_meetup() tells the app whether to offer it.
 --
 -- Replaced, same signatures: private.can_see_series_as(),
 -- private.can_review_report(), private.reports_for(), private.hide_target(),
@@ -1595,6 +1596,17 @@ begin
   end if;
 end $$;
 
+-- Whether the caller may hide this date (it decides whether the app offers Hide).
+create or replace function public.can_hide_meetup(event uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (select 1 from events e where e.id = can_hide_meetup.event and private.can_moderate_park(e.park_id));
+$$;
+
 /* Grants ------------------------------------------------------------------------- */
 
 revoke all on function private.notify_meetup(uuid, public.notification_kind, uuid, uuid, uuid, uuid, text) from public, anon, authenticated;
@@ -1623,7 +1635,8 @@ begin
     'public.moderation_queue(uuid)',
     'public.moderation_report_detail(text, uuid)',
     'public.moderate_reports(text, uuid, text, text, integer, boolean)',
-    'public.hide_meetup(uuid, boolean)'
+    'public.hide_meetup(uuid, boolean)',
+    'public.can_hide_meetup(uuid)'
   ] loop
     execute format('revoke all on function %s from public, anon', f);
     execute format('grant execute on function %s to authenticated', f);

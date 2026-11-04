@@ -9,13 +9,22 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const languages = ['en', 'es', 'da', 'de'];
-const keys = ['commentOne', 'reply', 'mention', 'captionMention', 'tag', 'filmer', 'inviteUsed', 'someoneNew', 'visiting', 'visitingPark', 'parkFixLive'];
+const keys = [
+  'commentOne', 'reply', 'mention', 'captionMention', 'tag', 'filmer', 'inviteUsed', 'someoneNew', 'visiting', 'visitingPark', 'parkFixLive',
+  // Meetups (PR 5).
+  'meetupChanged', 'meetupCancelled', 'meetupEnded', 'meetupReminder', 'meetupCommentOne', 'meetupReply', 'meetupMention',
+];
+/** Cancel reasons, from `meetup.reason`, as reason_<key>. */
+const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other'];
 
 export function pushStrings() {
   const out = {};
   for (const lang of languages) {
     const file = JSON.parse(readFileSync(join(root, 'src/i18n/locales', `${lang}.json`), 'utf8'));
-    out[lang] = Object.fromEntries(keys.map((k) => [k, file.notifications[k]]));
+    out[lang] = {
+      ...Object.fromEntries(keys.map((k) => [k, file.notifications[k]])),
+      ...Object.fromEntries(reasons.map((r) => [`reason_${r}`, file.meetup.reason[r]])),
+    };
   }
   return JSON.stringify(out, null, 2) + '\n';
 }
