@@ -18,25 +18,50 @@ export function useBarHeight() {
   return useSafeAreaInsets().top + size.barRow;
 }
 
-/** 48px paper square with an ink icon, the same at the top and once pinned. */
-function Tile({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
+/**
+ * Back or ⋯. At the top it's a 48px paper tile with an ink icon, so it reads
+ * over a photo or halftone. As the ink bar fades in (`progress` 0 → 1), the
+ * tile's paper fades out and the icon cross-fades from ink to paper, so it's
+ * never ink on ink. On the solid bar it's a bare paper icon. The pressable
+ * stays 48px the whole way, so the touch target and focus ring don't change.
+ */
+function BarButton({
+  icon,
+  label,
+  progress,
+  onPress,
+}: {
+  icon: IconName;
+  label: string;
+  progress: Animated.AnimatedInterpolation<number>;
+  onPress: () => void;
+}) {
+  const tile = progress.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityLabel={label}
       onPress={onPress}
       hitSlop={4}
-      style={({ pressed }) => [styles.tile, pressed && styles.pressed]}
+      style={({ pressed }) => [styles.button, pressed && styles.pressed]}
     >
-      <Icon name={icon} color={brand.ink} size={22} />
+      <Animated.View style={[StyleSheet.absoluteFill, styles.tile, { opacity: tile }]} />
+      <Animated.View style={[styles.glyph, { opacity: tile }]}>
+        <Icon name={icon} color={brand.ink} />
+      </Animated.View>
+      <Animated.View style={[styles.glyph, { opacity: progress }]}>
+        <Icon name={icon} color={brand.paper} />
+      </Animated.View>
     </Pressable>
   );
 }
 
 /**
- * The pinned header, option C (Nov 4): Back and ⋯ as paper tiles over the
- * big header, always on top, and a solid ink bar that fades in behind them
- * over the last 60pt before the big header scrolls off, then stays. The bar
+ * The pinned header, option C (Nov 4): Back and ⋯ always on top, as paper
+ * tiles over the big header, and a solid ink bar that fades in behind them
+ * over the last 60pt before the big header scrolls off, then stays. As the
+ * bar fades in, the tiles fade out: on the solid bar Back and ⋯ are bare
+ * paper icons (paper, not pink: pink means selected). The bar
  * carries the name (Archivo Black, paper, pink 2pt offset, one line) and the
  * page's stamp. It's printed ink in both themes, like the header, so the
  * status bar stays light the whole way.
@@ -92,7 +117,7 @@ export function PinnedBar({
         style={[StyleSheet.absoluteFill, { backgroundColor: brand.ink, opacity }]}
       />
       <View pointerEvents="box-none" style={[styles.row, { paddingTop: insets.top + space[2] }]}>
-        <Tile icon="back" label={t('common.back')} onPress={onBack} />
+        <BarButton icon="back" label={t('common.back')} progress={opacity} onPress={onBack} />
         <Animated.View
           pointerEvents="none"
           accessibilityElementsHidden
@@ -120,7 +145,11 @@ export function PinnedBar({
             </View>
           ) : null}
         </Animated.View>
-        {onMore ? <Tile icon="more" label={moreLabel} onPress={onMore} /> : <View style={styles.slot} />}
+        {onMore ? (
+          <BarButton icon="more" label={moreLabel} progress={opacity} onPress={onMore} />
+        ) : (
+          <View style={styles.slot} />
+        )}
       </View>
     </View>
   );
@@ -134,13 +163,15 @@ const styles = StyleSheet.create({
     gap: space[3],
     paddingHorizontal: space[4],
   },
-  tile: {
+  button: {
     width: size.tapMin,
     height: size.tapMin,
-    backgroundColor: brand.paper,
     alignItems: 'center',
     justifyContent: 'center',
   },
+  tile: { backgroundColor: brand.paper },
+  // Both icons sit in the same spot; only one shows at a time, except mid-fade.
+  glyph: { position: 'absolute' },
   // The ⋯ slot on the team's view: space only (Edit page goes here in PR 7).
   slot: { width: size.tapMin, height: size.tapMin },
   title: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: space[2] },
