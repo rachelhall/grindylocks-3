@@ -15,6 +15,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import { PagesYouManage } from '@/components/page-team';
 import { SafeAreaView } from '@/components/safe-area';
 
 import { Avatar } from '@/components/avatar';
@@ -601,6 +602,7 @@ export function ProfileView({ username }: { username?: string }) {
             isMe && myId ? <OwnActions userId={myId} /> : myId ? <FollowButton viewerId={myId} profile={profile} /> : null
           }
         />
+        {isMe && myId ? <PagesYouManage userId={myId} /> : null}
         {!canSeePosts ? (
           <EmptyTab icon="lock" text={t('profile.privateBody')} />
         ) : (

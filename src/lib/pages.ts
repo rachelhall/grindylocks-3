@@ -12,8 +12,8 @@
  *   `impersonating`).
  * - "Suggest it" goes to Rachel's Suggested brands queue (suggest_page).
  *
- * A page's logo and header photo come with claiming (PR 5); until then no
- * page is OFFICIAL, since the logo is the official signal.
+ * A page's logo comes with claiming (PR 5) and its header photo with Edit
+ * page (PR 7a); no page is OFFICIAL without a logo, the official signal.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
@@ -37,6 +37,8 @@ export type Page = {
   country: string | null;
   website: string | null;
   logoPath: string | null;
+  /** A managed page's header photo (Edit page, PR 7a). */
+  headerPath: string | null;
   foundedLabel: string | null;
   endedLabel: string | null;
   mainLanguage: string;
@@ -172,7 +174,7 @@ type PageRow = Database['public']['Tables']['pages']['Row'] & {
   }[];
 };
 
-const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, website, logo_path, founded_label,
+const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, website, logo_path, header_path, founded_label,
   ended_label, main_language, managed_at, founding_partner_at, closed_at, suspended_at, temp_closed_at,
   temp_closed_until, temp_closed_note, page_descriptions (locale, body), page_links (position, url),
   page_aliases (name, created_at),
@@ -193,6 +195,7 @@ function toPage(row: PageRow): Page {
     country: row.country,
     website: row.website,
     logoPath: row.logo_path,
+    headerPath: row.header_path,
     foundedLabel: row.founded_label,
     endedLabel: row.ended_label,
     mainLanguage: row.main_language,

@@ -1,0 +1,283 @@
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+
+import { Avatar } from '@/components/avatar';
+import { timeAgo } from '@/components/post-card';
+import { useTeamErrorAlert } from '@/components/page-team';
+import { SafeAreaView } from '@/components/safe-area';
+import { BackButton, Button, Icon, Toggle, useActionSheet } from '@/components/ui';
+import { useAuth } from '@/lib/auth';
+import { useMyPages, useSetPageInboxPush } from '@/lib/claims';
+import { type InboxItem, roleRank, useMarkInboxSeen, usePageBlock, usePageFollowerCount, usePageInbox } from '@/lib/page-team';
+import { type Page, usePage, usePageViewerState } from '@/lib/pages';
+import { brand, fontFamily, space, Text, useColors } from '@/theme';
+
+/**
+ * A page's inbox (Page-Inbox mockup, part A PR 7a), for everyone on the
+ * team: the follower number (only the team sees it, nobody sees who), then
+ * the @mentions of the page from captions, comments and meetup comments,
+ * New since you last looked and Earlier. Comments on the page's own posts
+ * join it with page posts (PR 8).
+ *
+ * Managers and the owner can block someone from the page from a row's ⋯.
+ * The push switch is yours alone, off by default.
+ */
+export default function PageInboxScreen() {
+  const { t } = useTranslation();
+  const c = useColors();
+  const { handle } = useLocalSearchParams<{ handle: string }>();
+  const { session } = useAuth();
+  const { data: page, isError, refetch } = usePage(handle);
+  const viewer = usePageViewerState(session?.user.id, page?.id);
+  if (!page || !viewer.data) {
+    return (
+      <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
+        <View style={styles.top}>
+          <BackButton />
+        </View>
+        {isError || viewer.isError ? (
+          <View style={styles.block}>
+            <Text variant="body" color="textSecondary">
+              {t('errors.network')}
+            </Text>
+            <Button label={t('common.retry')} onPress={() => void refetch()} />
+          </View>
+        ) : (
+          <ActivityIndicator color={c.text} accessibilityLabel={t('common.loading')} style={styles.loading} />
+        )}
+      </SafeAreaView>
+    );
+  }
+  if (!viewer.data.teamRole) {
+    return (
+      <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
+        <View style={styles.top}>
+          <BackButton />
+        </View>
+        <View style={styles.block}>
+          <Text variant="body" color="textSecondary">
+            {t('pageEdit.notYours')}
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  return <Inbox page={page} canBlock={roleRank(viewer.data.teamRole) >= 2 && page.state === 'managed'} />;
+}
+
+function Inbox({ page, canBlock }: { page: Page; canBlock: boolean }) {
+  const { t, i18n } = useTranslation();
+  const c = useColors();
+  const { session } = useAuth();
+  const userId = session?.user.id;
+  const name = page.displayName;
+  const inbox = usePageInbox(userId, page.id);
+  const followers = usePageFollowerCount(page.id);
+  const myPages = useMyPages(userId);
+  const setPush = useSetPageInboxPush(userId);
+  const markSeen = useMarkInboxSeen(page.id, userId);
+  const block = usePageBlock(page.id, userId);
+  const alertError = useTeamErrorAlert();
+  const actions = useActionSheet();
+  const pushOn = myPages.data?.find((p) => p.pageId === page.id)?.inboxPush ?? false;
+
+  // Opening the inbox marks it seen; this visit still shows what's New.
+  const marked = useRef(false);
+  const mark = markSeen.mutate;
+  useFocusEffect(
+    useCallback(() => {
+      if (marked.current) return;
+      marked.current = true;
+      mark();
+    }, [mark]),
+  );
+
+  const items = inbox.data ?? [];
+  const fresh = items.filter((i) => i.unread);
+  const earlier = items.filter((i) => !i.unread);
+
+  const open = (item: InboxItem) => {
+    if (item.eventId) return router.push({ pathname: '/meetup/[id]', params: { id: item.eventId } });
+    if (item.postId) router.push({ pathname: '/post/[id]', params: { id: item.postId, ...(item.commentId ? { comments: '1' } : {}) } });
+  };
+  const sentence = (item: InboxItem) => {
+    const username = item.authorUsername ?? t('common.deletedUser');
+    if (item.kind === 'meetup_comment') return t('pageInbox.meetupComment', { username, name, meetup: item.eventTitle ?? '' });
+    return t(item.kind === 'comment' ? 'pageInbox.comment' : 'pageInbox.caption', { username, name });
+  };
+  const options = (item: InboxItem) => {
+    const username = item.authorUsername;
+    const list: { label: string; onPress: () => void; destructive?: boolean }[] = [];
+    if (username) list.push({ label: t('pageInbox.viewProfile'), onPress: () => router.push({ pathname: '/profile/[username]', params: { username } }) });
+    if (canBlock)
+      list.push({
+        label: t('pageInbox.block', { name }),
+        destructive: true,
+        onPress: () =>
+          Alert.alert(t('pageInbox.blockConfirm', { username: username ?? '', name }), t('pageInbox.blockBody', { name }), [
+            { text: t('common.cancel'), style: 'cancel' },
+            {
+              text: t('block.block'),
+              style: 'destructive',
+              onPress: () => block.mutate({ who: item.authorId, on: true }, { onSuccess: () => void inbox.refetch(), onError: (err) => void alertError(err) }),
+            },
+          ]),
+      });
+    actions.show({ title: username ?? undefined, actions: list });
+  };
+
+  const row = (item: InboxItem) => (
+    <View key={item.id} style={[styles.row, { borderBottomColor: c.borderSubtle }, item.unread && { backgroundColor: c.accentSubtle }]}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${sentence(item)}. ${item.body ?? ''}. ${timeAgo(item.createdAt, t, i18n.language)}`}
+        onPress={() => open(item)}
+        style={({ pressed }) => [styles.rowMain, pressed && styles.pressed]}
+      >
+        <View>
+          <Avatar path={item.authorAvatarPath} username={item.authorUsername ?? '?'} size={40} />
+          <View style={[styles.badge, { backgroundColor: item.kind === 'caption' ? brand.pink : brand.ink }]}>
+            {item.kind === 'caption' ? (
+              <Text variant="caption" style={{ color: brand.ink, fontFamily: fontFamily.sansSemiBold }}>
+                @
+              </Text>
+            ) : (
+              <Icon name="badgeComment" color={brand.paper} size={12} />
+            )}
+          </View>
+        </View>
+        <View style={styles.flex}>
+          <Text variant="bodySm" style={{ color: item.unread ? c.onAccentSubtle : c.text, fontFamily: fontFamily.sansSemiBold }}>
+            {sentence(item)}
+          </Text>
+          {item.body ? (
+            <Text variant="bodySm" numberOfLines={3} style={{ color: item.unread ? c.onAccentSubtle : c.textSecondary }}>
+              “{item.body}”
+            </Text>
+          ) : null}
+          <Text variant="caption" style={{ color: item.unread ? c.onAccentSubtle : c.textSecondary }}>
+            {timeAgo(item.createdAt, t, i18n.language)}
+          </Text>
+        </View>
+      </Pressable>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('pageInbox.options', { username: item.authorUsername ?? '' })}
+        onPress={() => options(item)}
+        hitSlop={4}
+        style={({ pressed }) => [styles.more, pressed && styles.pressed]}
+      >
+        <Icon name="more" color={item.unread ? c.onAccentSubtle : c.text} />
+      </Pressable>
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
+      <View style={styles.top}>
+        <BackButton />
+        <View style={styles.flex}>
+          <Text variant="label" color="textSecondary">
+            {name}
+          </Text>
+          <Text variant="title" accessibilityRole="header" style={styles.upper}>
+            {t('pageTeam.bar.inbox')}
+          </Text>
+        </View>
+      </View>
+      <ScrollView contentContainerStyle={styles.content}>
+        <View style={[styles.followers, { backgroundColor: brand.ink }]} accessible accessibilityLabel={`${t('pageInbox.followersLine', { count: followers.data ?? 0, name })}. ${t('pageInbox.followersNote')}`}>
+          <View>
+            <Text variant="display" style={[styles.count, { color: brand.pink }]} accessibilityElementsHidden>
+              {followers.data ?? '–'}
+            </Text>
+            <Text variant="display" style={[styles.count, styles.countTop, { color: brand.paper }]}>
+              {followers.data ?? '–'}
+            </Text>
+          </View>
+          <View style={styles.flex}>
+            <Text variant="headline" style={{ color: brand.paper }}>
+              {t('pageInbox.followersLine', { count: followers.data ?? 0, name })}
+            </Text>
+            <Text variant="caption" style={{ color: brand.paper, opacity: 0.8 }}>
+              {t('pageInbox.followersNote')}
+            </Text>
+          </View>
+        </View>
+
+        {inbox.isPending ? <ActivityIndicator color={c.text} accessibilityLabel={t('common.loading')} style={styles.loading} /> : null}
+        {inbox.isError ? (
+          <View style={styles.block}>
+            <Text variant="body" color="statusClosed">
+              {t('errors.network')}
+            </Text>
+            <Button variant="secondary" label={t('common.retry')} onPress={() => void inbox.refetch()} />
+          </View>
+        ) : null}
+        {inbox.data && items.length === 0 ? (
+          <Text variant="body" color="textSecondary" style={styles.empty}>
+            {t('pageInbox.empty', { name })}
+          </Text>
+        ) : null}
+        {fresh.length > 0 ? (
+          <>
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.heading}>
+              {t('pageInbox.new')}
+            </Text>
+            <View style={[styles.group, { borderTopColor: c.borderSubtle }]}>{fresh.map(row)}</View>
+          </>
+        ) : null}
+        {earlier.length > 0 ? (
+          <>
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.heading}>
+              {t('pageInbox.earlier')}
+            </Text>
+            <View style={[styles.group, { borderTopColor: c.borderSubtle }]}>{earlier.map(row)}</View>
+          </>
+        ) : null}
+
+        <View style={[styles.pushRow, { borderTopColor: c.borderSubtle }]}>
+          <View style={styles.flex}>
+            <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
+              {t('pageInbox.push')}
+            </Text>
+            <Text variant="caption" color="textSecondary">
+              {t('pageInbox.pushBody')}
+            </Text>
+          </View>
+          <Toggle
+            value={pushOn}
+            onChange={(next) => setPush.mutate({ pageId: page.id, enabled: next }, { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) })}
+            label={t('pageInbox.push')}
+            fg={c.text}
+          />
+        </View>
+      </ScrollView>
+      {actions.sheet}
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  screen: { flex: 1 },
+  flex: { flex: 1 },
+  pressed: { opacity: 0.75 },
+  upper: { textTransform: 'uppercase' },
+  top: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[4], paddingTop: space[2] },
+  block: { paddingHorizontal: space[4], gap: space[3], paddingTop: space[4] },
+  loading: { marginTop: space[6] },
+  content: { paddingTop: space[4], paddingBottom: space[12] },
+  followers: { marginHorizontal: space[4], paddingHorizontal: 14, paddingVertical: space[3], flexDirection: 'row', alignItems: 'center', gap: space[3] },
+  count: { fontSize: 30, lineHeight: 32, position: 'absolute', top: 2, left: 2 },
+  countTop: { position: 'relative', top: 0, left: 0 },
+  empty: { paddingHorizontal: space[4], paddingTop: space[6] },
+  heading: { paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: 6 },
+  group: { borderTopWidth: 1 },
+  row: { flexDirection: 'row', alignItems: 'flex-start', borderBottomWidth: 1 },
+  rowMain: { flex: 1, flexDirection: 'row', gap: space[3], paddingLeft: space[4], paddingVertical: space[3] },
+  badge: { position: 'absolute', right: -6, bottom: -6, width: 20, height: 20, alignItems: 'center', justifyContent: 'center' },
+  more: { width: 48, height: 48, alignItems: 'center', justifyContent: 'center', marginTop: space[1] },
+  pushRow: { marginHorizontal: space[4], marginTop: space[6], minHeight: 56, borderTopWidth: 1, flexDirection: 'row', alignItems: 'center', gap: space[3] },
+});

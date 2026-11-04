@@ -107,12 +107,15 @@ function rgba(hex: string): number[] {
   return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255, 1];
 }
 
-/** The header's background: the photocopied photo, or ink, with the halftone. */
-function HeaderArt({ photoUrl, width }: { photoUrl: string | null; width: number }) {
+/**
+ * The header's background: the photocopied photo, or ink, with the halftone.
+ * Brand and shop pages use it too, for a managed page's header photo.
+ */
+export function HeaderArt({ photoUrl, width, height = HEADER_HEIGHT }: { photoUrl: string | null; width: number; height?: number }) {
   const image = useImage(photoUrl);
   const { ink, photo } = getEffects();
   const halftone = {
-    size: [width, HEADER_HEIGHT],
+    size: [width, height],
     cell: HALFTONE.cell,
     dotRadius: HALFTONE.dotRadius,
     fadeStart: HALFTONE.fadeStart,
@@ -124,7 +127,7 @@ function HeaderArt({ photoUrl, width }: { photoUrl: string | null; width: number
       <Fill>
         {image ? (
           <Shader source={photo} uniforms={{ ...halftone, ...PHOTOCOPY }}>
-            <ImageShader image={image} fit="cover" rect={{ x: 0, y: 0, width, height: HEADER_HEIGHT }} />
+            <ImageShader image={image} fit="cover" rect={{ x: 0, y: 0, width, height }} />
           </Shader>
         ) : (
           <Shader source={ink} uniforms={{ ...halftone, ink: rgba(brand.ink) }} />

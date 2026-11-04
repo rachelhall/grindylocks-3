@@ -184,6 +184,16 @@ export const keys = {
   myPageNotifications: (userId: string) => ['notifications', 'pages', userId] as const,
   /** The pages you're on, with your role and each inbox's push switch. */
   myPages: (userId: string) => ['my-pages', userId] as const,
+  /** Running a page (PR 7a): the team, its open invites and its Blocked list. */
+  pageTeam: (pageId: string) => ['page-team', pageId, 'members'] as const,
+  pageTeamInvites: (pageId: string) => ['page-team', pageId, 'invites'] as const,
+  pageBlocked: (pageId: string) => ['page-team', pageId, 'blocked'] as const,
+  /** The page's inbox as you see it (New is per member). */
+  pageInbox: (userId: string, pageId: string) => ['page-team', pageId, 'inbox', userId] as const,
+  /** The number of people following a page, for its team. */
+  pageFollowers: (pageId: string) => ['page-team', pageId, 'followers'] as const,
+  /** The pages you own, for Delete account's stop. */
+  myOwnedPages: (userId: string) => ['my-pages', userId, 'owned'] as const,
   /** What an emailed page invite code is for, before signing in. */
   pageInvitePreview: (code: string) => ['page-invite-preview', code] as const,
   /** How many posts and park photos you have (Delete account). */

@@ -14,8 +14,12 @@ const keys = [
   // Meetups (PR 5).
   'meetupChanged', 'meetupCancelled', 'meetupEnded', 'meetupReminder', 'meetupCommentOne', 'meetupReply', 'meetupMention',
 ];
-/** Brand and shop pages (PR 5), from `notifications.page`, as page_<key>. */
-const pageKeys = ['teamInvite', 'ownership', 'claimApproved', 'claimDeclined', 'claimTaken', 'madeRole', 'removed', 'owner', 'joined', 'suggestionLive'];
+/** Brand and shop pages (PRs 5 and 7a), from `notifications.page`, as page_<key>. */
+const pageKeys = [
+  'teamInvite', 'ownership', 'claimApproved', 'claimDeclined', 'claimTaken', 'madeRole', 'removed', 'owner', 'joined', 'suggestionLive',
+  // Running a page (PR 7a).
+  'handedOver', 'ownershipDeclined', 'mention',
+];
 /** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
 const roles = ['staff', 'manager'];
 /** Cancel reasons, from `meetup.reason`, as reason_<key>. */

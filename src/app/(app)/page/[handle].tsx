@@ -9,6 +9,7 @@ import { ClaimFooter } from '@/components/claim';
 import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
+import { TeamBar } from '@/components/page-team';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { useShopFixSheet } from '@/components/shop-fix';
 import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
@@ -16,6 +17,8 @@ import { SafeAreaView } from '@/components/safe-area';
 import { useExplainRestriction } from '@/components/safety';
 import { BackButton, Button, Icon, type IconName } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { useMyPages } from '@/lib/claims';
+import { useLeaveTeam } from '@/lib/page-team';
 import { usePageCatalog } from '@/lib/catalog';
 import {
   isArchive,
@@ -45,8 +48,8 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * - Unofficial and managed pages can be followed; an unofficial page says
  *   following means hearing when it joins.
  * - The ⋯ menu has Mute, Report and Block (Report only on archives), each
- *   with a line saying what it does. The page's own team sees no menu yet;
- *   Edit page comes with running a page (PR 7).
+ *   with a line saying what it does. The page's own team gets Edit page,
+ *   Team, Inbox and Leave there instead (PR 7a).
  *
  * Shops (PR 3, the Shop-8SET and Shop-TempClosed mockups) add the address
  * with open-now and location-type chips, Directions beside Follow, the
@@ -61,7 +64,11 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * unofficial page, then the claimant's pending card (or Rachel's reason if
  * it was declined); a claimed page waiting for its logo shows its owner and
  * managers the Add logo card. Founding partner tape shows once the page is
- * OFFICIAL. `?logo=1` (the claim-approved push) opens the logo screen.
+ * OFFICIAL. `?logo=1` (the claim-approved push) opens Edit page to add it.
+ *
+ * Running a page (PR 7a, Page-TeamView): the team sees "You're the owner"
+ * (or manager, or staff) under the handle and an ink bar with Edit page,
+ * Team and Inbox, with a dot when the inbox has something new.
  *
  * Coming with later PRs: the page's own posts (PR 8) and its meetups (PR 9).
  * Until then a managed page's Posts section is empty.
@@ -72,12 +79,12 @@ export default function PageScreen() {
   const c = useColors();
   const { data: page, isError, refetch } = usePage(handle);
 
-  // Opened from "Your claim was approved": go on to add the logo.
+  // Opened from "Your claim was approved": go on to Edit page to add the logo.
   const askedLogo = useRef(false);
   useEffect(() => {
     if (logo !== '1' || askedLogo.current || !page || isOfficial(page)) return;
     askedLogo.current = true;
-    router.push({ pathname: '/page-logo/[handle]', params: { handle: page.handle } });
+    router.push({ pathname: '/page-edit/[handle]', params: { handle: page.handle } });
   }, [logo, page]);
 
   if (page === undefined && !isError) {
@@ -132,6 +139,11 @@ function PageBody({ page }: { page: Page }) {
   const nameOnly = page.state === 'name_only';
   const state = viewer.data;
   const onTeam = Boolean(state?.teamRole);
+  const myPages = useMyPages(onTeam ? userId : undefined);
+  const inboxNew = myPages.data?.find((p) => p.pageId === page.id)?.inboxNew ?? 0;
+  const leave = useLeaveTeam(page.id, userId);
+  // The team runs a managed page from here; an archive or a suspended page has nothing to run.
+  const running = onTeam && page.state === 'managed' && !page.suspendedAt;
   const headerHeight = nameOnly ? PLAIN_HEADER_HEIGHT : PAGE_HEADER_HEIGHT;
 
   const block = () =>
@@ -158,6 +170,37 @@ function PageBody({ page }: { page: Page }) {
         },
       },
     );
+
+  const openTeamMenu = () => {
+    const go = (pathname: '/page-edit/[handle]' | '/page-team/[handle]' | '/page-inbox/[handle]') =>
+      router.push({ pathname, params: { handle: page.handle } });
+    const items = [
+      { icon: 'edit' as const, title: t('pageTeam.bar.edit'), body: t('pageTeam.menu.editBody'), onPress: () => go('/page-edit/[handle]') },
+      { icon: 'people' as const, title: t('pageTeam.bar.team'), body: t('pageTeam.menu.teamBody'), onPress: () => go('/page-team/[handle]') },
+      { icon: 'mail' as const, title: t('pageTeam.bar.inbox'), body: t('pageTeam.menu.inboxBody'), onPress: () => go('/page-inbox/[handle]') },
+    ];
+    const leaveItem =
+      state?.teamRole && state.teamRole !== 'owner'
+        ? [
+            {
+              icon: 'close' as const,
+              title: t('pageTeam.menu.leave', { name }),
+              body: t('pageTeam.menu.leaveBody', { name }),
+              destructive: true,
+              onPress: () =>
+                Alert.alert(t('pageTeam.menu.leaveConfirm', { name }), t('pageTeam.menu.leaveBody', { name }), [
+                  { text: t('common.cancel'), style: 'cancel' },
+                  {
+                    text: t('pageTeam.menu.leaveButton'),
+                    style: 'destructive',
+                    onPress: () => leave.mutate(undefined, { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) }),
+                  },
+                ]),
+            },
+          ]
+        : [];
+    menu.open({ name, handle: page.handle, stamp }, [...(running ? items : []), ...leaveItem]);
+  };
 
   const openMenu = () => {
     const reportItem = {
@@ -279,7 +322,7 @@ function PageBody({ page }: { page: Page }) {
         stamp={stamp}
         moreLabel={archive ? t('page.moreReport') : t('page.more')}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/search'))}
-        onMore={onTeam ? undefined : openMenu}
+        onMore={onTeam ? (running || state?.teamRole !== 'owner' ? openTeamMenu : undefined) : openMenu}
       />
       <Animated.ScrollView
         contentInsetAdjustmentBehavior="never"
@@ -297,6 +340,7 @@ function PageBody({ page }: { page: Page }) {
             stamp={stamp}
             foundingPartner={Boolean(page.foundingPartnerAt) && official}
             logoUrl={official ? pageImageUrl(page.logoPath) : null}
+            photoUrl={page.state === 'managed' ? pageImageUrl(page.headerPath) : null}
             plain={nameOnly}
             dim={archive}
           />
@@ -312,12 +356,19 @@ function PageBody({ page }: { page: Page }) {
                 {statusLine}
               </Text>
             ) : null}
+            {state?.teamRole ? (
+              <Text variant="bodySm" color="textSecondary">
+                {t(`pageTeam.youAre.${state.teamRole}`)}
+              </Text>
+            ) : null}
             {page.formerly.length > 0 ? (
               <Text variant="bodySm" color="textSecondary">
                 {t('page.formerly', { names: page.formerly.join(', ') })}
               </Text>
             ) : null}
           </View>
+
+          {running ? <TeamBar page={page} inboxNew={inboxNew} /> : null}
 
           {shop ? <ShopPlace page={page} /> : null}
           {shop && page.tempClosedAt && page.tempClosedNote ? <ClosedNote page={page} /> : null}

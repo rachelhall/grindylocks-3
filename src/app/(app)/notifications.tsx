@@ -405,7 +405,11 @@ export default function Notifications() {
             ? t('notifications.page.removed', { name })
             : p.message === 'owner'
               ? t('notifications.page.owner', { name })
-              : t('notifications.page.madeRole', { name, role: t(`pageInvite.roleA.${p.message === 'role:manager' ? 'manager' : 'staff'}`) });
+              : p.message === 'handed_over'
+                ? t('notifications.page.handedOver', { name, a: p.actorUsername ?? '' })
+                : p.message === 'ownership_declined'
+                  ? t('notifications.page.ownershipDeclined', { name, a: p.actorUsername ?? '' })
+                  : t('notifications.page.madeRole', { name, role: t(`pageInvite.roleA.${p.message === 'role:manager' ? 'manager' : 'staff'}`) });
         icon = 'badgeRole';
         break;
       case 'page_claimed':
@@ -426,7 +430,7 @@ export default function Notifications() {
           : null;
     const open = () => {
       if (p.kind === 'page_claim_approved' && !isOfficial(p.page)) {
-        router.push({ pathname: '/page-logo/[handle]', params: { handle: p.page.handle } });
+        router.push({ pathname: '/page-edit/[handle]', params: { handle: p.page.handle } });
       } else {
         router.push({ pathname: '/page/[handle]', params: { handle: p.page.handle } });
       }
@@ -446,7 +450,7 @@ export default function Notifications() {
         </View>
         <View style={styles.rowText}>
           <Text variant="bodySm" style={{ color: ink }}>
-            {withBoldNames(text, [name]).map((part, i) =>
+            {withBoldNames(text, p.actorUsername ? [name, p.actorUsername] : [name]).map((part, i) =>
               part.bold ? (
                 <Text key={i} variant="bodySm" style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
                   {part.text}

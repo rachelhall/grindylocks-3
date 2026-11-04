@@ -3166,12 +3166,28 @@ export type Database = {
         Returns: {
           display_name: string
           handle: string
+          inbox_new: number
           inbox_push: boolean
           logo_path: string | null
           page_id: string
           role: string
           roles: string[]
           state: string
+        }[]
+      }
+      my_owned_pages: {
+        Args: never
+        Returns: {
+          declined_username: string | null
+          display_name: string
+          handle: string
+          handover_id: string | null
+          handover_username: string | null
+          logo_path: string | null
+          page_id: string
+          roles: string[]
+          state: string
+          team_size: number
         }[]
       }
       page_email_claim: {
@@ -3228,6 +3244,91 @@ export type Database = {
         Returns: undefined
       }
       set_page_logo: { Args: { page: string; path: string }; Returns: undefined }
+      page_team: {
+        Args: { page: string }
+        Returns: {
+          avatar_path: string | null
+          is_me: boolean
+          joined_at: string
+          role: string
+          user_id: string
+          username: string | null
+        }[]
+      }
+      page_team_invites: {
+        Args: { page: string }
+        Returns: {
+          avatar_path: string | null
+          created_at: string
+          email: string | null
+          expires_at: string
+          id: string
+          kind: string
+          role: string | null
+          username: string | null
+        }[]
+      }
+      set_page_member_role: {
+        Args: { member: string; page: string; role: Database["public"]["Enums"]["page_member_role"] }
+        Returns: undefined
+      }
+      remove_page_member: { Args: { member: string; page: string }; Returns: undefined }
+      leave_page_team: { Args: { page: string }; Returns: undefined }
+      offer_page_ownership: { Args: { member: string; page: string }; Returns: string }
+      block_from_page: { Args: { page: string; who: string }; Returns: undefined }
+      unblock_from_page: { Args: { page: string; who: string }; Returns: undefined }
+      page_blocked_people: {
+        Args: { page: string }
+        Returns: {
+          avatar_path: string | null
+          blocked_at: string
+          blocked_by_username: string | null
+          user_id: string
+          username: string | null
+        }[]
+      }
+      update_page_details: {
+        Args: { links: string[]; main_language: string; page: string }
+        Returns: undefined
+      }
+      set_page_description: {
+        Args: { body: string; locale: string; page: string }
+        Returns: undefined
+      }
+      set_page_header: { Args: { page: string; path?: string }; Returns: undefined }
+      set_page_location_type: {
+        Args: {
+          location_type: Database["public"]["Enums"]["shop_location_type"]
+          page: string
+          show_pin?: boolean
+        }
+        Returns: undefined
+      }
+      set_page_temp_closed: {
+        Args: { closed: boolean; closed_until?: string; note?: string; page: string }
+        Returns: undefined
+      }
+      set_page_brands_carried: { Args: { brands: string[]; page: string }; Returns: undefined }
+      close_page_for_good: { Args: { page: string }; Returns: string }
+      page_inbox: {
+        Args: { max_rows?: number; page: string }
+        Returns: {
+          author_avatar_path: string | null
+          author_id: string
+          author_username: string | null
+          body: string | null
+          comment_id: string | null
+          created_at: string
+          event_comment_id: string | null
+          event_id: string | null
+          event_title: string | null
+          id: string
+          kind: string
+          post_id: string | null
+          unread: boolean
+        }[]
+      }
+      mark_page_inbox_seen: { Args: { page: string }; Returns: undefined }
       start_page_claim: {
         Args: {
           email?: string
@@ -4299,6 +4400,7 @@ export type Database = {
         | "page_team_change"
         | "page_claimed"
         | "suggestion_live"
+        | "page_mention"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -4568,6 +4670,7 @@ export const Constants = {
         "page_team_change",
         "page_claimed",
         "suggestion_live",
+        "page_mention",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [
