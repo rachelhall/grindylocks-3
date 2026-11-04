@@ -421,7 +421,7 @@
   },
   "find": {
     "title": "Search",
-    "placeholder": "Search people or parks",
+    "placeholder": "Search people, parks or pages",
     "show": "Show",
     "all": "All",
     "people": "People",
@@ -430,7 +430,11 @@
     "error": "Couldn't search. Check your connection.",
     "following": "Following",
     "requested": "Requested",
-    "privateAccount": "Private account"
+    "privateAccount": "Private account",
+    "pages": "Pages",
+    "pagesHeading": "Brands and shops",
+    "suggestTitle": "Can't find a brand or shop?",
+    "suggestLink": "Suggest it"
   },
   "profile": {
     "edit": "Edit profile",
@@ -886,7 +890,13 @@
     "gone": "This isn't available any more.",
     "titleMeetup": "Report this meetup",
     "meetupBy": "Meetup hosted by @{{username}}",
-    "whoMeetup": "@{{username}} isn't told who reported it. This park's admins review it."
+    "whoMeetup": "@{{username}} isn't told who reported it. This park's admins review it.",
+    "impersonation": "Pretending to be a brand or shop",
+    "whichPage": "Which brand or shop?",
+    "findPage": "Search brands and shops",
+    "changePage": "Change",
+    "noPageFound": "No brand or shop called that.",
+    "whoImpersonation": "@{{username}} isn't told who reported it. Rachel checks it against {{page}}'s page."
   },
   "moderation": {
     "reported": {
@@ -901,7 +911,13 @@
       "inappropriate_one": "Reported {{count}} time as inappropriate",
       "inappropriate_other": "Reported {{count}} times as inappropriate",
       "other_one": "Reported {{count}} time",
-      "other_other": "Reported {{count}} times"
+      "other_other": "Reported {{count}} times",
+      "impersonation_one": "Reported {{count}} time as pretending to be a brand or shop",
+      "impersonation_other": "Reported {{count}} times as pretending to be a brand or shop",
+      "our_page_one": "Reported {{count}} time by someone who says it's their brand or shop",
+      "our_page_other": "Reported {{count}} times by people who say it's their brand or shop",
+      "wrong_info_one": "Reported {{count}} time for wrong info",
+      "wrong_info_other": "Reported {{count}} times for wrong info"
     },
     "autoHidden": "Auto-hidden",
     "hidden": "Hidden",
@@ -1324,5 +1340,90 @@
     "allUpcoming": "All upcoming",
     "failed": "Couldn't save your changes",
     "seasonsPark": "This meetup's park comes from its seasons, so change the park for this date only."
+  },
+  "page": {
+    "brand": "Brand",
+    "shop": "Shop",
+    "stamp": {
+      "official": "Official",
+      "unofficial": "Unofficial",
+      "retired": "Retired",
+      "closed": "Closed"
+    },
+    "foundingPartner": "Founding partner",
+    "officialPage": "Official page",
+    "unofficialBrand": "Unofficial, not managed by this brand",
+    "unofficialShop": "Unofficial, not managed by this shop",
+    "nameOnly": "Not managed by this brand. Listed so skaters' gear stays linked.",
+    "retiredIn": "{{name}} stopped making gear in {{year}}. This page stays up as an archive, so skaters can still find and talk about its gear.",
+    "retiredAround": "{{name}} stopped making gear around {{year}}. This page stays up as an archive, so skaters can still find and talk about its gear.",
+    "retired": "{{name}} doesn't make gear any more. This page stays up as an archive, so skaters can still find and talk about its gear.",
+    "closedIn": "This shop closed in {{date}}. Its page stays up as an archive, with its posts.",
+    "closedUntil": "Closed until {{date}}",
+    "closedForNow": "Closed for now",
+    "closedSetBy": "Set by the {{name}} team",
+    "formerly": "Formerly {{names}}",
+    "website": "Website",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "follow": "Follow",
+    "following": "Following",
+    "followHint": "Follow to hear when {{name}} joins Grindylocks.",
+    "followFailed": "Couldn't follow. Check your connection.",
+    "blocked": "You blocked {{name}}. Its posts and meetups are hidden for you.",
+    "unblock": "Unblock",
+    "posts": "Posts",
+    "noPosts": "No posts yet.",
+    "missing": "There's no brand or shop page here.",
+    "more": "More: mute, block or report",
+    "moreReport": "More: report",
+    "menu": {
+      "mute": "Mute",
+      "muteBody": "Hide their posts from Home. You still follow them, and they aren't told.",
+      "unmute": "Unmute",
+      "unmuteBody": "Their posts show in Home again.",
+      "report": "Report page",
+      "reportBody": "Goes to Rachel",
+      "block": "Block {{name}}",
+      "blockBody": "Unfollows, hides their posts and meetups everywhere, and stops them commenting on yours. They aren't told.",
+      "unblock": "Unblock {{name}}",
+      "unblockBody": "Their posts and meetups can show again. You won't follow them unless you choose to.",
+      "blockConfirm": "Block {{name}}?"
+    },
+    "report": {
+      "label": "Page @{{handle}}",
+      "title": "Report this page",
+      "impersonationBody": "Not the real one",
+      "ourPage": "This is our brand or shop",
+      "ourPageBody": "Someone else is managing it",
+      "wrongInfo": "Wrong info",
+      "wrongInfoBody": "Name, location, hours or links",
+      "reach": "How can we reach you?",
+      "reachHint": "Your role and an email on the brand's own domain helps",
+      "who": "Reports about a page go straight to Rachel. {{name}}'s team isn't told who reported it.",
+      "blockToo": "Block {{name}} too?",
+      "blockTooBody": "Its posts and meetups disappear for you, and it can't comment on yours. It isn't told."
+    },
+    "suggest": {
+      "title": "Suggest a brand or shop",
+      "name": "Name",
+      "what": "What do they make?",
+      "whatShop": "What do they sell?",
+      "link": "Website or Instagram",
+      "note": "Rachel checks every suggestion. Once it's added, it shows as an unofficial page and you'll get a notification.",
+      "send": "Send suggestion",
+      "sentTitle": "Thanks, it's sent",
+      "sentBody": "You'll get a notification once it's live.",
+      "tooMany": "That's a lot of suggestions for one day. Try again tomorrow."
+    },
+    "mention": {
+      "heading": "Pages",
+      "people": "People",
+      "brandFollowing": "Brand you follow",
+      "shopFollowing": "Shop you follow",
+      "inbox": "Mentioning a page sends it to the page's inbox."
+    },
+    "closed": "This shop has closed. Its page stays up as an archive, with its posts.",
+    "logo": "{{name}} logo"
   }
 }

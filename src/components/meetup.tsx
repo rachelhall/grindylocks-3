@@ -20,6 +20,7 @@ import { Sheet } from '@/components/tagging';
 import { Button, Icon, Toggle } from '@/components/ui';
 import { MAX_COMMENT } from '@/lib/engagement';
 import { activeMention, insertMention, MAX_SUGGESTIONS } from '@/lib/mentions';
+import { usePageMentions } from '@/lib/pages';
 import {
   type GoingPerson,
   type MeetupComment,
@@ -424,6 +425,8 @@ export function MeetupCommentComposer({
   // Typing @ opens the list: only people who can see this meetup (decided Nov 3).
   const mention = activeMention(text, cursor);
   const people = useMeetupMentionPeople(eventId, mention ? mention.query : null);
+  const pageHits = usePageMentions(mention ? mention.query : null, mention !== null);
+  const pages = mention ? (pageHits.data ?? []) : [];
   const candidates = mention
     ? (people.data ?? [])
         .filter((p) => p.username.toLowerCase().startsWith(mention.query.toLowerCase()))
@@ -458,8 +461,8 @@ export function MeetupCommentComposer({
 
   return (
     <>
-      {candidates.length > 0 ? (
-        <MentionList candidates={candidates} typed={mention?.query.length ?? 0} parkName={null} onPick={pick} />
+      {candidates.length > 0 || pages.length > 0 ? (
+        <MentionList candidates={candidates} pages={pages} typed={mention?.query.length ?? 0} parkName={null} onPick={pick} />
       ) : null}
       <View style={[styles.composer, { borderTopColor: c.borderSubtle, backgroundColor: c.surface }]}>
         {replyTo ? (

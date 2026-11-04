@@ -43,21 +43,34 @@ export const MAX_REPORT_DETAILS = 500;
 
 /**
  * The reasons a member can pick, in the mockup's order. "Not at this park"
- * is for posts only; `inappropriate` exists in the database but isn't offered.
+ * is for posts only; "Pretending to be a brand or shop" for people only
+ * (Profile-Report-Impersonation, v2), with the page it imitates;
+ * `inappropriate` exists in the database but isn't offered.
  */
 export function reportReasons(kind: ReportTarget['kind']): ReportReason[] {
-  return kind === 'post'
-    ? ['spam', 'harassment', 'wrong_park', 'involves_minor', 'other']
-    : ['spam', 'harassment', 'involves_minor', 'other'];
+  if (kind === 'post') return ['spam', 'harassment', 'wrong_park', 'involves_minor', 'other'];
+  if (kind === 'person') return ['spam', 'harassment', 'involves_minor', 'impersonation', 'other'];
+  return ['spam', 'harassment', 'involves_minor', 'other'];
 }
 
 /** Harassment, anything involving a minor and reports about a person go only to the owner. */
 export const goesToOwner = (kind: ReportTarget['kind'], reason: ReportReason) =>
-  kind === 'person' || reason === 'harassment' || reason === 'involves_minor';
+  kind === 'person' || reason === 'harassment' || reason === 'involves_minor' || reason === 'impersonation';
 
 export function useFileReport() {
   return useMutation({
-    mutationFn: async ({ target, reason, details }: { target: ReportTarget; reason: ReportReason; details: string }) => {
+    mutationFn: async ({
+      target,
+      reason,
+      details,
+      impersonating,
+    }: {
+      target: ReportTarget;
+      reason: ReportReason;
+      details: string;
+      /** The page a profile pretends to be. */
+      impersonating?: string;
+    }) => {
       const { error } = await supabase.rpc('file_report', {
         post: target.kind === 'post' ? target.id : undefined,
         comment: target.kind === 'comment' ? target.id : undefined,
@@ -66,6 +79,7 @@ export function useFileReport() {
         meetup_comment: target.kind === 'meetup_comment' ? target.id : undefined,
         reason,
         details: details.trim() || undefined,
+        impersonating: reason === 'impersonation' ? impersonating : undefined,
       });
       if (error) throw error;
     },

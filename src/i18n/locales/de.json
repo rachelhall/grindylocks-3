@@ -421,7 +421,7 @@
   },
   "find": {
     "title": "Suche",
-    "placeholder": "Leute oder Parks suchen",
+    "placeholder": "Personen, Parks oder Seiten suchen",
     "show": "Anzeigen",
     "all": "Alle",
     "people": "Leute",
@@ -430,7 +430,11 @@
     "error": "Suche fehlgeschlagen. Prüf deine Verbindung.",
     "following": "Folgst du",
     "requested": "Angefragt",
-    "privateAccount": "Privates Konto"
+    "privateAccount": "Privates Konto",
+    "pages": "Seiten",
+    "pagesHeading": "Marken und Shops",
+    "suggestTitle": "Marke oder Shop nicht gefunden?",
+    "suggestLink": "Vorschlagen"
   },
   "profile": {
     "edit": "Profil bearbeiten",
@@ -886,7 +890,13 @@
     "gone": "Das ist nicht mehr verfügbar.",
     "titleMeetup": "Dieses Meetup melden",
     "meetupBy": "Meetup von @{{username}}",
-    "whoMeetup": "@{{username}} erfährt nicht, wer es gemeldet hat. Die Admins dieses Parks prüfen es."
+    "whoMeetup": "@{{username}} erfährt nicht, wer es gemeldet hat. Die Admins dieses Parks prüfen es.",
+    "impersonation": "Gibt sich als Marke oder Shop aus",
+    "whichPage": "Welche Marke oder welcher Shop?",
+    "findPage": "Marken und Shops suchen",
+    "changePage": "Ändern",
+    "noPageFound": "Keine Marke und kein Shop mit diesem Namen.",
+    "whoImpersonation": "@{{username}} erfährt nicht, wer es gemeldet hat. Rachel vergleicht es mit der Seite von {{page}}."
   },
   "moderation": {
     "reported": {
@@ -901,7 +911,13 @@
       "inappropriate_one": "{{count}}-mal als unangemessen gemeldet",
       "inappropriate_other": "{{count}}-mal als unangemessen gemeldet",
       "other_one": "{{count}}-mal gemeldet",
-      "other_other": "{{count}}-mal gemeldet"
+      "other_other": "{{count}}-mal gemeldet",
+      "impersonation_one": "{{count}}-mal gemeldet: gibt sich als Marke oder Shop aus",
+      "impersonation_other": "{{count}}-mal gemeldet: gibt sich als Marke oder Shop aus",
+      "our_page_one": "{{count}}-mal gemeldet von jemandem, der sagt, es sei die eigene Marke oder der eigene Shop",
+      "our_page_other": "{{count}}-mal gemeldet von Leuten, die sagen, es sei die eigene Marke oder der eigene Shop",
+      "wrong_info_one": "{{count}}-mal wegen falscher Angaben gemeldet",
+      "wrong_info_other": "{{count}}-mal wegen falscher Angaben gemeldet"
     },
     "autoHidden": "Automatisch ausgeblendet",
     "hidden": "Ausgeblendet",
@@ -1324,5 +1340,90 @@
     "allUpcoming": "Alle kommenden",
     "failed": "Deine Änderungen konnten nicht gespeichert werden",
     "seasonsPark": "Der Park dieses Meetups kommt aus seinen Saisons. Ändere den Park also nur für diesen Termin."
+  },
+  "page": {
+    "brand": "Marke",
+    "shop": "Shop",
+    "stamp": {
+      "official": "Offiziell",
+      "unofficial": "Inoffiziell",
+      "retired": "Eingestellt",
+      "closed": "Geschlossen"
+    },
+    "foundingPartner": "Gründungspartner",
+    "officialPage": "Offizielle Seite",
+    "unofficialBrand": "Inoffiziell, nicht von dieser Marke betreut",
+    "unofficialShop": "Inoffiziell, nicht von diesem Shop betreut",
+    "nameOnly": "Nicht von dieser Marke betreut. Gelistet, damit die Ausrüstung der Skater verlinkt bleibt.",
+    "retiredIn": "{{name}} hat {{year}} aufgehört, Ausrüstung herzustellen. Die Seite bleibt als Archiv, damit Skater die Ausrüstung weiter finden und darüber reden können.",
+    "retiredAround": "{{name}} hat um {{year}} aufgehört, Ausrüstung herzustellen. Die Seite bleibt als Archiv, damit Skater die Ausrüstung weiter finden und darüber reden können.",
+    "retired": "{{name}} stellt keine Ausrüstung mehr her. Die Seite bleibt als Archiv, damit Skater die Ausrüstung weiter finden und darüber reden können.",
+    "closedIn": "Dieser Shop hat im {{date}} geschlossen. Die Seite bleibt mit ihren Posts als Archiv.",
+    "closedUntil": "Geschlossen bis {{date}}",
+    "closedForNow": "Vorerst geschlossen",
+    "closedSetBy": "Vom {{name}}-Team eingetragen",
+    "formerly": "Früher {{names}}",
+    "website": "Website",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "follow": "Folgen",
+    "following": "Folgst du",
+    "followHint": "Folge, um zu erfahren, wann {{name}} zu Grindylocks kommt.",
+    "followFailed": "Folgen hat nicht geklappt. Prüfe deine Verbindung.",
+    "blocked": "Du hast {{name}} blockiert. Ihre Posts und Meetups siehst du nicht.",
+    "unblock": "Blockierung aufheben",
+    "posts": "Posts",
+    "noPosts": "Noch keine Posts.",
+    "missing": "Hier gibt es keine Marken- oder Shop-Seite.",
+    "more": "Mehr: stummschalten, blockieren oder melden",
+    "moreReport": "Mehr: melden",
+    "menu": {
+      "mute": "Stummschalten",
+      "muteBody": "Blendet ihre Posts auf Home aus. Du folgst weiter, und sie erfahren es nicht.",
+      "unmute": "Stummschaltung aufheben",
+      "unmuteBody": "Ihre Posts erscheinen wieder auf Home.",
+      "report": "Seite melden",
+      "reportBody": "Geht an Rachel",
+      "block": "{{name}} blockieren",
+      "blockBody": "Entfolgt, blendet ihre Posts und Meetups überall aus und verhindert, dass sie deine kommentieren. Sie erfahren es nicht.",
+      "unblock": "Blockierung von {{name}} aufheben",
+      "unblockBody": "Ihre Posts und Meetups können wieder erscheinen. Du folgst nur, wenn du es willst.",
+      "blockConfirm": "{{name}} blockieren?"
+    },
+    "report": {
+      "label": "Seite @{{handle}}",
+      "title": "Diese Seite melden",
+      "impersonationBody": "Nicht die echte",
+      "ourPage": "Das ist unsere Marke oder unser Shop",
+      "ourPageBody": "Jemand anderes betreut sie",
+      "wrongInfo": "Falsche Angaben",
+      "wrongInfoBody": "Name, Ort, Öffnungszeiten oder Links",
+      "reach": "Wie erreichen wir dich?",
+      "reachHint": "Deine Rolle und eine E-Mail-Adresse der Marke helfen",
+      "who": "Meldungen zu einer Seite gehen direkt an Rachel. Das Team von {{name}} erfährt nicht, wer gemeldet hat.",
+      "blockToo": "{{name}} auch blockieren?",
+      "blockTooBody": "Ihre Posts und Meetups verschwinden für dich, und sie kann deine nicht kommentieren. Sie erfährt es nicht."
+    },
+    "suggest": {
+      "title": "Marke oder Shop vorschlagen",
+      "name": "Name",
+      "what": "Was stellen sie her?",
+      "whatShop": "Was verkaufen sie?",
+      "link": "Website oder Instagram",
+      "note": "Rachel prüft jeden Vorschlag. Sobald er dabei ist, erscheint er als inoffizielle Seite, und du bekommst eine Benachrichtigung.",
+      "send": "Vorschlag senden",
+      "sentTitle": "Danke, ist verschickt",
+      "sentBody": "Du bekommst eine Benachrichtigung, sobald sie online ist.",
+      "tooMany": "Das sind viele Vorschläge für einen Tag. Versuch es morgen wieder."
+    },
+    "mention": {
+      "heading": "Seiten",
+      "people": "Personen",
+      "brandFollowing": "Marke, der du folgst",
+      "shopFollowing": "Shop, dem du folgst",
+      "inbox": "Wenn du eine Seite erwähnst, landet das in ihrem Posteingang."
+    },
+    "closed": "Dieser Shop hat geschlossen. Die Seite bleibt mit ihren Posts als Archiv.",
+    "logo": "Logo von {{name}}"
   }
 }

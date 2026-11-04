@@ -34,6 +34,8 @@
   --gl-status-soon: #4A4740;
   --gl-danger: #B3261E;
   --gl-on-danger: #F2EFE6;
+  --gl-warning: #8A4B00;
+  --gl-accent-on-ink: #FF9AD0;
   --gl-overlay: rgba(17, 17, 17, 0.6);
   --gl-map-pin: #FF48B0;
   --gl-map-pin-outline: #111111;
@@ -145,5 +147,6 @@
     --gl-status-soon: #B8B4AA;
     --gl-danger: #FF8A5C;
     --gl-on-danger: #111111;
+    --gl-warning: #F5A524;
   }
 }

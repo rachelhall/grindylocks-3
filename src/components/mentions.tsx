@@ -6,7 +6,9 @@
  *   then people you follow, then regulars at the post's park; the first row
  *   is highlighted as the likely pick.
  * - MentionedText: comment or caption text with each @username as a link to
- *   that profile.
+ *   that profile (a page's handle opens the page; the profile route sends it on).
+ * - Brand and shop pages come after the people, under a Pages heading (v2,
+ *   Mention-Pages mockup): pages you follow first, then matches.
  * - useCaptionMentions: what a caption box needs to open the list while you
  *   type @ and put the picked name in.
  *
@@ -17,6 +19,7 @@ import { Fragment, type ReactNode, type RefObject, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type NativeSyntheticEvent, Pressable, StyleSheet, type TextInput, type TextInputSelectionChangeEventData, View } from 'react-native';
 
+import { PageMentionRows } from '@/components/pages';
 import { Avatar } from '@/components/profile';
 import {
   activeMention,
@@ -27,6 +30,7 @@ import {
   type Person,
   useMentionSearch,
 } from '@/lib/mentions';
+import { type PageResult, usePageMentions } from '@/lib/pages';
 import { type Post, useParkRegulars } from '@/lib/posts';
 import { useBlockedAccounts, useFollowing } from '@/lib/social';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
@@ -70,13 +74,17 @@ function MatchedName({ username, typed, color }: { username: string; typed: numb
 
 export function MentionList({
   candidates,
+  pages = [],
   typed,
   parkName,
   onPick,
 }: {
   candidates: MentionCandidate[];
+  /** Brand and shop pages, listed after the people. */
+  pages?: PageResult[];
   typed: number;
   parkName: string | null;
+  /** A username, or a page's handle. */
   onPick: (username: string) => void;
 }) {
   const { t } = useTranslation();
@@ -138,6 +146,7 @@ export function MentionList({
           </Pressable>
         );
       })}
+      <PageMentionRows pages={pages} typed={typed} highlightFirst={candidates.length === 0} onPick={onPick} />
     </View>
   );
 }
@@ -174,6 +183,7 @@ export function useCaptionMentions({
   const regulars = useParkRegulars(typing ? (parkId ?? undefined) : undefined);
   const blocked = useBlockedAccounts(typing ? userId : undefined);
   const search = useMentionSearch(mention?.query ?? '', typing);
+  const pages = usePageMentions(mention?.query ?? null, typing);
   const candidates = mention
     ? buildCandidates({
         query: mention.query,
@@ -198,6 +208,7 @@ export function useCaptionMentions({
 
   return {
     candidates,
+    pages: typing ? (pages.data ?? []) : [],
     typed: mention?.query.length ?? 0,
     pick,
     onSelectionChange: (e: NativeSyntheticEvent<TextInputSelectionChangeEventData>) =>

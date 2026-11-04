@@ -25,6 +25,7 @@ import {
 } from '@/lib/engagement';
 import { MentionedText, MentionList, openProfile } from '@/components/mentions';
 import { activeMention, buildCandidates, insertMention, useMentionSearch } from '@/lib/mentions';
+import { usePageMentions } from '@/lib/pages';
 import { useParkRegulars, usePost } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
 import { useBlockedAccounts, useFollowing } from '@/lib/social';
@@ -337,6 +338,8 @@ export function CommentComposer({
   const regulars = useParkRegulars(typing ? post.data?.park?.id : undefined);
   const blocked = useBlockedAccounts(typing ? userId : undefined);
   const search = useMentionSearch(mention?.query ?? '', typing);
+  const pageHits = usePageMentions(mention?.query ?? null, typing);
+  const pages = typing ? (pageHits.data ?? []) : [];
   const candidates = mention
     ? buildCandidates({
         query: mention.query,
@@ -380,9 +383,10 @@ export function CommentComposer({
 
   return (
     <>
-      {candidates.length > 0 ? (
+      {candidates.length > 0 || pages.length > 0 ? (
         <MentionList
           candidates={candidates}
+          pages={pages}
           typed={mention?.query.length ?? 0}
           parkName={post.data?.park?.name ?? null}
           onPick={pick}

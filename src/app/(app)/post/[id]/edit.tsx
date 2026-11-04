@@ -306,9 +306,10 @@ function EditForm({ post }: { post: Post }) {
             {t('editPost.footnote')}
           </Text>
         </ScrollView>
-        {mentions.candidates.length > 0 ? (
+        {mentions.candidates.length > 0 || mentions.pages.length > 0 ? (
           <MentionList
             candidates={mentions.candidates}
+            pages={mentions.pages}
             typed={mentions.typed}
             parkName={park?.name ?? null}
             onPick={mentions.pick}

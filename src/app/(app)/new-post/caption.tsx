@@ -63,7 +63,7 @@ export default function NewPostCaption() {
     onPost,
     parkId: park?.id,
   });
-  const mentioning = mentions.candidates.length > 0;
+  const mentioning = mentions.candidates.length > 0 || mentions.pages.length > 0;
 
   const clips = items.filter((m) => m.kind === 'video').length;
 
@@ -187,6 +187,7 @@ export default function NewPostCaption() {
           <View>
             <MentionList
               candidates={mentions.candidates}
+              pages={mentions.pages}
               typed={mentions.typed}
               parkName={park?.name ?? null}
               onPick={mentions.pick}

@@ -5,10 +5,12 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { PageRow, SuggestPageBox } from '@/components/pages';
 import { ParkRow } from '@/components/parks';
 import { Icon } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
+import { type PageResult, searchPages } from '@/lib/pages';
 import { type PersonResult, searchPeople } from '@/lib/people';
 import {
   distanceMeters,
@@ -20,11 +22,12 @@ import {
 } from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
-type Filter = 'all' | 'people' | 'parks';
+type Filter = 'all' | 'people' | 'parks' | 'pages';
 type Point = { latitude: number; longitude: number };
 type Results = {
   people: PersonResult[];
   parks: SearchResult[];
+  pages: PageResult[];
   coords: Map<string, Point>;
   failed: boolean;
 };
@@ -33,10 +36,13 @@ const MIN_CHARS = 2;
 const DEBOUNCE_MS = 250;
 
 /**
- * Search tab (Nov 1): one box for people and parks, an All / People / Parks
- * switch, and results grouped by type. People match on username; parks on
- * display name, official name and aliases, accent-insensitive. The map's
- * own search bar stays for picking a city to plan a trip.
+ * Search tab (Nov 1): one box for people, parks and brand and shop pages, an
+ * All / People / Parks / Pages switch, and results grouped by type. People
+ * match on username; parks on display name, official name and aliases;
+ * pages on handle, name and "Formerly" names, all accent-insensitive. Under
+ * the results (All and Pages), "Can't find a brand or shop? Suggest it"
+ * (Search-Pages mockup, v2). The map's own search bar stays for picking a
+ * city to plan a trip.
  */
 export default function Search() {
   const { t, i18n } = useTranslation();
@@ -90,7 +96,7 @@ export default function Search() {
 
   async function run(query: string) {
     let failed = false;
-    const [people, directory] = await Promise.all([
+    const [people, directory, pages] = await Promise.all([
       searchPeople(query).catch(() => {
         failed = true;
         return [] as PersonResult[];
@@ -100,12 +106,16 @@ export default function Search() {
         failed = true;
         return [] as SearchResult[];
       }),
+      searchPages(query).catch(() => {
+        failed = true;
+        return [] as PageResult[];
+      }),
     ]);
     const parks = directory.filter((r) => r.kind === 'park');
     // Coordinates come separately, so distances can show once location arrives.
     const coords = await parkCoords(parks.map((p) => p.id)).catch(() => new Map<string, Point>());
     if (latest.current !== query) return;
-    setResults({ people, parks, coords, failed });
+    setResults({ people, parks, pages, coords, failed });
     setSearching(false);
   }
 
@@ -127,14 +137,18 @@ export default function Search() {
       .join(' · ');
   }
 
-  const showPeople = filter !== 'parks' && (results?.people.length ?? 0) > 0;
-  const showParks = filter !== 'people' && (results?.parks.length ?? 0) > 0;
-  const nothing = results !== null && !showPeople && !showParks;
+  const showPeople = (filter === 'all' || filter === 'people') && (results?.people.length ?? 0) > 0;
+  const showParks = (filter === 'all' || filter === 'parks') && (results?.parks.length ?? 0) > 0;
+  const showPages = (filter === 'all' || filter === 'pages') && (results?.pages.length ?? 0) > 0;
+  const nothing = results !== null && !showPeople && !showParks && !showPages;
+  // Offered under any search that could have been for a brand or shop.
+  const offerSuggest = results !== null && (filter === 'all' || filter === 'pages');
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('find.all') },
     { key: 'people', label: t('find.people') },
     { key: 'parks', label: t('find.parks') },
+    { key: 'pages', label: t('find.pages') },
   ];
 
   return (
@@ -252,8 +266,23 @@ export default function Search() {
                 ))}
               </View>
             ) : null}
+            {showPages ? (
+              <View style={styles.list}>
+                <Text variant="label" color="textSecondary" accessibilityRole="header">
+                  {t('find.pagesHeading')}
+                </Text>
+                {results?.pages.map((p) => (
+                  <PageRow
+                    key={p.id}
+                    page={p}
+                    onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: p.handle } })}
+                  />
+                ))}
+              </View>
+            ) : null}
           </>
         )}
+        {offerSuggest ? <SuggestPageBox /> : null}
       </ScrollView>
     </SafeAreaView>
   );
