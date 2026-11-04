@@ -61,25 +61,49 @@ export function useToggleLike(userId: string | undefined) {
 
 /* Comments ------------------------------------------------------------------------------- */
 
+/** The page a comment was made as (PR 8b). */
+export type CommentPage = {
+  id: string;
+  handle: string;
+  displayName: string;
+  logoPath: string | null;
+  state: PageState;
+  roles: string[];
+};
+
 export type Comment = {
   id: string;
   parentId: string | null;
-  /** Null when the comment was deleted. */
+  /** Null when the comment was deleted, or made as a page. */
   authorId: string | null;
   /** Null for a deleted comment or a deleted account. */
   username: string | null;
   avatarPath: string | null;
   body: string | null;
+  /** A person's username, or a page's handle when it answers a page. */
   replyToUsername: string | null;
+  replyToPageId: string | null;
   isPoster: boolean;
   deleted: boolean;
   createdAt: string;
+  /** Set when the comment was made as a page: the page shows, not the member. */
+  page: CommentPage | null;
+  /** Yours, on your post, made as your page, or on a page you manage (the database decides). */
+  canDelete: boolean;
+  /** Made as a page you're on, so it can't be reported. */
+  byMyPage: boolean;
 };
 
 /** A top-level comment and its replies, oldest first. */
 export type Thread = { comment: Comment; replies: Comment[] };
 
 export const MAX_COMMENT = 1000;
+
+function commentPage(raw: unknown): CommentPage | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const p = raw as { id: string; handle: string; display_name: string; logo_path: string | null; state: PageState; roles: string[] | null };
+  return { id: p.id, handle: p.handle, displayName: p.display_name, logoPath: p.logo_path, state: p.state, roles: p.roles ?? [] };
+}
 
 async function fetchComments(postId: string): Promise<Thread[]> {
   const { data, error } = await supabase.rpc('post_comments', { post: postId });
@@ -92,9 +116,13 @@ async function fetchComments(postId: string): Promise<Thread[]> {
     avatarPath: r.avatar_path,
     body: r.body,
     replyToUsername: r.reply_to_username,
+    replyToPageId: r.reply_to_page_id,
     isPoster: r.is_poster,
     deleted: r.deleted,
     createdAt: r.created_at,
+    page: commentPage(r.page),
+    canDelete: r.can_delete,
+    byMyPage: r.by_my_page,
   }));
   const threads = new Map<string, Thread>();
   for (const c of rows) if (!c.parentId) threads.set(c.id, { comment: c, replies: [] });
@@ -113,19 +141,53 @@ export function useComments(postId: string | undefined) {
   });
 }
 
-/** Who you're answering: the thread, and the person to @mention. */
-export type ReplyTarget = { threadId: string; username: string | null; userId: string | null };
+/**
+ * Who you're answering: the thread, and the person (or page) to @mention.
+ * Answering a page's comment sets pageId, and username is the page's handle.
+ */
+export type ReplyTarget = { threadId: string; username: string | null; userId: string | null; pageId?: string | null };
+
+/** A page you can comment as on a post (PR 8b). */
+export type CommentAsPage = { pageId: string; handle: string; displayName: string; logoPath: string | null; state: PageState; roles: string[] };
+
+/**
+ * The pages you can comment as on this post: its own page, or a page the
+ * caption or a comment mentions (the database decides, blocks included).
+ * Empty for nearly everyone, so the toggle doesn't show.
+ */
+export function useCommentAsPages(postId: string | undefined, userId: string | undefined) {
+  return useQuery({
+    queryKey: ['comment-as-pages', userId ?? '', postId ?? ''],
+    queryFn: async (): Promise<CommentAsPage[]> => {
+      const { data, error } = await supabase.rpc('comment_as_pages', { post: postId! });
+      if (error) throw error;
+      return (data ?? []).map((p) => ({
+        pageId: p.page_id,
+        handle: p.handle,
+        displayName: p.display_name,
+        logoPath: p.logo_path,
+        state: p.state as PageState,
+        roles: p.roles ?? [],
+      }));
+    },
+    enabled: Boolean(postId && userId),
+    staleTime: fresh.social,
+  });
+}
 
 export function useAddComment(postId: string | undefined, userId: string | undefined) {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async ({ body, replyTo }: { body: string; replyTo: ReplyTarget | null }) => {
+    mutationFn: async ({ body, replyTo, asPage }: { body: string; replyTo: ReplyTarget | null; asPage?: string | null }) => {
+      // As a page: no author, the page instead (the database keeps who wrote it).
       const { error } = await supabase.from('comments').insert({
         post_id: postId!,
-        author_id: userId!,
+        author_id: asPage ? null : userId!,
+        page_id: asPage ?? null,
         body: body.trim(),
         parent_id: replyTo?.threadId ?? null,
-        reply_to_user_id: replyTo?.userId ?? null,
+        reply_to_user_id: replyTo?.pageId ? null : (replyTo?.userId ?? null),
+        reply_to_page_id: replyTo?.pageId ?? null,
       });
       if (error) throw error;
     },

@@ -118,9 +118,11 @@ function rowTitle(item: QueueItem): { title: string; sub: string } {
     if (item.target === "person") return { title: `${who} reported${times}`, sub: reason };
     const thing =
       item.target === "meetup" ? "Meetup" : item.target === "meetup_comment" ? "Meetup comment" : item.target === "comment" ? "Comment" : "Post";
+    // A post or comment made as a page (PR 8b) has no person: name the page.
+    const by = item.page ? item.page.name : who;
     return {
       title: `${thing} reported${times}`,
-      sub: item.target === "meetup" && item.label ? `${reason} · “${item.label}” · ${who}` : `${reason} · ${who}`,
+      sub: item.target === "meetup" && item.label ? `${reason} · “${item.label}” · ${by}` : `${reason} · ${by}`,
     };
   }
   if (item.kind === "park_info") {
@@ -159,6 +161,14 @@ function rowTitle(item: QueueItem): { title: string; sub: string } {
 /** The Where column: the park, or the page and its place. */
 function whereCell(item: QueueItem): { main: React.ReactNode; sub: string | null } {
   if (item.kind === "page_suggestion") return { main: item.target === "shop" ? "New shop" : "New brand", sub: null };
+  // A report on a page's post or comment: the park, with the page under it.
+  if (item.kind === "report" && item.page) {
+    const type = item.page.roles.includes("shop") ? "Shop" : "Brand";
+    return {
+      main: item.parkName ?? <span className="text-gl-text-secondary">No park</span>,
+      sub: `${item.page.name} · ${type}`,
+    };
+  }
   if (item.page) {
     const type = item.page.roles.includes("shop") ? "Shop" : "Brand";
     return { main: item.page.name, sub: [type, item.page.place].filter(Boolean).join(" · ") };

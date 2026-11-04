@@ -454,7 +454,9 @@
       "suggestionLiveWhat": "Your suggestion for {{name}} is live: {{what}}",
       "handedOver": "{{a}} is now the owner of {{name}}. You're a manager.",
       "ownershipDeclined": "{{a}} declined to take over {{name}}",
-      "mention": "{{a}} mentioned {{name}}"
+      "mention": "{{a}} mentioned {{name}}",
+      "commentPost": "{{a}} commented on {{name}}'s post",
+      "commentReply": "{{a}} replied to {{name}}"
     }
   },
   "feed": {
@@ -865,6 +867,18 @@
     "mentionFollowing": "Following",
     "mentionRegular": "Regular at {{park}}",
     "mentionHost": "Hosting"
+  },
+  "commentAs": {
+    "title": "Comment as",
+    "you": "you",
+    "page": "page",
+    "asYou": "as you",
+    "asPage": "as {{name}}",
+    "toggleLabel": "Commenting as {{name}}",
+    "toggleHint": "Choose whether to comment as you or as a page you're on",
+    "placeholder": "Comment as {{name}}",
+    "where": "{{name}} can comment on its own posts and posts that mention it.",
+    "notHere": "{{name}} can't comment on this post any more."
   },
   "clip": {
     "play": "Play clip",
@@ -1922,11 +1936,16 @@
     "followersLine_one": "person follows {{name}}",
     "followersLine_other": "people follow {{name}}",
     "followersNote": "Only your team sees this number. Nobody sees who.",
-    "empty": "When someone @mentions {{name}} in a caption or a comment, it shows up here.",
+    "empty": "When someone comments on {{name}}'s posts, replies to it or @mentions it, it shows up here.",
     "new": "New",
     "earlier": "Earlier",
     "push": "Push for this inbox",
-    "pushBody": "Just for you. Everyone on the team sets their own."
+    "pushBody": "Just for you. Everyone on the team sets their own.",
+    "postComment": "{{username}} commented on {{name}}'s post",
+    "postComments_one": "{{username}} and {{count}} other commented on {{name}}'s post",
+    "postComments_other": "{{username}} and {{count}} others commented on {{name}}'s post",
+    "reply": "{{username}} replied to {{name}}",
+    "viewPage": "View page"
   },
   "pageAddress": {
     "title": "Address and pin",

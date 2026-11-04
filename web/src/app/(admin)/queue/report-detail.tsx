@@ -103,9 +103,12 @@ export function ReportDetailPane({
   const thing = isComment ? "comment" : d.target === "meetup" ? "meetup" : "post";
   const hiddenNow = d.target === "meetup" ? Boolean(d.meetup?.hidden) : d.target === "post" && d.post?.status !== "visible";
   const roleHolder = !d.canBan && !!d.person?.holdsRole;
+  // Made as a page (PR 8b): there's no person to warn, suspend or ban.
+  const asPage = d.page;
 
   function start(decision: Decision) {
     if (roleHolder && (decision === "warn" || decision === "suspend")) return;
+    if (asPage && (decision === "warn" || decision === "suspend" || decision === "ban")) return;
     if (!hasContent && decision === "keep_hidden") return;
     setError(null);
     setMessage("");
@@ -218,7 +221,12 @@ export function ReportDetailPane({
         <article className="flex flex-col gap-3 border-2 border-gl-border p-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col">
-              <span className="type-body-sm font-semibold">{d.post.author ? `@${d.post.author}` : "deleted user"}</span>
+              <span className="type-body-sm font-semibold">
+                {d.postPage ? `${d.postPage.name} (@${d.postPage.handle})` : d.post.author ? `@${d.post.author}` : "deleted user"}
+                {d.madeBy && d.target === "post" && (
+                  <span className="font-normal text-gl-text-secondary"> · made by @{d.madeBy}, only you see this</span>
+                )}
+              </span>
               <span className="type-caption text-gl-text-secondary">
                 {d.post.park ? `${d.post.park.name} · ` : ""}
                 {shortDate(d.post.createdAt)}
@@ -260,10 +268,12 @@ export function ReportDetailPane({
       {d.comment && (
         <article className="flex flex-col gap-2 border-2 border-gl-border p-4">
           <span className="type-body-sm font-semibold">
-            {d.comment.author ? `@${d.comment.author}` : "deleted user"}{" "}
+            {d.page ? `${d.page.name} (@${d.page.handle})` : d.comment.author ? `@${d.comment.author}` : "deleted user"}{" "}
             <span className="font-normal text-gl-text-secondary">
               commented {shortDate(d.comment.createdAt)}
-              {d.post?.park ? ` on a post at ${d.post.park.name}` : ""}
+              {d.postPage ? ` on ${d.postPage.name}'s post` : ""}
+              {d.post?.park ? ` at ${d.post.park.name}` : ""}
+              {d.madeBy && d.target === "comment" ? ` · made by @${d.madeBy}, only you see this` : ""}
               {d.meetup ? ` on ${d.meetup.title ?? d.meetup.note ?? "a meetup"}${d.meetup.park ? ` at ${d.meetup.park.name}` : ""}` : ""}
             </span>
           </span>
@@ -329,14 +339,14 @@ export function ReportDetailPane({
               {isComment ? "Remove comment" : d.target === "meetup" ? (hiddenNow ? "Keep hidden" : "Hide date") : d.post?.status === "visible" ? "Hide post" : "Keep hidden"}
             </Button>
           )}
-          <Button variant="outline" disabled={roleHolder} onClick={() => start("warn")}>
+          <Button variant="outline" disabled={roleHolder || !!asPage} onClick={() => start("warn")}>
             Warn
           </Button>
-          <Button variant="danger" disabled={roleHolder} onClick={() => start("suspend")}>
+          <Button variant="danger" disabled={roleHolder || !!asPage} onClick={() => start("suspend")}>
             Suspend…
           </Button>
           {d.canBan ? (
-            <Button variant="danger" onClick={() => start("ban")}>
+            <Button variant="danger" disabled={!!asPage} onClick={() => start("ban")}>
               Ban permanently…
             </Button>
           ) : (
@@ -347,7 +357,9 @@ export function ReportDetailPane({
           )}
         </div>
         <p className="type-caption text-gl-text-secondary">
-          {roleHolder
+          {asPage
+            ? `Made as ${asPage.name}, so there's nobody to warn or suspend. Dismiss, or ${isComment ? "remove the comment" : "keep it hidden"}; nobody is told.`
+            : roleHolder
             ? `${who} holds a role, so warnings and suspensions go through Rachel: escalate instead.`
             : `Dismissing ${hiddenNow ? `brings the ${thing} back and ` : ""}tells nobody. ${
                 d.target === "meetup"

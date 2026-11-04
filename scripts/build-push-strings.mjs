@@ -19,6 +19,8 @@ const pageKeys = [
   'teamInvite', 'ownership', 'claimApproved', 'claimDeclined', 'claimTaken', 'madeRole', 'removed', 'owner', 'joined', 'suggestionLive',
   // Running a page (PR 7a).
   'handedOver', 'ownershipDeclined', 'mention',
+  // Commenting as a page (PR 8b): comments in a page's inbox.
+  'commentPost', 'commentReply',
 ];
 /** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
 const roles = ['staff', 'manager'];

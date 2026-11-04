@@ -454,7 +454,9 @@
       "suggestionLiveWhat": "Tu sugerencia para {{name}} ya está publicada: {{what}}",
       "handedOver": "{{a}} es ahora dueño de {{name}}. Tú eres gerente.",
       "ownershipDeclined": "{{a}} no aceptó hacerse cargo de {{name}}",
-      "mention": "{{a}} mencionó a {{name}}"
+      "mention": "{{a}} mencionó a {{name}}",
+      "commentPost": "{{a}} comentó en la publicación de {{name}}",
+      "commentReply": "{{a}} respondió a {{name}}"
     }
   },
   "feed": {
@@ -865,6 +867,18 @@
     "mentionFollowing": "Lo sigues",
     "mentionRegular": "Habitual en {{park}}",
     "mentionHost": "Anfitrión"
+  },
+  "commentAs": {
+    "title": "Comentar como",
+    "you": "tú",
+    "page": "página",
+    "asYou": "como tú",
+    "asPage": "como {{name}}",
+    "toggleLabel": "Comentando como {{name}}",
+    "toggleHint": "Elige si comentar como tú o como una página de la que formas parte",
+    "placeholder": "Comenta como {{name}}",
+    "where": "{{name}} puede comentar en sus propias publicaciones y en las que la mencionan.",
+    "notHere": "{{name}} ya no puede comentar en esta publicación."
   },
   "clip": {
     "play": "Reproducir clip",
@@ -1922,11 +1936,16 @@
     "followersLine_one": "persona sigue a {{name}}",
     "followersLine_other": "personas siguen a {{name}}",
     "followersNote": "Solo tu equipo ve este número. Nadie ve quiénes son.",
-    "empty": "Cuando alguien @mencione a {{name}} en un pie de foto o un comentario, aparecerá aquí.",
+    "empty": "Cuando alguien comente en las publicaciones de {{name}}, le responda o la @mencione, aparecerá aquí.",
     "new": "Nuevo",
     "earlier": "Antes",
     "push": "Avisos de esta bandeja",
-    "pushBody": "Solo para ti. Cada persona del equipo elige los suyos."
+    "pushBody": "Solo para ti. Cada persona del equipo elige los suyos.",
+    "postComment": "{{username}} comentó en la publicación de {{name}}",
+    "postComments_one": "{{username}} y {{count}} persona más comentaron en la publicación de {{name}}",
+    "postComments_other": "{{username}} y {{count}} personas más comentaron en la publicación de {{name}}",
+    "reply": "{{username}} respondió a {{name}}",
+    "viewPage": "Ver página"
   },
   "pageAddress": {
     "title": "Dirección y pin",

@@ -454,7 +454,9 @@
       "suggestionLiveWhat": "Dit forslag til {{name}} er nu live: {{what}}",
       "handedOver": "{{a}} ejer nu {{name}}. Du er manager.",
       "ownershipDeclined": "{{a}} sagde nej til at overtage {{name}}",
-      "mention": "{{a}} nævnte {{name}}"
+      "mention": "{{a}} nævnte {{name}}",
+      "commentPost": "{{a}} kommenterede {{name}}s opslag",
+      "commentReply": "{{a}} svarede {{name}}"
     }
   },
   "feed": {
@@ -865,6 +867,18 @@
     "mentionFollowing": "Du følger",
     "mentionRegular": "Fast gæst i {{park}}",
     "mentionHost": "Vært"
+  },
+  "commentAs": {
+    "title": "Kommentér som",
+    "you": "dig",
+    "page": "side",
+    "asYou": "som dig",
+    "asPage": "som {{name}}",
+    "toggleLabel": "Kommenterer som {{name}}",
+    "toggleHint": "Vælg om du kommenterer som dig selv eller som en side, du er med på",
+    "placeholder": "Kommentér som {{name}}",
+    "where": "{{name}} kan kommentere sine egne opslag og opslag, der nævner den.",
+    "notHere": "{{name}} kan ikke længere kommentere dette opslag."
   },
   "clip": {
     "play": "Afspil klip",
@@ -1922,11 +1936,16 @@
     "followersLine_one": "person følger {{name}}",
     "followersLine_other": "personer følger {{name}}",
     "followersNote": "Kun dit team ser dette tal. Ingen ser hvem.",
-    "empty": "Når nogen @nævner {{name}} i en billedtekst eller en kommentar, dukker det op her.",
+    "empty": "Når nogen kommenterer {{name}}s opslag, svarer den eller @nævner den, dukker det op her.",
     "new": "Nyt",
     "earlier": "Tidligere",
     "push": "Push for denne indbakke",
-    "pushBody": "Kun for dig. Alle på teamet vælger selv."
+    "pushBody": "Kun for dig. Alle på teamet vælger selv.",
+    "postComment": "{{username}} kommenterede {{name}}s opslag",
+    "postComments_one": "{{username}} og {{count}} anden kommenterede {{name}}s opslag",
+    "postComments_other": "{{username}} og {{count}} andre kommenterede {{name}}s opslag",
+    "reply": "{{username}} svarede {{name}}",
+    "viewPage": "Se side"
   },
   "pageAddress": {
     "title": "Adresse og nål",
