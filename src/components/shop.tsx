@@ -12,9 +12,9 @@ import { Alert, Linking, Pressable, StyleSheet, View } from 'react-native';
 
 import { openDirections, StatusChip } from '@/components/parks';
 import { Icon, type IconName } from '@/components/ui';
-import { formatClock } from '@/lib/hours';
+import { formatClock, formatMonthDay } from '@/lib/hours';
 import { type CarriedBrand, linkKind, linkUrl, type Page } from '@/lib/pages';
-import { shopOpenState, timeZoneCity, weekLines } from '@/lib/shops';
+import { shopOpenState, shopWeek, timeZoneCity, type WeekLine } from '@/lib/shops';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /** Where a shop is, if it says: by-appointment shops without a pin show the city only. */
@@ -153,15 +153,62 @@ function SquareButton({
  * The week's hours on the shop's own clock, days with the same hours run
  * together. While the shop is closed for a while they're its usual hours,
  * greyed. A storefront with no hours yet shows nothing.
+ *
+ * Hours that change with the seasons (PR 7b) show today's set with the date
+ * it runs to, and the next set behind a tap; dates without hours read
+ * Closed for the season.
  */
 export function ShopHours({ page }: { page: Page }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
+  const [showNext, setShowNext] = useState(false);
   if (page.locationType !== 'storefront' || page.hours.length === 0) return null;
   const locale = i18n.language;
-  const lines = weekLines(page.hours, page.timeZone);
+  const week = shopWeek(page.hours, page.timeZone);
   const city = page.city ?? timeZoneCity(page.timeZone);
   const usual = Boolean(page.tempClosedAt);
+  const date = (d: { month: number; day: number }) => formatMonthDay(d.month, d.day, locale);
+  const base = city
+    ? t(usual ? 'shop.usualHoursIn' : 'shop.hoursIn', { city })
+    : t(usual ? 'shop.usualHours' : 'shop.hours');
+  const title = week.until ? t('shop.hoursUntil', { hours: base, date: date(week.until) }) : base;
+  return (
+    <View style={[styles.card, { backgroundColor: c.surfaceRaised }]} accessibilityRole="summary">
+      <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.cardTitle}>
+        {title.toUpperCase()}
+      </Text>
+      {week.lines.length ? (
+        <HoursLines lines={week.lines} muted={usual} />
+      ) : (
+        <Text variant="body" color="textSecondary" style={styles.hoursRow}>
+          {t('shop.closedForSeason')}
+        </Text>
+      )}
+      {week.next ? (
+        <>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityState={{ expanded: showNext }}
+            onPress={() => setShowNext((v) => !v)}
+            style={({ pressed }) => [styles.nextToggle, pressed && styles.pressed]}
+          >
+            <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
+              {t('shop.hoursFrom', { date: date(week.next.from) })}
+            </Text>
+            <Icon name={showNext ? 'chevronUp' : 'chevronDown'} color={c.text} size={18} />
+          </Pressable>
+          {showNext ? <HoursLines lines={week.next.lines} muted /> : null}
+        </>
+      ) : null}
+    </View>
+  );
+}
+
+/** One line per run of days, and one line per opening, so a split day (11–2:30, 3:45–5) stacks. */
+function HoursLines({ lines, muted }: { lines: WeekLine[]; muted: boolean }) {
+  const { t, i18n } = useTranslation();
+  const c = useColors();
+  const locale = i18n.language;
   const dayName = (d: number, style: 'short' | 'long') =>
     // 2026-01-05 was a Monday.
     new Intl.DateTimeFormat(locale, { weekday: style, timeZone: 'UTC' }).format(new Date(Date.UTC(2026, 0, 4 + d)));
@@ -171,43 +218,25 @@ export function ShopHours({ page }: { page: Page }) {
       : from === to
         ? dayName(from, 'long')
         : t('shop.dayRange', { from: dayName(from, 'short'), to: dayName(to, 'short') });
-  const title = city
-    ? t(usual ? 'shop.usualHoursIn' : 'shop.hoursIn', { city })
-    : t(usual ? 'shop.usualHours' : 'shop.hours');
   return (
-    <View style={[styles.card, { backgroundColor: c.surfaceRaised }]} accessibilityRole="summary">
-      <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.cardTitle}>
-        {title.toUpperCase()}
-      </Text>
+    <>
       {lines.map((line, i) => {
-        // One line per opening, so a split day (11–2:30, 3:45–5) stacks
-        // instead of squeezing the day name.
         const times =
           line.spans.length === 0
             ? [t('shop.closed')]
-            : line.spans.map((s) =>
-                t('park.timeRange', { start: formatClock(s.start, locale), end: formatClock(s.end, locale) }),
-              );
-        const timeStyle = usual || line.spans.length === 0 ? undefined : { fontFamily: fontFamily.sansSemiBold };
+            : line.spans.map((s) => t('park.timeRange', { start: formatClock(s.start, locale), end: formatClock(s.end, locale) }));
+        const timeStyle = muted || line.spans.length === 0 ? undefined : { fontFamily: fontFamily.sansSemiBold };
         return (
           <View
             key={line.from}
-            style={[
-              styles.hoursRow,
-              i < lines.length - 1 && { borderBottomWidth: stroke.hairline, borderBottomColor: c.borderSubtle },
-            ]}
+            style={[styles.hoursRow, i < lines.length - 1 && { borderBottomWidth: stroke.hairline, borderBottomColor: c.borderSubtle }]}
           >
-            <Text variant="body" color={usual ? 'textSecondary' : 'text'} numberOfLines={1} style={styles.hoursDay}>
+            <Text variant="body" color={muted ? 'textSecondary' : 'text'} numberOfLines={1} style={styles.hoursDay}>
               {days(line.from, line.to)}
             </Text>
             <View style={styles.hoursTimes}>
               {times.map((time) => (
-                <Text
-                  key={time}
-                  variant="body"
-                  color={usual ? 'textSecondary' : 'text'}
-                  style={[styles.hoursTime, timeStyle]}
-                >
+                <Text key={time} variant="body" color={muted ? 'textSecondary' : 'text'} style={[styles.hoursTime, timeStyle]}>
                   {time}
                 </Text>
               ))}
@@ -215,7 +244,7 @@ export function ShopHours({ page }: { page: Page }) {
           </View>
         );
       })}
-    </View>
+    </>
   );
 }
 
@@ -292,6 +321,7 @@ const styles = StyleSheet.create({
   hoursDay: { flexShrink: 0 },
   hoursTimes: { flex: 1, alignItems: 'flex-end', gap: 2 },
   hoursTime: { textAlign: 'right' },
+  nextToggle: { minHeight: size.tapMin, flexDirection: 'row', alignItems: 'center', gap: 4 },
   section: { paddingHorizontal: space[4], paddingTop: space[6], gap: 10 },
   brandChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   brand: { minHeight: 36, borderWidth: stroke.rule, paddingHorizontal: 10, justifyContent: 'center' },

@@ -8,7 +8,8 @@
  *   manager, remove staff and block skaters from the page.
  * - Only the owner moves a manager down, removes a manager, hands the page
  *   over (the new owner accepts from the bell) or closes it for good.
- * - Address and pin, and hours, come with PR 7b.
+ * - Address and pin (managers and the owner) and hours (everyone on the
+ *   team) came with PR 7b.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { File } from 'expo-file-system';
@@ -17,7 +18,8 @@ import * as ImagePicker from 'expo-image-picker';
 
 import i18n from '@/i18n';
 
-import type { Database } from './database.types';
+import type { Database, Json } from './database.types';
+import type { rowsFromSets } from './page-hours';
 import type { PageMemberRole, PageRole, PageState } from './pages';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
@@ -380,6 +382,36 @@ export function useSetBrandsCarried(userId: string | undefined) {
   return useMutation({
     mutationFn: async ({ pageId, brandIds }: { pageId: string; brandIds: string[] }) => {
       const { error } = await supabase.rpc('set_page_brands_carried', { page: pageId, brands: brandIds });
+      if (error) throw error;
+    },
+    onSettled: done,
+  });
+}
+
+/** Address and pin (PR 7b; managers and the owner). A null pin takes it off the map. */
+export function useSetPageLocation(userId: string | undefined) {
+  const done = usePageEdited(userId);
+  return useMutation({
+    mutationFn: async ({ pageId, address, pin }: { pageId: string; address: string; pin: { latitude: number; longitude: number } | null }) => {
+      const { error } = await supabase.rpc('set_page_location', {
+        page: pageId,
+        address: address.trim(),
+        // null, not undefined: the function has no defaults, and undefined drops out of the request.
+        latitude: (pin?.latitude ?? null) as number,
+        longitude: (pin?.longitude ?? null) as number,
+      });
+      if (error) throw error;
+    },
+    onSettled: done,
+  });
+}
+
+/** A shop's hours, replaced in one go (PR 7b; everyone on the team). See `src/lib/page-hours.ts`. */
+export function useSetPageHours(userId: string | undefined) {
+  const done = usePageEdited(userId);
+  return useMutation({
+    mutationFn: async ({ pageId, rows }: { pageId: string; rows: ReturnType<typeof rowsFromSets> }) => {
+      const { error } = await supabase.rpc('set_page_hours', { page: pageId, hours: rows as unknown as Json });
       if (error) throw error;
     },
     onSettled: done,
