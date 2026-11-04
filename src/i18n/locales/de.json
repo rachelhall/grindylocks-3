@@ -1504,6 +1504,43 @@
     "moreBrandsLabel_one": "{{count}} weitere Marke zeigen",
     "moreBrandsLabel_other": "{{count}} weitere Marken zeigen"
   },
+  "shopFix": {
+    "menu": "Korrektur vorschlagen",
+    "menuBody": "Öffnungszeiten, Adresse, Marken oder etwas anderes. Der Stadt-Admin prüft es.",
+    "label": "{{name}} · INOFFIZIELL",
+    "title": "Was stimmt nicht?",
+    "field": {
+      "hours": "Öffnungszeiten",
+      "location_type": "Laden oder nicht",
+      "location": "Adresse oder Pin",
+      "brands_carried": "Marken im Sortiment",
+      "website": "Website",
+      "closed": "Für immer geschlossen",
+      "other": "Etwas anderes"
+    },
+    "listedNow": "STEHT JETZT",
+    "listedType": {
+      "storefront": "Laden, mit Pin auf der Karte",
+      "by_appointment": "Nach Vereinbarung",
+      "online_only": "Nur online"
+    },
+    "listedHours": "Die Öffnungszeiten auf der Seite",
+    "listedOpen": "Geöffnet",
+    "shouldBe": "Was dort stehen sollte",
+    "whatsWrong": "Was stimmt nicht?",
+    "placeholder": {
+      "hours": "Di–Fr 12–18, Sa 11–17",
+      "location": "Straße und Hausnummer, Stadt",
+      "brands_carried": "Marken, die sie haben oder nicht mehr haben",
+      "website": "laden.de",
+      "other": "Sag uns, was nicht passt"
+    },
+    "note": "Notiz",
+    "who": "Der Stadt-Admin prüft es, bevor sich etwas ändert. Wir sagen dir Bescheid, wenn deine Korrektur live ist.",
+    "send": "Korrektur senden",
+    "sentTitle": "Danke, ist gesendet",
+    "sentBody": "Wir sagen dir Bescheid, wenn deine Korrektur live ist."
+  },
   "catalog": {
     "title": "Produkte",
     "pastHidden_one": "{{count}} früheres Modell ausgeblendet",

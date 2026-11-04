@@ -1504,6 +1504,43 @@
     "moreBrandsLabel_one": "Show {{count}} more brand",
     "moreBrandsLabel_other": "Show {{count}} more brands"
   },
+  "shopFix": {
+    "menu": "Suggest a fix",
+    "menuBody": "Hours, address, brands or something else. The city admin checks it.",
+    "label": "{{name}} · UNOFFICIAL",
+    "title": "What's wrong?",
+    "field": {
+      "hours": "Hours",
+      "location_type": "Storefront or not",
+      "location": "Address or pin",
+      "brands_carried": "Brands carried",
+      "website": "Website",
+      "closed": "Closed for good",
+      "other": "Something else"
+    },
+    "listedNow": "LISTED NOW",
+    "listedType": {
+      "storefront": "Storefront, with a map pin",
+      "by_appointment": "By appointment",
+      "online_only": "Online only"
+    },
+    "listedHours": "The hours on the page",
+    "listedOpen": "Open",
+    "shouldBe": "What it should be",
+    "whatsWrong": "What's wrong?",
+    "placeholder": {
+      "hours": "Tue–Fri 12–18, Sat 11–17",
+      "location": "Street and number, city",
+      "brands_carried": "Brands they have, or don't have any more",
+      "website": "shop.com",
+      "other": "Tell us what's off"
+    },
+    "note": "Note",
+    "who": "The city admin checks it before anything changes. We'll let you know when your fix goes live.",
+    "send": "Send fix",
+    "sentTitle": "Thanks, it's sent",
+    "sentBody": "We'll let you know when your fix goes live."
+  },
   "catalog": {
     "title": "Products",
     "pastHidden_one": "{{count}} past model hidden",

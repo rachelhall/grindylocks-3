@@ -10,6 +10,7 @@ import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
+import { useShopFixSheet } from '@/components/shop-fix';
 import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
 import { SafeAreaView } from '@/components/safe-area';
 import { useExplainRestriction } from '@/components/safety';
@@ -144,6 +145,7 @@ function PageBody({ page }: { page: Page }) {
       { text: t('block.block'), style: 'destructive', onPress: block },
     ]);
   const report = usePageReportSheet({ onBlock: state?.blocked ? undefined : block });
+  const shopFix = useShopFixSheet();
 
   const toggle = (what: 'follow' | 'mute' | 'block', on: boolean) =>
     relation.mutate(
@@ -165,7 +167,14 @@ function PageBody({ page }: { page: Page }) {
       onPress: () => report.open({ id: page.id, handle: page.handle, displayName: name }),
     };
     if (archive) return menu.open({ name, handle: page.handle, stamp }, [reportItem]);
+    // Unofficial shops have nobody to fix them: anyone can suggest a fix,
+    // checked by the shop's city admin (Shop-Fix).
+    const fixItem =
+      page.state === 'unofficial' && page.roles.includes('shop')
+        ? [{ icon: 'edit' as const, title: t('shopFix.menu'), body: t('shopFix.menuBody'), onPress: () => shopFix.open(page) }]
+        : [];
     menu.open({ name, handle: page.handle, stamp }, [
+      ...fixItem,
       state?.muted
         ? { icon: 'soundOn', title: t('page.menu.unmute'), body: t('page.menu.unmuteBody'), onPress: () => toggle('mute', false) }
         : { icon: 'soundOff', title: t('page.menu.mute'), body: t('page.menu.muteBody'), onPress: () => toggle('mute', true) },
@@ -381,6 +390,7 @@ function PageBody({ page }: { page: Page }) {
       </Animated.ScrollView>
       {menu.sheet}
       {report.sheet}
+      {shopFix.sheet}
     </View>
   );
 }
