@@ -158,6 +158,14 @@ export const keys = {
   goingPrivately: (userId: string) => ['going-privately', userId] as const,
   /** A signed URL for a meetup's cover photo. */
   meetupCover: (path: string) => ['meetup-cover', path] as const,
+  /** A brand or shop page, by handle (any capitals). Every page key starts with 'page'. */
+  page: (handle: string) => ['page', 'handle', handle.toLowerCase().replace(/^@+/, '')] as const,
+  /** Which page a handle points at, if any (profile links to a page's handle). */
+  pageHandle: (handle: string) => ['page', 'id-for', handle.toLowerCase().replace(/^@+/, '')] as const,
+  /** Your follow, mute and block of a page. */
+  pageState: (userId: string, pageId: string) => ['page', 'state', userId, pageId] as const,
+  /** Search's Pages filter and the @ list's Pages heading. */
+  pageSearch: (q: string, forMention: boolean) => ['page-search', forMention ? 'mention' : 'search', q] as const,
   /** How many posts and park photos you have (Delete account). */
   myContentCounts: (userId: string) => ['content-counts', userId] as const,
 };

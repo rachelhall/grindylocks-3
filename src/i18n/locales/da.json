@@ -421,7 +421,7 @@
   },
   "find": {
     "title": "Søg",
-    "placeholder": "Søg efter folk eller parker",
+    "placeholder": "Søg efter personer, parker eller sider",
     "show": "Vis",
     "all": "Alle",
     "people": "Folk",
@@ -430,7 +430,11 @@
     "error": "Kunne ikke søge. Tjek din forbindelse.",
     "following": "Følger",
     "requested": "Anmodet",
-    "privateAccount": "Privat konto"
+    "privateAccount": "Privat konto",
+    "pages": "Sider",
+    "pagesHeading": "Brands og butikker",
+    "suggestTitle": "Kan du ikke finde et brand eller en butik?",
+    "suggestLink": "Foreslå det"
   },
   "profile": {
     "edit": "Rediger profil",
@@ -886,7 +890,13 @@
     "gone": "Det er ikke tilgængeligt længere.",
     "titleMeetup": "Anmeld dette meetup",
     "meetupBy": "Meetup med @{{username}} som vært",
-    "whoMeetup": "@{{username}} får ikke at vide, hvem der anmeldte det. Parkens admins kigger på det."
+    "whoMeetup": "@{{username}} får ikke at vide, hvem der anmeldte det. Parkens admins kigger på det.",
+    "impersonation": "Udgiver sig for at være et brand eller en butik",
+    "whichPage": "Hvilket brand eller hvilken butik?",
+    "findPage": "Søg efter brands og butikker",
+    "changePage": "Skift",
+    "noPageFound": "Der er intet brand eller nogen butik med det navn.",
+    "whoImpersonation": "@{{username}} får ikke at vide, hvem der anmeldte det. Rachel sammenligner med {{page}}s side."
   },
   "moderation": {
     "reported": {
@@ -901,7 +911,13 @@
       "inappropriate_one": "Anmeldt {{count}} gang som upassende",
       "inappropriate_other": "Anmeldt {{count}} gange som upassende",
       "other_one": "Anmeldt {{count}} gang",
-      "other_other": "Anmeldt {{count}} gange"
+      "other_other": "Anmeldt {{count}} gange",
+      "impersonation_one": "Anmeldt {{count}} gang for at udgive sig for at være et brand eller en butik",
+      "impersonation_other": "Anmeldt {{count}} gange for at udgive sig for at være et brand eller en butik",
+      "our_page_one": "Anmeldt {{count}} gang af en, der siger, det er deres brand eller butik",
+      "our_page_other": "Anmeldt {{count}} gange af folk, der siger, det er deres brand eller butik",
+      "wrong_info_one": "Anmeldt {{count}} gang for forkerte oplysninger",
+      "wrong_info_other": "Anmeldt {{count}} gange for forkerte oplysninger"
     },
     "autoHidden": "Skjult automatisk",
     "hidden": "Skjult",
@@ -1324,5 +1340,90 @@
     "allUpcoming": "Alle kommende",
     "failed": "Kunne ikke gemme dine ændringer",
     "seasonsPark": "Parken for dette meetup kommer fra sæsonerne, så skift kun parken for denne dato."
+  },
+  "page": {
+    "brand": "Brand",
+    "shop": "Butik",
+    "stamp": {
+      "official": "Officiel",
+      "unofficial": "Uofficiel",
+      "retired": "Ophørt",
+      "closed": "Lukket"
+    },
+    "foundingPartner": "Stiftende partner",
+    "officialPage": "Officiel side",
+    "unofficialBrand": "Uofficiel, ikke styret af dette brand",
+    "unofficialShop": "Uofficiel, ikke styret af denne butik",
+    "nameOnly": "Ikke styret af dette brand. Listet, så skaternes udstyr forbliver linket.",
+    "retiredIn": "{{name}} stoppede med at lave udstyr i {{year}}. Siden bliver stående som arkiv, så skatere stadig kan finde og snakke om udstyret.",
+    "retiredAround": "{{name}} stoppede med at lave udstyr omkring {{year}}. Siden bliver stående som arkiv, så skatere stadig kan finde og snakke om udstyret.",
+    "retired": "{{name}} laver ikke udstyr længere. Siden bliver stående som arkiv, så skatere stadig kan finde og snakke om udstyret.",
+    "closedIn": "Butikken lukkede i {{date}}. Siden bliver stående som arkiv med sine opslag.",
+    "closedUntil": "Lukket indtil {{date}}",
+    "closedForNow": "Lukket indtil videre",
+    "closedSetBy": "Sat af {{name}}-teamet",
+    "formerly": "Tidligere {{names}}",
+    "website": "Hjemmeside",
+    "instagram": "Instagram",
+    "youtube": "YouTube",
+    "follow": "Følg",
+    "following": "Følger",
+    "followHint": "Følg for at få besked, når {{name}} kommer på Grindylocks.",
+    "followFailed": "Kunne ikke følge. Tjek din forbindelse.",
+    "blocked": "Du har blokeret {{name}}. Dens opslag og meetups er skjult for dig.",
+    "unblock": "Fjern blokering",
+    "posts": "Opslag",
+    "noPosts": "Ingen opslag endnu.",
+    "missing": "Der er ingen brand- eller butiksside her.",
+    "more": "Mere: skjul, bloker eller anmeld",
+    "moreReport": "Mere: anmeld",
+    "menu": {
+      "mute": "Skjul",
+      "muteBody": "Skjul deres opslag fra Hjem. Du følger dem stadig, og de får det ikke at vide.",
+      "unmute": "Vis igen",
+      "unmuteBody": "Deres opslag vises i Hjem igen.",
+      "report": "Anmeld side",
+      "reportBody": "Går til Rachel",
+      "block": "Bloker {{name}}",
+      "blockBody": "Stopper med at følge, skjuler deres opslag og meetups overalt og forhindrer dem i at kommentere dine. De får det ikke at vide.",
+      "unblock": "Fjern blokering af {{name}}",
+      "unblockBody": "Deres opslag og meetups kan vises igen. Du følger dem ikke, medmindre du vælger det.",
+      "blockConfirm": "Bloker {{name}}?"
+    },
+    "report": {
+      "label": "Side @{{handle}}",
+      "title": "Anmeld denne side",
+      "impersonationBody": "Ikke den rigtige",
+      "ourPage": "Det er vores brand eller butik",
+      "ourPageBody": "En anden styrer den",
+      "wrongInfo": "Forkerte oplysninger",
+      "wrongInfoBody": "Navn, sted, åbningstider eller links",
+      "reach": "Hvordan kan vi kontakte dig?",
+      "reachHint": "Din rolle og en e-mail på brandets eget domæne hjælper",
+      "who": "Anmeldelser af en side går direkte til Rachel. {{name}}s team får ikke at vide, hvem der anmeldte den.",
+      "blockToo": "Bloker også {{name}}?",
+      "blockTooBody": "Dens opslag og meetups forsvinder for dig, og den kan ikke kommentere dine. Den får det ikke at vide."
+    },
+    "suggest": {
+      "title": "Foreslå et brand eller en butik",
+      "name": "Navn",
+      "what": "Hvad laver de?",
+      "whatShop": "Hvad sælger de?",
+      "link": "Hjemmeside eller Instagram",
+      "note": "Rachel tjekker hvert forslag. Når det er tilføjet, vises det som en uofficiel side, og du får en notifikation.",
+      "send": "Send forslag",
+      "sentTitle": "Tak, det er sendt",
+      "sentBody": "Du får en notifikation, når den er oppe.",
+      "tooMany": "Det er mange forslag på én dag. Prøv igen i morgen."
+    },
+    "mention": {
+      "heading": "Sider",
+      "people": "Personer",
+      "brandFollowing": "Brand du følger",
+      "shopFollowing": "Butik du følger",
+      "inbox": "Når du nævner en side, lander det i sidens indbakke."
+    },
+    "closed": "Butikken er lukket. Siden bliver stående som arkiv med sine opslag.",
+    "logo": "{{name}}s logo"
   }
 }

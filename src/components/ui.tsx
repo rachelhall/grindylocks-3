@@ -116,6 +116,11 @@ const icons = {
   flag: { ios: 'flag', android: 'flag' },
   rain: { ios: 'cloud.rain', android: 'rainy' },
   block: { ios: 'nosign', android: 'block' },
+  // Brand and shop pages (v2 mockups).
+  storefront: { ios: 'storefront', android: 'storefront' },
+  archive: { ios: 'archivebox', android: 'inventory_2' },
+  photoCamera: { ios: 'camera', android: 'photo_camera' },
+  playCircle: { ios: 'play.circle', android: 'play_circle' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

@@ -12,6 +12,11 @@ export const reasonLabel: Record<string, string> = {
   involves_minor: "Involves a minor",
   wrong_park: "Not at this park",
   inappropriate: "Inappropriate",
+  // Brand and shop pages (v2). Profile reports can say a person is pretending
+  // to be a page; the other two are for reports about a page itself.
+  impersonation: "Pretending to be a brand or shop",
+  our_page: "This is our brand or shop",
+  wrong_info: "Wrong info",
   other: "Something else",
 };
 

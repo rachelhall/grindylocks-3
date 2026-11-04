@@ -52,6 +52,7 @@ export default function AppLayout() {
         options={{ presentation: 'fullScreenModal', animation: 'fade', contentStyle: { backgroundColor: brand.ink } }}
       />
       <Stack.Screen name="profile/[username]" />
+      <Stack.Screen name="page/[handle]" />
       <Stack.Screen name="edit-profile" options={{ presentation: 'fullScreenModal' }} />
       <Stack.Screen name="say-hi" options={{ presentation: 'fullScreenModal', gestureEnabled: false }} />
       <Stack.Screen name="settings/index" />

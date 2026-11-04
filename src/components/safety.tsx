@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { PagePicker } from '@/components/pages';
 import { openSupportMail } from '@/components/settings';
 import { Button, Icon, SelectRow, TextField } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -26,6 +27,7 @@ import {
   restrictionFor,
   useFileReport,
 } from '@/lib/moderation';
+import type { PageResult } from '@/lib/pages';
 import { Sentry } from '@/lib/sentry';
 import { useBlock } from '@/lib/social';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
@@ -102,13 +104,15 @@ function ReportSheetContent({
   const confirmBlock = useConfirmBlock();
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState('');
+  const [page, setPage] = useState<PageResult | null>(null);
   const [sent, setSent] = useState(false);
   const username = target.username;
+  const impersonation = reason === 'impersonation';
 
   const send = () => {
     if (!reason) return;
     file.mutate(
-      { target, reason, details },
+      { target, reason, details, impersonating: page?.id },
       {
         onSuccess: () => setSent(true),
         onError: (err) => {
@@ -135,6 +139,8 @@ function ReportSheetContent({
         return { title: t('report.wrongPark'), subtitle: t('report.wrongParkBody') };
       case 'involves_minor':
         return { title: t('report.minor'), subtitle: t('report.toOwner') };
+      case 'impersonation':
+        return { title: t('report.impersonation'), subtitle: t('report.toOwner') };
       default:
         return { title: t('report.other'), subtitle: undefined };
     }
@@ -150,7 +156,9 @@ function ReportSheetContent({
           : { label: null, title: t('report.titlePerson', { username }) };
 
   const who =
-    target.kind === 'person'
+    target.kind === 'person' && impersonation && page
+      ? t('report.whoImpersonation', { username, page: page.displayName })
+      : target.kind === 'person'
       ? t('report.whoPerson', { username })
       : target.kind === 'post'
         ? t('report.whoPost', { username })
@@ -244,6 +252,8 @@ function ReportSheetContent({
               })}
             </View>
 
+            {impersonation ? <PagePicker value={page} onChange={setPage} /> : null}
+
             <TextField
               label={t('report.details')}
               labelNote={t('common.optional')}
@@ -261,7 +271,7 @@ function ReportSheetContent({
               label={t('report.send')}
               palette={{ fill: c.accent, text: c.onAccent, border: c.accent }}
               onPress={send}
-              disabled={!reason}
+              disabled={!reason || (impersonation && !page)}
               loading={file.isPending}
             />
           </ScrollView>
