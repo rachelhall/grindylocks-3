@@ -1,0 +1,36 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+d3353eb3-58a8-4959-ae77-0372c8f0f4d7,boot,Cream,Cult,,,model,,inline,,discontinued,,,Bladeville says the Cult was first sold as the Cream; the Shima 1 used its shell.,bladeville.com
+030d1d71-1359-42e4-b264-264454511d2f,boot,Cult,Cult,,,model,,inline,1998,current,,,Razors' original aggressive line and the base for most early pro skates. Now the entry and mid model.,thisissoul.com; bladeville.com; inlinewarehouse.com
+eea66e29-f36e-4688-bd37-9525279a531e,boot,Cult Level One,Cult,,,model,,inline,,current,,,Entry-level Cult.,inlinewarehouse.com; hedonskate.com
+0ef03027-c7e2-4ac8-824c-d9486cef6680,boot,Cult Junior,Cult,,,model,,inline,,current,,,Youth Cult.,inlinewarehouse.com; bladeville.com
+d6a222aa-bdbc-48ec-b1a0-c9ae80bf012f,boot,Cult,Cult,,Cream V3,special edition,,inline,c. 2025,current,,,Cream-branded reissue on the current Cult.,inlinewarehouse.com; thisissoul.com
+63d592b2-df2d-487b-be09-af411c271d70,boot,Cult,Cult,Brian Shima,,pro,,inline,2001,discontinued,,,Shima 1 (March 2001) on the Cream shell.,bladeville.com; rollernews.com
+15802fc6-1d4d-4074-8621-9d327e7a28bf,boot,Cult,Cult,Brian Shima,2,pro,,inline,2001,discontinued,,,Shima 2 (August 2001); came on the first Ground Control UFS frame.,bladeville.com
+e3578ec7-d499-45cd-ab45-e7d118226924,boot,Cult,Cult,Brian Shima,3,pro,,inline,,discontinued,,,All white.,bladeville.com; rollernews.com
+fbae8197-e707-42fa-874f-39fe8f5b7d22,boot,Cult,Cult,Brian Shima,5,pro,,inline,c. 2005,discontinued,,,Base shell not confirmed. Seven Shima pros in all.,rollernews.com; thisissoul.com
+5e743d66-c1c8-41ea-bbcd-8b2312c10e74,boot,Cult,Cult,Brian Shima,Shima 1 Reissue,special edition,,inline,2020,discontinued,,,,be-mag.com; rollernews.com; bladeville.com
+11ba72ad-c06b-4510-96e3-70a2d0cb8a32,boot,Cult,Cult,Brian Shima,Shima 3.1 Reissue,special edition,,inline,2023,unknown,,,Also sold as Shima 3 Remastered.,rollernews.com; thisissoul.com
+fa3d4645-ab42-4c21-b28b-114baf06136d,boot,Cult,Cult,Fabio Enes,,pro,,inline,2013,discontinued,,,,rollernews.com; bladeville.com
+044c131a-ec6f-49fb-a076-fdf623bed953,boot,Cult,Cult,,Ghetto Community,collab,,inline,2024,unknown,,,With NYC brand Ghetto Community.,be-mag.com
+e8e3160e-2990-47e5-91af-d664ecce03a7,boot,Genesys,Genesys,,,model,,inline,2001,current,,,"First boot Razors designed fully in-house, with Shima's input. Numbered versions include G7.2, G7.4 and G9.1.",thisissoul.com; bladeville.com; be-mag.com
+9cffedbf-03e4-4bc9-8e50-2f13489aac4e,boot,Genesys Junior,Genesys,,,model,,inline,,unknown,,,Youth Genesys.,bladeville.com; thisissoul.com
+5e200290-bb1a-4d3e-9b57-88cf4627a91c,boot,Genesys,Genesys,Mike Johnson,,pro,,inline,,discontinued,,,The first Genesys launched as his pro skate.,bladeville.com
+d50bee7d-bb89-46fb-bba2-c783f3e09213,boot,Genesys,Genesys,Iain McLeod,,pro,,inline,2012,discontinued,,,,be-mag.com
+155a125f-100f-4bbf-9421-63faf08289d6,boot,Genesys,Genesys,Json Adriani,,pro,,inline,,current,,,,inlinewarehouse.com
+fcb5e7fd-95a1-48a9-b0af-b49359c1711a,boot,SL,SL,,,model,,inline,2008,current,,,"""Super Light"": no base, so the frame sits closer to the soul. SL 2, SL3 and SL Sky are new looks on the same boot.",thisissoul.com; be-mag.com; inlinewarehouse.com
+cdf20d59-05b9-416b-9032-d4e155dd73af,boot,SL,SL,Don Bambrick,,pro,,inline,2010,discontinued,,,Base boot not confirmed.,rollernews.com
+d51ecb3e-50ce-4154-8a14-f3d5f4abf3e2,boot,SL,SL,Stefan Horngacher,,pro,,inline,2011,discontinued,,,,rollernews.com
+e83656ce-348b-4b78-95a1-877ea492e023,boot,SL,SL,Jeph Howard,,pro,,inline,2013,discontinued,,,His first pro skate.,rampworx.com
+39ca04d9-a5d3-4a1b-bbd8-730c553a881c,boot,SL,SL,Scott Quinn,,pro,,inline,2015,discontinued,,,Launched with the FLT3.,intuitionskate.com
+876847e6-edc2-4a43-a31f-13239fa4b9a4,boot,SL,SL,Derek Henderson,,pro,,inline,,discontinued,,,,hedonskate.com; skatepro.com
+43fb77c1-6ab0-4e05-8e4b-70564aa8b0b1,boot,SL,SL,Derek Henderson,II,pro,,inline,,unknown,,,,intuitionskate.com; hedonskate.com
+d0268261-ff73-4df5-ab6f-9d60aba59db9,boot,SL,SL,Nico Auroux,,pro,,inline,,unknown,,,,thisissoul.com; inlinewarehouse.com
+295e1a3c-cec3-46fd-856d-7a327814013d,boot,Shift,Shift,,,model,,inline,2017,current,,,Slimmer shell with an SL-style flat sole; the frame and sole unit swaps without tools.,be-mag.com; rollernews.com; bladeville.com
+e66770a2-038d-416a-b71e-5845f54a0640,boot,Shift 2,Shift,,,model,,inline,2018,discontinued,,,,rollernews.com
+81b6fea6-72a1-4b20-b0eb-54e5bdbf91b5,boot,Shift,Shift,Jeph Howard,II,pro,,inline,2022,current,,,,rollernews.com; inlinewarehouse.com
+000c0f9c-f08f-4159-9a6a-c5a1248fe069,boot,Shift,Shift,Andrew Broom,,pro,,inline,2023,unknown,,,,rollernews.com; thisissoul.com
+bcfaa748-7e71-4e26-90e0-cac8aae99e22,boot,Shift,Shift,Jake Dotson,,pro,,inline,2026,current,,,,inlinewarehouse.com; be-mag.com
+6dbd019a-0b6d-493e-a35c-c14963386fc0,boot,Shift Loca,Shift,,,model,,inline,,unknown,,,Loca line built on the Shift.,thisissoul.com; bladeville.com
+a7a8a604-2016-482c-8b45-a48949437640,boot,Shift Loca,Shift,,Bladies,collab,,inline,2022,unknown,,,Designed by Gaby Velasquez.,rollernews.com; inlinewarehouse.com
+06d90856-ec0d-481b-b137-cb5ee7b0db39,boot,Shift Loca,Shift,Tais Colares,,pro,,inline,2024,current,,,,rollernews.com; inlinewarehouse.com
+13cd609d-e351-4f62-87fc-d55af5ac9705,boot,Shift Loca,Shift,Darly Saavedra,Makabra,pro,,inline,2025,current,,,,rollernews.com; inlinewarehouse.com

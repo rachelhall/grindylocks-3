@@ -170,6 +170,10 @@ export const keys = {
    */
   shopsInBounds: (userId: string, b: { north: number; south: number; east: number; west: number }) =>
     ['shops', 'bounds', userId, ...[b.north, b.south, b.east, b.west].map((n) => Math.round(n * 1000) / 1000)] as const,
+  /** A page's Products tab: its products and the collabs another brand sells with it (PR 4). */
+  pageCatalog: (pageId: string) => ['catalog', 'page', pageId] as const,
+  /** One product for its sheet, with what's built on it and its stock setup. */
+  product: (id: string) => ['catalog', 'product', id] as const,
   /** Search's Pages filter and the @ list's Pages heading. */
   pageSearch: (q: string, forMention: boolean) => ['page-search', forMention ? 'mention' : 'search', q] as const,
   /** How many posts and park photos you have (Delete account). */

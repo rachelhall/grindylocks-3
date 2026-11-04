@@ -1,0 +1,30 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+d7aedbac-26ec-47ea-af11-c1bba20844a6,frame,Hi-Lo,,,,model,,inline,,discontinued,,,Early Ground Control frame.,wikipedia.org
+24ddaebd-b089-4b0d-a9cb-61ffc172e574,frame,Hi-Lo,,Brian Shima,,pro,,inline,,discontinued,,,,wikipedia.org
+49a38fe4-aa9a-4b5c-9f83-9a3c4f604918,frame,Formula 1,Formula 1,,,model,,inline,,discontinued,,,Freestyle frame.,be-mag.com
+f4af1b96-bb58-4d94-828e-009afa4a758a,frame,Formula 1 XS,Formula 1,Joey Chase,,pro,,inline,2011,discontinued,,,Redesigned Formula 1; the white version was his first pro frame.,rollerenligne.com; rollernews.com
+95647322-8478-4602-8ed5-d12ddec071ad,frame,FLT1,Featherlite,,,model,,inline,,discontinued,,,First Featherlite; introduced metal axle spacers.,be-mag.com; thisissoul.com
+dc82d657-d756-4d44-9e26-3fd2aa24bfc2,frame,FLT2,Featherlite,,,model,,inline,c. 2010,discontinued,,,Lighter body with sickle-shaped axle heads.,be-mag.com; bladeville.com
+a9230d2f-9fde-41d8-8594-f3f426d82085,frame,Featherlite Freestyle,Featherlite,,,model,,inline,2010,discontinued,,,One-piece freestyle frame derived from the Formula 1.,be-mag.com
+86855b36-2ace-4c40-b074-a85cc10c7443,frame,Featherlite,Featherlite,Brian Shima,,pro,,inline,,discontinued,,,FLT generation not confirmed.,wikipedia.org
+9a189e86-b152-4e1f-992e-d9f6f4beb57e,frame,FLT3,Featherlite,,,model,,inline,2014,current,,,Combines FLT1's metal spacers with FLT2's weight.,be-mag.com; inlinewarehouse.com; thisissoul.com
+d7ad3946-cfb0-4135-8802-057454f7362a,frame,FLT3,Featherlite,,Korey,special edition,,inline,,discontinued,,,Rider not named; possibly Korey Waikiki.,thisissoul.com
+a31c3175-701a-4799-ac89-20feda2327e9,frame,FLT4,Featherlite,,,model,,inline,c. 2021,unknown,,,"Mixes Mega strength, FLT3 weight and HD H-block protection.",rollernews.com; thisissoul.com; bladeville.com
+a6f62dc2-5a69-46d5-887d-a322c5303ce0,frame,FLT4,Featherlite,,Broom,special edition,,inline,c. 2023,discontinued,,,Probably tied to Andrew Broom's 2023 pro skate.,thisissoul.com
+b180124d-40ec-4107-aeac-e1b6d4d3e758,frame,BIG,,,,model,,inline,2014,unknown,,,Taller frame for wheels up to 72mm; designed by Geoff Acers and Keaton Newsom.,be-mag.com; rollerenligne.com
+be88f39d-9368-4180-909e-ffd3632f1a63,frame,Mega,,,,model,,inline,,current,,,Flat frame for 59–64mm wheels.,clic-n-roll.com; inlinewarehouse.com
+77fffc9b-d41c-43ea-96b7-e71b2beb7040,frame,HD,HD,,,model,,inline,,unknown,,,Aluminium aggressive frame.,thisissoul.com
+787b8a24-faeb-4460-84aa-6922176ea0a4,frame,HD2,HD,,,model,,inline,,current,,,Second-generation HD in 60mm and 72mm.,inlinewarehouse.com; hedonskate.com
+8604da83-125e-4505-8f46-e834766f7105,frame,80mm HD,HD,,,model,,inline,,current,,,Aluminium UFS frame for 80mm wheels.,inlinewarehouse.com
+7af61458-b8f7-4029-9845-b9de7ae19863,frame,FSK 8090 HD,FSK,,,model,,inline,,current,,,UFS frame for 80 or 90mm wheels.,inlinewarehouse.com; bladeville.com
+4c1de2d4-2085-4fb1-81f2-971ff5f47b11,frame,TriSkate,,,,model,,inline,,current,,,Urban UFS frames on 3x110 or 3x125; shops list V3.,inlinewarehouse.com; thisissoul.com
+81e7327b-e98f-48bc-a241-ea3cad7bf1b6,wheels,Anti-Rocker,,,,model,,inline,,current,,,"42mm anti-rocker, co-branded with Razors.",inlinewarehouse.com; be-mag.com
+288aa0ea-4a84-4957-94ff-b45435168019,wheels,Lite,,,,model,,inline,,current,,,,inlinewarehouse.com; rollernews.com
+899eda58-37ec-4287-ad9f-3c46205dfa5b,wheels,ATF,,,,model,,inline,,current,,,,inlinewarehouse.com
+4f4c1709-751d-4f4d-b97e-527f8158cfcf,wheels,Team,,,,model,,inline,,unknown,,,,thisissoul.com
+b0f20c11-4ce7-4d53-9c0b-920a37dd8d54,wheels,CM Bullet,CM,,,model,,inline,,current,,,,inlinewarehouse.com
+681e03b6-c778-4b15-9c7f-ced99bbdf901,wheels,CM Earth,CM,,,model,,inline,,current,,,,inlinewarehouse.com
+7e5947bf-051b-4774-855c-3674c8d9ccd5,wheels,CM Formula,CM,,,model,,inline,,unknown,,,Stock on the Shima 3.1 reissue.,thisissoul.com
+5024ca84-1261-4bbb-bf23-4cc9006fe396,wheels,Turbine,,,,model,,inline,,unknown,,,Stock on the Broom and Colares pro skates.,rollernews.com
+d6692bfb-08e8-41ee-ac60-a36a3484fd30,wheels,DH,,Derek Henderson,II,pro,,inline,,unknown,,,Comes on the Henderson II.,intuitionskate.com
+a9870be2-3f76-4a5c-8069-c5e30414acde,wheels,FSK Psych,FSK,,,model,,inline,,current,,,Freeskate wheel.,inlinewarehouse.com

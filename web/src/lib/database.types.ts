@@ -2867,11 +2867,47 @@ export type Database = {
       }
     }
     Views: {
+      catalog_entries: {
+        Row: {
+          base_id: string | null
+          disciplines: Database["public"]["Enums"]["discipline"][] | null
+          edition: string | null
+          entry_type: Database["public"]["Enums"]["product_entry_type"] | null
+          family: string | null
+          first_year: string | null
+          id: string | null
+          includes_frame: boolean | null
+          name: string | null
+          page_handle: string | null
+          page_id: string | null
+          page_name: string | null
+          part_type: string | null
+          partner_handle: string | null
+          partner_name: string | null
+          partner_page_id: string | null
+          pro_rider: string | null
+          sort: number | null
+          status: Database["public"]["Enums"]["product_status"] | null
+        }
+        Relationships: []
+      }
       park_regulars: {
         Row: {
           last_active_at: string | null
           park_id: string | null
           user_id: string | null
+        }
+        Relationships: []
+      }
+      product_stock_setup: {
+        Row: {
+          part_id: string | null
+          part_name: string | null
+          part_page_id: string | null
+          part_page_name: string | null
+          part_type: string | null
+          part_type_sort: number | null
+          product_id: string | null
         }
         Relationships: []
       }
@@ -3724,6 +3760,17 @@ export type Database = {
           timezone: string | null
         }[]
       }
+      suggest_product: {
+        Args: {
+          kind: Database["public"]["Enums"]["product_suggestion_kind"]
+          note?: string
+          page: string
+          part_type?: string
+          product?: string
+          value?: string
+        }
+        Returns: string
+      }
       suggest_page: {
         Args: {
           link?: string
@@ -3836,6 +3883,15 @@ export type Database = {
       page_invite_kind: "team" | "ownership"
       page_member_role: "staff" | "manager" | "owner"
       page_role: "brand" | "shop"
+      product_entry_type: "model" | "pro" | "collab" | "special_edition"
+      product_status: "current" | "discontinued" | "unknown"
+      product_suggestion_kind:
+        | "missing_model"
+        | "wrong_name"
+        | "wrong_year"
+        | "no_longer_made"
+        | "stock_parts"
+        | "something_else"
       page_state:
         | "unofficial"
         | "name_only"
@@ -4082,6 +4138,16 @@ export const Constants = {
       page_invite_kind: ["team", "ownership"],
       page_member_role: ["staff", "manager", "owner"],
       page_role: ["brand", "shop"],
+      product_entry_type: ["model", "pro", "collab", "special_edition"],
+      product_status: ["current", "discontinued", "unknown"],
+      product_suggestion_kind: [
+        "missing_model",
+        "wrong_name",
+        "wrong_year",
+        "no_longer_made",
+        "stock_parts",
+        "something_else",
+      ],
       page_state: [
         "unofficial",
         "name_only",

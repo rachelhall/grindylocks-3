@@ -1,0 +1,14 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+52eee07c-e3e7-4944-bbb9-0062496a182f,frame,NR90,Natural Rocker,,,model,,inline,c. 2015,current,,,"Natural-rocker UFS frame, CNC-made in Canada; grew out of the original 90mm Wizard frame.",inlinewarehouse.com; thisissoul.com; bigwheelblading.com
+8972de6c-55eb-4d22-aa37-0e5bdfcd71cb,frame,NR100,Natural Rocker,,,model,,inline,,current,,,,inlinewarehouse.com; thisissoul.com
+fef081b2-d305-4454-9aea-5e68253bb784,frame,NR110,Natural Rocker,,,model,,inline,,current,,,,inlinewarehouse.com; bladeville.com
+11007fc8-093d-42b6-a22b-3d3da593196b,frame,PR76,Progressive Rocker,,,model,,inline,2019,unknown,,,5-wheel progressive rocker frame for small boots.,be-mag.com; thisissoul.com
+09e2513e-33e3-451c-a44e-44cbb6f34d30,frame,PR80,Progressive Rocker,,,model,,inline,2019,unknown,,,5-wheel frames were first tested in 2017.,be-mag.com; thisissoul.com
+26b73bba-feac-48ed-9e79-9b3ace1b9107,frame,PR84,Progressive Rocker,,,model,,inline,,current,,,,thisissoul.com; bladeville.com
+297b1444-e8db-4d00-8888-965b061b5d8c,frame,Advanced,Progressive Rocker,,,model,,inline,c. 2022,current,,,Two big outer wheels with three small inner wheels; pairs with the Base High.,rollernews.com; hedonskate.com
+cc08165c-0d66-4848-ab5c-10182d50606e,boot,Base,Base,,,model,,inline,c. 2024,current,,,"Carbon UFS shell made for Wizard skating, developed with FR Skates and Intuition. Before it, Wizard skaters often used Seba CJ Prime boots.",bladeville.com; hedonskate.com; rollernews.com
+58fc18bc-aeeb-4713-9876-1b1d2ec8cc4e,boot,Base High,Base,,,model,,inline,c. 2024,current,,,About 3cm taller than the Base.,bladeville.com; rollernews.com
+08188d8a-7a87-4988-8ebb-3eb58d804bc7,wheels,Natural,,,,model,,inline,,current,,,Sized for the NR frames.,bladeville.com
+93a696c6-d80c-4513-a904-a3fda30c94d9,wheels,Progressive,,,,model,,inline,,current,,,Sized for the PR frames.,bladeville.com; thisissoul.com
+8654437a-5a8c-48ff-94f7-024c65dc6974,wheels,Advanced,Advanced,,,model,,inline,,unknown,,,Mixed big and small wheel pack for the Advanced frames.,bladeville.com
+fc0e2f4a-0ff0-43cd-be68-dd44c08f9715,wheels,Advanced 2nd Gen,Advanced,,,model,,inline,,current,,,,rollernco.com

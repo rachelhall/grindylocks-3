@@ -1,0 +1,15 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+a22fc6e4-e6c4-4dd3-8f3a-b0c816c80ff1,boot,Remedy,,,,model,,inline,c. 1998,discontinued,,,"Original Remedyz hybrid boot built on the ""Freedom of Feet"" idea: no buckles, no external cuff.",skatepro.com; bladeville.com
+f6202f07-20bf-4353-918f-3d9dbbab3c28,boot,OS4,OS,,,model,,inline,2010,discontinued,,,Open Shell line with a pocket liner that wraps the boot.,be-mag.com
+94d86ddc-bd69-4dee-af05-da677036da32,boot,OS4,OS,Nick Wood,,pro,,inline,2011,discontinued,,,,be-mag.com
+fb25a777-f308-4611-80ca-f7aebb08d332,boot,OS4,OS,,Yellow,special edition,,inline,2011,discontinued,,,Presented through Franky Morales.,be-mag.com
+b5ce1346-a97a-4f04-9b6f-adb8d8b53a76,boot,HR 1.1,HR,,,model,,inline,2010,discontinued,,,First High Resilience skin boot.,be-mag.com
+ff3808de-f395-4623-8d22-b193400066dc,boot,HR 2.0,HR,,,model,,inline,2017,discontinued,,,,rollernews.com; skatepro.com
+32c64cd7-fedd-4260-94f2-b8451526cace,boot,HR 2.5,HR,,,model,,inline,2019,discontinued,,,Fixed soft spots in the skin; one-piece soul frame.,be-mag.com; rollernews.com
+b877c4a3-8ed2-4ee9-9c5f-1f252e2960e6,boot,Haffey Signature,Haffey,Chris Haffey,2.0,pro,,inline,2010,discontinued,,,Low-cut HR-skin boot; colors nod to the original Remedy.,be-mag.com; skatepro.com
+8ee879a4-1953-4dd5-a8c9-1c25cd39337b,boot,Haffey Signature,Haffey,Chris Haffey,2.1,pro,,inline,2010,discontinued,,,,be-mag.com
+47518d40-abb3-4ec2-b70d-025f302ff2dd,boot,Nils Pro,,Nils Jansons,,pro,,inline,2014,discontinued,,,His first Remz pro skate.,be-mag.com; hedonskate.com
+4e285dfa-66a8-4bbe-9fa8-668d5b394885,boot,Nils Pro,,Nils Jansons,1.5,pro,,inline,,discontinued,,,,thisissoul.com
+7e66d7d9-1036-4d3b-948f-714b49a266a6,boot,Josiah Blee Pro,,Josiah Blee,,pro,,inline,,discontinued,,,Remz's first signature skate for the Seattle rider.,thisissoul.com; hedonskate.com
+752cc77c-c834-46b5-b5e4-8e8f1f5b8916,liner,Remz liner,,,,model,,inline,,unknown,,,"Original, OS pocket (2010) and HR neoprene-toe (2019) versions.",be-mag.com; bladeville.com
+2100f8f0-6ed9-49d2-8da9-5ec053ef5a7b,soulplate,One-Piece Soul Frame,,,,model,,inline,,unknown,,,Used across OS and HR models.,be-mag.com; bladeville.com

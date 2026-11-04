@@ -1,0 +1,19 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+0289bb53-de44-4d30-917c-4d169cf25820,frame,Freestyle V.1,Freestyle,,,model,,inline,,discontinued,,,Kaltik's first frame; an early version was licensed to a UK company.,be-mag.com
+a7bf836b-819b-4fdb-a9a4-4ee9c659f339,frame,Freestyle V.2,Freestyle,,,model,,inline,,current,,,,bladeville.com
+d143160d-b37d-4068-9145-e1b20d082b65,frame,Stealth Flat,Flat,,,model,,inline,c. 2010,unknown,,,Flat frame developed over 2–3 years and reviewed in 2011. May be the same frame as the Flat V.1.,be-mag.com; oneblademag.com; bladeville.com
+709e5c8d-e811-453a-ac43-9254ac329677,frame,Stealth Flat,Flat,Joey Egan,,pro,,inline,,unknown,,,,bladeville.com
+c1d7331f-9453-4659-b5c0-b5f16261dd63,frame,Stealth Flat,Flat,Stephen Swain,,pro,,inline,,discontinued,,,Named only in a Be-Mag profile summary; unverified.,be-mag.com
+90a30258-ce94-49b0-ac26-baecc4006877,frame,Stealth Flat,Flat,Aaron Feinberg,,pro,,inline,,discontinued,,,Named only in a Be-Mag profile summary; Feinberg rode Kaltik around 2010. Unverified.,be-mag.com; oneblademag.com
+f5ff1e44-a99b-4df1-abf4-c334d2cd245b,frame,Flat V.1,Flat,,,model,,inline,,current,,,UFS 4x60 flat frame.,bladeville.com; hedonskate.com; thisissoul.com
+caa6db38-5907-4ee9-82d5-567d349afe51,frame,Flat V.1,Flat,Ilia Savosin,II,pro,,inline,,current,,,,bladeville.com
+2fe21e7a-5e30-47ab-bae6-27c3765622a3,frame,Flat V.2,Flat,,,model,,inline,,current,,,Cast UFS frame with adjustable rocker (flat or hi-lo).,thisissoul.com; bladeville.com; skatepro.com
+57c0756f-2288-4fe3-ab25-0cb5654574b6,frame,Flat V.2,Flat,Egor Loginov,,pro,,inline,,unknown,,,,bladeville.com; thisissoul.com
+90026d9e-7bda-4682-b5e5-1182261e3c45,frame,Flat V.2,Flat,,Skullfuck,collab,,inline,,unknown,,,Partner not confirmed.,bladeville.com
+88907eb9-6b5e-41d0-b275-4a2ea479ae66,frame,BAATS,,,,model,,inline,,current,,,CNC aluminium UFS urban frame (4x90 or 4x100; a 3x110 version too).,bladeville.com; thisissoul.com
+fa343e8f-cd3b-4cae-a2e5-6d3587bfc160,boot,K Skate,K Skate,,,model,,inline,,current,,,Junior size-adjustable aggressive skate.,bladeville.com; hedonskate.com
+fd8a636f-1c8b-4542-894a-e3e6ba6c2862,boot,K Freestyle Urban,K Skate,,,model,,inline,,unknown,,,Junior urban skate on a BAATS frame.,thisissoul.com; locoskates.com
+8f3264c3-cfd5-4c86-8da7-20d6c0286998,wheels,Smiles Better,,,,model,,inline,,unknown,,,Stock on Flat V.2 completes.,bladeville.com
+f87d1185-99ec-4a68-8228-8cb57f506542,wheels,Face,,,,model,,inline,,current,,,,inlinewarehouse.com; bladeville.com
+b264f5db-ca7b-4bfd-a7c1-4434bd407ec2,wheels,Pro wheel,,Egor Loginov,,pro,,inline,,current,,,,inlinewarehouse.com; hedonskate.com
+29b17960-02ab-42bb-99dc-d3423cd3d93f,wheels,Pro wheel,,Ilia Savosin,,pro,,inline,,current,,,,inlinewarehouse.com; bladeville.com

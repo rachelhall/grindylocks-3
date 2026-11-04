@@ -1,0 +1,17 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+c07c5fed-c23c-4578-877e-197de45ffeeb,frame,Endless 80,Classic,,,model,,inline,c. 2020,current,,,First Endless line (later called MK1 or Classic). Low-ride 165mm freeskate frames.,be-mag.com; inlinewarehouse.com
+93ff6acf-9cbb-4bfb-817a-84e00eea9656,frame,Endless 90,Classic,,,model,,inline,c. 2020,current,,,The founder's first design (2019).,endlessblading.com; be-mag.com
+737d7007-530c-4b58-9527-4bfad88750b7,frame,Endless 100,Classic,,,model,,inline,c. 2020,current,,,Also an RB version for Rollerblade boots.,be-mag.com; inlinewarehouse.com
+2ecb16cd-96a2-43e1-b0b3-8a380b20d25b,frame,Endless 110,Classic,,,model,,inline,,current,,,,endlessblading.com
+0a9587b1-3f30-4bd4-aa5f-88feaedee660,frame,MK2 80,MK2,,,model,,inline,,current,,,,inlinewarehouse.com
+e9f331de-f177-473a-b379-11ffb0144a0b,frame,MK2 90,MK2,,,model,,inline,,current,,,,inlinewarehouse.com
+8079dae5-af15-4446-b3bf-bae85a0d2f9a,frame,MK2 90 ES,MK2,,,model,,inline,,current,,,Longer wheelbase for big boots.,inlinewarehouse.com
+f6855912-eaf5-460e-a1ec-976e79d88633,frame,Ultra 90,Ultra,,,model,,inline,,current,,,Top tier.,inlinewarehouse.com
+43a65690-8ba1-400f-8c4b-cf3162d70a5c,frame,Ultra 100,Ultra,,,model,,inline,,current,,,,inlinewarehouse.com
+52ac83b8-b362-4257-bf2a-bb5f0a105950,frame,Arc,Arc,,,model,,inline,,current,,,5-wheel frame with an extra pivot for rocker.,inlinewarehouse.com; endlessblading.com
+66f9041a-0b71-47d8-a789-9f78f4927249,frame,Arc ES,Arc,,,model,,inline,,current,,,,inlinewarehouse.com
+96de73cd-ecf2-446b-b177-54d74613fafd,frame,SJR,Signature,Stephen Johnstone,,pro,,inline,,current,,,4x84 UFS powerblading frame.,endlessblading.com; inlinewarehouse.com
+5b539ee5-5489-4cb3-80a7-f549e4b26fcd,frame,Stoppard,Signature,Bill Stoppard,,pro,,inline,,current,,,4x84 urban frame.,endlessblading.com; inlinewarehouse.com
+c897a7cd-a730-47b2-bf00-6d3ab9e246d6,frame,Swan,Signature,Nicholas Swan,,pro,,inline,,current,,,Made with Beehive Skate Shop's owner for obstacle street skating.,endlessblading.com; inlinewarehouse.com
+9401dcb3-94b8-4fb7-a589-ca29bb618339,frame,Endless 90,Classic,,Skate Hunnies,collab,,inline,,unknown,,,Base frame not confirmed.,endlessblading.com
+98ce4032-e223-48e1-bb60-b2fd68d83362,wheels,Endless wheels,,,,model,,inline,,current,,,68–110mm range.,endlessblading.com; inlinewarehouse.com

@@ -1,0 +1,27 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+90732364-53cd-404b-b83b-8f0297d9160b,boot,Next,Next,,,model,,inline,2018,current,,,"Trinity-mount urban hardboot, sold in 80 to 125mm setups.",bladeville.com; inlinewarehouse.com; locoskates.com
+919d9647-4a93-4dfa-89c8-b5f147a33d98,boot,Next Core,Next,,,model,,inline,,current,,,Lower-priced Next.,inlinewarehouse.com
+2120e97e-0141-46a1-aa2a-45fbbad531d6,boot,Next SL,Next,,,model,,inline,,unknown,,,,inlinewarehouse.com; powerslide.com
+a4ef499e-4a69-422b-8d97-92be43a195cd,boot,Next Pro,Next,,,model,,inline,,unknown,,,Higher-spec Next.,bladeville.com
+9f01ccab-a752-47fd-bf4a-1a9959d3bb41,boot,Next Megacruiser Pro,Next,,,model,,inline,,unknown,,,3x125 big-wheel Next.,bladeville.com
+d970d0c3-1588-40b7-9766-11b5be48d084,boot,Next 2.0,Next,,,model,,inline,2026,current,,,"Reworked, roomier shell; Trinity mount, liner and frames carry over.",bladeville.com; inlinewarehouse.com
+33b8b0a8-71bb-4200-8928-0ad2555369e3,boot,Next 2.0 PDS,Next,,,model,,inline,2026,current,,,Next 2.0 with a single-dial closure.,bladeville.com
+009b618b-4d9b-4fdc-82d3-22f211a56cc0,boot,Next,Next,Mery Muñoz,,pro,,inline,,current,,,Narrow-fit 80mm pro; a 2025 version is listed and there may be earlier runs.,bladeville.com; thisissoul.com
+54419775-701a-4286-b96a-699264ea0432,boot,Next,Next,,30th Anniversary,special edition,,inline,c. 2024,unknown,,,"125mm edition, probably for Powerslide's 30th year.",locoskates.com
+e6953788-4c37-4773-989a-424b84914f70,boot,Zoom,Zoom,,,model,,inline,,current,,,Retro freeskate hardboot whose shell recalls the USD Throne; the basic line was once called Zoom One.,bladeville.com; inlinewarehouse.com
+3ce0733a-9933-4ade-8aa7-0555fbaf1abf,boot,Zoom Pro,Zoom,,,model,,inline,,current,,,Trinity-mount Zoom.,bladeville.com; inlinewarehouse.com
+bcecf27e-e532-4eb1-af19-d40ae61fc08e,boot,Zoom Renegade,Zoom,,,model,,inline,c. 2021,unknown,,,Off-road Zoom on 125mm wheels.,bladeville.com
+79950217-707e-4a85-8496-f8fee1d3c507,boot,Zoom Pro,Zoom,Nick Lomax,,pro,,inline,c. 2021,discontinued,,,3x110; called Powerslide's first urban pro model.,bladeville.com
+6a1d9643-aeb6-4119-bfd3-cf7cba34f8b1,boot,Zoom,Zoom,Nicola Torelli,NT1,pro,,inline,,current,,,All-white Trinity pro skate.,powerslide.com; inlinewarehouse.com
+7551a615-ff7e-4995-8424-700696b84110,boot,Storm,Storm,,,model,,inline,c. 2025,current,,,Urban hardboot on a 165mm mount instead of Trinity.,powerslide.com; inlinewarehouse.com
+71214b8f-ae19-478a-ae90-fbaf47fbc512,boot,Storm Meteor,Storm,,,model,,inline,c. 2025,current,,,,powerslide.com; inlinewarehouse.com
+a9badbc5-e098-4406-858f-a15bf959e01b,boot,Storm,Storm,Nicoly Machado,,pro,,inline,c. 2025,current,,,80mm pro model.,powerslide.com; thisissoul.com
+7dfdc7eb-caaa-4799-97be-da0797dc6c8c,boot,Imperial,Imperial,,,model,,inline,,current,,,Urban and freeskate line (4x80 and 3x110).,bladeville.com; inlinewarehouse.com
+d7cb8ec8-405f-46f4-b23d-23b2683e07ab,boot,Imperial One,Imperial,,,model,,inline,,discontinued,,,Entry Imperial.,bladeville.com; skatepro.com
+4a473b7e-07b8-4f44-9e5a-853154204e39,boot,Imperial Evo,Imperial,,,model,,inline,c. 2017,discontinued,,,,bladeville.com
+889d8a41-9fd5-4b64-8e02-54060bdff89c,boot,Imperial Megacruiser,Imperial,,,model,,inline,2016,discontinued,,,3x125 Imperial.,rollerenligne.com; skatepro.com
+2d85d475-0b44-4a80-a12b-bf60955197cd,boot,Imperial Supercruiser,Imperial,,,model,,inline,,unknown,,,3x110 Imperial.,bladeville.com
+f18501e2-23fe-4d8e-bc39-0c8ef8b7af7e,boot,Hardcore Evo,Hardcore,,,model,,inline,c. 2010,discontinued,,,Freestyle hardboot.,rollerenligne.com; bladeville.com
+9a6cf146-31e7-4ff1-a863-bd9915c7f17b,boot,Hardcore Evo Pro,Hardcore,,,model,,inline,,current,,,Carbon Hardcore Evo.,inlinewarehouse.com; bladeville.com
+7ae9384d-7dc0-4c66-a3ae-6118f3158845,boot,Hardcore Evo,Hardcore,Sam Crofts,,pro,,inline,c. 2021,discontinued,,,,bladeville.com; hedonskate.com
+a60a6002-1bcf-49e9-ac6f-b8b91cabd6f7,boot,Kaze,,,,model,,inline,2016,current,,,Semi-soft freeride skate; shares the Swell's mold.,rollerenligne.com; inlinewarehouse.com

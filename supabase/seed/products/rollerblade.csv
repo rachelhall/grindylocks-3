@@ -1,0 +1,34 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+0380c69b-cbc5-4d5f-93ea-0e981415a548,boot,Lightning TRS,Lightning,,,model,,inline,c. 1988,discontinued,,,Wikipedia calls it the first aggressive inline skate; Rollerblade's own pages place it in the 90s.,wikipedia.org; rollerblade.com
+361157ef-6239-4e53-bb32-8f2343d569f4,boot,Lightning 608,Lightning,,,model,,inline,c. 1991,discontinued,,,Early-90s aggressive Lightning.,wikipedia.org
+07b49780-3904-4823-92d6-263556f4cebb,boot,Lightning TRS 80,Lightning,,,model,,inline,,current,,,Retro urban reissue with TRS styling; a flat 80mm skate rather than an aggressive one.,thisissoul.com; inlinewarehouse.com; rollerblade.com
+808e6785-05b6-4225-a2a1-59441d3bac21,boot,Lightning 80,Lightning,,,model,,inline,,current,,,Urban Lightning.,inlinewarehouse.com; thisissoul.com
+6ac81f4e-9d01-4d8e-8a68-29881c908f48,boot,Lightning 90,Lightning,,,model,,inline,,current,,,Urban Lightning.,inlinewarehouse.com
+02a64d8f-970f-416e-a0bd-7714a61b1e12,boot,Lightning 110,Lightning,,,model,,inline,,current,,,Urban Lightning.,inlinewarehouse.com; thisissoul.com
+fa3b17bb-2b3e-4c4f-a17b-04fa159d377b,boot,Tarmac,Tarmac,,,model,,inline,c. 1993,discontinued,,,Early-90s aggressive skate.,wikipedia.org
+f4771129-cf9e-4f82-887f-5a5eb48161d0,boot,Tarmac,Tarmac,Chris Edwards,,pro,,inline,c. 1994,discontinued,,,Tarmac CE.,wikipedia.org; bigwheelblading.com
+5b5e7ca8-8bd7-498e-b4f0-0f80b459a2ca,boot,Fusion,Fusion,,,model,,inline,c. 1995,discontinued,,,Mid-90s aggressive skate. A later freeskate (c. 2012) reused the name.,wikipedia.org; rollerenligne.com
+32e90f6f-6288-4749-abb5-2eebf5fdd1df,boot,Trooper,Trooper,,,model,,inline,c. 1996,discontinued,,,Mid-90s aggressive skate; the name returned as Trooper Solo in 2012.,wikipedia.org
+05a101df-c697-42cf-a066-50854958bd54,boot,Trooper,Trooper,Chris Edwards,,pro,,inline,,discontinued,,,Edwards Trooper.,wikipedia.org
+41fa76bc-7fe9-4f77-83c8-7c51f38d5b8c,boot,Swindler,,,,model,,inline,2001,discontinued,,,Street and park skate.,thisissoul.com
+391f6617-163c-4e7a-a532-41b33eb3d6c0,boot,New Jack 3,New Jack,,,model,,inline,2012,discontinued,,,TRS-line hard and soft hybrid with replaceable grind inserts.,skatepro.com; rollerenligne.com
+0293ab32-6f39-48fb-afff-1c90f461a73f,boot,New Jack 4,New Jack,,,model,,inline,,discontinued,,,TRS line.,thisissoul.com
+a1b4a32f-1b20-4a22-84ae-3bb37c74d771,boot,New Jack 5,New Jack,,,model,,inline,,discontinued,,,TRS line.,thisissoul.com
+16e9588e-072b-4573-92cd-913c6c75a55f,boot,NJ Team,New Jack,,,model,,inline,2018,discontinued,,,Later replaced by Blank Team.,rollernews.com
+bbbbdb20-a4bf-44f9-8fed-45870f0d1435,boot,NJ Pro,New Jack,,,model,,inline,2018,discontinued,,,Higher-end NJ on a Blank frame with Hydrogen wheels.,rollernews.com; rollerenligne.com
+6d5078b3-f1c7-46f0-b973-25cfedfdbf09,boot,Solo Tribe,Solo,,,model,,inline,2010,discontinued,,,No soulplates.,bladeville.com
+c92cb247-4af1-4410-aafc-76a82f6a7413,boot,Solo Estilo,Solo,Rob Guerrero,,pro,,inline,,discontinued,,,Guerrero's first pro skate; came on the Switch frame.,skatepro.com
+0932ddde-4ebe-48a3-8344-88fb6ae5009f,boot,Solo Estilo,Solo,Rob Guerrero,II,pro,,inline,2012,discontinued,,,Introduced the Solo sole system and came on the new Blank frame.,be-mag.com; skatepro.com
+82582dd7-8c6a-4d21-9b49-6dd422bed799,boot,Solo Estilo,Solo,Sven Boekhorst,,pro,,inline,c. 2012,discontinued,,,,hedonskate.com; rollerenligne.com
+921ceab1-9b2d-4189-9eae-991f13f21dd5,boot,Black Widow Solo,Solo,,,model,,inline,2012,discontinued,,,,rollerenligne.com
+e8cd0bca-9b8f-427a-9d6b-c3df3fe7d1fe,boot,Trooper Solo,Solo,,,model,,inline,2012,discontinued,,,Brought back the Trooper name.,rollerenligne.com
+f9876cbb-ecfe-4a64-a30d-10d2ae2bd3fa,frame,Switch,,,,model,,inline,,discontinued,,,Aggressive frame with several setups; stock on the first Solo Estilo RG.,skatepro.com
+241bc17e-7eba-4798-9c04-b7b1ec615367,boot,Twister,Twister,,,model,,inline,1999,discontinued,,,First Twister freeskate.,rollerblade.com
+1e48dd57-cac8-4c4a-9e90-7f3e026d3193,boot,Twister Pro,Twister,,,model,,inline,,discontinued,,,Early-2000s Twister with a magnesium frame.,rollerblade.com
+c128ac93-4dc2-4c81-a5fa-01aa83ab9026,boot,Twister Edge,Twister,,,model,,inline,2017,unknown,,,Urban redesign with a stiffer shell; also sold as a 3WD version.,rollerblade.com; rollerenligne.com
+5c0d695a-ffc0-47dc-a3ae-c1c0735da6f4,boot,Twister Edge X,Twister,,,model,,inline,2018,unknown,,,Higher-spec Twister Edge.,rollerenligne.com; bladeville.com
+32ff8369-40a1-4426-a030-98c962eff235,boot,Twister XT,Twister,,,model,,inline,2022,current,,,Updated fit.,rollerblade.com; inlinewarehouse.com
+d11c8562-e0d0-4435-9b3e-70d6bf528198,boot,Twister 110,Twister,,,model,,inline,2022,current,,,3x110 Twister.,rollerblade.com; inlinewarehouse.com
+1bbdfcb7-0323-41d0-ba56-1f6ee5f49cee,boot,RB 80,RB,,,model,,inline,,current,,,Freeskate that started as the RB Storm in a few markets.,bladeville.com; inlinewarehouse.com
+ead94fd1-b6db-4677-a4a3-880eb3757d09,boot,RB Pro X,RB,,,model,,inline,,unknown,,,Premium RB freeskate.,bladeville.com; rollerblade.com
+3537ec15-3267-4308-9bbe-060b5548a052,boot,RB 110 3WD,RB,,,model,,inline,,current,,,3x110 RB.,bladeville.com; rollerblade.com

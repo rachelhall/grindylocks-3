@@ -1,0 +1,8 @@
+product_id,part_type,model,family,pro_rider,edition,entry_type,partner,disciplines,first_year,status,includes_frame,stock_parts,notes,sources
+33ce33ca-559b-4f2f-8b8e-8de349b3e721,bearings,Swiss,Swiss,,,model,,inline; quad,c. 1981,current,,,The original skate-rated Swiss bearing.,bonesbearings.com; inlinewarehouse.com
+8826b2ac-75d6-4c6d-ad42-27b8f7234036,bearings,Super Swiss 6,Swiss,,,model,,inline; quad,,current,,,Six larger balls.,inlinewarehouse.com
+e9f25e7d-b270-4c66-a0a8-b2e081b8ebfb,bearings,Swiss Ceramic,Swiss,,,model,,inline; quad,,current,,,,inlinewarehouse.com
+3840d112-0adb-4b0c-aa4c-e642ccaed731,bearings,Reds,Reds,,,model,,inline; quad,,current,,,Budget skate-rated bearing.,inlinewarehouse.com; bladeville.com
+b870a8c6-355b-48c0-a15d-68c8193f06cb,bearings,Super Reds,Reds,,,model,,inline; quad,,current,,,,inlinewarehouse.com; bladeville.com
+4797b56c-f737-4769-801d-5be487aec8cd,bearings,Big Balls Reds,Reds,,,model,,inline; quad,,current,,,,inlinewarehouse.com
+60ece4d5-aa67-42fc-b0e3-aa301df869f6,bearings,Super Reds Ceramic,Reds,,,model,,inline; quad,,current,,,,inlinewarehouse.com
