@@ -62,7 +62,7 @@ export function ClaimFooter({ page, teamRole }: { page: Page; teamRole: string |
             </Text>
           </View>
         </View>
-        <Button label={t('pageLogo.choose')} onPress={() => router.push({ pathname: '/page-logo/[handle]', params: { handle: page.handle } })} />
+        <Button label={t('pageLogo.choose')} onPress={() => router.push({ pathname: '/page-edit/[handle]', params: { handle: page.handle } })} />
       </View>
     );
   }

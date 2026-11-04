@@ -161,9 +161,16 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       if (!page) return null;
       if (row.detail === 'removed') return { body: say('page_removed', { name: page }) };
       if (row.detail === 'owner') return { body: say('page_owner', { name: page }) };
+      // Running a page (PR 7a): a hand-over accepted or declined, told to the owner.
+      if (row.detail === 'handed_over') return { body: say('page_handedOver', { name: page }) };
+      if (row.detail === 'ownership_declined') return { body: say('page_ownershipDeclined', { name: page }) };
       return { body: say('page_madeRole', { name: page, role: row.detail === 'role:manager' ? s.roleA_manager : s.roleA_staff }) };
     case 'page_claimed':
       return page ? { body: say('page_joined', { name: page }) } : null;
+    // A page's inbox (PR 7a), for team members who switched its push on: the
+    // sentence in the title and what was said in the body, like a mention.
+    case 'page_mention':
+      return page ? { title: say('page_mention', { name: page }), body: row.comment_body ?? '' } : null;
     case 'suggestion_live':
       return page ? { title: say('page_suggestionLive', { name: page }), body: row.detail ?? '' } : null;
     default:

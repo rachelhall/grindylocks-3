@@ -1464,9 +1464,11 @@ begin
 
   perform public.set_page_member_role(them, s, 'staff');
   total := total + 1;
+  execute 'reset role';
   if private.page_role_of(them, s) = 'staff'
      and exists (select 1 from public.notifications where recipient_id = s and kind = 'page_team_change' and message = 'role:staff')
   then ok := ok + 1; else r := r || 'FAIL owner demoted a manager; '; end if;
+  execute 'set local role authenticated';
 
   -- The delete stop: a page with a team needs a new owner first.
   total := total + 1;
@@ -1506,16 +1508,20 @@ begin
   select i.id into inv from public.my_page_invites() i where i.kind = 'ownership';
   perform public.answer_page_invite(inv, true);
   total := total + 1;
+  execute 'reset role';
   if private.page_role_of(them, s) = 'owner' and private.page_role_of(them, o) = 'manager'
      and exists (select 1 from public.notifications where recipient_id = o and message = 'handed_over')
   then ok := ok + 1; else r := r || 'FAIL hand-over accepted; '; end if;
+  execute 'set local role authenticated';
 
   -- The new owner removes the old one, now a manager.
   perform public.remove_page_member(them, o);
   total := total + 1;
+  execute 'reset role';
   if private.page_role_of(them, o) is null
      and exists (select 1 from public.notifications where recipient_id = o and message = 'removed')
   then ok := ok + 1; else r := r || 'FAIL owner removed a manager; '; end if;
+  execute 'set local role authenticated';
 
   total := total + 1;
   begin
@@ -1544,8 +1550,12 @@ begin
   -- 8SET's owner (o) closes the shop.
   perform set_config('request.jwt.claims', json_build_object('sub', o, 'role', 'authenticated')::text, true);
   total := total + 1;
-  if public.close_page_for_good(eightset) = 'closed' and (select closed_at is not null from public.pages where id = eightset)
-  then ok := ok + 1; else r := r || 'FAIL close shop; '; end if;
+  res := public.close_page_for_good(eightset);
+  execute 'reset role';
+  if res = 'closed' and (select closed_at is not null and state = 'closed' from public.pages where id = eightset)
+  then ok := ok + 1; else r := r || 'FAIL close shop ' || coalesce(res, 'null') || ' '
+    || coalesce((select state::text || '/' || coalesce(closed_at::text, '-') from public.pages where id = eightset), '?') || '; '; end if;
+  execute 'set local role authenticated';
 
   -- A solo owner isn't stopped by the page (only by the sign-in code).
   perform set_config('request.jwt.claims', json_build_object('sub', y, 'role', 'authenticated')::text, true);

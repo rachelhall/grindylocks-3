@@ -6,7 +6,7 @@
  *   GRIND-XXXX code posted on the brand's Instagram or website (7 days).
  *   Only the claimant and Rachel see a claim; Rachel decides it.
  * - Invites: Rachel's claim invite (the person becomes the owner) and team
- *   invites from owners and managers (the Team screen comes in PR 7).
+ *   invites from owners and managers (from the Team screen, PR 7a).
  *   Emailed invites carry an invite code that also opens sign-up for that
  *   email, without using anyone's personal invites. Members answer from the
  *   bell's Page invites box.
@@ -330,6 +330,8 @@ export type MyPage = {
   logoPath: string | null;
   role: PageMemberRole;
   inboxPush: boolean;
+  /** Inbox items that came in since you last opened it (PR 7a), for the dots. */
+  inboxNew: number;
 };
 
 export function useMyPages(userId: string | undefined) {
@@ -347,6 +349,7 @@ export function useMyPages(userId: string | undefined) {
         logoPath: r.logo_path,
         role: r.role as PageMemberRole,
         inboxPush: r.inbox_push,
+        inboxNew: r.inbox_new ?? 0,
       }));
     },
     enabled: Boolean(userId),

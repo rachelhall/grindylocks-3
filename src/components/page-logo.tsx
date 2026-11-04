@@ -18,8 +18,8 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  * header with the logo in, Choose a logo, and Skip for now. The logo is the
  * official signal, so the page stays UNOFFICIAL until it has one.
  *
- * Used as the last onboarding step for an owner joining through a page, and
- * from "Your claim was approved" (until Edit page arrives in PR 7).
+ * Used as the last onboarding step for an owner joining through a page.
+ * After that, the logo is changed from Edit page (PR 7a).
  * `onDone` gets whether a logo was saved.
  */
 export function PageLogoForm({
