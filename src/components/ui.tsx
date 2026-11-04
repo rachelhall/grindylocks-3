@@ -121,6 +121,11 @@ const icons = {
   archive: { ios: 'archivebox', android: 'inventory_2' },
   photoCamera: { ios: 'camera', android: 'photo_camera' },
   playCircle: { ios: 'play.circle', android: 'play_circle' },
+  // Claims and invites (PR 5).
+  hourglass: { ios: 'hourglass', android: 'hourglass_top' },
+  key: { ios: 'key.fill', android: 'key' },
+  verified: { ios: 'checkmark.seal.fill', android: 'verified' },
+  share: { ios: 'square.and.arrow.up', android: 'share' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

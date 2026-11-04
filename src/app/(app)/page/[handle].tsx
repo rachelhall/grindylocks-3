@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { ClaimFooter } from '@/components/claim';
 import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
@@ -54,14 +55,28 @@ import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } 
  * section (unofficial and retired pages have no posts). A page with no
  * products shows neither.
  *
- * Coming with later PRs: Claim this page (PR 5), the page's own posts (PR 8)
- * and its meetups (PR 9). Until then a managed page's Posts section is empty.
+ * Claiming (PR 5): "Work at Dead? Claim this page" at the bottom of an
+ * unofficial page, then the claimant's pending card (or Rachel's reason if
+ * it was declined); a claimed page waiting for its logo shows its owner and
+ * managers the Add logo card. Founding partner tape shows once the page is
+ * OFFICIAL. `?logo=1` (the claim-approved push) opens the logo screen.
+ *
+ * Coming with later PRs: the page's own posts (PR 8) and its meetups (PR 9).
+ * Until then a managed page's Posts section is empty.
  */
 export default function PageScreen() {
-  const { handle } = useLocalSearchParams<{ handle: string }>();
+  const { handle, logo } = useLocalSearchParams<{ handle: string; logo?: string }>();
   const { t } = useTranslation();
   const c = useColors();
   const { data: page, isError, refetch } = usePage(handle);
+
+  // Opened from "Your claim was approved": go on to add the logo.
+  const askedLogo = useRef(false);
+  useEffect(() => {
+    if (logo !== '1' || askedLogo.current || !page || isOfficial(page)) return;
+    askedLogo.current = true;
+    router.push({ pathname: '/page-logo/[handle]', params: { handle: page.handle } });
+  }, [logo, page]);
 
   if (page === undefined && !isError) {
     return (
@@ -235,7 +250,7 @@ function PageBody({ page }: { page: Page }) {
           name={name}
           tape={tape ? tape.toUpperCase() : null}
           stamp={stamp}
-          foundingPartner={Boolean(page.foundingPartnerAt) && !archive}
+          foundingPartner={Boolean(page.foundingPartnerAt) && official}
           logoUrl={official ? pageImageUrl(page.logoPath) : null}
           plain={nameOnly}
           dim={archive}
@@ -339,6 +354,8 @@ function PageBody({ page }: { page: Page }) {
             {products}
           </View>
         ) : null}
+
+        <ClaimFooter page={page} teamRole={state?.teamRole ?? null} />
       </ScrollView>
       {pastHeader ? (
         <View pointerEvents="none" style={[styles.statusStrip, { height: insets.top, backgroundColor: c.surface }]} />

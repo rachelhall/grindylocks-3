@@ -115,6 +115,12 @@
       "point3": "Puedes ocultarte cuando quieras en ajustes.",
       "gotIt": "Entendido",
       "hideMe": "Ocultarme de las listas de habituales"
+    },
+    "page": {
+      "joining": "Te unes a {{name}} como {{role}}",
+      "noSkating": "Déjalo en blanco si no patinas. Puedes añadirlo después en Editar perfil.",
+      "cityFromShop": "Hemos puesto la ciudad de {{name}}. Cámbiala si vives en otro sitio. Solo la ven los miembros con sesión iniciada.",
+      "from": "De {{name}}"
     }
   },
   "home": {
@@ -419,7 +425,34 @@
     "meetupCommentMany_other": "{{a}}, {{b}} y {{count}} personas más comentaron en {{meetup}}",
     "meetupReply": "{{a}} te respondió en {{meetup}}",
     "meetupMention": "{{a}} te mencionó en {{meetup}}",
-    "meetupHidden": "Los admins del park ocultaron {{meetup}} del {{date}}"
+    "meetupHidden": "Los admins del park ocultaron {{meetup}} del {{date}}",
+    "page": {
+      "invites": "Invitaciones de páginas",
+      "teamInvite": "{{name}} te invitó a su equipo como {{role}}",
+      "ownership": "{{a}} quiere hacerte propietario de {{name}}",
+      "claimInvite": "{{name}} te invitó a gestionar su página",
+      "ownershipNote": "Llevarías el equipo y podrías quitar gerentes. Si lo rechazas, Grindylocks elige al nuevo propietario.",
+      "becomeOwner": "Ser propietario",
+      "from": "De {{username}}",
+      "youAre": {
+        "staff": "Ahora eres personal",
+        "manager": "Ahora eres gerente",
+        "owner": "Ahora eres el propietario"
+      },
+      "inviteClosed": "Esta invitación ya no está abierta.",
+      "inviteSuspended": "No puedes unirte al equipo de una página mientras tu cuenta está suspendida.",
+      "claimApproved": "Tu solicitud para {{name}} fue aprobada. Añade un logo para que la página sea oficial.",
+      "claimDeclined": "Tu solicitud para {{name}} no fue aprobada",
+      "claimTaken": "Otra persona de {{name}} lleva ahora su página",
+      "tryAgain": "Puedes intentarlo con otra prueba.",
+      "madeRole": "{{name}} te hizo {{role}}",
+      "removed": "Ya no estás en el equipo de {{name}}",
+      "owner": "Ahora eres el propietario de {{name}}",
+      "joined": "{{name}} ya está en Grindylocks",
+      "joinedNote": "Seguías su página antes de que fuera oficial.",
+      "suggestionLive": "Tu sugerencia para {{name}} ya está publicada",
+      "suggestionLiveWhat": "Tu sugerencia para {{name}} ya está publicada: {{what}}"
+    }
   },
   "feed": {
     "newPost": "Nueva publicación",
@@ -867,7 +900,19 @@
     "askBody": "Entérate cuando alguien comenta, te etiqueta o saluda cerca de ti.",
     "ask": "Activar notificaciones",
     "meetups": "Meetups",
-    "meetupsBody": "Cambios, cancelaciones y recordatorios de los meetups a los que vas"
+    "meetupsBody": "Cambios, cancelaciones y recordatorios de los meetups a los que vas",
+    "groupYou": "Tú",
+    "groupPages": "Páginas",
+    "groupInboxes": "Bandejas de las páginas que gestionas",
+    "fixes": "Arreglos y sugerencias",
+    "fixesBody": "Cuando se publica tu arreglo de un parque, o una marca o producto que sugeriste",
+    "teamsClaims": "Equipos y solicitudes",
+    "teamsClaimsBody": "Invitaciones de equipo, cambios de puesto, la propiedad y las decisiones sobre tus solicitudes",
+    "pagesJoining": "Páginas que sigues llegan",
+    "pagesJoiningBody": "Una vez por página, cuando una marca o tienda que sigues se hace cargo de su página",
+    "inbox": "Bandeja de {{name}}",
+    "inboxBody": "Comentarios en los posts de {{name}} y @menciones de {{name}}",
+    "inboxNote": "Desactivado por defecto, y solo para ti: cada persona del equipo elige lo suyo."
   },
   "report": {
     "report": "Denunciar",
@@ -1545,6 +1590,111 @@
       "toe_stop": "Freno",
       "slide_blocks": "Slide blocks",
       "laces": "Cordones"
+    }
+  },
+  "claim": {
+    "workAt": "¿Trabajas en {{name}}?",
+    "claimLink": "Reclama esta página",
+    "title": "Reclama esta página",
+    "intro": "Gestiona la página de {{name}} en Grindylocks: publica como {{name}}, mantén bien sus productos y forma un equipo. Revisamos cada solicitud a mano.",
+    "role": "Tu puesto en {{name}}",
+    "rolePlaceholder": "Team manager",
+    "roleNeeded": "Di qué haces allí.",
+    "howCheck": "¿Cómo lo comprobamos?",
+    "workEmail": "Correo del trabajo",
+    "workEmailBody": "Una dirección de {{name}}. Le enviamos un código.",
+    "matches": "Coincide con la web de {{name}}",
+    "noMatch": "No coincide con la web de {{name}}. Puedes enviarlo igual; lo miraremos con más cuidado.",
+    "postCode": "Publica un código",
+    "postCodeBody": "Te damos un código corto para publicar en el Instagram o la web de {{name}}.",
+    "note": "¿Algo que debamos saber?",
+    "notePlaceholder": "Quién eres, quién más lleva {{name}}",
+    "afterApproval": "Cuando se apruebe, añades el logo de {{name}} y la página pasa a ser oficial.",
+    "sendCode": "Envíame un código",
+    "getCode": "Dame mi código",
+    "step2": "Reclamar {{name}} · 2 de 2",
+    "inboxTitle": "Mira tu correo",
+    "inboxBody": "Hemos enviado un código de 6 cifras a {{email}}.",
+    "codeNote": "El código solo demuestra que puedes leer este correo. Tu solicitud sigue llegándonos para revisarla.",
+    "send": "Enviar solicitud",
+    "postTitle": "Publica este código",
+    "postBody": "Ponlo en un post, una historia o la bio del Instagram de {{name}}, o en cualquier parte de la web de {{name}}. Déjalo hasta que lo hayamos comprobado.",
+    "share": "Compartir",
+    "shareCode": "Compartir el código",
+    "codeValid": "Este código funciona hasta el {{date}} y solo para esta solicitud.",
+    "where": "¿Dónde lo has publicado?",
+    "wherePlaceholder": "Un enlace al post o la página",
+    "whereNeeded": "Añade un enlace a donde está, o estará, el código.",
+    "postLater": "Puedes enviar la solicitud ya y publicar el código después. Lo miraremos cuando esté.",
+    "pendingTitle": "Tu solicitud está pendiente",
+    "pendingEmail": "Enviada el {{date}} con tu correo del trabajo. Te avisaremos bajo la campana cuando se decida.",
+    "pendingPosted": "Enviada el {{date}} con un código publicado. Te avisaremos bajo la campana cuando se decida.",
+    "onlyYou": "Solo tú ves esto.",
+    "withdraw": "Retirar solicitud",
+    "withdrawTitle": "¿Retirar tu solicitud para {{name}}?",
+    "withdrawBody": "Puedes volver a reclamarla más adelante.",
+    "declinedTitle": "Tu solicitud no fue aprobada",
+    "takenReason": "Otra persona de {{name}} lleva ahora esta página.",
+    "tryAgain": "Inténtalo con otra prueba",
+    "logoTitle": "Añade el logo de {{name}}",
+    "logoBody": "La página sigue sin ser oficial hasta que tenga uno.",
+    "result": {
+      "wrong_code": "Ese código no es correcto. Revisa el correo y vuelve a intentarlo.",
+      "code_expired": "Ese código ha caducado. Pide uno nuevo.",
+      "too_many_tries": "Demasiados códigos incorrectos. Pide uno nuevo.",
+      "wait": "Espera un minuto antes de pedir otro código."
+    },
+    "error": {
+      "claim_pending": "Ya tienes una solicitud pendiente para esta página.",
+      "too_many_claims": "Son muchas solicitudes para un día. Inténtalo mañana.",
+      "invalid_email": "Revisa la dirección de correo.",
+      "too_many_codes": "Ya hemos enviado bastantes códigos para esta solicitud. Vuelve a empezar mañana o publica un código.",
+      "not_claimable": "Ahora mismo no se puede reclamar esta página.",
+      "invalid_link": "Añade un enlace a donde está, o estará, el código.",
+      "invalid_role": "Di qué haces allí."
+    }
+  },
+  "pageLogo": {
+    "title": "Añade el logo de {{name}}",
+    "body": "El logo es como los patinadores saben que una página es de verdad {{name}}. Hace oficial la página.",
+    "previewLabel": "Vista previa de la cabecera de {{name}} con el logo",
+    "logo": "LOGO",
+    "preview": "Vista previa: así queda la cabecera de {{name}} con el logo.",
+    "choose": "Elegir un logo",
+    "change": "Elegir otro",
+    "hint": "Mejor una imagen cuadrada, de al menos 400 px. Puedes cambiarla cuando quieras.",
+    "skipNote": "¿No tienes el logo a mano? Sáltalo y {{name}} sigue",
+    "skip": "Saltar por ahora",
+    "failed": "No se ha guardado el logo"
+  },
+  "pageInvite": {
+    "runTape": "Te invitan a llevar {{name}}",
+    "invitedTape": "{{name}} te ha invitado",
+    "owner": "PROPIETARIO",
+    "claimShop": "Publica como {{name}}, mantén bien su horario y organiza quedadas.",
+    "claimBrand": "Publica como {{name}}, mantén bien sus productos y organiza quedadas.",
+    "claimTeam": "Forma un equipo de gerentes y personal.",
+    "claimChecked": "Ya hemos comprobado que eres tú, así que no hay solicitud que esperar. Al final añadirás el logo de {{name}}.",
+    "teamShop": "Publica y comenta como {{name}}, organiza quedadas y actualiza el horario.",
+    "teamBrand": "Publica y comenta como {{name}} y organiza quedadas.",
+    "teamOwnAccount": "También tienes tu propia cuenta gratis. No hace falta que patines.",
+    "wantsYou": "{{username}} te quiere en el equipo de {{name}} como {{role}}.",
+    "wantsYouNoName": "Te invitan al equipo de {{name}} como {{role}}.",
+    "claimFoot": "¿Ya estás en Grindylocks? Inicia sesión con ese correo y {{name}} se añade a tu cuenta. La invitación funciona una vez y caduca en {{days}} días.",
+    "teamFoot": "Enviada a {{email}}. ¿Ya estás en Grindylocks? Inicia sesión y acéptala desde tus notificaciones. Caduca en {{days}} días.",
+    "teamFootNoEmail": "¿Ya estás en Grindylocks? Inicia sesión y acéptala desde tus notificaciones. Caduca en {{days}} días.",
+    "role": {
+      "staff": "personal",
+      "manager": "gerente"
+    },
+    "roleA": {
+      "staff": "personal",
+      "manager": "gerente"
+    },
+    "roleAs": {
+      "staff": "personal",
+      "manager": "gerente",
+      "owner": "propietario"
     }
   }
 }

@@ -4,7 +4,10 @@ import { ActivityIndicator, Alert, Linking, ScrollView, StyleSheet, View } from 
 import { SafeAreaView } from '@/components/safe-area';
 import { SettingsRow } from '@/components/settings';
 import { BackButton, Button, Icon, Toggle } from '@/components/ui';
+import { PageTile } from '@/components/pages';
 import { useAuth } from '@/lib/auth';
+import { useMyPages, useSetPageInboxPush } from '@/lib/claims';
+import { isArchive } from '@/lib/pages';
 import { useMyProfile } from '@/lib/profiles';
 import {
   type PushSetting,
@@ -18,7 +21,13 @@ import { space, stroke, Text, useColors } from '@/theme';
 /**
  * Settings › Push notifications: one switch per type, all on by default.
  * The bell lists everything either way; these only decide what reaches the
- * phone. "Park fixes" joins the list with park info reports (M5).
+ * phone.
+ *
+ * Grouped You / Pages / Inboxes of pages you manage (Settings-Push-Pages,
+ * PR 5). "Park fixes" became "Fixes and suggestions", covering suggested
+ * brands and products going live too. Pages has Teams and claims and Pages
+ * you follow joining. Inboxes has a switch per page you're on, off by
+ * default and only for you.
  */
 export default function PushNotificationSettings() {
   const { t } = useTranslation();
@@ -29,6 +38,9 @@ export default function PushNotificationSettings() {
   const permission = usePushPermission();
   const settings = usePushSettings(userId);
   const setSetting = useSetPushSetting(userId);
+  const myPages = useMyPages(userId);
+  const setInbox = useSetPageInboxPush(userId);
+  const inboxes = (myPages.data ?? []).filter((p) => p.state === 'managed' || !isArchive(p));
 
   const metro = profile?.homeMetro?.name;
   const rows: { key: PushSetting; title: string; body: string }[] = [
@@ -39,11 +51,16 @@ export default function PushNotificationSettings() {
     // Changes, cancellations and the 1-hour reminder for meetups you're going to (PR 5).
     { key: 'meetups', title: t('push.meetups'), body: t('push.meetupsBody') },
     { key: 'invites', title: t('push.invites'), body: t('push.invitesBody') },
+    { key: 'park_fixes', title: t('push.fixes'), body: t('push.fixesBody') },
     {
       key: 'someone_new',
       title: t('push.someoneNew'),
       body: metro ? t('push.someoneNewBody', { metro }) : t('push.someoneNewBodyNoCity'),
     },
+  ];
+  const pageRows: { key: PushSetting; title: string; body: string }[] = [
+    { key: 'teams_claims', title: t('push.teamsClaims'), body: t('push.teamsClaimsBody') },
+    { key: 'pages_joining', title: t('push.pagesJoining'), body: t('push.pagesJoiningBody') },
   ];
 
   const flip = (setting: PushSetting, enabled: boolean) =>
@@ -92,6 +109,9 @@ export default function PushNotificationSettings() {
           </View>
         ) : (
           <View>
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.group}>
+              {t('push.groupYou')}
+            </Text>
             {rows.map((row, i) => (
               <SettingsRow
                 key={row.key}
@@ -99,15 +119,56 @@ export default function PushNotificationSettings() {
                 title={row.title}
                 subtitle={row.body}
                 control={
-                  <Toggle
-                    value={settings.data[row.key]}
-                    onChange={(v) => flip(row.key, v)}
-                    label={row.title}
-                    fg={c.text}
-                  />
+                  <Toggle value={settings.data[row.key]} onChange={(v) => flip(row.key, v)} label={row.title} fg={c.text} />
                 }
               />
             ))}
+            <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.group}>
+              {t('push.groupPages')}
+            </Text>
+            {pageRows.map((row, i) => (
+              <SettingsRow
+                key={row.key}
+                first={i === 0}
+                title={row.title}
+                subtitle={row.body}
+                control={
+                  <Toggle value={settings.data[row.key]} onChange={(v) => flip(row.key, v)} label={row.title} fg={c.text} />
+                }
+              />
+            ))}
+            {inboxes.length > 0 ? (
+              <>
+                <Text variant="label" color="textSecondary" accessibilityRole="header" style={styles.group}>
+                  {t('push.groupInboxes')}
+                </Text>
+                {inboxes.map((p, i) => (
+                  <SettingsRow
+                    key={p.pageId}
+                    first={i === 0}
+                    icon={<PageTile page={p} size={32} />}
+                    title={t('push.inbox', { name: p.displayName })}
+                    subtitle={t('push.inboxBody', { name: p.displayName })}
+                    control={
+                      <Toggle
+                        value={p.inboxPush}
+                        onChange={(v) =>
+                          setInbox.mutate(
+                            { pageId: p.pageId, enabled: v },
+                            { onError: () => Alert.alert(t('errors.generic'), t('errors.network')) },
+                          )
+                        }
+                        label={t('push.inbox', { name: p.displayName })}
+                        fg={c.text}
+                      />
+                    }
+                  />
+                ))}
+                <Text variant="bodySm" color="textSecondary" style={styles.inboxNote}>
+                  {t('push.inboxNote')}
+                </Text>
+              </>
+            ) : null}
           </View>
         )}
 
@@ -130,6 +191,8 @@ const styles = StyleSheet.create({
   intro: { paddingHorizontal: 20, paddingTop: space[4], paddingBottom: space[6], gap: space[3] },
   notice: { marginHorizontal: 20, marginBottom: space[6], padding: space[4], gap: space[2], borderWidth: stroke.rule },
   loading: { marginTop: space[6] },
+  group: { paddingHorizontal: 20, paddingTop: space[6], paddingBottom: space[2] },
+  inboxNote: { paddingHorizontal: 20, paddingTop: space[2] },
   likes: {
     marginHorizontal: 20,
     marginTop: space[6],

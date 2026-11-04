@@ -215,6 +215,12 @@ function open(data: Record<string, unknown> | undefined) {
     case 'notifications':
       router.push('/notifications');
       return;
+    case 'page': {
+      // A claim approved opens the page and goes on to add the logo.
+      const handle = str('handle');
+      if (handle) router.push({ pathname: '/page/[handle]', params: str('logo') ? { handle, logo: '1' } : { handle } });
+      return;
+    }
   }
 }
 
@@ -245,7 +251,19 @@ export function usePushTaps() {
 
 /* Switches ------------------------------------------------------------------------- */
 
-export type PushSetting = 'comments' | 'mentions' | 'tags' | 'filmer_credits' | 'invites' | 'someone_new' | 'park_fixes' | 'meetups';
+export type PushSetting =
+  | 'comments'
+  | 'mentions'
+  | 'tags'
+  | 'filmer_credits'
+  | 'invites'
+  | 'someone_new'
+  | 'park_fixes'
+  | 'meetups'
+  // Pages (PR 5): team invites, role changes, ownership and claim decisions;
+  // a page you follow taking over its page.
+  | 'teams_claims'
+  | 'pages_joining';
 export type PushSettings = Record<PushSetting, boolean>;
 
 const ALL_ON: PushSettings = {
@@ -257,6 +275,8 @@ const ALL_ON: PushSettings = {
   someone_new: true,
   park_fixes: true,
   meetups: true,
+  teams_claims: true,
+  pages_joining: true,
 };
 
 async function fetchPushSettings(): Promise<PushSettings> {

@@ -912,6 +912,7 @@ export type Database = {
           id: string
           kind: Database["public"]["Enums"]["notification_kind"]
           message: string | null
+          page_id: string | null
           park_id: string | null
           post_id: string | null
           read_at: string | null
@@ -927,6 +928,7 @@ export type Database = {
           id?: string
           kind: Database["public"]["Enums"]["notification_kind"]
           message?: string | null
+          page_id?: string | null
           park_id?: string | null
           post_id?: string | null
           read_at?: string | null
@@ -942,6 +944,7 @@ export type Database = {
           id?: string
           kind?: Database["public"]["Enums"]["notification_kind"]
           message?: string | null
+          page_id?: string | null
           park_id?: string | null
           post_id?: string | null
           read_at?: string | null
@@ -1318,10 +1321,96 @@ export type Database = {
           },
         ]
       }
+      page_claims: {
+        Row: {
+          checked_at: string | null
+          created_at: string
+          decided_at: string | null
+          decline_reason: string | null
+          email: string | null
+          email_code_expires_at: string | null
+          email_code_sent_at: string | null
+          email_confirmed_at: string | null
+          email_domain_matches: boolean | null
+          id: string
+          note: string | null
+          page_id: string
+          posted_code: string | null
+          posted_code_expires_at: string | null
+          posted_url: string | null
+          proof: Database["public"]["Enums"]["page_claim_proof"]
+          role_title: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["page_claim_status"]
+          user_id: string
+        }
+        Insert: {
+          checked_at?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decline_reason?: string | null
+          email?: string | null
+          email_code_expires_at?: string | null
+          email_code_sent_at?: string | null
+          email_confirmed_at?: string | null
+          email_domain_matches?: boolean | null
+          id?: string
+          note?: string | null
+          page_id?: string
+          posted_code?: string | null
+          posted_code_expires_at?: string | null
+          posted_url?: string | null
+          proof?: Database["public"]["Enums"]["page_claim_proof"]
+          role_title?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["page_claim_status"]
+          user_id?: string
+        }
+        Update: {
+          checked_at?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decline_reason?: string | null
+          email?: string | null
+          email_code_expires_at?: string | null
+          email_code_sent_at?: string | null
+          email_confirmed_at?: string | null
+          email_domain_matches?: boolean | null
+          id?: string
+          note?: string | null
+          page_id?: string
+          posted_code?: string | null
+          posted_code_expires_at?: string | null
+          posted_url?: string | null
+          proof?: Database["public"]["Enums"]["page_claim_proof"]
+          role_title?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["page_claim_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_claims_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_claims_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_invites: {
         Row: {
           accepted_at: string | null
+          accepted_by: string | null
           cancelled_at: string | null
+          code: string | null
           created_at: string
           declined_at: string | null
           email: string | null
@@ -1330,12 +1419,15 @@ export type Database = {
           invited_by: string | null
           invitee_id: string | null
           kind: Database["public"]["Enums"]["page_invite_kind"]
+          logo_path: string | null
           page_id: string
           role: Database["public"]["Enums"]["page_member_role"] | null
         }
         Insert: {
           accepted_at?: string | null
+          accepted_by?: string | null
           cancelled_at?: string | null
+          code?: string | null
           created_at?: string
           declined_at?: string | null
           email?: string | null
@@ -1344,12 +1436,15 @@ export type Database = {
           invited_by?: string | null
           invitee_id?: string | null
           kind: Database["public"]["Enums"]["page_invite_kind"]
+          logo_path?: string | null
           page_id: string
           role?: Database["public"]["Enums"]["page_member_role"] | null
         }
         Update: {
           accepted_at?: string | null
+          accepted_by?: string | null
           cancelled_at?: string | null
+          code?: string | null
           created_at?: string
           declined_at?: string | null
           email?: string | null
@@ -1358,6 +1453,7 @@ export type Database = {
           invited_by?: string | null
           invitee_id?: string | null
           kind?: Database["public"]["Enums"]["page_invite_kind"]
+          logo_path?: string | null
           page_id?: string
           role?: Database["public"]["Enums"]["page_member_role"] | null
         }
@@ -1413,6 +1509,7 @@ export type Database = {
       }
       page_members: {
         Row: {
+          inbox_push: boolean
           invited_by: string | null
           joined_at: string
           page_id: string
@@ -1420,6 +1517,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          inbox_push?: boolean
           invited_by?: string | null
           joined_at?: string
           page_id: string
@@ -1427,6 +1525,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          inbox_push?: boolean
           invited_by?: string | null
           joined_at?: string
           page_id?: string
@@ -1689,6 +1788,7 @@ export type Database = {
           display_name: string
           ended_label: string | null
           founded_label: string | null
+          followers_told_at: string | null
           founding_partner_at: string | null
           frozen_at: string | null
           handle: string
@@ -1727,6 +1827,7 @@ export type Database = {
           display_name: string
           ended_label?: string | null
           founded_label?: string | null
+          followers_told_at?: string | null
           founding_partner_at?: string | null
           frozen_at?: string | null
           handle: string
@@ -1765,6 +1866,7 @@ export type Database = {
           display_name?: string
           ended_label?: string | null
           founded_label?: string | null
+          followers_told_at?: string | null
           founding_partner_at?: string | null
           frozen_at?: string | null
           handle?: string
@@ -2913,6 +3015,160 @@ export type Database = {
       }
     }
     Functions: {
+      answer_page_invite: {
+        Args: { accept: boolean; invite: string }
+        Returns: string
+      }
+      cancel_page_invite: { Args: { invite: string }; Returns: undefined }
+      decide_page_claim: {
+        Args: { approve: boolean; claim: string; reason?: string }
+        Returns: undefined
+      }
+      invite_to_page: {
+        Args: {
+          language?: string
+          page: string
+          role: Database["public"]["Enums"]["page_member_role"]
+          who: string
+        }
+        Returns: string
+      }
+      my_page_invites: {
+        Args: never
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          inviter_avatar_path: string | null
+          inviter_username: string | null
+          kind: string
+          my_role: string | null
+          page_city: string | null
+          page_country: string | null
+          page_handle: string
+          page_id: string
+          page_logo_path: string | null
+          page_name: string
+          page_roles: string[]
+          page_state: string
+          role: string | null
+        }[]
+      }
+      my_page_notifications: {
+        Args: never
+        Returns: {
+          actor_avatar_path: string | null
+          actor_username: string | null
+          created_at: string
+          id: string
+          kind: string
+          message: string | null
+          page_handle: string
+          page_id: string
+          page_logo_path: string | null
+          page_name: string
+          page_roles: string[]
+          page_state: string
+          unread: boolean
+        }[]
+      }
+      my_page_onboarding: {
+        Args: never
+        Returns: {
+          city: string | null
+          display_name: string
+          handle: string
+          metro_area_id: string | null
+          needs_logo: boolean
+          page_id: string
+          role: string
+          roles: string[]
+        }[]
+      }
+      my_pages: {
+        Args: never
+        Returns: {
+          display_name: string
+          handle: string
+          inbox_push: boolean
+          logo_path: string | null
+          page_id: string
+          role: string
+          roles: string[]
+          state: string
+        }[]
+      }
+      page_email_claim: {
+        Args: { max_rows?: number }
+        Returns: {
+          code: string | null
+          email_id: number
+          expires_at: string | null
+          inviter_username: string | null
+          kind: string
+          language: string
+          page_handle: string
+          page_kind: string
+          page_name: string
+          page_place: string | null
+          role: string | null
+          send: boolean
+          to_email: string
+        }[]
+      }
+      page_email_done: { Args: { ids: number[] }; Returns: undefined }
+      page_invite_preview: {
+        Args: { code: string }
+        Returns: {
+          email: string | null
+          expires_at: string
+          inviter_username: string | null
+          kind: string
+          page_city: string | null
+          page_country: string | null
+          page_handle: string
+          page_logo_path: string | null
+          page_name: string
+          page_roles: string[]
+          page_state: string
+          role: string | null
+        }[]
+      }
+      redeem_my_page_invite: { Args: never; Returns: string | null }
+      resend_page_claim_code: {
+        Args: { claim: string; language?: string }
+        Returns: string
+      }
+      send_claim_invite: {
+        Args: { email: string; language?: string; logo?: string; page: string }
+        Returns: { code: string; invite_id: string }[]
+      }
+      send_page_claim: {
+        Args: { claim: string; email_code?: string; posted_url?: string }
+        Returns: string
+      }
+      set_page_inbox_push: {
+        Args: { enabled: boolean; page: string }
+        Returns: undefined
+      }
+      set_page_logo: { Args: { page: string; path: string }; Returns: undefined }
+      start_page_claim: {
+        Args: {
+          email?: string
+          language?: string
+          note?: string
+          page: string
+          proof: Database["public"]["Enums"]["page_claim_proof"]
+          role_title: string
+        }
+        Returns: {
+          claim_id: string
+          domain_matches: boolean | null
+          posted_code: string | null
+          posted_code_expires_at: string | null
+        }[]
+      }
+      withdraw_page_claim: { Args: { claim: string }; Returns: undefined }
       before_user_created: { Args: { event: Json }; Returns: Json }
       can_delete_meetup: { Args: { event: string }; Returns: boolean }
       can_hide_meetup: { Args: { event: string }; Returns: boolean }
@@ -3314,9 +3570,11 @@ export type Database = {
           invites: boolean
           meetups: boolean
           mentions: boolean
+          pages_joining: boolean
           park_fixes: boolean
           someone_new: boolean
           tags: boolean
+          teams_claims: boolean
         }[]
       }
       my_recent_meetups: {
@@ -3590,6 +3848,8 @@ export type Database = {
           kind: string
           metro_name: string | null
           outbox_id: number
+          page_handle: string | null
+          page_name: string | null
           park_name: string | null
           park_slug: string | null
           post_id: string | null
@@ -3849,6 +4109,12 @@ export type Database = {
         | "co_host_invite"
         | "meetup_comment"
         | "meetup_hidden"
+        | "page_invite"
+        | "page_claim_approved"
+        | "page_claim_declined"
+        | "page_team_change"
+        | "page_claimed"
+        | "suggestion_live"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -3880,7 +4146,9 @@ export type Database = {
         | "rainbow_bench"
         | "other"
         | "street_plaza"
-      page_invite_kind: "team" | "ownership"
+      page_claim_proof: "email" | "posted_code"
+      page_claim_status: "draft" | "pending" | "approved" | "declined" | "withdrawn"
+      page_invite_kind: "team" | "ownership" | "claim"
       page_member_role: "staff" | "manager" | "owner"
       page_role: "brand" | "shop"
       product_entry_type: "model" | "pro" | "collab" | "special_edition"
@@ -4102,6 +4370,12 @@ export const Constants = {
         "co_host_invite",
         "meetup_comment",
         "meetup_hidden",
+        "page_invite",
+        "page_claim_approved",
+        "page_claim_declined",
+        "page_team_change",
+        "page_claimed",
+        "suggestion_live",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [
@@ -4135,7 +4409,9 @@ export const Constants = {
         "other",
         "street_plaza",
       ],
-      page_invite_kind: ["team", "ownership"],
+      page_claim_proof: ["email", "posted_code"],
+      page_claim_status: ["draft", "pending", "approved", "declined", "withdrawn"],
+      page_invite_kind: ["team", "ownership", "claim"],
       page_member_role: ["staff", "manager", "owner"],
       page_role: ["brand", "shop"],
       product_entry_type: ["model", "pro", "collab", "special_edition"],

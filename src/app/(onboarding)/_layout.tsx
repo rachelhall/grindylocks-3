@@ -6,7 +6,8 @@ import { useColors } from '@/theme';
 
 /**
  * Onboarding: age check → username and disciplines → home city (and
- * optional park) → regulars notice. Each step saves to the profile as it
+ * optional park) → regulars notice, then (an owner joining through a page
+ * invite, with no logo yet) the page's logo. Each step saves to the profile as it
  * goes, so a member who closes the app picks up at the first unfinished step.
  */
 export default function OnboardingLayout() {
@@ -22,6 +23,7 @@ export default function OnboardingLayout() {
         <Stack.Screen name="username" />
         <Stack.Screen name="city" />
         <Stack.Screen name="regulars" />
+        <Stack.Screen name="logo" />
       </Stack>
     </OnboardingProvider>
   );

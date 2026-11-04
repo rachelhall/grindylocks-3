@@ -41,7 +41,10 @@ export function SettingsRow({
   onPress,
   first,
   accessibilityHint,
+  icon,
 }: {
+  /** Something on the left, such as a page's logo tile. */
+  icon?: ReactNode;
   title: string;
   subtitle?: string;
   value?: string;
@@ -54,6 +57,7 @@ export function SettingsRow({
   const c = useColors();
   const content = (
     <>
+      {icon}
       <View style={styles.text}>
         <Text variant="body" style={styles.title}>
           {title}

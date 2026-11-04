@@ -31,8 +31,16 @@ type Claimed = {
   event_timezone: string | null;
   /** The meetup's title, or its line when it has none. */
   event_title: string | null;
-  /** What changed ("time", "park", "time,park"), or the cancel reason (":series" when the rest of a series was cancelled). */
+  /**
+   * What changed ("time", "park", "time,park"), or the cancel reason
+   * (":series" when the rest of a series was cancelled). Pages: the invite
+   * ("team:staff", "ownership"), the decline reason, the team change
+   * ("role:manager", "removed", "owner") or what went live.
+   */
   detail: string | null;
+  /** Page notifications: the page's handle and name. */
+  page_handle: string | null;
+  page_name: string | null;
 };
 
 type ExpoMessage = {
@@ -88,6 +96,7 @@ function compose(row: Claimed, language: string): { title?: string; body: string
   const lang = language in strings ? language : 'en';
   const meetup = row.event_title ?? row.park_name ?? '';
   const park = row.park_name ?? '';
+  const page = row.page_name ?? '';
   const reasonOf = (r: string) => {
     const key = `reason_${r}` as keyof Sentences;
     return key in s ? s[key] : s.reason_other;
@@ -133,6 +142,30 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { title: say('meetupReply', { meetup }), body: row.comment_body ?? '' };
     case 'meetup_mention':
       return { title: say('meetupMention', { meetup }), body: row.comment_body ?? '' };
+    // Pages (brand and shop accounts, PR 5): the bell's sentences, with the
+    // page's name in {{name}}.
+    case 'page_invite': {
+      if (!page) return null;
+      if (row.detail === 'ownership') return { body: say('page_ownership', { name: page }) };
+      const role = row.detail === 'team:manager' ? s.role_manager : s.role_staff;
+      return { body: say('page_teamInvite', { name: page, role }) };
+    }
+    case 'page_claim_approved':
+      return page ? { body: say('page_claimApproved', { name: page }) } : null;
+    case 'page_claim_declined':
+      if (!page) return null;
+      return row.detail === 'another_claim_approved'
+        ? { body: say('page_claimTaken', { name: page }) }
+        : { title: say('page_claimDeclined', { name: page }), body: row.detail ?? '' };
+    case 'page_team_change':
+      if (!page) return null;
+      if (row.detail === 'removed') return { body: say('page_removed', { name: page }) };
+      if (row.detail === 'owner') return { body: say('page_owner', { name: page }) };
+      return { body: say('page_madeRole', { name: page, role: row.detail === 'role:manager' ? s.roleA_manager : s.roleA_staff }) };
+    case 'page_claimed':
+      return page ? { body: say('page_joined', { name: page }) } : null;
+    case 'suggestion_live':
+      return page ? { title: say('page_suggestionLive', { name: page }), body: row.detail ?? '' } : null;
     default:
       return null;
   }
@@ -149,6 +182,10 @@ function destination(row: Claimed): Record<string, string> {
     return { open: 'post', id: row.post_id, ...(comments ? { comments: '1' } : {}) };
   }
   if (row.kind === 'park_report_accepted' && row.park_slug) return { open: 'park', slug: row.park_slug };
+  // Team invites wait in the bell's Page invites box; the rest open the page
+  // (an approved claim opens it to add the logo).
+  if (row.kind === 'page_invite') return { open: 'notifications' };
+  if (row.page_handle) return { open: 'page', handle: row.page_handle, ...(row.kind === 'page_claim_approved' ? { logo: '1' } : {}) };
   if (row.actor_username) return { open: 'profile', username: row.actor_username };
   return { open: 'notifications' };
 }
