@@ -688,7 +688,10 @@ update comments set deleted_at = now() where id = 'e2000000-0000-4000-8000-00000
 reset role;
 insert into t_results select 'deleting the comment drops its mention', count(*) = 0, count(*)::text
   from page_mentions where comment_id = 'e2000000-0000-4000-8000-0000000000e1';
+set local role authenticated;
+select set_config('request.jwt.claims', '{"sub":"e2000000-0000-4000-8000-0000000000a2","role":"authenticated"}', true);
 update posts set status = 'deleted' where id = 'a2000000-0000-4000-8000-0000000000f1';
+reset role;
 insert into t_results select 'deleting the post drops its caption mentions', count(*) = 0, count(*)::text from page_mentions;
 
 /* Grants */
