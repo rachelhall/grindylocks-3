@@ -22,6 +22,10 @@ export type AccessRequest = {
   invitedAt: string | null;
   /** How long ago they were marked invited, like `ago`; null while not invited. */
   invitedAgo: string | null;
+  /** When the owner dismissed it; null while it isn't dismissed. */
+  dismissedAt: string | null;
+  /** How long ago it was dismissed, like `ago`; null while not dismissed. */
+  dismissedAgo: string | null;
 };
 
 /** Only the owner sees requests (the table's access rules say the same). */
@@ -56,7 +60,7 @@ export async function fetchAccessRequests(): Promise<AccessRequest[]> {
   const [requests, metroAreas] = await Promise.all([
     supabase
       .from("access_requests")
-      .select("id, email, home_city, disciplines, created_at, invited_at")
+      .select("id, email, home_city, disciplines, created_at, invited_at, dismissed_at")
       .order("created_at", { ascending: false }),
     supabase.rpc("welcome_metro_areas"),
   ]);
@@ -79,17 +83,20 @@ export async function fetchAccessRequests(): Promise<AccessRequest[]> {
       ago: ago(r.created_at, now),
       invitedAt: r.invited_at,
       invitedAgo: r.invited_at ? ago(r.invited_at, now) : null,
+      dismissedAt: r.dismissed_at,
+      dismissedAgo: r.dismissed_at ? ago(r.dismissed_at, now) : null,
     };
   });
 }
 
-/** How many requests are waiting for an invite, for the sidebar badge. */
+/** How many requests are waiting for an invite (not invited, not dismissed), for the sidebar badge. */
 export async function countNotInvited(): Promise<number> {
   const supabase = await createClient();
   const { count, error } = await supabase
     .from("access_requests")
     .select("id", { count: "exact", head: true })
-    .is("invited_at", null);
+    .is("invited_at", null)
+    .is("dismissed_at", null);
   if (error) throw error;
   return count ?? 0;
 }

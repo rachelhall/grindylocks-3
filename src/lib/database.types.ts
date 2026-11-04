@@ -18,6 +18,7 @@ export type Database = {
         Row: {
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
+          dismissed_at: string | null
           email: string
           home_city: string | null
           id: string
@@ -26,6 +27,7 @@ export type Database = {
         Insert: {
           created_at?: string
           disciplines?: Database["public"]["Enums"]["discipline"][]
+          dismissed_at?: string | null
           email: string
           home_city?: string | null
           id?: string
@@ -34,6 +36,7 @@ export type Database = {
         Update: {
           created_at?: string
           disciplines?: Database["public"]["Enums"]["discipline"][]
+          dismissed_at?: string | null
           email?: string
           home_city?: string | null
           id?: string
