@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { SafeAreaView } from '@/components/safe-area';
@@ -11,6 +11,7 @@ import { HereNowSection } from '@/components/here-now';
 import { ParkPastMeetups, ParkUpcomingMeetups } from '@/components/park-meetups';
 import { HEADER_HEIGHT, ParkHeader } from '@/components/park-header';
 import { AddParkPhotosSheet, NoPhotosCard, RoleBadge } from '@/components/park-photos';
+import { PinnedBar } from '@/components/pinned-bar';
 import { ParkPosts, ParkRegulars } from '@/components/park-social';
 import { BookmarkIcon, DisciplineChips, IconButton, openDirections, StatusChip } from '@/components/parks';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
@@ -28,7 +29,7 @@ import {
 import { pickFromLibrary, type PickedMedia } from '@/lib/media';
 import { MAX_PARK_PHOTOS, useParkPhotos, useParkRole } from '@/lib/park-photos';
 import { type Discipline, type ParkDetail, pickDescription, usePark, useSavedParks } from '@/lib/parks';
-import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
+import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 type HoursLine = { key: string; season: string | null; days: string; time: string; disciplines: Discipline[]; note: string | null };
 
@@ -56,9 +57,8 @@ export default function ParkScreen() {
   const { sheet, show: showActions } = useActionSheet();
   const [picked, setPicked] = useState<PickedMedia[]>([]);
   const insets = useSafeAreaInsets();
-  const scheme = useColorSchemeName();
-  // Light status bar text over the dark header; the theme's once it scrolls away.
-  const [pastHeader, setPastHeader] = useState(false);
+  // Drives the pinned bar's fade (natively, with the scroll).
+  const [scrollY] = useState(() => new Animated.Value(0));
 
   const locale = i18n.language;
   const place = useMemo(
@@ -204,23 +204,27 @@ export default function ParkScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: c.surface }]}>
-      <StatusBar style={pastHeader ? (scheme === 'dark' ? 'light' : 'dark') : 'light'} />
-      <ScrollView
+      {/* The header and the pinned bar are ink in both themes, so the clock stays light. */}
+      <StatusBar style="light" />
+      <PinnedBar
+        scrollY={scrollY}
+        headerHeight={HEADER_HEIGHT}
+        name={park.display_name}
+        moreLabel={t('park.more')}
+        onBack={() => router.back()}
+        onMore={more}
+      />
+      <Animated.ScrollView
         // The header runs up under the status bar.
         contentInsetAdjustmentBehavior="never"
         contentContainerStyle={[styles.content, { paddingBottom: space[12] + insets.bottom }]}
-        scrollEventThrottle={32}
-        onScroll={(e) => {
-          const past = e.nativeEvent.contentOffset.y > HEADER_HEIGHT - insets.top;
-          if (past !== pastHeader) setPastHeader(past);
-        }}
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
       >
         <ParkHeader
           name={park.display_name}
           tape={[park.metro?.name ?? park.city, t(`park.type.${park.park_type}`)].join(' · ')}
           photoUrl={photos[0]?.url ?? null}
-          onBack={() => router.back()}
-          onMore={more}
           onOpenGallery={photos.length > 0 ? openGallery : undefined}
           onAddPhotos={canContribute ? () => void addPhotos() : undefined}
         />
@@ -466,11 +470,7 @@ export default function ParkScreen() {
             {t('park.osmCredit')}
           </Text>
         </View>
-      </ScrollView>
-      {/* Keeps the status bar readable once the header has scrolled under it. */}
-      {pastHeader ? (
-        <View pointerEvents="none" style={[styles.statusStrip, { height: insets.top, backgroundColor: c.surface }]} />
-      ) : null}
+      </Animated.ScrollView>
       {sheet}
       {profile?.username ? (
         <AddParkPhotosSheet
@@ -502,7 +502,6 @@ const styles = StyleSheet.create({
   content: { gap: space[6] },
   intro: { marginTop: -space[2] },
   chip: { borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: 2 },
-  statusStrip: { position: 'absolute', top: 0, left: 0, right: 0 },
   block: { paddingHorizontal: space[4], gap: space[2] },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2], alignItems: 'center', marginTop: space[1] },
   verified: { flexDirection: 'row', alignItems: 'center', gap: 4, borderWidth: stroke.rule, paddingHorizontal: space[2], paddingVertical: 2 },

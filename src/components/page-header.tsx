@@ -1,13 +1,11 @@
 import { Image } from 'expo-image';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 
 import { HalftoneGround } from '@/components/park-header';
 import { StampTape } from '@/components/pages';
-import { Icon, type IconName } from '@/components/ui';
 import type { Stamp } from '@/lib/pages';
-import { brand, size, space, stroke, Text } from '@/theme';
+import { brand, space, stroke, Text } from '@/theme';
 
 /** Height of a page header, status bar included. Name-only pages get a shorter, plain one. */
 export const PAGE_HEADER_HEIGHT = 300;
@@ -15,20 +13,6 @@ export const PLAIN_HEADER_HEIGHT = 228;
 /** The logo tile overlaps the header's bottom edge by this much. */
 export const LOGO_OVERLAP = 38;
 const LOGO_SIZE = 76;
-
-function HeaderButton({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      hitSlop={4}
-      style={({ pressed }) => [styles.square, pressed && styles.pressed]}
-    >
-      <Icon name={icon} color={brand.ink} size={22} />
-    </Pressable>
-  );
-}
 
 /**
  * A brand or shop page's header, per the Brand accounts (v2) mockups. It
@@ -44,7 +28,8 @@ function HeaderButton({ icon, label, onPress }: { icon: IconName; label: string;
  *   CLOSED stamp.
  *
  * Founding partner is a paper tape beside the type tape. Like the park
- * header, it's dark in both themes, so it uses brand ink and paper.
+ * header, it's dark in both themes, so it uses brand ink and paper. Back
+ * and ⋯ are the pinned bar's tiles (`PinnedBar`), drawn over the header.
  */
 export function PageHeader({
   name,
@@ -54,9 +39,6 @@ export function PageHeader({
   logoUrl,
   plain = false,
   dim = false,
-  moreLabel,
-  onBack,
-  onMore,
 }: {
   name: string;
   /** "BRAND · SANTA ANA"; null for a name-only page. */
@@ -67,13 +49,8 @@ export function PageHeader({
   logoUrl: string | null;
   plain?: boolean;
   dim?: boolean;
-  moreLabel: string;
-  onBack: () => void;
-  /** Hidden when there's nothing in the menu (the page's own team, for now). */
-  onMore?: () => void;
 }) {
   const { t } = useTranslation();
-  const insets = useSafeAreaInsets();
   const height = plain ? PLAIN_HEADER_HEIGHT : PAGE_HEADER_HEIGHT;
 
   return (
@@ -141,10 +118,6 @@ export function PageHeader({
         />
       ) : null}
 
-      <View style={[styles.topRow, { top: Math.max(space[4], insets.top + space[1]) }]}>
-        <HeaderButton icon="back" label={t('common.back')} onPress={onBack} />
-        {onMore ? <HeaderButton icon="more" label={moreLabel} onPress={onMore} /> : null}
-      </View>
     </View>
   );
 }
@@ -172,19 +145,4 @@ const styles = StyleSheet.create({
     borderColor: brand.ink,
     backgroundColor: brand.paper,
   },
-  topRow: {
-    position: 'absolute',
-    left: space[4],
-    right: space[4],
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  square: {
-    width: size.tapMin,
-    height: size.tapMin,
-    backgroundColor: brand.paper,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pressed: { opacity: 0.75 },
 });
