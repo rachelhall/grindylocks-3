@@ -931,7 +931,8 @@ begin
     || coalesce((select near_you::text from public.posts where id = p1), '?') || '/'
     || coalesce((select near_you::text from public.posts where id = p2), '?') || '; '; end if;
 
-  -- Bo's already used five slots this week (Monday and Tuesday, its clock).
+  -- Bo's already used five slots this week (Monday and Tuesday, its clock), posted by its owner.
+  perform set_config('request.jwt.claims', json_build_object('sub', o, 'role', 'authenticated')::text, true);
   insert into public.posts (author_id, page_id, metro_area_id, caption, slide_count, published_at, near_you)
   select null, bos, (select metro_area_id from public.pages where id = bos), 'earlier ' || g, 1,
          ((date_trunc('week', now() at time zone 'America/Los_Angeles') + interval '10 hours'
