@@ -38,6 +38,60 @@ export async function setInvited(ids: string[], invited: boolean): Promise<Actio
 }
 
 /**
+ * Dismisses requests (or restores them). A dismissed request leaves Not
+ * invited, the sidebar count and By city. Because there's one request per
+ * email, a dismissed email that asks again stays dismissed.
+ */
+export async function setDismissed(ids: string[], dismissed: boolean): Promise<ActionResult> {
+  if (!isOwner(await getAdmin())) return { ok: false, error: "Only the owner can change requests." };
+
+  const clean = cleanIds(ids);
+  if (!clean) return { ok: false, error: "Pick at least one request." };
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("access_requests")
+    .update({ dismissed_at: dismissed ? new Date().toISOString() : null })
+    .in("id", clean);
+
+  if (error) {
+    console.error("setDismissed failed", error);
+    return { ok: false, error: "Couldn't save that. Try again." };
+  }
+
+  refresh();
+  return { ok: true };
+}
+
+/**
+ * Deletes requests for good: for tests and junk. There's no undo, and the
+ * email can ask again from grindylocks.com. The table's access rules allow
+ * it for the owner only.
+ */
+export async function deleteRequests(ids: string[]): Promise<ActionResult> {
+  if (!isOwner(await getAdmin())) return { ok: false, error: "Only the owner can delete requests." };
+
+  const clean = cleanIds(ids);
+  if (!clean) return { ok: false, error: "Pick at least one request." };
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("access_requests").delete().in("id", clean);
+
+  if (error) {
+    console.error("deleteRequests failed", error);
+    return { ok: false, error: "Couldn't delete that. Try again." };
+  }
+
+  refresh();
+  return { ok: true };
+}
+
+function cleanIds(ids: string[]): string[] | null {
+  const clean = [...new Set(ids)].filter((id) => UUID.test(id));
+  return clean.length && clean.length <= MAX_IDS ? clean : null;
+}
+
+/**
  * Records that the owner opened the Requests page, so next time only newer
  * requests are tagged NEW. Called once the page has shown, and doesn't
  * refresh it, so this visit's NEW tags stay put.
