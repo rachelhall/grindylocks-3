@@ -1454,6 +1454,72 @@ export type Database = {
           },
         ]
       }
+      page_mentions: {
+        Row: {
+          author_id: string
+          comment_id: string | null
+          created_at: string
+          event_comment_id: string | null
+          id: string
+          page_id: string
+          post_id: string | null
+        }
+        Insert: {
+          author_id: string
+          comment_id?: string | null
+          created_at?: string
+          event_comment_id?: string | null
+          id?: string
+          page_id: string
+          post_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          comment_id?: string | null
+          created_at?: string
+          event_comment_id?: string | null
+          id?: string
+          page_id?: string
+          post_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_mentions_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_mentions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_mentions_event_comment_id_fkey"
+            columns: ["event_comment_id"]
+            isOneToOne: false
+            referencedRelation: "event_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_mentions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_mentions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_mutes: {
         Row: {
           created_at: string
@@ -1481,6 +1547,128 @@ export type Database = {
           {
             foreignKeyName: "page_mutes_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          page_id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          page_id: string
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          page_id?: string
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_reports_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_reports_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_suggestions: {
+        Row: {
+          created_at: string
+          id: string
+          link: string | null
+          name: string
+          page_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          role: Database["public"]["Enums"]["page_role"]
+          status: Database["public"]["Enums"]["review_status"]
+          suggester_id: string | null
+          what: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          name: string
+          page_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role: Database["public"]["Enums"]["page_role"]
+          status?: Database["public"]["Enums"]["review_status"]
+          suggester_id?: string | null
+          what?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          link?: string | null
+          name?: string
+          page_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          role?: Database["public"]["Enums"]["page_role"]
+          status?: Database["public"]["Enums"]["review_status"]
+          suggester_id?: string | null
+          what?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_suggestions_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_suggestions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_suggestions_suggester_id_fkey"
+            columns: ["suggester_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -2325,6 +2513,7 @@ export type Database = {
           event_comment_id: string | null
           event_id: string | null
           id: string
+          impersonated_page_id: string | null
           post_id: string | null
           reason: Database["public"]["Enums"]["report_reason"]
           reported_user_id: string | null
@@ -2341,6 +2530,7 @@ export type Database = {
           event_comment_id?: string | null
           event_id?: string | null
           id?: string
+          impersonated_page_id?: string | null
           post_id?: string | null
           reason: Database["public"]["Enums"]["report_reason"]
           reported_user_id?: string | null
@@ -2357,6 +2547,7 @@ export type Database = {
           event_comment_id?: string | null
           event_id?: string | null
           id?: string
+          impersonated_page_id?: string | null
           post_id?: string | null
           reason?: Database["public"]["Enums"]["report_reason"]
           reported_user_id?: string | null
@@ -2366,6 +2557,13 @@ export type Database = {
           status?: Database["public"]["Enums"]["report_status"]
         }
         Relationships: [
+          {
+            foreignKeyName: "reports_impersonated_page_id_fkey"
+            columns: ["impersonated_page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reports_comment_id_fkey"
             columns: ["comment_id"]
@@ -2838,10 +3036,19 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      file_page_report: {
+        Args: {
+          details?: string
+          page: string
+          reason: Database["public"]["Enums"]["report_reason"]
+        }
+        Returns: undefined
+      }
       file_report: {
         Args: {
           comment?: string
           details?: string
+          impersonating?: string
           meetup?: string
           meetup_comment?: string
           person?: string
@@ -3111,6 +3318,17 @@ export type Database = {
       }
       obstacle_review_detail: { Args: { obstacle: string }; Returns: Json }
       page_follower_count: { Args: { page: string }; Returns: number }
+      page_for_handle: { Args: { h: string }; Returns: string }
+      page_viewer_state: {
+        Args: { page: string }
+        Returns: {
+          blocked: boolean
+          can_follow: boolean
+          following: boolean
+          muted: boolean
+          team_role: Database["public"]["Enums"]["page_member_role"] | null
+        }[]
+      }
       park_here_now: {
         Args: { park: string }
         Returns: {
@@ -3409,6 +3627,21 @@ export type Database = {
           status: Database["public"]["Enums"]["park_status"]
         }[]
       }
+      search_pages: {
+        Args: { for_mention?: boolean; max_results?: number; q: string }
+        Returns: {
+          city: string | null
+          country: string | null
+          display_name: string
+          following: boolean
+          formerly: string | null
+          handle: string
+          id: string
+          logo_path: string | null
+          roles: Database["public"]["Enums"]["page_role"][]
+          state: Database["public"]["Enums"]["page_state"]
+        }[]
+      }
       search_people: {
         Args: { max_results?: number; q: string }
         Returns: {
@@ -3457,6 +3690,15 @@ export type Database = {
           slide: string
         }
         Returns: undefined
+      }
+      suggest_page: {
+        Args: {
+          link?: string
+          name: string
+          role: Database["public"]["Enums"]["page_role"]
+          what?: string
+        }
+        Returns: string
       }
       tagged_posts: {
         Args: {
@@ -3600,6 +3842,9 @@ export type Database = {
         | "inappropriate"
         | "other"
         | "wrong_park"
+        | "impersonation"
+        | "our_page"
+        | "wrong_info"
       report_status: "open" | "dismissed" | "actioned" | "escalated"
       review_status: "open" | "accepted" | "rejected"
       role_name: "owner" | "city_admin" | "park_admin" | "park_contributor"
@@ -3847,6 +4092,9 @@ export const Constants = {
         "inappropriate",
         "other",
         "wrong_park",
+        "impersonation",
+        "our_page",
+        "wrong_info",
       ],
       report_status: ["open", "dismissed", "actioned", "escalated"],
       review_status: ["open", "accepted", "rejected"],
