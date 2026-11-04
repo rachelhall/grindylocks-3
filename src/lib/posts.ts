@@ -16,6 +16,7 @@ import { type InfiniteData, useInfiniteQuery, useMutation, useQuery, useQueryCli
 
 import type { Database } from './database.types';
 import { type FramePoint, photoUrls, videoKeys } from './media';
+import type { PageRole, PageState } from './pages';
 import type { ObstacleType } from './parks';
 import type { GridPost } from './profiles';
 import { fresh, keys } from './query';
@@ -24,9 +25,10 @@ import { supabase } from './supabase';
 type Enums = Database['public']['Enums'];
 
 /** Everything a post card or post detail shows, in one select. */
-export const POST_SELECT = `id, author_id, caption, created_at, published_at, edited_at, park_id, event_id, slide_count, anonymized,
+export const POST_SELECT = `id, author_id, page_id, near_you, caption, created_at, published_at, edited_at, park_id, event_id, slide_count, anonymized,
   comment_count, liked_by_me,
   author:profiles!posts_author_id_fkey(id, username, avatar_path, deleted_at),
+  page:pages!posts_page_id_fkey(id, handle, display_name, roles, state, logo_path),
   park:parks!posts_park_id_fkey(id, slug, display_name),
   metro:metro_areas!posts_metro_area_id_fkey(id, name),
   post_slides(id, position, kind, width, height, frame_x, frame_y, duration_s, upload_status, storage_path, stream_video_id,
@@ -61,11 +63,26 @@ export type PostSlide = {
   people: PersonRef[];
 };
 
+/** The page a post was made as (PR 8a). The public sees only the page, never the member. */
+export type PostPage = {
+  id: string;
+  handle: string;
+  displayName: string;
+  roles: PageRole[];
+  state: PageState;
+  logoPath: string | null;
+};
+
 export type Post = {
   id: string;
-  authorId: string;
-  /** Null for a deleted account or an anonymized post. */
+  /** Null for a page post: who made it is only known to the page's team. */
+  authorId: string | null;
+  /** Null for a deleted account, an anonymized post or a page post. */
   author: { id: string; username: string | null; avatarPath: string | null } | null;
+  /** Set when the post was made as a page. */
+  page: PostPage | null;
+  /** A shop's post that went to Near you (within its cap). */
+  nearYou: boolean;
   park: { id: string; slug: string; name: string } | null;
   metro: { id: string; name: string } | null;
   /** The meetup it's from ("From Thursday's meetup?"), if linked. */
@@ -83,7 +100,10 @@ export type Post = {
 /** The shape PostgREST hands back for POST_SELECT. */
 type Row = {
   id: string;
-  author_id: string;
+  author_id: string | null;
+  page_id: string | null;
+  near_you: boolean | null;
+  page: { id: string; handle: string; display_name: string; roles: PageRole[]; state: PageState; logo_path: string | null } | null;
   caption: string | null;
   created_at: string;
   published_at: string | null;
@@ -139,6 +159,17 @@ async function toPosts(rows: Row[]): Promise<Post[]> {
       r.anonymized || !r.author || r.author.deleted_at
         ? null
         : { id: r.author.id, username: r.author.username, avatarPath: r.author.avatar_path },
+    page: r.page
+      ? {
+          id: r.page.id,
+          handle: r.page.handle,
+          displayName: r.page.display_name,
+          roles: r.page.roles,
+          state: r.page.state,
+          logoPath: r.page.logo_path,
+        }
+      : null,
+    nearYou: Boolean(r.near_you),
     park: r.park ? { id: r.park.id, slug: r.park.slug, name: r.park.display_name } : null,
     metro: r.metro,
     eventId: r.event_id ?? null,
@@ -284,6 +315,51 @@ export function useParkPosts(parkId: string | undefined) {
     GRID_PAGE,
     Boolean(parkId),
   );
+}
+
+/** A page's own posts (its Posts tab), newest first. */
+export function usePagePosts(pageId: string | undefined, enabled = true) {
+  return usePostPages(
+    keys.pagePosts(pageId ?? ''),
+    async (cursor) => {
+      let q = supabase
+        .from('posts')
+        .select(POST_SELECT)
+        .eq('page_id', pageId!)
+        .eq('status', 'visible')
+        .not('published_at', 'is', null)
+        .order('published_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(GRID_PAGE);
+      if (cursor) q = q.or(`published_at.lt."${cursor.at}",and(published_at.eq."${cursor.at}",id.lt.${cursor.id})`);
+      const { data, error } = await q;
+      if (error) throw error;
+      return toPosts((data ?? []) as unknown as Row[]);
+    },
+    GRID_PAGE,
+    Boolean(pageId) && enabled,
+  );
+}
+
+/** "by [member]" for a page's post tiles: the team only, by post ID. */
+export function usePagePostBylines(pageId: string | undefined, postIds: string[], onTeam: boolean) {
+  return useQuery({
+    queryKey: [...keys.pagePosts(pageId ?? ''), 'bylines', postIds.join(',')],
+    queryFn: async (): Promise<Record<string, string | null>> => {
+      const { data, error } = await supabase.rpc('page_post_bylines', { page: pageId!, posts: postIds });
+      if (error) throw error;
+      return Object.fromEntries((data ?? []).map((r) => [r.post_id, r.username]));
+    },
+    enabled: Boolean(pageId) && onTeam && postIds.length > 0,
+    staleTime: fresh.posts,
+  });
+}
+
+/** Whether you made this post (its author, or the member who posted it as a page). */
+export async function fetchMadePost(postId: string): Promise<boolean> {
+  const { data, error } = await supabase.rpc('i_made_post', { post: postId });
+  if (error) throw error;
+  return data === true;
 }
 
 /** Posts linked to a meetup date ("From this session"), newest first. */

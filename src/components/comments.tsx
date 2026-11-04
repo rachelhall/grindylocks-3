@@ -236,7 +236,8 @@ export function CommentList({
   expandThread,
 }: {
   postId: string;
-  postAuthorId: string;
+  /** Null for a page post (comments as a page come with PR 8b). */
+  postAuthorId: string | null;
   userId: string | undefined;
   onReply: (target: ReplyTarget) => void;
   /** A thread just replied to opens up, so the new reply shows. */

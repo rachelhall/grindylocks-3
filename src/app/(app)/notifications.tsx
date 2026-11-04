@@ -341,7 +341,12 @@ export default function Notifications() {
             </View>
           ) : (
             <>
-              <Avatar path={person?.avatarPath ?? null} username={person?.username ?? '?'} size={40} />
+              {person?.page ? (
+                // A tag, credit or caption mention from a page post (PR 8a).
+                <PageTile page={person.page} size={40} />
+              ) : (
+                <Avatar path={person?.avatarPath ?? null} username={person?.username ?? '?'} size={40} />
+              )}
               <View style={[styles.badge, { backgroundColor: badgeFill }]}>
                 <Icon name={BADGES[n.kind]} color={badgeIcon} size={12} />
               </View>

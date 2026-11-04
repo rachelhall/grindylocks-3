@@ -31,7 +31,18 @@ export type ParkField = Enums['park_field'];
 
 /** What a report is about. `personId` and `username` are whose it is, for "Block them too?". */
 export type ReportTarget =
-  | { kind: 'post'; id: string; personId: string; username: string; parkName: string | null }
+  /**
+   * A page post (PR 8a) has no person behind it publicly: `personId` is null,
+   * `username` is the page's name, and "Block them too?" blocks the page.
+   */
+  | {
+      kind: 'post';
+      id: string;
+      personId: string | null;
+      username: string;
+      parkName: string | null;
+      page?: { onBlock: () => void };
+    }
   | { kind: 'comment'; id: string; personId: string; username: string }
   | { kind: 'person'; id: string; personId: string; username: string }
   /** A meetup date: `personId` and `username` are its host; `parkName` where it's routed. */

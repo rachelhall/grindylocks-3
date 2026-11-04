@@ -2,7 +2,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Animated, Linking, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Linking, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ClaimFooter } from '@/components/claim';
@@ -10,6 +10,7 @@ import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
 import { TeamBar } from '@/components/page-team';
+import { MasonryGrid } from '@/components/profile';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { useShopFixSheet } from '@/components/shop-fix';
 import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
@@ -35,6 +36,7 @@ import {
   usePageRelation,
   usePageViewerState,
 } from '@/lib/pages';
+import { toGridPost, usePagePostBylines, usePagePosts } from '@/lib/posts';
 import { Sentry } from '@/lib/sentry';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
@@ -70,8 +72,10 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * (or manager, or staff) under the handle and an ink bar with Edit page,
  * Team and Inbox, with a dot when the inbox has something new.
  *
- * Coming with later PRs: the page's own posts (PR 8) and its meetups (PR 9).
- * Until then a managed page's Posts section is empty.
+ * Posts (PR 8a, Page-TeamView): the page's own posts in the masonry grid;
+ * the team sees "by [member]" on each tile, nobody else learns who posted.
+ *
+ * Coming with PR 9: the page's meetups.
  */
 export default function PageScreen() {
   const { handle, logo } = useLocalSearchParams<{ handle: string; logo?: string }>();
@@ -260,6 +264,7 @@ function PageBody({ page }: { page: Page }) {
       </Text>
     </View>
   );
+  const postsBlock = <PagePosts pageId={page.id} onTeam={onTeam} empty={postsEmpty} />;
 
   const tabRow = (
     <View accessibilityRole="tablist" style={[styles.tabs, { borderColor: c.borderSubtle }]}>
@@ -414,7 +419,7 @@ function PageBody({ page }: { page: Page }) {
               <Text variant="title" accessibilityRole="header">
                 {t('page.posts')}
               </Text>
-              {postsEmpty}
+              {postsBlock}
             </View>
           ) : hasProducts ? (
             <View style={styles.section}>
@@ -435,13 +440,60 @@ function PageBody({ page }: { page: Page }) {
             <View style={[styles.tabsGround, { backgroundColor: c.surface }]}>{tabRow}</View>
           </View>
         ) : null}
-        {tabbed ? <View style={styles.tabBody}>{tab === 'posts' ? postsEmpty : products}</View> : null}
+        {tabbed ? <View style={styles.tabBody}>{tab === 'posts' ? postsBlock : products}</View> : null}
 
         <ClaimFooter page={page} teamRole={state?.teamRole ?? null} />
       </Animated.ScrollView>
       {menu.sheet}
       {report.sheet}
       {shopFix.sheet}
+    </View>
+  );
+}
+
+/**
+ * A page's posts in the masonry grid, with Show more. The team sees "by
+ * [member]" on the tiles (from page_post_bylines, which answers only them).
+ */
+function PagePosts({ pageId, onTeam, empty }: { pageId: string; onTeam: boolean; empty: React.ReactNode }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const window = useWindowDimensions();
+  // Measured: the grid sits in a padded section or under the tabs.
+  const [width, setWidth] = useState(window.width);
+  const posts = usePagePosts(pageId);
+  const list = posts.data?.pages.flat() ?? [];
+  const bylines = usePagePostBylines(pageId, list.map((p) => p.id), onTeam);
+  if (posts.isPending) return <ActivityIndicator color={c.text} style={styles.postsLoading} />;
+  if (posts.isError && list.length === 0) {
+    return (
+      <View style={styles.postsMore}>
+        <Text variant="bodySm" color="statusClosed">
+          {t('errors.network')}
+        </Text>
+        <Button label={t('common.retry')} variant="secondary" onPress={() => void posts.refetch()} />
+      </View>
+    );
+  }
+  if (list.length === 0) return <>{empty}</>;
+  const grid = list.map((p) => {
+    const g = toGridPost(p);
+    const who = onTeam ? bylines.data?.[p.id] : undefined;
+    return { ...g, byline: who ? t('postingAs.by', { username: who }) : null };
+  });
+  return (
+    <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
+      <MasonryGrid posts={grid} width={width} />
+      {posts.hasNextPage ? (
+        <View style={styles.postsMore}>
+          <Button
+            label={t('park.morePosts')}
+            variant="secondary"
+            loading={posts.isFetchingNextPage}
+            onPress={() => void posts.fetchNextPage()}
+          />
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -515,6 +567,8 @@ function LinkButton({ url }: { url: string }) {
 }
 
 const styles = StyleSheet.create({
+  postsLoading: { marginVertical: space[6] },
+  postsMore: { padding: space[4], gap: space[2] },
   screen: { flex: 1 },
   flex: { flex: 1 },
   pressed: { opacity: 0.75 },

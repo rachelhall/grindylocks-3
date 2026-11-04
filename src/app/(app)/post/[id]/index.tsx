@@ -17,8 +17,17 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { CommentComposer, CommentList } from '@/components/comments';
 import { Carousel } from '@/components/media';
-import { AuthorName, CreditsLine, MoreButton, ObstacleChip, PlaceLine, PostActions, usePostMenu } from '@/components/post-card';
-import { Avatar } from '@/components/profile';
+import {
+  AuthorName,
+  CreditsLine,
+  MoreButton,
+  ObstacleChip,
+  PlaceLine,
+  PostActions,
+  PosterAvatar,
+  posterName,
+  usePostMenu,
+} from '@/components/post-card';
 import { BackButton, Button, Icon, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import type { ReplyTarget } from '@/lib/engagement';
@@ -68,7 +77,7 @@ export default function PostScreen() {
   const date = post
     ? new Intl.DateTimeFormat(i18n.language, { dateStyle: 'medium' }).format(new Date(post.publishedAt ?? post.createdAt))
     : '';
-  const username = post?.author?.username ?? t('common.deletedUser');
+  const username = post ? posterName(post, t) : t('common.deletedUser');
 
   function showPeople(i: number) {
     const slide = post?.slides[i];
@@ -110,7 +119,7 @@ export default function PostScreen() {
         >
         <ScrollView ref={scroll} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           <View style={styles.author}>
-            <Avatar path={post.author?.avatarPath ?? null} username={username} size={40} />
+            <PosterAvatar post={post} size={40} />
             <View style={styles.flex}>
               <AuthorName post={post} variant="body" />
               <PlaceLine post={post} />

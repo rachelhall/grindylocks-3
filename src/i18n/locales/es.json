@@ -2006,5 +2006,27 @@
     "dayOfMonth": "Elige un día que exista en ese mes.",
     "datesNote": "Estas fechas se repiten cada año. Pueden pasar de un año al siguiente, como 1 nov – 28 feb.",
     "removeDates": "Quitar estas fechas y su horario"
+  },
+  "postingAs": {
+    "title": "Publicar como",
+    "label": "Publicar como {{name}}",
+    "changeHint": "Elige de quién es esta publicación",
+    "change": "Cambiar",
+    "sheetTitle": "Publicar como",
+    "you": "tú",
+    "shop": "página de tienda",
+    "brand": "página de marca",
+    "reachNearYou": "Llega a quienes siguen a {{name}} y a Cerca de ti en {{metro}} (una vez al día).",
+    "reachUsedToday": "La publicación de hoy en Cerca de ti ya está usada, así que esta solo llega a quienes siguen a {{name}}.",
+    "reachUsedWeek": "Las publicaciones de esta semana en Cerca de ti ya están usadas, así que esta solo llega a quienes siguen a {{name}}.",
+    "reachFollowers": "Llega a quienes siguen a {{name}}.",
+    "noRegulars": "Las publicaciones de páginas nunca cuentan para los habituales.",
+    "postAs": "Publicar como {{name}}",
+    "refused": "{{name}} no puede publicar ahora. Pregunta a quien es dueño de la página.",
+    "menuTitle": "Publicación de {{name}}",
+    "reportBody": "Va a moderación. No se avisa a la página.",
+    "cardLabel": "Publicación de la página {{name}}",
+    "more": "Más: silenciar, denunciar o bloquear {{name}}",
+    "by": "de {{username}}"
   }
 }

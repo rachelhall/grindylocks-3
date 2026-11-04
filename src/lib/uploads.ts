@@ -79,8 +79,17 @@ export type PostJob = {
   createdAt: string;
   caption: string;
   parkId?: string | null;
+  /** Posting as a page (PR 8a): its photos go in the page's folder, not yours. */
+  pageId?: string | null;
   slides: SlideJob[];
 };
+
+/**
+ * Where a post's photos live in post-media. A page post's media sits under
+ * page/<page>/, so deleting the member's account doesn't take the page's
+ * posts with it.
+ */
+export const mediaFolder = (userId: string, pageId?: string | null) => (pageId ? `page/${pageId}` : userId);
 
 type Snapshot = { posts: PostJob[] };
 
@@ -190,7 +199,7 @@ async function accessToken(): Promise<string> {
 }
 
 async function uploadPhoto(job: PostJob, slide: SlideJob) {
-  const path = `${job.userId}/${job.postId}/${slide.slideId}.jpg`;
+  const path = `${mediaFolder(job.userId, job.pageId)}/${job.postId}/${slide.slideId}.jpg`;
   const token = await accessToken();
   const task = new File(slide.file).createUploadTask(
     `${env.supabaseUrl}/storage/v1/object/post-media/${path}`,
@@ -534,6 +543,8 @@ export function useUploads(): PostJob[] {
 export async function createPost(input: {
   userId: string;
   metroAreaId: string;
+  /** Post as this page (you're on its team); the page is the public author. */
+  pageId?: string | null;
   caption: string;
   /** The park for every slide, if one was picked. */
   parkId?: string | null;
@@ -544,11 +555,15 @@ export async function createPost(input: {
   const postId = uuid();
   const caption = input.caption.trim() || null;
 
+  const pageId = input.pageId ?? null;
   const { error: postError } = await supabase.from('posts').insert({
     id: postId,
-    author_id: input.userId,
-    // The database replaces this with the park's metro area when there's a park.
-    metro_area_id: input.metroAreaId,
+    // A page post has no author: the database records which member made it.
+    author_id: pageId ? null : input.userId,
+    page_id: pageId,
+    // The database replaces this with the park's metro area when there's a
+    // park, and with the page's own for a page post.
+    metro_area_id: pageId ? null : input.metroAreaId,
     park_id: input.parkId ?? null,
     caption,
     slide_count: input.media.length,
@@ -570,7 +585,7 @@ export async function createPost(input: {
       post_id: postId,
       position,
       kind: 'photo' as const,
-      storage_path: `${input.userId}/${postId}/${m.slideId}.jpg`,
+      storage_path: `${mediaFolder(input.userId, pageId)}/${postId}/${m.slideId}.jpg`,
       width: m.width,
       height: m.height,
       frame_x: m.frame?.x ?? 0.5,
@@ -604,6 +619,7 @@ export async function createPost(input: {
     createdAt: new Date().toISOString(),
     caption: caption ?? '',
     parkId: input.parkId ?? null,
+    pageId,
     slides: input.media.map((m, position) => ({
       position,
       kind: m.kind,

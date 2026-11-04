@@ -199,12 +199,19 @@ function ReportSheetContent({
                 label={t('report.blockPerson', { username })}
                 variant="secondary"
                 palette={{ fill: 'transparent', text: c.danger, border: c.danger }}
-                onPress={() =>
+                onPress={() => {
+                  // A page post: block the page (its own confirm), not a person.
+                  if (target.kind === 'post' && target.page) {
+                    onClose();
+                    target.page.onBlock();
+                    return;
+                  }
+                  if (!target.personId) return;
                   confirmBlock({ id: target.personId, username }, () => {
                     onClose();
                     onBlocked?.();
-                  })
-                }
+                  });
+                }}
                 style={styles.outline}
               />
             </View>

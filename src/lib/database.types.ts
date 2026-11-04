@@ -2538,13 +2538,15 @@ export type Database = {
       posts: {
         Row: {
           anonymized: boolean
-          author_id: string
+          author_id: string | null
           caption: string | null
           created_at: string
           edited_at: string | null
           event_id: string | null
           id: string
-          metro_area_id: string
+          metro_area_id: string | null
+          near_you: boolean
+          page_id: string | null
           park_id: string | null
           published_at: string | null
           slide_count: number
@@ -2554,13 +2556,15 @@ export type Database = {
         }
         Insert: {
           anonymized?: boolean
-          author_id: string
+          author_id?: string | null
           caption?: string | null
           created_at?: string
           edited_at?: string | null
           event_id?: string | null
           id?: string
-          metro_area_id: string
+          metro_area_id?: string | null
+          near_you?: boolean
+          page_id?: string | null
           park_id?: string | null
           published_at?: string | null
           slide_count?: number
@@ -2568,13 +2572,15 @@ export type Database = {
         }
         Update: {
           anonymized?: boolean
-          author_id?: string
+          author_id?: string | null
           caption?: string | null
           created_at?: string
           edited_at?: string | null
           event_id?: string | null
           id?: string
-          metro_area_id?: string
+          metro_area_id?: string | null
+          near_you?: boolean
+          page_id?: string | null
           park_id?: string | null
           published_at?: string | null
           slide_count?: number
@@ -2600,6 +2606,13 @@ export type Database = {
             columns: ["metro_area_id"]
             isOneToOne: false
             referencedRelation: "metro_areas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
             referencedColumns: ["id"]
           },
           {
@@ -3315,6 +3328,15 @@ export type Database = {
       }
       set_page_brands_carried: { Args: { brands: string[]; page: string }; Returns: undefined }
       close_page_for_good: { Args: { page: string }; Returns: string }
+      i_made_post: { Args: { post: string }; Returns: boolean }
+      page_near_you_status: {
+        Args: { page: string }
+        Returns: { metro_name: string | null; reaches: boolean; used_today: boolean; week_left: number }[]
+      }
+      page_post_bylines: {
+        Args: { page: string; posts: string[] }
+        Returns: { post_id: string; username: string | null }[]
+      }
       page_inbox: {
         Args: { max_rows?: number; page: string }
         Returns: {

@@ -4,6 +4,7 @@
  * the post's More menu, and the like and comment row (M4b). Only the post
  * mostly on screen plays its clip (see `@/lib/playback`).
  */
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { type TFunction } from 'i18next';
 import { Fragment } from 'react';
@@ -11,17 +12,30 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
 import { MentionedText } from '@/components/mentions';
+import { PageTile, StampTape, usePageMenu } from '@/components/pages';
 import { Carousel } from '@/components/media';
 import { Avatar } from '@/components/profile';
 import { useConfirmBlock, useExplainRestriction, useReportSheet } from '@/components/safety';
 import { Icon, type SheetAction, useActionSheet } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { useMyPages } from '@/lib/claims';
+import { fetchViewerState, isOfficial, pageKind, stampFor, usePageRelation } from '@/lib/pages';
+import { keys } from '@/lib/query';
 import { fetchReportSummary, type ReportSummary, useModeratePost } from '@/lib/moderation';
-import { credits, isOnPost, type PersonRef, type Post, type PostSlide, useDeletePost, useRemoveMeFromPost } from '@/lib/posts';
+import {
+  credits,
+  fetchMadePost,
+  isOnPost,
+  type PersonRef,
+  type Post,
+  type PostSlide,
+  useDeletePost,
+  useRemoveMeFromPost,
+} from '@/lib/posts';
 import { useToggleLike } from '@/lib/engagement';
 import { useIsActivePost } from '@/lib/playback';
 import { Sentry } from '@/lib/sentry';
-import { brand, fontFamily, size, space, Text, useColors } from '@/theme';
+import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /* Time ------------------------------------------------------------------------------ */
 
@@ -172,8 +186,14 @@ export function usePostMenu(
   const removeMe = useRemoveMeFromPost(userId);
   const moderate = useModeratePost(userId);
   const summaryTitle = useReportSummaryTitle();
+  const qc = useQueryClient();
+  const page = post?.page ?? null;
+  const myPages = useMyPages(page ? userId : undefined);
+  const teamRole = page ? (myPages.data?.find((p) => p.pageId === page.id)?.role ?? null) : null;
+  const pageRelation = usePageRelation(userId, page?.id);
+  const pageMenu = usePageMenu();
 
-  const isAuthor = Boolean(post && userId && post.authorId === userId);
+  const isAuthor = Boolean(post && userId && post.authorId && post.authorId === userId);
   const onPost = Boolean(post && isOnPost(post, userId));
   const available = Boolean(post && userId);
 
@@ -201,8 +221,95 @@ export function usePostMenu(
     ]);
   }
 
+  function deleteAction(postId: string): SheetAction {
+    return {
+      label: t('postCard.delete'),
+      destructive: true,
+      onPress: () =>
+        Alert.alert(t('postCard.deleteTitle'), t('postCard.deleteBody'), [
+          { text: t('common.cancel'), style: 'cancel' },
+          {
+            text: t('postCard.delete'),
+            style: 'destructive',
+            onPress: () =>
+              del.mutate(postId, {
+                onSuccess: () => afterDelete?.(),
+                onError: (err) => {
+                  Sentry.captureException(err);
+                  Alert.alert(t('errors.generic'));
+                },
+              }),
+          },
+        ]),
+    };
+  }
+
+  /**
+   * A page post (PR 8a). The team: Edit for the member who made it, Delete
+   * for them or a manager or owner. Everyone else: the page's Mute, Report
+   * this post and Block, each with its line (Feed-PageCard's ⋯).
+   */
+  async function openPagePost(p: Post, pg: NonNullable<Post['page']>) {
+    if (!userId) return;
+    if (teamRole) {
+      const made = await fetchMadePost(p.id).catch((err: unknown) => {
+        Sentry.captureException(err);
+        return false;
+      });
+      const actions: SheetAction[] = [];
+      if (made) {
+        actions.push({ label: t('postCard.edit'), onPress: () => router.push({ pathname: '/post/[id]/edit', params: { id: p.id } }) });
+      }
+      if (made || teamRole === 'manager' || teamRole === 'owner') actions.push(deleteAction(p.id));
+      if (actions.length > 0) show({ title: t('postingAs.menuTitle', { name: pg.displayName }), actions });
+      return;
+    }
+    const state = await qc
+      .fetchQuery({ queryKey: keys.pageState(userId, pg.id), queryFn: () => fetchViewerState(pg.id) })
+      .catch(() => null);
+    const name = pg.displayName;
+    const toggle = (what: 'mute' | 'block', on: boolean) =>
+      pageRelation.mutate(
+        { what, on },
+        {
+          onSuccess: () => {
+            void qc.invalidateQueries({ queryKey: ['feed'] });
+            void qc.invalidateQueries({ queryKey: ['posts'] });
+            if (what === 'block' && on) afterBlock?.();
+          },
+          onError: () => Alert.alert(t('errors.generic'), t('errors.network')),
+        },
+      );
+    const confirmPageBlock = () =>
+      Alert.alert(t('page.menu.blockConfirm', { name }), t('page.menu.blockBody'), [
+        { text: t('common.cancel'), style: 'cancel' },
+        { text: t('block.block'), style: 'destructive', onPress: () => toggle('block', true) },
+      ]);
+    pageMenu.open({ name, handle: pg.handle, stamp: stampFor(pg) }, [
+      state?.muted
+        ? { icon: 'soundOn', title: t('page.menu.unmute'), body: t('page.menu.unmuteBody'), onPress: () => toggle('mute', false) }
+        : { icon: 'soundOff', title: t('page.menu.mute'), body: t('page.menu.muteBody'), onPress: () => toggle('mute', true) },
+      {
+        icon: 'flag',
+        title: t('report.reportPost'),
+        body: t('postingAs.reportBody'),
+        onPress: () =>
+          report.open({
+            kind: 'post',
+            id: p.id,
+            personId: null,
+            username: name,
+            parkName: p.park?.name ?? null,
+            page: { onBlock: confirmPageBlock },
+          }),
+      },
+      { icon: 'block', title: t('page.menu.block', { name }), body: t('page.menu.blockBody'), destructive: true, onPress: confirmPageBlock },
+    ]);
+  }
+
   async function open() {
     if (!post || !userId) return;
+    if (post.page) return openPagePost(post, post.page);
     const actions: SheetAction[] = [];
     let title: string | undefined;
     let message: string | undefined;
@@ -235,26 +342,7 @@ export function usePostMenu(
         label: t('postCard.edit'),
         onPress: () => router.push({ pathname: '/post/[id]/edit', params: { id: post.id } }),
       });
-      actions.push({
-        label: t('postCard.delete'),
-        destructive: true,
-        onPress: () =>
-          Alert.alert(t('postCard.deleteTitle'), t('postCard.deleteBody'), [
-            { text: t('common.cancel'), style: 'cancel' },
-            {
-              text: t('postCard.delete'),
-              style: 'destructive',
-              onPress: () =>
-                del.mutate(post.id, {
-                  onSuccess: () => afterDelete?.(),
-                  onError: (err) => {
-                    Sentry.captureException(err);
-                    Alert.alert(t('errors.generic'));
-                  },
-                }),
-            },
-          ]),
-      });
+      actions.push(deleteAction(post.id));
     } else {
       if (onPost) {
         actions.push({
@@ -278,16 +366,17 @@ export function usePostMenu(
         });
       }
       // A deleted account or an anonymized post has nobody to report or block.
-      if (username) {
+      if (username && post.authorId) {
+        const authorId = post.authorId;
         actions.push({
           label: t('report.reportPost'),
           onPress: () =>
-            report.open({ kind: 'post', id: post.id, personId: post.authorId, username, parkName: post.park?.name ?? null }),
+            report.open({ kind: 'post', id: post.id, personId: authorId, username, parkName: post.park?.name ?? null }),
         });
         actions.push({
           label: t('report.blockPerson', { username }),
           destructive: true,
-          onPress: () => confirmBlock({ id: post.authorId, username }, afterBlock),
+          onPress: () => confirmBlock({ id: authorId, username }, afterBlock),
         });
       }
     }
@@ -299,6 +388,7 @@ export function usePostMenu(
       <>
         {sheet}
         {report.sheet}
+        {pageMenu.sheet}
       </>
     ),
     open: () => void open(),
@@ -306,7 +396,7 @@ export function usePostMenu(
   };
 }
 
-export function MoreButton({ onPress, label }: { onPress: () => void; label: string }) {
+export function MoreButton({ onPress, label, color }: { onPress: () => void; label: string; color?: string }) {
   const c = useColors();
   return (
     <Pressable
@@ -315,7 +405,7 @@ export function MoreButton({ onPress, label }: { onPress: () => void; label: str
       onPress={onPress}
       style={({ pressed }) => [styles.more, pressed && styles.pressed]}
     >
-      <Icon name="more" color={c.text} size={20} />
+      <Icon name="more" color={color ?? c.text} size={20} />
     </Pressable>
   );
 }
@@ -404,8 +494,37 @@ export function PlaceLine({ post }: { post: Post }) {
   );
 }
 
+/** Who a post shows as: the page for a page post, else the author (or "deleted user"). */
+export function posterName(post: Post, t: TFunction): string {
+  return post.page?.displayName ?? post.author?.username ?? t('common.deletedUser');
+}
+
+/** The page's logo tile for a page post, else the author's avatar. */
+export function PosterAvatar({ post, size: side }: { post: Post; size: number }) {
+  const { t } = useTranslation();
+  if (post.page) return <PageTile page={post.page} size={side} />;
+  return <Avatar path={post.author?.avatarPath ?? null} username={posterName(post, t)} size={side} />;
+}
+
 export function AuthorName({ post, variant = 'bodySm' }: { post: Post; variant?: 'bodySm' | 'body' }) {
   const { t } = useTranslation();
+  if (post.page) {
+    const handle = post.page.handle;
+    return (
+      <View style={styles.pageName}>
+        <Text
+          variant={variant}
+          accessibilityRole="link"
+          numberOfLines={1}
+          onPress={() => router.push({ pathname: '/page/[handle]', params: { handle } })}
+          style={[styles.shrink, { fontFamily: fontFamily.sansSemiBold }]}
+        >
+          {post.page.displayName}
+        </Text>
+        {isOfficial(post.page) ? <StampTape stamp="official" small /> : null}
+      </View>
+    );
+  }
   const username = post.author?.username;
   if (!username) {
     return (
@@ -432,11 +551,17 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
   const c = useColors();
   const menu = usePostMenu(post);
   const active = useIsActivePost(post.id);
-  const username = post.author?.username ?? t('common.deletedUser');
+  const username = posterName(post, t);
   const openPost = () => router.push({ pathname: '/post/[id]', params: { id: post.id } });
 
   return (
-    <View style={{ backgroundColor: c.surfaceRaised }}>
+    <View
+      style={[{ backgroundColor: c.surfaceRaised }, post.page && { borderWidth: stroke.rule, borderColor: brand.ink }]}
+      accessibilityLabel={post.page ? t('postingAs.cardLabel', { name: username }) : undefined}
+    >
+      {post.page ? (
+        <PageCardHead post={post} page={post.page} onMore={menu.available ? menu.open : undefined} />
+      ) : (
       <View style={styles.head}>
         <Avatar path={post.author?.avatarPath ?? null} username={username} size={36} />
         <View style={styles.headText}>
@@ -448,6 +573,7 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
         </Text>
         {menu.available ? <MoreButton onPress={menu.open} label={t('postCard.more')} /> : null}
       </View>
+      )}
 
       <Pressable accessibilityRole="button" accessibilityLabel={t('postCard.open', { username })} onPress={openPost}>
         <Carousel
@@ -486,8 +612,62 @@ export function PostCard({ post, width }: { post: Post; width: number }) {
   );
 }
 
+/**
+ * A page post's header in Home (Feed-PageCard): an inverted ink strip with
+ * the logo, the name, OFFICIAL and SHOP or BRAND, the park in pink for ink,
+ * the time and ⋯. No "Sponsored": nobody pays to reach the feed.
+ */
+function PageCardHead({ post, page, onMore }: { post: Post; page: NonNullable<Post['page']>; onMore?: () => void }) {
+  const { t, i18n } = useTranslation();
+  const c = useColors();
+  const handle = page.handle;
+  const park = post.park;
+  return (
+    <View style={[styles.head, { backgroundColor: brand.ink }]}>
+      <View style={[styles.logoRing, { borderColor: brand.paper }]}>
+        <PageTile page={page} size={32} />
+      </View>
+      <View style={styles.headText}>
+        <View style={styles.pageName}>
+          <Text
+            variant="bodySm"
+            accessibilityRole="link"
+            numberOfLines={1}
+            onPress={() => router.push({ pathname: '/page/[handle]', params: { handle } })}
+            style={[styles.shrink, { color: brand.paper, fontFamily: fontFamily.sansSemiBold }]}
+          >
+            {page.displayName}
+          </Text>
+          {isOfficial(page) ? <StampTape stamp="official" small /> : null}
+          <Text variant="label" style={{ color: brand.paper, opacity: 0.75 }}>
+            {t(`page.${pageKind(page)}`).toUpperCase()}
+          </Text>
+        </View>
+        {park ? (
+          <Text
+            variant="caption"
+            accessibilityRole="link"
+            numberOfLines={1}
+            onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: park.slug } })}
+            style={{ color: c.accentOnInk, fontFamily: fontFamily.sansSemiBold }}
+          >
+            {park.name}
+          </Text>
+        ) : null}
+      </View>
+      <Text variant="caption" style={{ color: brand.paper, opacity: 0.75 }}>
+        {timeAgo(post.publishedAt ?? post.createdAt, t, i18n.language)}
+      </Text>
+      {onMore ? <MoreButton onPress={onMore} label={t('postingAs.more', { name: page.displayName })} color={brand.paper} /> : null}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   pressed: { opacity: 0.75 },
+  pageName: { flexDirection: 'row', alignItems: 'center', gap: space[1], minWidth: 0 },
+  shrink: { flexShrink: 1 },
+  logoRing: { borderWidth: 2 },
   head: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[3], paddingVertical: space[2] },
   headText: { flex: 1, minWidth: 0, marginLeft: 2 },
   more: { width: 40, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },

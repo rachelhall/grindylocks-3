@@ -2006,5 +2006,27 @@
     "dayOfMonth": "Pick a day that’s in that month.",
     "datesNote": "These dates repeat every year. They can run over New Year, like Nov 1 – Feb 28.",
     "removeDates": "Remove these dates and their hours"
+  },
+  "postingAs": {
+    "title": "Posting as",
+    "label": "Posting as {{name}}",
+    "changeHint": "Choose who this post is from",
+    "change": "Change",
+    "sheetTitle": "Post as",
+    "you": "you",
+    "shop": "shop page",
+    "brand": "brand page",
+    "reachNearYou": "Reaches {{name}}'s followers and Near you in {{metro}} (once a day).",
+    "reachUsedToday": "Today's Near you post is used, so this one reaches {{name}}'s followers only.",
+    "reachUsedWeek": "This week's Near you posts are used, so this one reaches {{name}}'s followers only.",
+    "reachFollowers": "Reaches {{name}}'s followers.",
+    "noRegulars": "Page posts never count toward regulars.",
+    "postAs": "Post as {{name}}",
+    "refused": "{{name}} can't post right now. Ask the page's owner.",
+    "menuTitle": "{{name}}'s post",
+    "reportBody": "Goes to the moderators. The page isn't told.",
+    "cardLabel": "Post from the page {{name}}",
+    "more": "More: mute, report or block {{name}}",
+    "by": "by {{username}}"
   }
 }
