@@ -2,13 +2,14 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Alert, Animated, Linking, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ClaimFooter } from '@/components/claim';
 import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
+import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { BrandsCarried, ShopButtons, ShopHours, shopHasDirections, ShopPlace } from '@/components/shop';
 import { SafeAreaView } from '@/components/safe-area';
 import { useExplainRestriction } from '@/components/safety';
@@ -31,7 +32,7 @@ import {
   usePageViewerState,
 } from '@/lib/pages';
 import { Sentry } from '@/lib/sentry';
-import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
+import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /**
  * A brand or shop page (part A, PR 2), per the Brand accounts (v2) mockups:
@@ -109,7 +110,6 @@ export default function PageScreen() {
 function PageBody({ page }: { page: Page }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
-  const scheme = useColorSchemeName();
   const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const userId = session?.user.id;
@@ -117,7 +117,9 @@ function PageBody({ page }: { page: Page }) {
   const relation = usePageRelation(userId, page.id);
   const explainRestriction = useExplainRestriction();
   const menu = usePageMenu();
-  const [pastHeader, setPastHeader] = useState(false);
+  // Drives the pinned bar's fade (natively, with the scroll).
+  const [scrollY] = useState(() => new Animated.Value(0));
+  const barHeight = useBarHeight();
   const catalog = usePageCatalog(page.id);
   const [tab, setTab] = useState<'posts' | 'products'>('posts');
 
@@ -207,6 +209,29 @@ function PageBody({ page }: { page: Page }) {
     </View>
   );
 
+  const tabRow = (
+    <View accessibilityRole="tablist" style={[styles.tabs, { borderColor: c.borderSubtle }]}>
+      {(['posts', 'products'] as const).map((k) => {
+        const on = tab === k;
+        return (
+          <Pressable
+            key={k}
+            accessibilityRole="tab"
+            accessibilityState={{ selected: on }}
+            onPress={() => setTab(k)}
+            style={[styles.tab, on && { borderColor: c.text, borderBottomWidth: 3 }]}
+          >
+            <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold, color: on ? c.text : c.textSecondary }}>
+              {t(k === 'posts' ? 'page.posts' : 'catalog.title')}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+  // Posts | Products pin under the bar once they reach it (pages with both tabs only).
+  const tabbed = showPosts && hasProducts;
+
   const descriptionBlock = description ? (
     <Text variant="body" style={styles.description}>
       {description}
@@ -236,130 +261,124 @@ function PageBody({ page }: { page: Page }) {
 
   return (
     <View style={[styles.screen, { backgroundColor: c.surface }]}>
-      <StatusBar style={pastHeader ? (scheme === 'dark' ? 'light' : 'dark') : 'light'} />
-      <ScrollView
+      {/* The header and the pinned bar are ink in both themes, so the clock stays light. */}
+      <StatusBar style="light" />
+      <PinnedBar
+        scrollY={scrollY}
+        headerHeight={headerHeight}
+        name={name}
+        stamp={stamp}
+        moreLabel={archive ? t('page.moreReport') : t('page.more')}
+        onBack={() => (router.canGoBack() ? router.back() : router.replace('/search'))}
+        onMore={onTeam ? undefined : openMenu}
+      />
+      <Animated.ScrollView
         contentInsetAdjustmentBehavior="never"
         contentContainerStyle={{ paddingBottom: space[12] + insets.bottom }}
-        scrollEventThrottle={32}
-        onScroll={(e) => {
-          const past = e.nativeEvent.contentOffset.y > headerHeight - insets.top;
-          if (past !== pastHeader) setPastHeader(past);
-        }}
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: true })}
+        // Child 1 is the tab row when there are tabs (see below).
+        stickyHeaderIndices={tabbed ? [1] : undefined}
       >
-        <PageHeader
-          name={name}
-          tape={tape ? tape.toUpperCase() : null}
-          stamp={stamp}
-          foundingPartner={Boolean(page.foundingPartnerAt) && official}
-          logoUrl={official ? pageImageUrl(page.logoPath) : null}
-          plain={nameOnly}
-          dim={archive}
-          moreLabel={archive ? t('page.moreReport') : t('page.more')}
-          onBack={() => (router.canGoBack() ? router.back() : router.replace('/search'))}
-          onMore={onTeam ? undefined : openMenu}
-        />
+        {/* Everything above the tabs, in one child so the tab row's index is fixed. */}
+        <View>
+          <PageHeader
+            name={name}
+            tape={tape ? tape.toUpperCase() : null}
+            stamp={stamp}
+            foundingPartner={Boolean(page.foundingPartnerAt) && official}
+            logoUrl={official ? pageImageUrl(page.logoPath) : null}
+            plain={nameOnly}
+            dim={archive}
+          />
 
-        {archive ? <ArchiveNote page={page} /> : null}
+          {archive ? <ArchiveNote page={page} /> : null}
 
-        <View style={[styles.who, official && styles.whoBesideLogo]}>
-          <Text variant="headline" style={styles.handle}>
-            @{page.handle}
-          </Text>
-          {statusLine ? (
-            <Text variant="bodySm" color="textSecondary">
-              {statusLine}
+          <View style={[styles.who, official && styles.whoBesideLogo]}>
+            <Text variant="headline" style={styles.handle}>
+              @{page.handle}
             </Text>
-          ) : null}
-          {page.formerly.length > 0 ? (
-            <Text variant="bodySm" color="textSecondary">
-              {t('page.formerly', { names: page.formerly.join(', ') })}
-            </Text>
-          ) : null}
-        </View>
-
-        {shop ? <ShopPlace page={page} /> : null}
-        {shop && page.tempClosedAt && page.tempClosedNote ? <ClosedNote page={page} /> : null}
-
-        {shop ? null : descriptionBlock}
-
-        {!shop && links.length > 0 ? (
-          <View style={styles.links}>
-            {links.map((url) => (
-              <LinkButton key={url} url={url} />
-            ))}
-          </View>
-        ) : null}
-
-        {state?.blocked && canShowFollow ? (
-          <View style={styles.followBlock}>
-            <Text variant="bodySm" color="textSecondary">
-              {t('page.blocked', { name })}
-            </Text>
-            <Button label={t('page.unblock')} variant="secondary" onPress={() => toggle('block', false)} />
-          </View>
-        ) : null}
-
-        {followButton || shopButtons ? (
-          <View style={styles.followBlock}>
-            <View style={styles.actionRow}>
-              {followButton}
-              {shopButtons ? <ShopButtons page={page} links={links} /> : null}
-            </View>
-            {followButton && page.state === 'unofficial' ? (
+            {statusLine ? (
               <Text variant="bodySm" color="textSecondary">
-                {t('page.followHint', { name })}
+                {statusLine}
+              </Text>
+            ) : null}
+            {page.formerly.length > 0 ? (
+              <Text variant="bodySm" color="textSecondary">
+                {t('page.formerly', { names: page.formerly.join(', ') })}
               </Text>
             ) : null}
           </View>
-        ) : null}
 
-        {shop ? descriptionBlock : null}
-        {shop ? <ShopHours page={page} /> : null}
-        {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
+          {shop ? <ShopPlace page={page} /> : null}
+          {shop && page.tempClosedAt && page.tempClosedNote ? <ClosedNote page={page} /> : null}
 
-        {showPosts && hasProducts ? (
-          <View style={styles.section}>
-            <View accessibilityRole="tablist" style={[styles.tabs, { borderColor: c.borderSubtle }]}>
-              {(['posts', 'products'] as const).map((k) => {
-                const on = tab === k;
-                return (
-                  <Pressable
-                    key={k}
-                    accessibilityRole="tab"
-                    accessibilityState={{ selected: on }}
-                    onPress={() => setTab(k)}
-                    style={[styles.tab, on && { borderColor: c.text, borderBottomWidth: 3 }]}
-                  >
-                    <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold, color: on ? c.text : c.textSecondary }}>
-                      {t(k === 'posts' ? 'page.posts' : 'catalog.title')}
-                    </Text>
-                  </Pressable>
-                );
-              })}
+          {shop ? null : descriptionBlock}
+
+          {!shop && links.length > 0 ? (
+            <View style={styles.links}>
+              {links.map((url) => (
+                <LinkButton key={url} url={url} />
+              ))}
             </View>
-            {tab === 'posts' ? postsEmpty : products}
-          </View>
-        ) : showPosts ? (
-          <View style={styles.section}>
-            <Text variant="title" accessibilityRole="header">
-              {t('page.posts')}
-            </Text>
-            {postsEmpty}
-          </View>
-        ) : hasProducts ? (
-          <View style={styles.section}>
-            <Text variant="title" accessibilityRole="header">
-              {t('catalog.title')}
-            </Text>
-            {products}
+          ) : null}
+
+          {state?.blocked && canShowFollow ? (
+            <View style={styles.followBlock}>
+              <Text variant="bodySm" color="textSecondary">
+                {t('page.blocked', { name })}
+              </Text>
+              <Button label={t('page.unblock')} variant="secondary" onPress={() => toggle('block', false)} />
+            </View>
+          ) : null}
+
+          {followButton || shopButtons ? (
+            <View style={styles.followBlock}>
+              <View style={styles.actionRow}>
+                {followButton}
+                {shopButtons ? <ShopButtons page={page} links={links} /> : null}
+              </View>
+              {followButton && page.state === 'unofficial' ? (
+                <Text variant="bodySm" color="textSecondary">
+                  {t('page.followHint', { name })}
+                </Text>
+              ) : null}
+            </View>
+          ) : null}
+
+          {shop ? descriptionBlock : null}
+          {shop ? <ShopHours page={page} /> : null}
+          {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
+          {tabbed ? null : showPosts ? (
+            <View style={styles.section}>
+              <Text variant="title" accessibilityRole="header">
+                {t('page.posts')}
+              </Text>
+              {postsEmpty}
+            </View>
+          ) : hasProducts ? (
+            <View style={styles.section}>
+              <Text variant="title" accessibilityRole="header">
+                {t('catalog.title')}
+              </Text>
+              {products}
+            </View>
+          ) : null}
+        </View>
+
+        {tabbed ? (
+          // Sticky: the wrapper reaches up by the bar's height (transparent,
+          // passing taps through), so the row sticks just under the bar, not
+          // under the status bar. `pointerEvents` goes in the style too, since
+          // the ScrollView moves the child's style onto its own sticky wrapper.
+          <View pointerEvents="box-none" style={[styles.stickyTabs, { marginTop: space[6] - barHeight, paddingTop: barHeight }]}>
+            <View style={[styles.tabsGround, { backgroundColor: c.surface }]}>{tabRow}</View>
           </View>
         ) : null}
+        {tabbed ? <View style={styles.tabBody}>{tab === 'posts' ? postsEmpty : products}</View> : null}
 
         <ClaimFooter page={page} teamRole={state?.teamRole ?? null} />
-      </ScrollView>
-      {pastHeader ? (
-        <View pointerEvents="none" style={[styles.statusStrip, { height: insets.top, backgroundColor: c.surface }]} />
-      ) : null}
+      </Animated.ScrollView>
       {menu.sheet}
       {report.sheet}
     </View>
@@ -441,7 +460,6 @@ const styles = StyleSheet.create({
   loading: { marginTop: space[12] },
   topBar: { paddingHorizontal: space[4], paddingVertical: space[2] },
   block: { paddingHorizontal: space[4], gap: space[3], paddingTop: space[4] },
-  statusStrip: { position: 'absolute', top: 0, left: 0, right: 0 },
   who: { paddingHorizontal: space[4], paddingTop: 14, gap: 2 },
   // Beside the logo tile, which overlaps the header's bottom edge.
   whoBesideLogo: { paddingLeft: space[4] + 76 + 16, paddingTop: 10, minHeight: LOGO_OVERLAP + 10 },
@@ -469,6 +487,9 @@ const styles = StyleSheet.create({
   },
   section: { paddingHorizontal: space[4], paddingTop: space[6], gap: space[3] },
   empty: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4] },
+  stickyTabs: { pointerEvents: 'box-none' },
+  tabsGround: { paddingHorizontal: space[4] },
+  tabBody: { paddingHorizontal: space[4], paddingTop: space[3], gap: space[3] },
   tabs: { flexDirection: 'row', gap: 22, borderBottomWidth: stroke.rule },
   tab: { minHeight: size.tapMin, justifyContent: 'center', marginBottom: -stroke.rule, borderColor: 'transparent', borderBottomWidth: 3 },
   note: { marginHorizontal: space[4], marginTop: space[4], padding: space[3], flexDirection: 'row', gap: 10, alignItems: 'flex-start' },

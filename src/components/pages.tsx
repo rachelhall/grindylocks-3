@@ -78,7 +78,18 @@ export function PageTile({
  * ink); otherwise it sits on the screen's surface. `small` is the tape in
  * Search and the @ list, where only OFFICIAL shows.
  */
-export function StampTape({ stamp, onInk = false, small = false }: { stamp: Stamp; onInk?: boolean; small?: boolean }) {
+export function StampTape({
+  stamp,
+  onInk = false,
+  small = false,
+  maxFontSizeMultiplier,
+}: {
+  stamp: Stamp;
+  onInk?: boolean;
+  small?: boolean;
+  /** Caps Large Text, for the pinned bar, which keeps its height. */
+  maxFontSizeMultiplier?: number;
+}) {
   const { t } = useTranslation();
   const c = useColors();
   const official = stamp === 'official';
@@ -94,6 +105,7 @@ export function StampTape({ stamp, onInk = false, small = false }: { stamp: Stam
     >
       <Text
         variant="label"
+        maxFontSizeMultiplier={maxFontSizeMultiplier}
         style={[styles.stampText, small && styles.stampTextSmall, { color: official ? brand.ink : line }]}
       >
         {t(`page.stamp.${stamp}`)}

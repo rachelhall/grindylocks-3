@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { type LayoutChangeEvent, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Icon, type IconName } from '@/components/ui';
+import { Icon } from '@/components/ui';
 import { brand, size, space, stroke, Text, useColors } from '@/theme';
 
 /** Height of the park page header, status bar included. */
@@ -178,25 +178,12 @@ export function HalftoneGround({
   );
 }
 
-/** 48px paper square with an ink icon, for the top of the header. */
-function HeaderButton({ icon, label, onPress }: { icon: IconName; label: string; onPress: () => void }) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      onPress={onPress}
-      hitSlop={4}
-      style={({ pressed }) => [styles.square, pressed && styles.pressed]}
-    >
-      <Icon name={icon} color={brand.ink} size={22} />
-    </Pressable>
-  );
-}
-
 /**
  * The park page header, per the Park page mockups: ink with a pink halftone,
  * or the park's first photo photocopied, with the pink tape label and the
- * park name bottom-left and Back / (Add photos) / More along the top.
+ * park name bottom-left, and Add photos along the top for contributors.
+ * Back and More aren't here: they're the pinned bar's tiles
+ * (`PinnedBar`), drawn over the header and staying when it scrolls off.
  *
  * The header is always dark whatever the theme, so it uses the brand paper
  * and ink directly; pink is the accent.
@@ -205,8 +192,6 @@ export function ParkHeader({
   name,
   tape,
   photoUrl,
-  onBack,
-  onMore,
   onOpenGallery,
   onAddPhotos,
 }: {
@@ -215,8 +200,6 @@ export function ParkHeader({
   tape: string;
   /** The first park photo, or null for the plain ink header. */
   photoUrl: string | null;
-  onBack: () => void;
-  onMore: () => void;
   /** Set when there are photos: a tap anywhere on the header opens them. */
   onOpenGallery?: () => void;
   /** Set for people who can add photos. */
@@ -263,29 +246,24 @@ export function ParkHeader({
         </View>
       </View>
 
-      <View style={[styles.topRow, { top: Math.max(space[4], insets.top + space[1]) }]}>
-        <HeaderButton icon="back" label={t('common.back')} onPress={onBack} />
-        <View style={styles.topRight}>
-          {onAddPhotos ? (
-            <Pressable
-              accessibilityRole="button"
-              onPress={onAddPhotos}
-              hitSlop={4}
-              style={({ pressed }) => [
-                styles.addPhotos,
-                { backgroundColor: c.accent, borderColor: c.onAccent },
-                pressed && styles.pressed,
-              ]}
-            >
-              <Icon name="addPhoto" color={c.onAccent} size={20} />
-              <Text variant="headline" style={{ color: c.onAccent, fontSize: 16 }}>
-                {t('parkPhotos.add')}
-              </Text>
-            </Pressable>
-          ) : null}
-          <HeaderButton icon="more" label={t('park.more')} onPress={onMore} />
-        </View>
-      </View>
+      {onAddPhotos ? (
+        // Left of the pinned bar's ⋯ tile, at the same height.
+        <Pressable
+          accessibilityRole="button"
+          onPress={onAddPhotos}
+          hitSlop={4}
+          style={({ pressed }) => [
+            styles.addPhotos,
+            { top: insets.top + space[2], backgroundColor: c.accent, borderColor: c.onAccent },
+            pressed && styles.pressed,
+          ]}
+        >
+          <Icon name="addPhoto" color={c.onAccent} size={20} />
+          <Text variant="headline" style={{ color: c.onAccent, fontSize: 16 }}>
+            {t('parkPhotos.add')}
+          </Text>
+        </Pressable>
+      ) : null}
     </View>
   );
 }
@@ -302,23 +280,9 @@ const styles = StyleSheet.create({
   tape: { paddingHorizontal: space[2], paddingVertical: space[1], transform: [{ rotate: '-2deg' }] },
   name: { letterSpacing: -0.48 },
   nameShadow: { position: 'absolute', top: 3, left: 3, right: -3 },
-  topRow: {
-    position: 'absolute',
-    left: space[4],
-    right: space[4],
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: space[2],
-  },
-  topRight: { flexDirection: 'row', gap: space[2] },
-  square: {
-    width: size.tapMin,
-    height: size.tapMin,
-    backgroundColor: brand.paper,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   addPhotos: {
+    position: 'absolute',
+    right: space[4] + size.tapMin + space[2],
     height: size.tapMin,
     paddingHorizontal: 14,
     borderWidth: stroke.rule,
