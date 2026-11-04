@@ -1456,7 +1456,7 @@ begin
   execute 'set local role authenticated';
 
   total := total + 1;
-  select count(*) into n from public.claimable_pages('bones');
+  select count(*) into n from public.claimable_pages('bones') c where c.id = bones;
   select count(*) into n2 from public.claimable_pages('them');
   if n = 0 and n2 >= 1 then ok := ok + 1; else r := r || 'FAIL claimable ' || n || '/' || n2 || '; '; end if;
 
