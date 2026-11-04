@@ -79,7 +79,14 @@ type Open = Decision | null;
  * confirmation first. City and park admins see Escalate where the owner sees
  * Ban, and escalate rather than warn or suspend someone who holds a role.
  */
-export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
+export function ReportDetailPane({
+  detail: d,
+  impersonated,
+}: {
+  detail: ReportDetail;
+  /** Profile reports saying this person pretends to be a page: report id → the page. */
+  impersonated?: Record<string, { name: string; handle: string }>;
+}) {
   const { done } = useQueue();
   const [open, setOpen] = useState<Open>(null);
   const [message, setMessage] = useState("");
@@ -286,6 +293,14 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
                 <span className="font-semibold">{reasonLabel[r.reason] ?? r.reason}</span>
                 {" · "}
                 {r.reporter ? `@${r.reporter}` : "deleted user"}
+                {impersonated?.[r.id] && (
+                  <span>
+                    {" · copies "}
+                    <span className="font-semibold">
+                      {impersonated[r.id].name} (@{impersonated[r.id].handle})
+                    </span>
+                  </span>
+                )}
                 {r.details && <span className="text-gl-text-secondary"> · &ldquo;{r.details}&rdquo;</span>}
                 {r.status === "escalated" && <span className="text-gl-text-secondary"> · escalated</span>}
               </span>

@@ -9,37 +9,91 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
 import type { QueueItem } from "@/lib/queue";
-import { fieldLabel, obstacleTypeLabel, reasonLabel, stateLabel } from "@/lib/queue-labels";
+import { fieldLabel, obstacleTypeLabel, type QueueTab, reasonLabel, stateLabel, TAB_VALUES } from "@/lib/queue-labels";
 import { cn } from "@/lib/utils";
 
-export type QueueTab = "all" | "reports" | "park-info" | "obstacles";
+export type { QueueTab };
 
-const tabs: { value: QueueTab; label: string; kind: QueueItem["kind"] | null; empty: string }[] = [
+type TabDef = {
+  value: QueueTab;
+  label: string;
+  kinds: QueueItem["kind"][] | null;
+  empty: string;
+  /** Rachel's tabs: only the owner sees them. */
+  ownerOnly?: boolean;
+  /** A line under the tabs, as in the mockups. */
+  note?: string;
+};
+
+const tabs: TabDef[] = [
   {
     value: "all",
     label: "All",
-    kind: null,
-    empty: "Nothing waiting. Reports, park info reports and suggested obstacles show up here.",
+    kinds: null,
+    empty: "Nothing waiting. Reports, park and shop fixes, suggestions and claims show up here.",
   },
   {
     value: "reports",
     label: "Reports",
-    kind: "report",
-    empty: "No reports waiting. Reported posts, comments and people show up here.",
+    kinds: ["report", "page_report"],
+    empty: "No reports waiting. Reported posts, comments, people and pages show up here.",
   },
   {
     value: "park-info",
-    label: "Park info",
-    kind: "park_info",
-    empty: "No park info reports waiting. Fixes members suggest for a park's details show up here.",
+    label: "Park and shop info",
+    kinds: ["park_info", "shop_fix"],
+    empty: "No fixes waiting. Fixes members suggest for a park's or an unofficial shop's details show up here.",
   },
   {
     value: "obstacles",
     label: "Suggested obstacles",
-    kind: "obstacle",
+    kinds: ["obstacle"],
     empty: "No suggested obstacles waiting. Obstacles members add while posting show up here.",
   },
+  {
+    value: "claims",
+    label: "Claims",
+    kinds: ["claim"],
+    ownerOnly: true,
+    empty: "No claims waiting. Claims sent from a page's Claim this page show up here.",
+    note: "Claims are only in your queue. Approving makes the person the page's owner.",
+  },
+  {
+    value: "suggested-brands",
+    label: "Suggested brands",
+    kinds: ["page_suggestion"],
+    ownerOnly: true,
+    empty: "No suggested brands or shops waiting. Suggestions from Search show up here.",
+    note: "Suggested brands and shops are only in your queue. English only.",
+  },
+  {
+    value: "product-suggestions",
+    label: "Product suggestions",
+    kinds: ["product_suggestion"],
+    ownerOnly: true,
+    empty: "No product suggestions waiting. Suggest a change on a Products tab shows up here.",
+    note: "Product suggestions are only in your queue. They come from Suggest a change on a Products tab.",
+  },
 ];
+
+const fixFieldLabel: Record<string, string> = {
+  hours: "hours",
+  location_type: "storefront or not",
+  location: "address or pin",
+  brands_carried: "brands carried",
+  website: "website",
+  closed: "closed for good",
+  other: "something else",
+};
+
+const productKindLabel: Record<string, string> = {
+  missing_model: "Missing model",
+  wrong_name: "Wrong name",
+  wrong_year: "Wrong year",
+  no_longer_made: "No longer made",
+  stock_parts: "Stock parts",
+  something_else: "Something else",
+};
 
 /** What a detail pane can tell the queue: the item is done, move on. */
 type QueueActions = { done: (message: string) => void; close: () => void };
@@ -73,7 +127,43 @@ function rowTitle(item: QueueItem): { title: string; sub: string } {
     const field = item.target === "obstacle" && item.label ? item.label : (fieldLabel[item.target as keyof typeof fieldLabel] ?? item.target);
     return { title: `Park info: ${field}`, sub: `Suggested fix · ${who}` };
   }
+  if (item.kind === "claim") {
+    const proof = item.target === "email" ? (item.flag ? "work email, domain matches" : "work email, domain doesn't match") : `posted code ${item.label ?? ""}`;
+    return {
+      title: `Claim for ${item.page?.name ?? "a page"}${item.reportCount > 1 ? ` · ${item.reportCount} open` : ""}`,
+      sub: `${who} · ${item.reason ?? ""} · ${proof}`,
+    };
+  }
+  if (item.kind === "page_suggestion") {
+    return {
+      title: `Suggested ${item.target}: ${item.label ?? ""}`,
+      sub: item.flag && item.page ? `${who} · possible match: ${item.page.name}` : `${who} · no match`,
+    };
+  }
+  if (item.kind === "product_suggestion") {
+    return {
+      title: `${productKindLabel[item.target] ?? "Suggestion"}: ${item.label ?? ""}`,
+      sub: `${item.page?.name ?? ""} · ${who} · ${item.flag ? "edit value" : "mark done"}`,
+    };
+  }
+  if (item.kind === "page_report") {
+    const times = item.reportCount > 1 ? ` ${item.reportCount} times` : "";
+    return { title: `${item.page?.name ?? "A page"} reported${times}`, sub: reasonLabel[item.reason ?? ""] ?? "Reported" };
+  }
+  if (item.kind === "shop_fix") {
+    return { title: `Shop info: ${fixFieldLabel[item.target] ?? item.target}`, sub: `Suggested fix · ${who}` };
+  }
   return { title: "Suggested obstacle", sub: `“${item.label ?? ""}” · ${obstacleTypeLabel(item.target).toLowerCase()}` };
+}
+
+/** The Where column: the park, or the page and its place. */
+function whereCell(item: QueueItem): { main: React.ReactNode; sub: string | null } {
+  if (item.kind === "page_suggestion") return { main: item.target === "shop" ? "New shop" : "New brand", sub: null };
+  if (item.page) {
+    const type = item.page.roles.includes("shop") ? "Shop" : "Brand";
+    return { main: item.page.name, sub: [type, item.page.place].filter(Boolean).join(" · ") };
+  }
+  return { main: item.parkName ?? <span className="text-gl-text-secondary">No park</span>, sub: item.metroName };
 }
 
 /**
@@ -93,6 +183,8 @@ export function QueueView({
   openKey,
   detailMissing,
   detail,
+  owner,
+  headerAction,
 }: {
   items: QueueItem[];
   areas: { id: string; name: string }[];
@@ -101,6 +193,9 @@ export function QueueView({
   openKey: string | null;
   detailMissing: boolean;
   detail: React.ReactNode;
+  owner: boolean;
+  /** Something for the tab's note line, like Send claim invite on Claims. */
+  headerAction?: React.ReactNode;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -108,18 +203,20 @@ export function QueueView({
   const [help, setHelp] = useState(false);
   const rowRefs = useRef(new Map<string, HTMLAnchorElement>());
 
+  const shown = useMemo(() => tabs.filter((t) => owner || !t.ownerOnly), [owner]);
   const counts = useMemo(() => {
-    const c = { all: items.length, reports: 0, "park-info": 0, obstacles: 0 } satisfies Record<QueueTab, number>;
+    const c = Object.fromEntries(TAB_VALUES.map((v) => [v, 0])) as Record<QueueTab, number>;
+    c.all = items.length;
     for (const i of items) {
-      if (i.kind === "report") c.reports++;
-      else if (i.kind === "park_info") c["park-info"]++;
-      else c.obstacles++;
+      const t = tabs.find((x) => x.kinds?.includes(i.kind));
+      if (t) c[t.value]++;
     }
     return c;
   }, [items]);
 
-  const kind = tabs.find((t) => t.value === tab)!.kind;
-  const visible = useMemo(() => (kind ? items.filter((i) => i.kind === kind) : items), [items, kind]);
+  const current = shown.find((t) => t.value === tab) ?? shown[0];
+  const kinds = current.kinds;
+  const visible = useMemo(() => (kinds ? items.filter((i) => kinds.includes(i.kind)) : items), [items, kinds]);
 
   const href = useCallback(
     (next: { tab?: QueueTab; area?: string | null; item?: string | null }) => {
@@ -187,13 +284,13 @@ export function QueueView({
   return (
     <QueueContext value={actions}>
       <Tabs.Root
-        value={tab}
+        value={current.value}
         onValueChange={(value) => router.replace(href({ tab: value as QueueTab }), { scroll: false })}
         className="flex min-h-0 flex-1 flex-col"
       >
         <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b-2 border-gl-border px-6 pt-4">
           <Tabs.List aria-label="Queue type" className="flex gap-6 overflow-x-auto">
-            {tabs.map((t) => (
+            {shown.map((t) => (
               <Tabs.Tab
                 key={t.value}
                 value={t.value}
@@ -240,7 +337,19 @@ export function QueueView({
           </div>
         </div>
 
-        {tabs.map((t) => (
+        {(current.note || headerAction) && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-gl-border-subtle px-6 py-3">
+            {current.note && (
+              <p className="flex items-center gap-1.5 type-body-sm text-gl-text-secondary">
+                <Icon name="lock" size={18} />
+                {current.note}
+              </p>
+            )}
+            {headerAction}
+          </div>
+        )}
+
+        {shown.map((t) => (
           <Tabs.Panel key={t.value} value={t.value} className="flex min-h-0 flex-1 focus-ring focus-visible:outline-offset-[-2px]">
             <section
               aria-label="Waiting"
@@ -253,7 +362,7 @@ export function QueueView({
                       <thead>
                         <tr className="border-b-2 border-gl-border text-left">
                           <Th className="pl-6">What</Th>
-                          <Th>Park</Th>
+                          <Th>Where</Th>
                           <Th>State</Th>
                           <Th className="pr-6 text-right">Waiting</Th>
                         </tr>
@@ -261,6 +370,7 @@ export function QueueView({
                       <tbody>
                         {visible.map((item) => {
                           const { title, sub } = rowTitle(item);
+                          const where = whereCell(item);
                           const open = item.key === openKey;
                           return (
                             <tr
@@ -286,8 +396,8 @@ export function QueueView({
                                 </Link>
                               </td>
                               <td className="p-3">
-                                {item.parkName ?? <span className="text-gl-text-secondary">No park</span>}
-                                {item.metroName && <div className="text-gl-text-secondary">{item.metroName}</div>}
+                                {where.main}
+                                {where.sub && <div className="text-gl-text-secondary">{where.sub}</div>}
                               </td>
                               <td className="p-3">
                                 <StateChip state={item.state} />
@@ -349,8 +459,8 @@ export function QueueView({
               ["d", "Dismiss (reports)"],
               ["h", "Keep hidden (reports)"],
               ["e", "Escalate to Rachel (reports, city and park admins)"],
-              ["a", "Approve (park info and obstacles)"],
-              ["x", "Decline (park info and obstacles)"],
+              ["a", "Approve (fixes, obstacles, claims and suggestions)"],
+              ["x", "Decline (fixes, obstacles, claims and suggestions)"],
               ["?", "This list"],
             ] as const
           ).map(([key, what]) => (

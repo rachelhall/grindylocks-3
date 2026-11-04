@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/wordmark";
 import { countNotInvited, isOwner } from "@/lib/access-requests";
 import { getAdmin, roleLabel } from "@/lib/admin";
+import { countFlaggedPages } from "@/lib/brands";
 import { countQueue } from "@/lib/queue";
 
 import { signOut } from "../sign-in/actions";
@@ -15,7 +16,8 @@ import { NavLink } from "./nav-link";
  * come later), and
  * the signed-in admin with Sign out at the bottom. Under 768px it's a top bar.
  * Requests (invite requests from grindylocks.com) shows for the owner only,
- * with the count of requests not yet invited.
+ * with the count of requests not yet invited, and so does Page blocks, with
+ * the count of flagged pages (more than 5 blocks in 7 days).
  */
 export function Sidebar() {
   return (
@@ -59,12 +61,17 @@ async function QueueLink() {
 
 async function OwnerLinks() {
   if (!isOwner(await getAdmin())) return null;
-  const waiting = await countNotInvited();
+  const [waiting, flagged] = await Promise.all([countNotInvited(), countFlaggedPages()]);
 
   return (
-    <NavLink href="/requests" icon="person_add" badge={waiting} badgeLabel="not invited">
-      Requests
-    </NavLink>
+    <>
+      <NavLink href="/requests" icon="person_add" badge={waiting} badgeLabel="not invited">
+        Requests
+      </NavLink>
+      <NavLink href="/page-blocks" icon="block" badge={flagged} badgeLabel={flagged === 1 ? "page flagged" : "pages flagged"}>
+        Page blocks
+      </NavLink>
+    </>
   );
 }
 
