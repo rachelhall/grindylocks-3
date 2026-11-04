@@ -25,6 +25,7 @@ const shared = {
   onAccentSubtleSecondary: '#4A4740',
   role: '#005F99',
   onRole: '#F2EFE6',
+  accentOnInk: '#FF9AD0',
   overlay: 'rgba(17, 17, 17, 0.6)',
   mapPin: '#FF48B0',
   mapPinOutline: '#111111',
@@ -49,6 +50,7 @@ export const colors = {
     statusSoon: '#4A4740',
     danger: '#B3261E',
     onDanger: '#F2EFE6',
+    warning: '#8A4B00',
   },
   dark: {
     ...shared,
@@ -68,6 +70,7 @@ export const colors = {
     statusSoon: '#B8B4AA',
     danger: '#FF8A5C',
     onDanger: '#111111',
+    warning: '#F5A524',
   },
 } as const;
 
