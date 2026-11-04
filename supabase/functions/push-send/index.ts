@@ -89,7 +89,8 @@ function meetupTime(row: Claimed, language: string, style: 'date' | 'dateTime' |
  */
 function compose(row: Claimed, language: string): { title?: string; body: string } | null {
   const s: Sentences = strings[(language in strings ? language : 'en') as Language];
-  const username = row.actor_username ?? '';
+  // Tags, credits and caption mentions on a page post come from the page.
+  const username = row.actor_username ?? row.page_name ?? '';
   const a = username ? `@${username}` : '';
   const metro = row.metro_name ?? '';
   const say = (key: keyof Sentences, extra: Record<string, string> = {}) => fill(s[key], { a, username, metro, ...extra });

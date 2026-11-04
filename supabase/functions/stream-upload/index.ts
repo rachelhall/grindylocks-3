@@ -33,6 +33,12 @@ const isUuid = (v: unknown): v is string =>
   typeof v === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 const isPositiveInt = (v: unknown): v is number => Number.isInteger(v) && (v as number) > 0;
 
+/** The caller wrote this post: its author, or the member who posted it as a page. */
+async function madeIt(db: ReturnType<typeof userClient>, postId: string): Promise<boolean> {
+  const { data, error } = await db.rpc('i_made_post', { post: postId });
+  return !error && data === true;
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return json({ error: 'method_not_allowed' }, 405);
@@ -59,8 +65,9 @@ Deno.serve(async (req) => {
         .select('id, post_id, kind, upload_status, stream_video_id, posts!inner(author_id, published_at)')
         .eq('id', body.slide_id)
         .maybeSingle();
-      const post = slide?.posts as unknown as { author_id: string; published_at: string | null } | undefined;
-      if (!slide || !post || post.author_id !== user.id) return json({ error: 'not_found' }, 404);
+      const post = slide?.posts as unknown as { author_id: string | null; published_at: string | null } | undefined;
+      // A page post has no author_id; the member who made it is checked by the database.
+      if (!slide || !post || !(await madeIt(db, slide.post_id))) return json({ error: 'not_found' }, 404);
       if (slide.kind !== 'video') return json({ error: 'not_a_video' }, 400);
       if (slide.upload_status === 'ready' || slide.upload_status === 'processing') {
         return json({ error: 'already_uploaded', status: slide.upload_status }, 409);
@@ -96,7 +103,7 @@ Deno.serve(async (req) => {
       .select('id, author_id, slide_count, published_at')
       .eq('id', b.post_id)
       .maybeSingle();
-    if (!post || post.author_id !== user.id) return json({ error: 'not_found' }, 404);
+    if (!post || !(await madeIt(db, post.id))) return json({ error: 'not_found' }, 404);
     if (post.published_at) return json({ error: 'already_published' }, 409);
     if (b.position! < 0 || b.position! >= post.slide_count) return json({ error: 'bad_position' }, 400);
 

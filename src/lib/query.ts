@@ -113,6 +113,7 @@ export const keys = {
   feedNearby: (userId: string, metroId: string) => ['feed', 'nearby', userId, metroId] as const,
   /** A park's posts. Post lists start with 'posts', so one invalidation covers them. */
   parkPosts: (parkId: string) => ['posts', 'park', parkId] as const,
+  pagePosts: (pageId: string) => ['posts', 'page', pageId] as const,
   obstaclePosts: (obstacleId: string) => ['posts', 'obstacle', obstacleId] as const,
   taggedPosts: (userId: string) => ['posts', 'tagged', userId] as const,
   filmedPosts: (userId: string) => ['posts', 'filmed', userId] as const,

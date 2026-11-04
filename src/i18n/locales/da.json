@@ -2006,5 +2006,27 @@
     "dayOfMonth": "Vælg en dag, der findes i den måned.",
     "datesNote": "Datoerne gentages hvert år. De kan gå hen over nytår, fx 1. nov. – 28. feb.",
     "removeDates": "Fjern disse datoer og deres åbningstider"
+  },
+  "postingAs": {
+    "title": "Slår op som",
+    "label": "Slår op som {{name}}",
+    "changeHint": "Vælg hvem opslaget er fra",
+    "change": "Skift",
+    "sheetTitle": "Slå op som",
+    "you": "dig",
+    "shop": "butiksside",
+    "brand": "mærkeside",
+    "reachNearYou": "Når ud til {{name}}s følgere og Nær dig i {{metro}} (én gang om dagen).",
+    "reachUsedToday": "Dagens opslag i Nær dig er brugt, så dette når kun {{name}}s følgere.",
+    "reachUsedWeek": "Ugens opslag i Nær dig er brugt, så dette når kun {{name}}s følgere.",
+    "reachFollowers": "Når ud til {{name}}s følgere.",
+    "noRegulars": "Opslag fra sider tæller aldrig med til stamgæster.",
+    "postAs": "Slå op som {{name}}",
+    "refused": "{{name}} kan ikke slå op lige nu. Spørg sidens ejer.",
+    "menuTitle": "{{name}}s opslag",
+    "reportBody": "Går til moderatorerne. Siden får ikke besked.",
+    "cardLabel": "Opslag fra siden {{name}}",
+    "more": "Mere: skjul, anmeld eller bloker {{name}}",
+    "by": "af {{username}}"
   }
 }

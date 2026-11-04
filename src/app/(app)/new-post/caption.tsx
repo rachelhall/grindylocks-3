@@ -7,6 +7,7 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { MediaTag, MediaThumb } from '@/components/media';
 import { MentionList, useCaptionMentions } from '@/components/mentions';
+import { PostingAsRow, usePostablePages } from '@/components/posting-as';
 import { TagSectionTitle, useTagSummary } from '@/components/tagging';
 import { BackButton, Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
@@ -35,6 +36,10 @@ function thumbWidth(m: DraftItem): number {
  * (Mentions (v2) mockup, Nov 2): people tagged or credited in the draft
  * first, then people you follow, then regulars at the post's park. While
  * it's open, a line saying mentions are notified stands in for Post it.
+ *
+ * Posting as (PR 8a, PostingAs-Caption): for members of a page they can post
+ * as, a pink row above the caption picks you or the page; the button then
+ * reads "Post as 8SET".
  */
 export default function NewPostCaption() {
   const { t } = useTranslation();
@@ -46,6 +51,9 @@ export default function NewPostCaption() {
   const [posting, setPosting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const input = useRef<TextInput>(null);
+  const postable = usePostablePages(session?.user.id);
+  const [asPageId, setAsPageId] = useState<string | null>(null);
+  const asPage = postable.find((p) => p.pageId === asPageId) ?? null;
 
   const onPost = items.flatMap((m) => [
     ...(m.tags.filmerId && names[m.tags.filmerId]
@@ -70,6 +78,7 @@ export default function NewPostCaption() {
   async function post() {
     const metroAreaId = profile?.home_metro_area_id;
     if (!session || !metroAreaId || items.length === 0) return;
+    const pageId = asPage?.pageId ?? null;
     setPosting(true);
     setError(null);
     try {
@@ -81,16 +90,20 @@ export default function NewPostCaption() {
       await createPost({
         userId: session.user.id,
         metroAreaId,
+        pageId,
         parkId: park?.id ?? null,
         eventId,
         caption,
         media: prepared,
       });
       void qc.invalidateQueries({ queryKey: ['posts'] });
+      if (pageId) void qc.invalidateQueries({ queryKey: ['page-near-you', pageId] });
       router.dismissTo('/home');
     } catch (err) {
       Sentry.captureException(err);
-      setError(t('errors.network'));
+      // The page can't post right now (suspended, disputed or closed meanwhile).
+      const refused = pageId && (err as { code?: string } | null)?.code === '42501';
+      setError(refused ? t('postingAs.refused', { name: asPage?.displayName ?? '' }) : t('errors.network'));
       setPosting(false);
     }
   }
@@ -128,6 +141,16 @@ export default function NewPostCaption() {
               </View>
             ))}
           </ScrollView>
+
+          {postable.length > 0 && profile?.username ? (
+            <PostingAsRow
+              username={profile.username}
+              avatarPath={null}
+              pages={postable}
+              value={asPageId}
+              onChange={setAsPageId}
+            />
+          ) : null}
 
           <View style={styles.field}>
             <TextInput
@@ -212,7 +235,7 @@ export default function NewPostCaption() {
               </Text>
             </View>
             <Button
-              label={t('post.postIt')}
+              label={asPage ? t('postingAs.postAs', { name: asPage.displayName }) : t('post.postIt')}
               onPress={post}
               loading={posting}
               disabled={items.length === 0}

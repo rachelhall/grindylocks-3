@@ -2006,5 +2006,27 @@
     "dayOfMonth": "Wählt einen Tag, den es in diesem Monat gibt.",
     "datesNote": "Der Zeitraum wiederholt sich jedes Jahr. Er kann über Neujahr gehen, z. B. 1. Nov. – 28. Feb.",
     "removeDates": "Diesen Zeitraum und seine Öffnungszeiten entfernen"
+  },
+  "postingAs": {
+    "title": "Posten als",
+    "label": "Posten als {{name}}",
+    "changeHint": "Wähle, von wem der Post ist",
+    "change": "Ändern",
+    "sheetTitle": "Posten als",
+    "you": "du",
+    "shop": "Shop-Seite",
+    "brand": "Marken-Seite",
+    "reachNearYou": "Erreicht die Follower von {{name}} und In deiner Nähe in {{metro}} (einmal am Tag).",
+    "reachUsedToday": "Der heutige Post für In deiner Nähe ist schon vergeben, also erreicht dieser nur die Follower von {{name}}.",
+    "reachUsedWeek": "Die Posts dieser Woche für In deiner Nähe sind schon vergeben, also erreicht dieser nur die Follower von {{name}}.",
+    "reachFollowers": "Erreicht die Follower von {{name}}.",
+    "noRegulars": "Posts von Seiten zählen nie für Stammgäste.",
+    "postAs": "Als {{name}} posten",
+    "refused": "{{name}} kann gerade nicht posten. Frag die Inhaberin oder den Inhaber der Seite.",
+    "menuTitle": "Post von {{name}}",
+    "reportBody": "Geht an die Moderation. Die Seite erfährt es nicht.",
+    "cardLabel": "Post der Seite {{name}}",
+    "more": "Mehr: {{name}} stummschalten, melden oder blockieren",
+    "by": "von {{username}}"
   }
 }

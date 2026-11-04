@@ -16,6 +16,7 @@
 import { type InfiniteData, type QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { photoUrls, videoKeys, videoThumbnailUrl } from './media';
+import type { PageState } from './pages';
 import type { Post } from './posts';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
@@ -185,7 +186,23 @@ export type NotificationKind =
   | 'meetup_mention'
   | 'meetup_hidden';
 
-export type NotificationPerson = { id: string; username: string | null; avatarPath: string | null };
+/**
+ * Who a row is from. A tag, credit or caption mention on a page post comes
+ * from the page (PR 8a): `page` is set and `username` is the page's name.
+ */
+export type NotificationPerson = {
+  id: string | null;
+  username: string | null;
+  avatarPath: string | null;
+  page?: { id: string; handle: string; displayName: string; logoPath: string | null; state: PageState };
+};
+
+type ActorRow = {
+  id: string | null;
+  username: string | null;
+  avatar_path: string | null;
+  page?: { id: string; handle: string; display_name: string; logo_path: string | null; state: PageState } | null;
+};
 
 export type AppNotification = {
   id: string;
@@ -253,9 +270,14 @@ export function useNotifications(userId: string | undefined) {
           id: n.id,
           kind: n.kind as NotificationKind,
           createdAt: n.created_at,
-          people: ((n.actors as { id: string; username: string | null; avatar_path: string | null }[] | null) ?? []).map(
-            (a) => ({ id: a.id, username: a.username, avatarPath: a.avatar_path }),
-          ),
+          people: ((n.actors as ActorRow[] | null) ?? []).map((a) => ({
+            id: a.id,
+            username: a.username,
+            avatarPath: a.avatar_path,
+            page: a.page
+              ? { id: a.page.id, handle: a.page.handle, displayName: a.page.display_name, logoPath: a.page.logo_path, state: a.page.state }
+              : undefined,
+          })),
           peopleCount: n.actor_count,
           postId: n.post_id,
           commentId: n.comment_id,

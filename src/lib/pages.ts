@@ -263,7 +263,7 @@ export function usePageIdForHandle(handle: string | undefined) {
   });
 }
 
-async function fetchViewerState(pageId: string): Promise<PageViewerState> {
+export async function fetchViewerState(pageId: string): Promise<PageViewerState> {
   const { data, error } = await supabase.rpc('page_viewer_state', { page: pageId });
   if (error) throw error;
   const row = data?.[0];
