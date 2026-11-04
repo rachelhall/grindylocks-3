@@ -215,3 +215,24 @@ update App Store Connect. If a reviewer deletes the account, repeat steps 4
 and 5.
 
 Migration applied, secrets set and `review-sign-in` deployed Nov 3 (a wrong-code test answered 401 `wrong_code`).
+
+## Brand and shop pages (migrations `pages_enums`, `pages`, `pages_seed`)
+
+Part A, PR 1 of brand and shop accounts: the pages data model, access rules
+and the seeded pages. No app screens yet.
+
+1. Run `tests/pages_check.sql` in the SQL editor first (it runs all three
+   and the checks in one transaction, then ends with `RESULTS [...]`; every
+   row should say `"ok": true`).
+2. Apply `pages_enums`, then `pages`, then `pages_seed`.
+
+The seed comes from `seed/pages/`: `pages.csv` (one row per page, with its
+handle; `handle_source` says whether the handle is the brand's Instagram
+handle from the Outreach Tracker, the PRD's example, or a draft) and
+`descriptions.csv` (the factual line in en, es, da and de). Regenerate the
+migration with `python3 seed/pages/build_pages_seed.py`. It's insert-only, like
+the park seed: existing handles and descriptions are left alone.
+
+Handles share one namespace with usernames: a page handle (or an old handle
+still redirecting, 90 days after a rename) can't be taken as a username, and
+usernames can't contain "official".
