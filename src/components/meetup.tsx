@@ -2,7 +2,10 @@
  * The meetup page's pieces (Meetups v2 mockups "Meetup page" and "Going
  * sheet"): the going list with HOST and CO-HOST, people you follow and
  * everyone else; the Going sheet; comments with HOST and CO-HOST labels;
- * and the banner for a co-host invite waiting for you.
+ * and the banner for a co-host invite waiting for you. Since PR 5 hosts can
+ * take someone off Going, comments can be reported, @names in them link to
+ * profiles, and the comment box has an @ list of people who can see the
+ * meetup.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -10,11 +13,13 @@ import { type RefObject, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { MentionedText, MentionList } from '@/components/mentions';
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { Sheet } from '@/components/tagging';
 import { Button, Icon, Toggle } from '@/components/ui';
 import { MAX_COMMENT } from '@/lib/engagement';
+import { activeMention, insertMention, MAX_SUGGESTIONS } from '@/lib/mentions';
 import {
   type GoingPerson,
   type MeetupComment,
@@ -23,6 +28,7 @@ import {
   useDeleteMeetupComment,
   useGoingPrivatelyDefault,
   useMeetupComments,
+  useMeetupMentionPeople,
   useSetGoing,
 } from '@/lib/meetups';
 import { Sentry } from '@/lib/sentry';
@@ -43,7 +49,18 @@ export function HostLabel({ role }: { role: 'host' | 'co_host' }) {
   );
 }
 
-export function GoingList({ people, unnamed, hostView }: { people: GoingPerson[]; unnamed: number; hostView: boolean }) {
+export function GoingList({
+  people,
+  unnamed,
+  hostView,
+  onRemove,
+}: {
+  people: GoingPerson[];
+  unnamed: number;
+  hostView: boolean;
+  /** Hosts and co-hosts, before the date ends: take someone off Going (they aren't told). */
+  onRemove?: (personId: string, username: string | null) => void;
+}) {
   const { t } = useTranslation();
   const c = useColors();
   const hosts = people.filter((p) => p.role !== 'going');
@@ -70,6 +87,19 @@ export function GoingList({ people, unnamed, hostView }: { people: GoingPerson[]
         <Text variant="caption" color="textSecondary">
           {t('meetup.goingPrivatelyLabel')}
         </Text>
+      ) : null}
+      {onRemove && p.role === 'going' ? (
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('meetup.removeLabel', { username: p.username ?? '' })}
+          onPress={() => onRemove(p.user_id, p.username)}
+          hitSlop={8}
+          style={styles.action}
+        >
+          <Text variant="caption" color="textSecondary" style={{ fontFamily: fontFamily.sansSemiBold }}>
+            {t('meetup.remove')}
+          </Text>
+        </Pressable>
       ) : null}
     </Pressable>
   );
@@ -238,12 +268,15 @@ export function MeetupComments({
   userId,
   canModerate,
   onReply,
+  onReport,
 }: {
   eventId: string;
   userId: string | undefined;
   /** Hosts and co-hosts can delete any comment on their meetup. */
   canModerate: boolean;
   onReply: (target: MeetupReply) => void;
+  /** Someone else's comment: Report. */
+  onReport: (comment: MeetupComment) => void;
 }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
@@ -287,7 +320,7 @@ export function MeetupComments({
                   {`@${cm.reply_to_username} `}
                 </Text>
               ) : null}
-              {cm.body}
+              <MentionedText text={cm.body ?? ''} variant="body" />
             </Text>
             <View style={styles.commentActions}>
               <Pressable
@@ -311,6 +344,19 @@ export function MeetupComments({
                 >
                   <Text variant="caption" color="textSecondary" style={{ fontFamily: fontFamily.sansSemiBold }}>
                     {t('comments.delete')}
+                  </Text>
+                </Pressable>
+              ) : null}
+              {userId && cm.author_id && cm.author_id !== userId ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('meetup.reportComment', { username: cm.username ?? '' })}
+                  onPress={() => onReport(cm)}
+                  hitSlop={6}
+                  style={styles.action}
+                >
+                  <Text variant="caption" color="textSecondary" style={{ fontFamily: fontFamily.sansSemiBold }}>
+                    {t('meetup.report')}
                   </Text>
                 </Pressable>
               ) : null}
@@ -372,7 +418,26 @@ export function MeetupCommentComposer({
   const c = useColors();
   const add = useAddMeetupComment(eventId, userId);
   const [text, setText] = useState('');
+  const [cursor, setCursor] = useState(0);
   const ready = text.trim().length > 0 && !add.isPending;
+
+  // Typing @ opens the list: only people who can see this meetup (decided Nov 3).
+  const mention = activeMention(text, cursor);
+  const people = useMeetupMentionPeople(eventId, mention ? mention.query : null);
+  const candidates = mention
+    ? (people.data ?? [])
+        .filter((p) => p.username.toLowerCase().startsWith(mention.query.toLowerCase()))
+        .slice(0, MAX_SUGGESTIONS)
+        .map((p) => ({ id: p.id, username: p.username, avatarPath: p.avatarPath, reason: p.reason }))
+    : [];
+
+  function pick(username: string) {
+    if (!mention) return;
+    const next = insertMention(text, cursor, mention.start, username);
+    setText(next.text);
+    setCursor(next.cursor);
+    inputRef.current?.setSelection?.(next.cursor, next.cursor);
+  }
 
   const send = () => {
     if (!ready) return;
@@ -392,41 +457,47 @@ export function MeetupCommentComposer({
   };
 
   return (
-    <View style={[styles.composer, { borderTopColor: c.borderSubtle, backgroundColor: c.surface }]}>
-      {replyTo ? (
-        <View style={styles.replying}>
-          <Text variant="caption" color="textSecondary" style={styles.flex}>
-            {replyTo.username ? t('comments.replyingTo', { username: replyTo.username }) : t('comments.replyingToThread')}
-          </Text>
-          <Pressable accessibilityRole="button" accessibilityLabel={t('comments.cancelReply')} onPress={onClearReply} hitSlop={8}>
-            <Icon name="close" color={c.textSecondary} size={16} />
+    <>
+      {candidates.length > 0 ? (
+        <MentionList candidates={candidates} typed={mention?.query.length ?? 0} parkName={null} onPick={pick} />
+      ) : null}
+      <View style={[styles.composer, { borderTopColor: c.borderSubtle, backgroundColor: c.surface }]}>
+        {replyTo ? (
+          <View style={styles.replying}>
+            <Text variant="caption" color="textSecondary" style={styles.flex}>
+              {replyTo.username ? t('comments.replyingTo', { username: replyTo.username }) : t('comments.replyingToThread')}
+            </Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={t('comments.cancelReply')} onPress={onClearReply} hitSlop={8}>
+              <Icon name="close" color={c.textSecondary} size={16} />
+            </Pressable>
+          </View>
+        ) : null}
+        <View style={styles.composerRow}>
+          <TextInput
+            ref={inputRef}
+            value={text}
+            onChangeText={(v) => setText(v.slice(0, MAX_COMMENT))}
+            onSelectionChange={(e) => setCursor(e.nativeEvent.selection.end)}
+            placeholder={t('comments.placeholder')}
+            placeholderTextColor={c.textSecondary}
+            multiline
+            maxLength={MAX_COMMENT}
+            accessibilityLabel={t('comments.placeholder')}
+            style={[styles.composerInput, { borderColor: c.border, backgroundColor: c.surfaceRaised, color: c.text }]}
+          />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('comments.post')}
+            accessibilityState={{ disabled: !ready }}
+            disabled={!ready}
+            onPress={send}
+            style={[styles.send, { borderColor: c.border, backgroundColor: ready ? c.accent : c.surfaceRaised }]}
+          >
+            {add.isPending ? <ActivityIndicator color={c.onAccent} /> : <Icon name="arrowUp" color={ready ? c.onAccent : c.textSecondary} size={22} />}
           </Pressable>
         </View>
-      ) : null}
-      <View style={styles.composerRow}>
-        <TextInput
-          ref={inputRef}
-          value={text}
-          onChangeText={(v) => setText(v.slice(0, MAX_COMMENT))}
-          placeholder={t('comments.placeholder')}
-          placeholderTextColor={c.textSecondary}
-          multiline
-          maxLength={MAX_COMMENT}
-          accessibilityLabel={t('comments.placeholder')}
-          style={[styles.composerInput, { borderColor: c.border, backgroundColor: c.surfaceRaised, color: c.text }]}
-        />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('comments.post')}
-          accessibilityState={{ disabled: !ready }}
-          disabled={!ready}
-          onPress={send}
-          style={[styles.send, { borderColor: c.border, backgroundColor: ready ? c.accent : c.surfaceRaised }]}
-        >
-          {add.isPending ? <ActivityIndicator color={c.onAccent} /> : <Icon name="arrowUp" color={ready ? c.onAccent : c.textSecondary} size={22} />}
-        </Pressable>
       </View>
-    </View>
+    </>
   );
 }
 

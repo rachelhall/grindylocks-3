@@ -389,7 +389,23 @@
     "warning": "En advarsel fra admins",
     "suspension": "Du er suspenderet",
     "roleVacatedPark": "{{a}}s rolle som {{role}} i {{park}} er stoppet. Vælg en ny.",
-    "roleVacated": "{{a}}s rolle som {{role}} er stoppet. Vælg en ny."
+    "roleVacated": "{{a}}s rolle som {{role}} er stoppet. Vælg en ny.",
+    "meetupGoingOne": "{{a}} kommer {{when}} i {{park}}",
+    "meetupGoingTwo": "{{a}} og {{b}} kommer {{when}} i {{park}}",
+    "meetupGoingMany_one": "{{a}} og {{count}} anden kommer {{when}} i {{park}}",
+    "meetupGoingMany_other": "{{a}} og {{count}} andre kommer {{when}} i {{park}}",
+    "meetupChanged": "{{meetup}} er ændret: nu {{when}} i {{park}}",
+    "meetupCancelled": "{{meetup}} {{date}} er aflyst: {{reason}}",
+    "meetupEnded": "{{meetup}} er slut: {{reason}}",
+    "meetupReminder": "{{meetup}} starter {{time}} i {{park}}",
+    "coHostInvite": "{{a}} har inviteret dig til at være medvært på {{meetup}}",
+    "meetupCommentOne": "{{a}} kommenterede {{meetup}}",
+    "meetupCommentTwo": "{{a}} og {{b}} kommenterede {{meetup}}",
+    "meetupCommentMany_one": "{{a}}, {{b}} og {{count}} anden kommenterede {{meetup}}",
+    "meetupCommentMany_other": "{{a}}, {{b}} og {{count}} andre kommenterede {{meetup}}",
+    "meetupReply": "{{a}} svarede dig på {{meetup}}",
+    "meetupMention": "{{a}} nævnte dig på {{meetup}}",
+    "meetupHidden": "Parkens admins skjulte {{meetup}} {{date}}"
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -793,7 +809,8 @@
     "mentionTagged": "Tagget i dette opslag",
     "mentionCommented": "Har kommenteret her",
     "mentionFollowing": "Du følger",
-    "mentionRegular": "Fast gæst i {{park}}"
+    "mentionRegular": "Fast gæst i {{park}}",
+    "mentionHost": "Vært"
   },
   "clip": {
     "play": "Afspil klip",
@@ -830,7 +847,9 @@
     "openSettings": "Åbn telefonens indstillinger",
     "askTitle": "Notifikationer er ikke slået til endnu",
     "askBody": "Få besked, når nogen kommenterer, tagger dig eller siger hej i nærheden.",
-    "ask": "Slå notifikationer til"
+    "ask": "Slå notifikationer til",
+    "meetups": "Meetups",
+    "meetupsBody": "Ændringer, aflysninger og påmindelser om meetups, du kommer til"
   },
   "report": {
     "report": "Anmeld",
@@ -864,7 +883,10 @@
     "blockTooBody": "I kan ikke se hinandens opslag, kommentarer eller profiler. Personen får ikke besked.",
     "blockPerson": "Blokér @{{username}}",
     "done": "Færdig",
-    "gone": "Det er ikke tilgængeligt længere."
+    "gone": "Det er ikke tilgængeligt længere.",
+    "titleMeetup": "Anmeld dette meetup",
+    "meetupBy": "Meetup med @{{username}} som vært",
+    "whoMeetup": "@{{username}} får ikke at vide, hvem der anmeldte det. Parkens admins kigger på det."
   },
   "moderation": {
     "reported": {
@@ -1139,7 +1161,15 @@
       "park_closed": "Parken er lukket",
       "something_came_up": "Der kom noget i vejen",
       "other": "Andet"
-    }
+    },
+    "hiddenTitle": "SKJULT AF PARKENS ADMINS",
+    "hiddenBody": "Kun værterne og parkens admins kan se denne dato.",
+    "remove": "Fjern",
+    "removeLabel": "Fjern @{{username}} fra Kommer",
+    "removeTitle": "Fjern @{{username}} fra Kommer?",
+    "removeBody": "De får ikke besked. Når de er ude af listen, kan de ikke se, hvem der ellers kommer.",
+    "report": "Anmeld",
+    "reportComment": "Anmeld @{{username}}s kommentar"
   },
   "meetupCompose": {
     "newTitle": "Nyt",
@@ -1233,5 +1263,66 @@
     "linked": "Fra meetup {{day}}",
     "note": "Du skulle til {{meetup}} her. Kobler du dem, vises opslaget på meetuppet.",
     "linkedNote": "Opslaget vises på {{meetup}}. Tryk for at fjerne det."
+  },
+  "meetupMenu": {
+    "open": "Muligheder for meetup",
+    "yourMeetup": "Dit meetup",
+    "title": "Meetup",
+    "edit": "Rediger meetup",
+    "coHosts": "Medværter",
+    "cancel": "Aflys meetup",
+    "cancelDetail": "Bliver på parkens side, overstreget",
+    "delete": "Slet meetup",
+    "deleteDetail": "Fjerner det helt. Kun indtil andre kommer, eller det starter.",
+    "report": "Anmeld meetup",
+    "hide": "Skjul denne dato",
+    "hideDetail": "Kun værterne og parkens admins kan se den",
+    "unhide": "Vis denne dato igen",
+    "unhideDetail": "Alle, der kunne se den, kan se den igen",
+    "deleteTitle": "Slet dette meetup?",
+    "deleteBody": "Det fjernes helt, som om du aldrig havde lagt det op. Brug det til fejl, som forkert park eller dag.",
+    "deleteNote": "Når en anden siger, de kommer, eller det starter, kan du kun aflyse det.",
+    "keepIt": "Behold det",
+    "deleteFailed": "Kunne ikke slette det",
+    "deleteFailedBody": "Nogen har måske lige sagt, at de kommer. Du kan stadig aflyse det.",
+    "hideTitle": "Skjul denne dato?",
+    "hideBody": "Kun værterne og parkens admins kan se den. Værterne får besked om, at den er skjult."
+  },
+  "meetupCancel": {
+    "title": "Aflys meetup",
+    "whichDates": "HVILKE DATOER",
+    "thisDate": "Denne dato · {{date}}",
+    "wholeSeries": "Hele serien",
+    "wholeSeriesDetail": "Afslutter den. Tidligere datoer bliver.",
+    "why": "HVORFOR",
+    "note": "NOTE (VALGFRI)",
+    "notePlaceholder": "Bowlen er oversvømmet. Vi ses i næste uge",
+    "footnote_one": "Den {{count}}, der kommer, får en notifikation. Det bliver på parkens side, overstreget, med din grund.",
+    "footnote_other": "De {{count}}, der kommer, får en notifikation. Det bliver på parkens side, overstreget, med din grund.",
+    "footnoteNobody": "Det bliver på parkens side, overstreget, med din grund.",
+    "confirmSeries": "Afslut serien",
+    "confirmDate": "Aflys {{day}}"
+  },
+  "coHosts": {
+    "body": "Medværter kan redigere, aflyse datoer og fjerne folk fra Kommer. De siger ja, før de vises.",
+    "invited": "Inviteret, har ikke svaret endnu",
+    "none": "Ingen medværter endnu.",
+    "invite": "Inviter medværter",
+    "remove": "Fjern",
+    "withdraw": "Træk tilbage",
+    "removeTitle": "Fjern @{{username}}?",
+    "removeBody": "De er ikke længere medvært på dette meetup. De får ikke besked.",
+    "inviteFailed": "Kunne ikke sende invitationerne. Et meetup kan have op til 10 medværter."
+  },
+  "meetupEdit": {
+    "title": "Rediger meetup",
+    "save": "Gem",
+    "footer": "De, der kommer, får besked om ændringer af dag, tid eller park.",
+    "scopeTitle": "Hvilke datoer?",
+    "scopeBody": "Dette meetup gentages.",
+    "thisDate": "Denne dato",
+    "allUpcoming": "Alle kommende",
+    "failed": "Kunne ikke gemme dine ændringer",
+    "seasonsPark": "Parken for dette meetup kommer fra sæsonerne, så skift kun parken for denne dato."
   }
 }

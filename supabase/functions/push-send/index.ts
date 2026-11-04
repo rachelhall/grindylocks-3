@@ -25,6 +25,14 @@ type Claimed = {
   park_slug: string | null;
   metro_name: string | null;
   devices: { token: string; language: string }[];
+  /** Meetups: the date, on the park's clock. */
+  event_id: string | null;
+  event_starts_at: string | null;
+  event_timezone: string | null;
+  /** The meetup's title, or its line when it has none. */
+  event_title: string | null;
+  /** What changed ("time", "park", "time,park"), or the cancel reason (":series" when the rest of a series was cancelled). */
+  detail: string | null;
 };
 
 type ExpoMessage = {
@@ -49,6 +57,23 @@ function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, k: string) => values[k] ?? '');
 }
 
+const LOCALES: Record<string, string> = { en: 'en-US', es: 'es', da: 'da-DK', de: 'de-DE' };
+
+/** "Thu, Nov 5", "Thu, Nov 5, 7:00 PM" or "7:00 PM", on the park's clock, in the reader's language (as the bell writes them). */
+function meetupTime(row: Claimed, language: string, style: 'date' | 'dateTime' | 'time'): string {
+  if (!row.event_starts_at) return '';
+  const day: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: 'numeric' };
+  const time: Intl.DateTimeFormatOptions = { hour: 'numeric', minute: '2-digit' };
+  try {
+    return new Intl.DateTimeFormat(LOCALES[language] ?? 'en-US', {
+      timeZone: row.event_timezone ?? 'UTC',
+      ...(style === 'time' ? time : style === 'date' ? day : { ...day, ...time }),
+    }).format(new Date(row.event_starts_at));
+  } catch {
+    return '';
+  }
+}
+
 /**
  * The sentence is the same one the bell shows. A comment, reply or mention
  * puts the sentence in the title and the comment itself in the body; a
@@ -60,6 +85,13 @@ function compose(row: Claimed, language: string): { title?: string; body: string
   const a = username ? `@${username}` : '';
   const metro = row.metro_name ?? '';
   const say = (key: keyof Sentences, extra: Record<string, string> = {}) => fill(s[key], { a, username, metro, ...extra });
+  const lang = language in strings ? language : 'en';
+  const meetup = row.event_title ?? row.park_name ?? '';
+  const park = row.park_name ?? '';
+  const reasonOf = (r: string) => {
+    const key = `reason_${r}` as keyof Sentences;
+    return key in s ? s[key] : s.reason_other;
+  };
 
   switch (row.kind) {
     case 'comment':
@@ -83,6 +115,24 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { body: row.park_name ? say('visitingPark', { park: row.park_name }) : say('visiting') };
     case 'park_report_accepted':
       return row.park_name ? { body: say('parkFixLive', { park: row.park_name }) } : null;
+    // Meetups: the bell's sentence, with times on the park's clock.
+    case 'meetup_changed':
+      return meetup ? { body: say('meetupChanged', { meetup, when: meetupTime(row, lang, 'dateTime'), park }) } : null;
+    case 'meetup_cancelled': {
+      if (!meetup) return null;
+      const [reason, scope] = (row.detail ?? 'other').split(':');
+      return scope === 'series'
+        ? { body: say('meetupEnded', { meetup, reason: reasonOf(reason) }) }
+        : { body: say('meetupCancelled', { meetup, date: meetupTime(row, lang, 'date'), reason: reasonOf(reason) }) };
+    }
+    case 'meetup_reminder':
+      return meetup ? { body: say('meetupReminder', { meetup, time: meetupTime(row, lang, 'time'), park }) } : null;
+    case 'meetup_comment':
+      return { title: say('meetupCommentOne', { meetup }), body: row.comment_body ?? '' };
+    case 'meetup_reply':
+      return { title: say('meetupReply', { meetup }), body: row.comment_body ?? '' };
+    case 'meetup_mention':
+      return { title: say('meetupMention', { meetup }), body: row.comment_body ?? '' };
     default:
       return null;
   }
@@ -90,6 +140,10 @@ function compose(row: Claimed, language: string): { title?: string; body: string
 
 /** Where tapping the push goes. The app maps this onto its routes. */
 function destination(row: Claimed): Record<string, string> {
+  if (row.event_id) {
+    const comments = ['meetup_comment', 'meetup_reply', 'meetup_mention'].includes(row.kind);
+    return { open: 'meetup', id: row.event_id, ...(comments ? { comments: '1' } : {}) };
+  }
   if (row.post_id) {
     const comments = ['comment', 'reply', 'mention'].includes(row.kind);
     return { open: 'post', id: row.post_id, ...(comments ? { comments: '1' } : {}) };

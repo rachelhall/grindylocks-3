@@ -202,6 +202,11 @@ function open(data: Record<string, unknown> | undefined) {
       if (username) router.push({ pathname: '/profile/[username]', params: { username } });
       return;
     }
+    case 'meetup': {
+      const id = str('id');
+      if (id) router.push({ pathname: '/meetup/[id]', params: { id } });
+      return;
+    }
     case 'park': {
       const slug = str('slug');
       if (slug) router.push({ pathname: '/park/[slug]', params: { slug } });
@@ -240,7 +245,7 @@ export function usePushTaps() {
 
 /* Switches ------------------------------------------------------------------------- */
 
-export type PushSetting = 'comments' | 'mentions' | 'tags' | 'filmer_credits' | 'invites' | 'someone_new' | 'park_fixes';
+export type PushSetting = 'comments' | 'mentions' | 'tags' | 'filmer_credits' | 'invites' | 'someone_new' | 'park_fixes' | 'meetups';
 export type PushSettings = Record<PushSetting, boolean>;
 
 const ALL_ON: PushSettings = {
@@ -251,6 +256,7 @@ const ALL_ON: PushSettings = {
   invites: true,
   someone_new: true,
   park_fixes: true,
+  meetups: true,
 };
 
 async function fetchPushSettings(): Promise<PushSettings> {

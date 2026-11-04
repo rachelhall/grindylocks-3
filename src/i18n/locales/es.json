@@ -389,7 +389,23 @@
     "warning": "Un aviso de los admins",
     "suspension": "Estás suspendido",
     "roleVacatedPark": "El rol de {{role}} de {{a}} en {{park}} ha terminado. Elige a otra persona.",
-    "roleVacated": "El rol de {{role}} de {{a}} ha terminado. Elige a otra persona."
+    "roleVacated": "El rol de {{role}} de {{a}} ha terminado. Elige a otra persona.",
+    "meetupGoingOne": "{{a}} va el {{when}} a {{park}}",
+    "meetupGoingTwo": "{{a}} y {{b}} van el {{when}} a {{park}}",
+    "meetupGoingMany_one": "{{a}} y {{count}} persona más van el {{when}} a {{park}}",
+    "meetupGoingMany_other": "{{a}} y {{count}} personas más van el {{when}} a {{park}}",
+    "meetupChanged": "{{meetup}} cambió: ahora {{when}} en {{park}}",
+    "meetupCancelled": "{{meetup}} del {{date}} se canceló: {{reason}}",
+    "meetupEnded": "{{meetup}} terminó: {{reason}}",
+    "meetupReminder": "{{meetup}} empieza a las {{time}} en {{park}}",
+    "coHostInvite": "{{a}} te invitó a ser coanfitrión de {{meetup}}",
+    "meetupCommentOne": "{{a}} comentó en {{meetup}}",
+    "meetupCommentTwo": "{{a}} y {{b}} comentaron en {{meetup}}",
+    "meetupCommentMany_one": "{{a}}, {{b}} y {{count}} persona más comentaron en {{meetup}}",
+    "meetupCommentMany_other": "{{a}}, {{b}} y {{count}} personas más comentaron en {{meetup}}",
+    "meetupReply": "{{a}} te respondió en {{meetup}}",
+    "meetupMention": "{{a}} te mencionó en {{meetup}}",
+    "meetupHidden": "Los admins del park ocultaron {{meetup}} del {{date}}"
   },
   "feed": {
     "newPost": "Nueva publicación",
@@ -793,7 +809,8 @@
     "mentionTagged": "Etiquetado en esta publicación",
     "mentionCommented": "Comentó aquí",
     "mentionFollowing": "Lo sigues",
-    "mentionRegular": "Habitual en {{park}}"
+    "mentionRegular": "Habitual en {{park}}",
+    "mentionHost": "Anfitrión"
   },
   "clip": {
     "play": "Reproducir clip",
@@ -830,7 +847,9 @@
     "openSettings": "Abrir ajustes del teléfono",
     "askTitle": "Las notificaciones aún no están activadas",
     "askBody": "Entérate cuando alguien comenta, te etiqueta o saluda cerca de ti.",
-    "ask": "Activar notificaciones"
+    "ask": "Activar notificaciones",
+    "meetups": "Meetups",
+    "meetupsBody": "Cambios, cancelaciones y recordatorios de los meetups a los que vas"
   },
   "report": {
     "report": "Denunciar",
@@ -864,7 +883,10 @@
     "blockTooBody": "No veréis las publicaciones, comentarios ni perfiles del otro. No se le avisa.",
     "blockPerson": "Bloquear a @{{username}}",
     "done": "Listo",
-    "gone": "Esto ya no está disponible."
+    "gone": "Esto ya no está disponible.",
+    "titleMeetup": "Denunciar este meetup",
+    "meetupBy": "Meetup de @{{username}}",
+    "whoMeetup": "A @{{username}} no se le dice quién lo denunció. Lo revisan los admins de este park."
   },
   "moderation": {
     "reported": {
@@ -1139,7 +1161,15 @@
       "park_closed": "Park cerrado",
       "something_came_up": "Surgió algo",
       "other": "Otro motivo"
-    }
+    },
+    "hiddenTitle": "OCULTO POR LOS ADMINS DEL PARK",
+    "hiddenBody": "Solo sus anfitriones y los admins de este park pueden ver esta fecha.",
+    "remove": "Quitar",
+    "removeLabel": "Quitar a @{{username}} de Voy",
+    "removeTitle": "¿Quitar a @{{username}} de Voy?",
+    "removeBody": "No se le avisa. Una vez fuera de la lista no puede ver quién más va.",
+    "report": "Denunciar",
+    "reportComment": "Denunciar el comentario de @{{username}}"
   },
   "meetupCompose": {
     "newTitle": "Nuevo",
@@ -1233,5 +1263,66 @@
     "linked": "Del meetup del {{day}}",
     "note": "Ibas a ir a {{meetup}} aquí. Al vincularlo, este post sale en el meetup.",
     "linkedNote": "Este post sale en {{meetup}}. Toca para quitarlo."
+  },
+  "meetupMenu": {
+    "open": "Opciones del meetup",
+    "yourMeetup": "Tu meetup",
+    "title": "Meetup",
+    "edit": "Editar meetup",
+    "coHosts": "Coanfitriones",
+    "cancel": "Cancelar meetup",
+    "cancelDetail": "Sigue en la página del park, tachado",
+    "delete": "Borrar meetup",
+    "deleteDetail": "Lo quita del todo. Solo hasta que alguien más vaya o empiece.",
+    "report": "Denunciar meetup",
+    "hide": "Ocultar esta fecha",
+    "hideDetail": "Solo la verán sus anfitriones y los admins del park",
+    "unhide": "Volver a mostrar esta fecha",
+    "unhideDetail": "Quienes podían verla la verán otra vez",
+    "deleteTitle": "¿Borrar este meetup?",
+    "deleteBody": "Se quita del todo, como si nunca lo hubieras publicado. Úsalo para errores, como el park o el día equivocado.",
+    "deleteNote": "Cuando alguien más diga que va, o empiece, solo podrás cancelarlo.",
+    "keepIt": "Dejarlo",
+    "deleteFailed": "No se pudo borrar",
+    "deleteFailedBody": "Puede que alguien acabe de decir que va. Todavía puedes cancelarlo.",
+    "hideTitle": "¿Ocultar esta fecha?",
+    "hideBody": "Solo la verán sus anfitriones y los admins de este park. Los anfitriones sabrán que se ocultó."
+  },
+  "meetupCancel": {
+    "title": "Cancelar meetup",
+    "whichDates": "QUÉ FECHAS",
+    "thisDate": "Esta fecha · {{date}}",
+    "wholeSeries": "Toda la serie",
+    "wholeSeriesDetail": "La termina. Las fechas pasadas se quedan.",
+    "why": "POR QUÉ",
+    "note": "NOTA (OPCIONAL)",
+    "notePlaceholder": "El bowl está inundado. Nos vemos la semana que viene",
+    "footnote_one": "La {{count}} persona que va recibe una notificación. Sigue en la página del park, tachado, con tu motivo.",
+    "footnote_other": "Las {{count}} personas que van reciben una notificación. Sigue en la página del park, tachado, con tu motivo.",
+    "footnoteNobody": "Sigue en la página del park, tachado, con tu motivo.",
+    "confirmSeries": "Terminar la serie",
+    "confirmDate": "Cancelar el {{day}}"
+  },
+  "coHosts": {
+    "body": "Los coanfitriones pueden editar, cancelar fechas y quitar gente de Voy. Aceptan antes de aparecer.",
+    "invited": "Invitado, aún no ha respondido",
+    "none": "Aún no hay coanfitriones.",
+    "invite": "Invitar coanfitriones",
+    "remove": "Quitar",
+    "withdraw": "Retirar",
+    "removeTitle": "¿Quitar a @{{username}}?",
+    "removeBody": "Deja de ser coanfitrión de este meetup. No se le avisa.",
+    "inviteFailed": "No se pudieron enviar las invitaciones. Un meetup puede tener hasta 10 coanfitriones."
+  },
+  "meetupEdit": {
+    "title": "Editar meetup",
+    "save": "Guardar",
+    "footer": "Quienes van se enteran de los cambios de día, hora o park.",
+    "scopeTitle": "¿Qué fechas cambias?",
+    "scopeBody": "Este meetup se repite.",
+    "thisDate": "Esta fecha",
+    "allUpcoming": "Todas las próximas",
+    "failed": "No se pudieron guardar los cambios",
+    "seasonsPark": "El park de este meetup sale de sus temporadas, así que cambia el park solo para esta fecha."
   }
 }

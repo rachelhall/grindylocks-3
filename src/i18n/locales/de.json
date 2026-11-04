@@ -389,7 +389,23 @@
     "warning": "Eine Verwarnung von den Admins",
     "suspension": "Du bist gesperrt",
     "roleVacatedPark": "Die Rolle von {{a}} als {{role}} in {{park}} ist beendet. Such jemand Neues aus.",
-    "roleVacated": "Die Rolle von {{a}} als {{role}} ist beendet. Such jemand Neues aus."
+    "roleVacated": "Die Rolle von {{a}} als {{role}} ist beendet. Such jemand Neues aus.",
+    "meetupGoingOne": "{{a}} kommt am {{when}} zu {{park}}",
+    "meetupGoingTwo": "{{a}} und {{b}} kommen am {{when}} zu {{park}}",
+    "meetupGoingMany_one": "{{a}} und {{count}} weitere Person kommen am {{when}} zu {{park}}",
+    "meetupGoingMany_other": "{{a}} und {{count}} weitere kommen am {{when}} zu {{park}}",
+    "meetupChanged": "{{meetup}} hat sich geändert: jetzt {{when}} im {{park}}",
+    "meetupCancelled": "{{meetup}} am {{date}} ist abgesagt: {{reason}}",
+    "meetupEnded": "{{meetup}} ist beendet: {{reason}}",
+    "meetupReminder": "{{meetup}} beginnt um {{time}} im {{park}}",
+    "coHostInvite": "{{a}} hat dich eingeladen, {{meetup}} mitzuhosten",
+    "meetupCommentOne": "{{a}} hat {{meetup}} kommentiert",
+    "meetupCommentTwo": "{{a}} und {{b}} haben {{meetup}} kommentiert",
+    "meetupCommentMany_one": "{{a}}, {{b}} und {{count}} weitere Person haben {{meetup}} kommentiert",
+    "meetupCommentMany_other": "{{a}}, {{b}} und {{count}} weitere haben {{meetup}} kommentiert",
+    "meetupReply": "{{a}} hat dir bei {{meetup}} geantwortet",
+    "meetupMention": "{{a}} hat dich bei {{meetup}} erwähnt",
+    "meetupHidden": "Park-Admins haben {{meetup}} am {{date}} ausgeblendet"
   },
   "feed": {
     "newPost": "Neuer Beitrag",
@@ -793,7 +809,8 @@
     "mentionTagged": "In diesem Post markiert",
     "mentionCommented": "Hat hier kommentiert",
     "mentionFollowing": "Du folgst",
-    "mentionRegular": "Stammgast in {{park}}"
+    "mentionRegular": "Stammgast in {{park}}",
+    "mentionHost": "Host"
   },
   "clip": {
     "play": "Clip abspielen",
@@ -830,7 +847,9 @@
     "openSettings": "Handy-Einstellungen öffnen",
     "askTitle": "Mitteilungen sind noch nicht an",
     "askBody": "Erfahre es, wenn jemand kommentiert, dich markiert oder in der Nähe hallo sagt.",
-    "ask": "Mitteilungen einschalten"
+    "ask": "Mitteilungen einschalten",
+    "meetups": "Meetups",
+    "meetupsBody": "Änderungen, Absagen und Erinnerungen für Meetups, zu denen du kommst"
   },
   "report": {
     "report": "Melden",
@@ -864,7 +883,10 @@
     "blockTooBody": "Ihr seht gegenseitig keine Posts, Kommentare oder Profile mehr. Die Person wird nicht benachrichtigt.",
     "blockPerson": "@{{username}} blockieren",
     "done": "Fertig",
-    "gone": "Das ist nicht mehr verfügbar."
+    "gone": "Das ist nicht mehr verfügbar.",
+    "titleMeetup": "Dieses Meetup melden",
+    "meetupBy": "Meetup von @{{username}}",
+    "whoMeetup": "@{{username}} erfährt nicht, wer es gemeldet hat. Die Admins dieses Parks prüfen es."
   },
   "moderation": {
     "reported": {
@@ -1139,7 +1161,15 @@
       "park_closed": "Park geschlossen",
       "something_came_up": "Etwas ist dazwischengekommen",
       "other": "Anderer Grund"
-    }
+    },
+    "hiddenTitle": "VON PARK-ADMINS AUSGEBLENDET",
+    "hiddenBody": "Nur die Hosts und die Admins dieses Parks sehen diesen Termin.",
+    "remove": "Entfernen",
+    "removeLabel": "@{{username}} von Ich komme entfernen",
+    "removeTitle": "@{{username}} von Ich komme entfernen?",
+    "removeBody": "Sie erfahren es nicht. Ohne Platz auf der Liste sehen sie nicht mehr, wer sonst kommt.",
+    "report": "Melden",
+    "reportComment": "Kommentar von @{{username}} melden"
   },
   "meetupCompose": {
     "newTitle": "Neu",
@@ -1233,5 +1263,66 @@
     "linked": "Vom Meetup am {{day}}",
     "note": "Du wolltest hier zu {{meetup}}. Verknüpft erscheint der Post beim Meetup.",
     "linkedNote": "Der Post erscheint bei {{meetup}}. Zum Entfernen tippen."
+  },
+  "meetupMenu": {
+    "open": "Meetup-Optionen",
+    "yourMeetup": "Dein Meetup",
+    "title": "Meetup",
+    "edit": "Meetup bearbeiten",
+    "coHosts": "Co-Hosts",
+    "cancel": "Meetup absagen",
+    "cancelDetail": "Bleibt auf der Parkseite, durchgestrichen",
+    "delete": "Meetup löschen",
+    "deleteDetail": "Entfernt es ganz. Nur bis jemand anderes kommt oder es anfängt.",
+    "report": "Meetup melden",
+    "hide": "Diesen Termin ausblenden",
+    "hideDetail": "Nur die Hosts und die Park-Admins sehen ihn",
+    "unhide": "Diesen Termin wieder zeigen",
+    "unhideDetail": "Alle, die ihn sehen konnten, sehen ihn wieder",
+    "deleteTitle": "Dieses Meetup löschen?",
+    "deleteBody": "Es wird ganz entfernt, als hättest du es nie gepostet. Für Fehler, etwa den falschen Park oder Tag.",
+    "deleteNote": "Sobald jemand anderes zusagt oder es anfängt, kannst du es nur noch absagen.",
+    "keepIt": "Behalten",
+    "deleteFailed": "Löschen hat nicht geklappt",
+    "deleteFailedBody": "Vielleicht hat gerade jemand zugesagt. Absagen kannst du es noch.",
+    "hideTitle": "Diesen Termin ausblenden?",
+    "hideBody": "Nur die Hosts und die Admins dieses Parks sehen ihn. Die Hosts erfahren, dass er ausgeblendet wurde."
+  },
+  "meetupCancel": {
+    "title": "Meetup absagen",
+    "whichDates": "WELCHE TERMINE",
+    "thisDate": "Dieser Termin · {{date}}",
+    "wholeSeries": "Die ganze Reihe",
+    "wholeSeriesDetail": "Beendet sie. Vergangene Termine bleiben.",
+    "why": "WARUM",
+    "note": "NOTIZ (OPTIONAL)",
+    "notePlaceholder": "Die Bowl ist geflutet. Bis nächste Woche",
+    "footnote_one": "Die {{count}} Person, die kommt, bekommt eine Push-Nachricht. Es bleibt auf der Parkseite, durchgestrichen, mit deinem Grund.",
+    "footnote_other": "Die {{count}} Leute, die kommen, bekommen eine Push-Nachricht. Es bleibt auf der Parkseite, durchgestrichen, mit deinem Grund.",
+    "footnoteNobody": "Es bleibt auf der Parkseite, durchgestrichen, mit deinem Grund.",
+    "confirmSeries": "Reihe beenden",
+    "confirmDate": "{{day}} absagen"
+  },
+  "coHosts": {
+    "body": "Co-Hosts können bearbeiten, Termine absagen und Leute von Ich komme entfernen. Sie sagen zu, bevor sie erscheinen.",
+    "invited": "Eingeladen, noch keine Antwort",
+    "none": "Noch keine Co-Hosts.",
+    "invite": "Co-Hosts einladen",
+    "remove": "Entfernen",
+    "withdraw": "Zurückziehen",
+    "removeTitle": "@{{username}} entfernen?",
+    "removeBody": "Sie sind dann kein Co-Host dieses Meetups mehr. Sie erfahren es nicht.",
+    "inviteFailed": "Die Einladungen konnten nicht gesendet werden. Ein Meetup kann bis zu 10 Co-Hosts haben."
+  },
+  "meetupEdit": {
+    "title": "Meetup bearbeiten",
+    "save": "Speichern",
+    "footer": "Wer kommt, erfährt von Änderungen an Tag, Uhrzeit oder Park.",
+    "scopeTitle": "Welche Termine ändern?",
+    "scopeBody": "Dieses Meetup wiederholt sich.",
+    "thisDate": "Diesen Termin",
+    "allUpcoming": "Alle kommenden",
+    "failed": "Deine Änderungen konnten nicht gespeichert werden",
+    "seasonsPark": "Der Park dieses Meetups kommt aus seinen Saisons. Ändere den Park also nur für diesen Termin."
   }
 }

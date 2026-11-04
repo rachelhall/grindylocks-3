@@ -58,7 +58,7 @@ export type Decision = "dismiss" | "keep_hidden" | "warn" | "suspend" | "escalat
 
 /** Acts on every open report about one post, comment or person. */
 export async function moderate(input: {
-  target: "post" | "comment" | "person";
+  target: "post" | "comment" | "person" | "meetup" | "meetup_comment";
   id: string;
   decision: Decision;
   message?: string;

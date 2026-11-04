@@ -173,7 +173,17 @@ export type NotificationKind =
   | 'comment_removed'
   | 'warning'
   | 'suspension'
-  | 'role_vacated';
+  | 'role_vacated'
+  // Meetups (PR 5). Going and comments on your meetup are grouped per date.
+  | 'meetup_going'
+  | 'meetup_changed'
+  | 'meetup_cancelled'
+  | 'meetup_reminder'
+  | 'co_host_invite'
+  | 'meetup_comment'
+  | 'meetup_reply'
+  | 'meetup_mention'
+  | 'meetup_hidden';
 
 export type NotificationPerson = { id: string; username: string | null; avatarPath: string | null };
 
@@ -198,6 +208,10 @@ export type AppNotification = {
   park: { slug: string; name: string } | null;
   metroName: string | null;
   unread: boolean;
+  /** Meetup rows: the date (on the park's clock) and its headline (title or line; null falls back to the park). */
+  meetup: { id: string; startsAt: string; timeZone: string | null; title: string | null } | null;
+  /** meetup_changed: what changed ("time", "park"); meetup_cancelled: the reason, ":series" when the series ended. */
+  detail: string | null;
 };
 
 const KINDS = new Set<NotificationKind>([
@@ -216,6 +230,15 @@ const KINDS = new Set<NotificationKind>([
   'warning',
   'suspension',
   'role_vacated',
+  'meetup_going',
+  'meetup_changed',
+  'meetup_cancelled',
+  'meetup_reminder',
+  'co_host_invite',
+  'meetup_comment',
+  'meetup_reply',
+  'meetup_mention',
+  'meetup_hidden',
 ]);
 
 export function useNotifications(userId: string | undefined) {
@@ -240,6 +263,11 @@ export function useNotifications(userId: string | undefined) {
           park: n.park_slug && n.park_name ? { slug: n.park_slug, name: n.park_name } : null,
           metroName: n.metro_name,
           unread: n.unread,
+          meetup:
+            n.event_id && n.event_starts_at
+              ? { id: n.event_id, startsAt: n.event_starts_at, timeZone: n.event_timezone, title: n.event_title }
+              : null,
+          detail: n.detail,
         }));
     },
     enabled: Boolean(userId),

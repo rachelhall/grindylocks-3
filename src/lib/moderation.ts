@@ -3,7 +3,8 @@
  *
  * Every rule lives in the database (migration `moderation`); the app only
  * calls its functions with the member's own session:
- * - Members report posts, comments and people (file_report) and wrong park
+ * - Members report posts, comments, people, meetups and meetup comments
+ *   (file_report; meetups since PR 5, routed through the meetup's park) and wrong park
  *   info (report_park_info, with an optional photo of the sign in the
  *   private report-photos bucket). A repeat report is quietly accepted.
  * - A role holder whose post menu opens on a post with open reports they
@@ -32,7 +33,10 @@ export type ParkField = Enums['park_field'];
 export type ReportTarget =
   | { kind: 'post'; id: string; personId: string; username: string; parkName: string | null }
   | { kind: 'comment'; id: string; personId: string; username: string }
-  | { kind: 'person'; id: string; personId: string; username: string };
+  | { kind: 'person'; id: string; personId: string; username: string }
+  /** A meetup date: `personId` and `username` are its host; `parkName` where it's routed. */
+  | { kind: 'meetup'; id: string; personId: string; username: string; parkName: string | null }
+  | { kind: 'meetup_comment'; id: string; personId: string; username: string; parkName: string | null };
 
 /** Same limit as the database. */
 export const MAX_REPORT_DETAILS = 500;
@@ -58,6 +62,8 @@ export function useFileReport() {
         post: target.kind === 'post' ? target.id : undefined,
         comment: target.kind === 'comment' ? target.id : undefined,
         person: target.kind === 'person' ? target.id : undefined,
+        meetup: target.kind === 'meetup' ? target.id : undefined,
+        meetup_comment: target.kind === 'meetup_comment' ? target.id : undefined,
         reason,
         details: details.trim() || undefined,
       });

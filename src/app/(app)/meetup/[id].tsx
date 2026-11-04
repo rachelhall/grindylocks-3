@@ -18,9 +18,11 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoingList, GoingSheet, MeetupCommentComposer, MeetupComments, type MeetupReply } from '@/components/meetup';
+import { CancelMeetupSheet, CoHostsSheet, confirmDeleteMeetup, MeetupMenu } from '@/components/meetup-manage';
 import { HalftoneGround, PHOTOCOPY } from '@/components/park-header';
 import { MasonryGrid } from '@/components/profile';
 import { SafeAreaView } from '@/components/safe-area';
+import { useReportSheet } from '@/components/safety';
 import { BackButton, Button, CheckBox, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { formatClock, localNow } from '@/lib/hours';
@@ -28,14 +30,21 @@ import {
   clocksDiffer,
   meetupHeadline,
   repeatLabel,
+  useCanDeleteMeetup,
+  useCanHideMeetup,
   useCoverUrl,
+  useDeleteMeetup,
   useGoing,
+  useHideMeetup,
   useMeetup,
   useMeetupCard,
   useMyHostRow,
+  useRemoveFromGoing,
   useRespondCoHost,
   useSeriesFollow,
 } from '@/lib/meetups';
+import { useMyProfile } from '@/lib/profiles';
+import { Sentry } from '@/lib/sentry';
 import { toGridPost, useMeetupPosts } from '@/lib/posts';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
@@ -48,6 +57,10 @@ import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme
  * way to "12 went" and the posts linked to it ("From this session") in the
  * masonry grid. Opened with `going=1` (the I'm going button on a card), it
  * opens the Going sheet straight away.
+ *
+ * The ⋯ button (PR 5) opens the host menu (Edit, Co-hosts, Cancel, Delete)
+ * for hosts and co-hosts, Report for everyone else, and Hide this date for
+ * the park's admins. Hosts can take someone off Going from the list.
  */
 export default function MeetupScreen() {
   const { id, going: openGoing } = useLocalSearchParams<{ id: string; going?: string }>();
@@ -64,7 +77,18 @@ export default function MeetupScreen() {
   const hostRow = useMyHostRow(meetup?.series_id, myId);
   const respond = useRespondCoHost(meetup?.series_id);
   const cover = useCoverUrl(meetup?.cover_path);
+  const { data: myProfile } = useMyProfile(myId);
   const [goingOpen, setGoingOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [coHostsOpen, setCoHostsOpen] = useState(false);
+  const mainHost = Boolean(meetup && myId && meetup.series.host_id === myId);
+  const canDelete = useCanDeleteMeetup(id, mainHost && menuOpen);
+  const canHide = useCanHideMeetup(id, (myProfile?.roles.length ?? 0) > 0);
+  const remove = useDeleteMeetup(id);
+  const hide = useHideMeetup(id);
+  const removeGoing = useRemoveFromGoing(id);
+  const report = useReportSheet();
   const [replyTo, setReplyTo] = useState<MeetupReply | null>(null);
   const inputRef = useRef<TextInput>(null);
   // When the page opened; enough to tell whether this date is over.
@@ -144,6 +168,48 @@ export default function MeetupScreen() {
   const linkedPosts = linked.data?.pages.flat() ?? [];
   const linkedCount = counts.data?.linked_post_count ?? linkedPosts.length;
 
+  const hosting = iHost || Boolean(isHost);
+  const dateLabel = new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start);
+  const dayName = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: tz ?? undefined }).format(start);
+  const hostName = meetup.series.host_id === myId ? (myProfile?.username ?? '') : (going.data?.people.find((p) => p.role === 'host')?.username ?? '');
+
+  const deleteIt = () =>
+    confirmDeleteMeetup(t, () =>
+      remove.mutate(undefined, {
+        onSuccess: () => router.back(),
+        onError: (err) => {
+          Sentry.captureException(err);
+          Alert.alert(t('meetupMenu.deleteFailed'), t('meetupMenu.deleteFailedBody'));
+        },
+      }),
+    );
+
+  const setHidden = (next: boolean) => {
+    const go = () =>
+      hide.mutate(next, {
+        onSuccess: () => void refetch(),
+        onError: (err) => {
+          Sentry.captureException(err);
+          Alert.alert(t('errors.generic'));
+        },
+      });
+    if (!next) return go();
+    Alert.alert(t('meetupMenu.hideTitle'), t('meetupMenu.hideBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('meetupMenu.hide'), style: 'destructive', onPress: go },
+    ]);
+  };
+
+  const takeOff = (personId: string, username: string | null) =>
+    Alert.alert(t('meetup.removeTitle', { username: username ?? '' }), t('meetup.removeBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('meetup.remove'),
+        style: 'destructive',
+        onPress: () => removeGoing.mutate(personId, { onError: () => Alert.alert(t('errors.generic')) }),
+      },
+    ]);
+
   const answer = (accept: boolean) =>
     respond.mutate(accept, {
       onSuccess: () => {
@@ -170,14 +236,26 @@ export default function MeetupScreen() {
               // The halftone shader paints its own ink, so it's only for meetups without a cover.
               <HalftoneGround />
             )}
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('common.back')}
-              onPress={() => router.back()}
-              style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
-            >
-              <Icon name="back" color={brand.ink} size={22} />
-            </Pressable>
+            <View style={styles.headerButtons}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('common.back')}
+                onPress={() => router.back()}
+                style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
+              >
+                <Icon name="back" color={brand.ink} size={22} />
+              </Pressable>
+              {myId ? (
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('meetupMenu.open')}
+                  onPress={() => setMenuOpen(true)}
+                  style={({ pressed }) => [styles.headerButton, pressed && styles.pressed]}
+                >
+                  <Icon name="more" color={brand.ink} size={22} />
+                </Pressable>
+              ) : null}
+            </View>
             <View style={styles.headerText}>
               <View style={[styles.tape, { backgroundColor: brand.pink }]}>
                 <Text variant="label" style={{ color: brand.ink }}>
@@ -198,6 +276,17 @@ export default function MeetupScreen() {
               </Text>
             </View>
           </View>
+
+          {meetup.hidden_at ? (
+            <View style={[styles.block, styles.cancelled, { borderColor: c.border }]}>
+              <Text variant="label" color="textSecondary">
+                {t('meetup.hiddenTitle')}
+              </Text>
+              <Text variant="bodySm" color="textSecondary">
+                {t('meetup.hiddenBody')}
+              </Text>
+            </View>
+          ) : null}
 
           {cancelled ? (
             <View style={[styles.block, styles.cancelled, { borderColor: c.statusClosed }]}>
@@ -341,7 +430,12 @@ export default function MeetupScreen() {
                   {t('errors.network')}
                 </Text>
               ) : (
-                <GoingList people={going.data?.people ?? []} unnamed={summary?.unnamed ?? 0} hostView={iHost} />
+                <GoingList
+                  people={going.data?.people ?? []}
+                  unnamed={summary?.unnamed ?? 0}
+                  hostView={iHost}
+                  onRemove={hosting && !over && !cancelled ? takeOff : undefined}
+                />
               )}
               {over && iHost ? (
                 <Text variant="caption" color="textSecondary">
@@ -375,6 +469,17 @@ export default function MeetupScreen() {
             eventId={meetup.id}
             userId={myId}
             canModerate={iHost}
+            onReport={(cm) =>
+              cm.author_id && cm.username
+                ? report.open({
+                    kind: 'meetup_comment',
+                    id: cm.id,
+                    personId: cm.author_id,
+                    username: cm.username,
+                    parkName: meetup.park.display_name,
+                  })
+                : undefined
+            }
             onReply={(target) => {
               setReplyTo(target);
               inputRef.current?.focus();
@@ -393,6 +498,43 @@ export default function MeetupScreen() {
         </View>
       </KeyboardAvoidingView>
 
+      <MeetupMenu
+        visible={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        hosting={hosting}
+        mainHost={mainHost}
+        canEdit={!over && !cancelled}
+        canDelete={Boolean(canDelete.data)}
+        canHide={Boolean(canHide.data)}
+        hidden={Boolean(meetup.hidden_at)}
+        onEdit={() => router.push({ pathname: '/new-meetup', params: { edit: meetup.id } })}
+        onCoHosts={() => setCoHostsOpen(true)}
+        onCancel={() => setCancelOpen(true)}
+        onDelete={deleteIt}
+        onReport={() =>
+          report.open({
+            kind: 'meetup',
+            id: meetup.id,
+            personId: meetup.series.host_id,
+            username: hostName,
+            parkName: meetup.park.display_name,
+          })
+        }
+        onHide={setHidden}
+      />
+      <CancelMeetupSheet
+        visible={cancelOpen}
+        onClose={() => setCancelOpen(false)}
+        eventId={meetup.id}
+        dateLabel={dateLabel}
+        dayName={dayName}
+        repeating={meetup.series.weekdays.length > 0}
+        mainHost={mainHost}
+        goingCount={Math.max(0, total - (going.data?.people.filter((p) => p.role !== 'going').length ?? 0))}
+        onCancelled={() => void refetch()}
+      />
+      {mainHost ? <CoHostsSheet visible={coHostsOpen} onClose={() => setCoHostsOpen(false)} seriesId={meetup.series_id} /> : null}
+      {report.sheet}
       <GoingSheet
         visible={goingOpen}
         eventId={meetup.id}
@@ -422,6 +564,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: space[4],
   },
+  headerButtons: { flexDirection: 'row', justifyContent: 'space-between' },
   headerButton: { width: size.tapMin, height: size.tapMin, backgroundColor: brand.paper, alignItems: 'center', justifyContent: 'center' },
   headerText: { gap: space[3], alignItems: 'flex-start' },
   tape: { paddingHorizontal: space[2], paddingVertical: 4, transform: [{ rotate: '-2deg' }] },

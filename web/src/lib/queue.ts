@@ -9,7 +9,7 @@ export type ParkField = Database["public"]["Enums"]["park_field"];
 export type Discipline = Database["public"]["Enums"]["discipline"];
 
 export type QueueKind = "report" | "park_info" | "obstacle";
-export type ReportTarget = "post" | "comment" | "person";
+export type ReportTarget = "post" | "comment" | "person" | "meetup" | "meetup_comment";
 export type QueueState = "sent_to_you" | "auto_hidden" | "hidden" | "open";
 
 /** One row of the queue, from moderation_queue(). */
@@ -18,13 +18,13 @@ export type QueueItem = {
   key: string;
   kind: QueueKind;
   id: string;
-  /** report: post, comment or person. park_info: the field. obstacle: its type. */
+  /** report: post, comment, person, meetup or meetup_comment. park_info: the field. obstacle: its type. */
   target: string;
   reportCount: number;
   reason: string | null;
   /** report: the reported person. park_info: the reporter. obstacle: who suggested it. */
   username: string | null;
-  /** obstacle: its suggested name. park_info about an obstacle: that obstacle's name. */
+  /** obstacle: its suggested name. park_info about an obstacle: that obstacle's name. A reported meetup: its title or line. */
   label: string | null;
   parkName: string | null;
   parkSlug: string | null;
@@ -55,7 +55,7 @@ export function parseItemKey(
   if (!key) return null;
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const parts = key.split(":");
-  if (parts[0] === "report" && parts.length === 3 && ["post", "comment", "person"].includes(parts[1]) && uuid.test(parts[2])) {
+  if (parts[0] === "report" && parts.length === 3 && ["post", "comment", "person", "meetup", "meetup_comment"].includes(parts[1]) && uuid.test(parts[2])) {
     return { kind: "report", target: parts[1] as ReportTarget, id: parts[2] };
   }
   if ((parts[0] === "park_info" || parts[0] === "obstacle") && parts.length === 2 && uuid.test(parts[1])) {
@@ -146,6 +146,21 @@ export type ReportDetail = {
     slides: Slide[];
   } | null;
   comment: { id: string; body: string; createdAt: string; deleted: boolean; author: string | null } | null;
+  /** A reported meetup date, or the date a reported meetup comment is on. */
+  meetup: {
+    id: string;
+    title: string | null;
+    note: string | null;
+    startsAt: string;
+    endsAt: string;
+    timezone: string | null;
+    status: string;
+    cancelReason: string | null;
+    hidden: boolean;
+    visibility: string;
+    host: string | null;
+    park: { name: string; slug: string; metro: string | null } | null;
+  } | null;
   reports: { id: string; reason: string; details: string | null; status: string; reporter: string | null; ago: string }[];
   person: {
     id: string;
@@ -184,6 +199,20 @@ type RawReportDetail = {
     }[];
   } | null;
   comment: { id: string; body: string; created_at: string; deleted: boolean; author: string | null } | null;
+  meetup?: {
+    id: string;
+    title: string | null;
+    note: string | null;
+    starts_at: string;
+    ends_at: string;
+    timezone: string | null;
+    status: string;
+    cancel_reason: string | null;
+    hidden: boolean;
+    visibility: string;
+    host: string | null;
+    park: { name: string; slug: string; metro: string | null } | null;
+  } | null;
   reports: { id: string; reason: string; details: string | null; status: string; created_at: string; reporter: string | null }[];
   person: {
     id: string;
@@ -256,6 +285,22 @@ export async function fetchReportDetail(target: ReportTarget, id: string): Promi
       deleted: raw.comment.deleted,
       author: raw.comment.author,
     },
+    meetup: raw.meetup
+      ? {
+          id: raw.meetup.id,
+          title: raw.meetup.title,
+          note: raw.meetup.note,
+          startsAt: raw.meetup.starts_at,
+          endsAt: raw.meetup.ends_at,
+          timezone: raw.meetup.timezone,
+          status: raw.meetup.status,
+          cancelReason: raw.meetup.cancel_reason,
+          hidden: raw.meetup.hidden,
+          visibility: raw.meetup.visibility,
+          host: raw.meetup.host,
+          park: raw.meetup.park,
+        }
+      : null,
     reports: raw.reports.map((r) => ({
       id: r.id,
       reason: r.reason,

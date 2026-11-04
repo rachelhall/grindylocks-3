@@ -36,6 +36,8 @@ export default function PushNotificationSettings() {
     { key: 'mentions', title: t('push.mentions'), body: t('push.mentionsBody') },
     { key: 'tags', title: t('push.tags'), body: t('push.tagsBody') },
     { key: 'filmer_credits', title: t('push.filmer'), body: t('push.filmerBody') },
+    // Changes, cancellations and the 1-hour reminder for meetups you're going to (PR 5).
+    { key: 'meetups', title: t('push.meetups'), body: t('push.meetupsBody') },
     { key: 'invites', title: t('push.invites'), body: t('push.invitesBody') },
     {
       key: 'someone_new',

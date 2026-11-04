@@ -110,6 +110,12 @@ const icons = {
   eye: { ios: 'eye', android: 'visibility' },
   eyeOff: { ios: 'eye.slash', android: 'visibility_off' },
   alarm: { ios: 'alarm', android: 'alarm' },
+  // Meetup changes (PR 5).
+  edit: { ios: 'pencil', android: 'edit' },
+  calendarOff: { ios: 'calendar.badge.minus', android: 'event_busy' },
+  flag: { ios: 'flag', android: 'flag' },
+  rain: { ios: 'cloud.rain', android: 'rainy' },
+  block: { ios: 'nosign', android: 'block' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

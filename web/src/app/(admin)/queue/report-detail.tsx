@@ -26,7 +26,24 @@ function headline(d: ReportDetail): string {
   const times = n > 1 ? ` ${n} times` : "";
   const who = d.person?.username ? `@${d.person.username}` : "This person";
   if (d.target === "person") return `${who} reported${times}${reason}`;
-  return `${d.target === "comment" ? "Comment" : "Post"} reported${times}${reason}`;
+  return `${noun(d)} reported${times}${reason}`;
+}
+
+/** "Post", "Comment", "Meetup" or "Meetup comment". */
+function noun(d: ReportDetail): string {
+  return d.target === "meetup" ? "Meetup" : d.target === "meetup_comment" ? "Meetup comment" : d.target === "comment" ? "Comment" : "Post";
+}
+
+/** "Thu, Nov 5, 7:00 PM" on the park's clock. */
+function meetupWhen(m: NonNullable<ReportDetail["meetup"]>): string {
+  return new Intl.DateTimeFormat("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: m.timezone ?? undefined,
+  }).format(new Date(m.startsAt));
 }
 
 function state(d: ReportDetail): string {
@@ -36,6 +53,7 @@ function state(d: ReportDetail): string {
   if (d.canBan && ownersOnly) return "sent_to_you";
   if (d.post?.status === "auto_hidden" && d.target === "post") return "auto_hidden";
   if (d.post?.status === "hidden" && d.target === "post") return "hidden";
+  if (d.meetup?.hidden && d.target === "meetup") return "hidden";
   return "open";
 }
 
@@ -55,7 +73,8 @@ function history(p: NonNullable<ReportDetail["person"]>): string {
 type Open = Decision | null;
 
 /**
- * A group of reports about one post, comment or person (mockups: Admin ·
+ * A group of reports about one post, comment, meetup date, meetup comment or
+ * person (mockups: Admin ·
  * queue, reported post; Admin · suspend, confirm). Every action opens a
  * confirmation first. City and park admins see Escalate where the owner sees
  * Ban, and escalate rather than warn or suspend someone who holds a role.
@@ -65,7 +84,7 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
   const [open, setOpen] = useState<Open>(null);
   const [message, setMessage] = useState("");
   const [days, setDays] = useState<(typeof DAYS)[number]>(7);
-  const [hide, setHide] = useState(d.post?.status !== "visible");
+  const [hide, setHide] = useState(d.target === "meetup" ? Boolean(d.meetup?.hidden) : d.post?.status !== "visible");
   const [confirmName, setConfirmName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
@@ -73,7 +92,9 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
   const st = state(d);
   const who = d.person?.username ? `@${d.person.username}` : "this person";
   const hasContent = d.target !== "person";
-  const thing = d.target === "comment" ? "comment" : "post";
+  const isComment = d.target === "comment" || d.target === "meetup_comment";
+  const thing = isComment ? "comment" : d.target === "meetup" ? "meetup" : "post";
+  const hiddenNow = d.target === "meetup" ? Boolean(d.meetup?.hidden) : d.target === "post" && d.post?.status !== "visible";
   const roleHolder = !d.canBan && !!d.person?.holdsRole;
 
   function start(decision: Decision) {
@@ -110,7 +131,7 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
       setOpen(null);
       const words: Record<Decision, string> = {
         dismiss: "Reports dismissed.",
-        keep_hidden: d.target === "comment" ? "Comment removed." : "Post kept hidden.",
+        keep_hidden: isComment ? "Comment removed." : d.target === "meetup" ? "Meetup date hidden." : "Post kept hidden.",
         warn: `Warning sent to ${who}.`,
         suspend: `${who} suspended for ${plural(days, "day")}.`,
         escalate: "Sent to Rachel.",
@@ -124,16 +145,19 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
     dismiss: {
       title: "Dismiss these reports?",
       description:
-        d.target === "post" && d.post?.status !== "visible"
-          ? "The post comes back for everyone. Nobody is told."
+        hiddenNow
+          ? `The ${thing} comes back for everyone. Nobody is told.`
           : "Nothing changes for anyone, and nobody is told.",
       confirm: "Dismiss",
       danger: false,
     },
     keep_hidden: {
-      title: d.target === "comment" ? "Remove this comment?" : "Keep this post hidden?",
-      description: `${who} is told their ${thing} was taken down, with your note if you write one.`,
-      confirm: d.target === "comment" ? "Remove comment" : "Keep hidden",
+      title: isComment ? "Remove this comment?" : d.target === "meetup" ? "Hide this meetup date?" : "Keep this post hidden?",
+      description:
+        d.target === "meetup"
+          ? "Only its hosts and this park's admins will see it. The hosts are told it was hidden, with your note if you write one."
+          : `${who} is told their ${thing} was taken down, with your note if you write one.`,
+      confirm: isComment ? "Remove comment" : d.target === "meetup" ? "Hide date" : "Keep hidden",
       danger: true,
     },
     warn: {
@@ -202,6 +226,30 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
         </article>
       )}
 
+      {d.meetup && d.target === "meetup" && (
+        <article className="flex flex-col gap-2 border-2 border-gl-border p-4">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex flex-col">
+              <span className="type-body-sm font-semibold">
+                {d.meetup.host ? `Hosted by @${d.meetup.host}` : "Host deleted their account"}
+              </span>
+              <span className="type-caption text-gl-text-secondary">
+                {meetupWhen(d.meetup)}
+                {d.meetup.park ? ` · ${d.meetup.park.name}` : ""}
+                {` · ${d.meetup.visibility === "public" ? "Public" : "Followers only"}`}
+                {d.meetup.status === "cancelled" ? " · cancelled" : ""}
+                {d.meetup.hidden ? " · hidden" : ""}
+              </span>
+            </div>
+            <a href={`grindylocks://meetup/${d.meetup.id}`} className="type-body-sm font-semibold text-gl-accent-text underline focus-ring">
+              Open in app
+            </a>
+          </div>
+          {d.meetup.title && <p className="type-body font-semibold">{d.meetup.title}</p>}
+          {d.meetup.note && <p className="type-body whitespace-pre-wrap">{d.meetup.note}</p>}
+        </article>
+      )}
+
       {d.comment && (
         <article className="flex flex-col gap-2 border-2 border-gl-border p-4">
           <span className="type-body-sm font-semibold">
@@ -209,6 +257,7 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
             <span className="font-normal text-gl-text-secondary">
               commented {shortDate(d.comment.createdAt)}
               {d.post?.park ? ` on a post at ${d.post.park.name}` : ""}
+              {d.meetup ? ` on ${d.meetup.title ?? d.meetup.note ?? "a meetup"}${d.meetup.park ? ` at ${d.meetup.park.name}` : ""}` : ""}
             </span>
           </span>
           {d.comment.deleted ? (
@@ -219,6 +268,11 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
           {d.post && (
             <a href={`grindylocks://post/${d.post.id}`} className="self-start type-body-sm font-semibold text-gl-accent-text underline focus-ring">
               Open the post in the app
+            </a>
+          )}
+          {d.meetup && (
+            <a href={`grindylocks://meetup/${d.meetup.id}`} className="self-start type-body-sm font-semibold text-gl-accent-text underline focus-ring">
+              Open the meetup in the app
             </a>
           )}
         </article>
@@ -253,11 +307,11 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => start("dismiss")}>
-            {d.target === "post" && d.post?.status !== "visible" ? "Dismiss and restore" : "Dismiss"}
+            {hiddenNow ? "Dismiss and restore" : "Dismiss"}
           </Button>
           {hasContent && (
             <Button variant="danger" onClick={() => start("keep_hidden")}>
-              {d.target === "comment" ? "Remove comment" : d.post?.status === "visible" ? "Hide post" : "Keep hidden"}
+              {isComment ? "Remove comment" : d.target === "meetup" ? (hiddenNow ? "Keep hidden" : "Hide date") : d.post?.status === "visible" ? "Hide post" : "Keep hidden"}
             </Button>
           )}
           <Button variant="outline" disabled={roleHolder} onClick={() => start("warn")}>
@@ -280,8 +334,12 @@ export function ReportDetailPane({ detail: d }: { detail: ReportDetail }) {
         <p className="type-caption text-gl-text-secondary">
           {roleHolder
             ? `${who} holds a role, so warnings and suspensions go through Rachel: escalate instead.`
-            : `Dismissing ${d.target === "post" && d.post?.status !== "visible" ? "brings the post back and " : ""}tells nobody. ${
-                hasContent ? `Keeping it hidden lets ${who} know their ${thing} was taken down.` : ""
+            : `Dismissing ${hiddenNow ? `brings the ${thing} back and ` : ""}tells nobody. ${
+                d.target === "meetup"
+                  ? "Hiding it tells its hosts."
+                  : hasContent
+                    ? `Keeping it hidden lets ${who} know their ${thing} was taken down.`
+                    : ""
               }`}
         </p>
       </div>
