@@ -671,9 +671,11 @@ insert into t_results select 'publishing keeps the caption''s page mentions (old
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"e2000000-0000-4000-8000-0000000000a2","role":"authenticated"}', true);
 update posts set caption = '909s from @themskates' where id = 'a2000000-0000-4000-8000-0000000000f1';
+insert into t_results select 'the author can''t read page mentions', count(*) = 0, count(*)::text from page_mentions;
+reset role;
 insert into t_results select 'editing a page out of the caption drops its mention', count(*) = 1, count(*)::text
   from page_mentions where post_id = 'a2000000-0000-4000-8000-0000000000f1';
-insert into t_results select 'the author can''t read page mentions', count(*) = 0, count(*)::text from page_mentions;
+set local role authenticated;
 
 -- The skater blocked Dead: their comment mentioning it isn't kept.
 select set_config('request.jwt.claims', '{"sub":"e2000000-0000-4000-8000-0000000000a1","role":"authenticated"}', true);
