@@ -180,12 +180,15 @@ export function ShopHours({ page }: { page: Page }) {
         {title.toUpperCase()}
       </Text>
       {lines.map((line, i) => {
-        const time =
+        // One line per opening, so a split day (11–2:30, 3:45–5) stacks
+        // instead of squeezing the day name.
+        const times =
           line.spans.length === 0
-            ? t('shop.closed')
-            : line.spans
-                .map((s) => t('park.timeRange', { start: formatClock(s.start, locale), end: formatClock(s.end, locale) }))
-                .join(', ');
+            ? [t('shop.closed')]
+            : line.spans.map((s) =>
+                t('park.timeRange', { start: formatClock(s.start, locale), end: formatClock(s.end, locale) }),
+              );
+        const timeStyle = usual || line.spans.length === 0 ? undefined : { fontFamily: fontFamily.sansSemiBold };
         return (
           <View
             key={line.from}
@@ -194,16 +197,21 @@ export function ShopHours({ page }: { page: Page }) {
               i < lines.length - 1 && { borderBottomWidth: stroke.hairline, borderBottomColor: c.borderSubtle },
             ]}
           >
-            <Text variant="body" color={usual ? 'textSecondary' : 'text'} style={styles.flex}>
+            <Text variant="body" color={usual ? 'textSecondary' : 'text'} numberOfLines={1} style={styles.hoursDay}>
               {days(line.from, line.to)}
             </Text>
-            <Text
-              variant="body"
-              color={usual ? 'textSecondary' : 'text'}
-              style={usual || line.spans.length === 0 ? undefined : { fontFamily: fontFamily.sansSemiBold }}
-            >
-              {time}
-            </Text>
+            <View style={styles.hoursTimes}>
+              {times.map((time) => (
+                <Text
+                  key={time}
+                  variant="body"
+                  color={usual ? 'textSecondary' : 'text'}
+                  style={[styles.hoursTime, timeStyle]}
+                >
+                  {time}
+                </Text>
+              ))}
+            </View>
           </View>
         );
       })}
@@ -267,7 +275,6 @@ export function BrandsCarried({ brands }: { brands: CarriedBrand[] }) {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
   pressed: { opacity: 0.75 },
   place: { paddingHorizontal: space[4], paddingTop: 14, gap: 10 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
@@ -282,6 +289,9 @@ const styles = StyleSheet.create({
   card: { marginHorizontal: space[4], marginTop: space[4], padding: space[3] },
   cardTitle: { paddingBottom: space[1] },
   hoursRow: { flexDirection: 'row', gap: space[3], paddingVertical: 6 },
+  hoursDay: { flexShrink: 0 },
+  hoursTimes: { flex: 1, alignItems: 'flex-end', gap: 2 },
+  hoursTime: { textAlign: 'right' },
   section: { paddingHorizontal: space[4], paddingTop: space[6], gap: 10 },
   brandChips: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
   brand: { minHeight: 36, borderWidth: stroke.rule, paddingHorizontal: 10, justifyContent: 'center' },
