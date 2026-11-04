@@ -25,6 +25,14 @@ type Claimed = {
   park_slug: string | null;
   metro_name: string | null;
   devices: { token: string; language: string }[];
+  /** Meetups: the date, on the park's clock. */
+  event_id: string | null;
+  event_starts_at: string | null;
+  event_timezone: string | null;
+  /** The meetup's title, or its line when it has none. */
+  event_title: string | null;
+  /** What changed ("time", "park", "time,park"), or the cancel reason (":series" when the rest of a series was cancelled). */
+  detail: string | null;
 };
 
 type ExpoMessage = {
@@ -49,6 +57,23 @@ function fill(template: string, values: Record<string, string>): string {
   return template.replace(/\{\{(\w+)\}\}/g, (_, k: string) => values[k] ?? '');
 }
 
+const LOCALES: Record<string, string> = { en: 'en-US', es: 'es', da: 'da-DK', de: 'de-DE' };
+
+/** "Thu, Nov 5, 7:00 PM" (or just "7:00 PM"), on the park's clock, in the reader's language. */
+function meetupTime(row: Claimed, language: string, withDay: boolean): string {
+  if (!row.event_starts_at) return '';
+  try {
+    return new Intl.DateTimeFormat(LOCALES[language] ?? 'en-US', {
+      timeZone: row.event_timezone ?? 'UTC',
+      ...(withDay ? { weekday: 'short', month: 'short', day: 'numeric' } : {}),
+      hour: 'numeric',
+      minute: '2-digit',
+    }).format(new Date(row.event_starts_at));
+  } catch {
+    return '';
+  }
+}
+
 /**
  * The sentence is the same one the bell shows. A comment, reply or mention
  * puts the sentence in the title and the comment itself in the body; a
@@ -60,6 +85,14 @@ function compose(row: Claimed, language: string): { title?: string; body: string
   const a = username ? `@${username}` : '';
   const metro = row.metro_name ?? '';
   const say = (key: keyof Sentences, extra: Record<string, string> = {}) => fill(s[key], { a, username, metro, ...extra });
+  const lang = language in strings ? language : 'en';
+  const meetup = row.event_title ?? row.park_name ?? '';
+  const park = row.park_name ?? '';
+  const when = meetupTime(row, lang, true);
+  const reasonOf = (r: string) => {
+    const key = `reason_${r}` as keyof Sentences;
+    return key in s ? s[key] : s.reason_other;
+  };
 
   switch (row.kind) {
     case 'comment':
@@ -83,6 +116,25 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       return { body: row.park_name ? say('visitingPark', { park: row.park_name }) : say('visiting') };
     case 'park_report_accepted':
       return row.park_name ? { body: say('parkFixLive', { park: row.park_name }) } : null;
+    case 'meetup_changed':
+      return meetup ? { title: say('meetupChanged', { meetup }), body: say('meetupChangedBody', { when, park }) } : null;
+    case 'meetup_cancelled': {
+      if (!meetup) return null;
+      const [reason, scope] = (row.detail ?? 'other').split(':');
+      return scope === 'series'
+        ? { title: say('meetupEnded', { meetup }), body: say('meetupEndedBody', { when, reason: reasonOf(reason) }) }
+        : { title: say('meetupCancelled', { meetup }), body: say('meetupCancelledBody', { when, reason: reasonOf(reason) }) };
+    }
+    case 'meetup_reminder':
+      return meetup
+        ? { title: say('meetupReminder', { meetup }), body: say('meetupReminderBody', { time: meetupTime(row, lang, false), park }) }
+        : null;
+    case 'meetup_comment':
+      return { title: say('meetupComment'), body: row.comment_body ?? '' };
+    case 'meetup_reply':
+      return { title: say('reply'), body: row.comment_body ?? '' };
+    case 'meetup_mention':
+      return { title: say('meetupMention'), body: row.comment_body ?? '' };
     default:
       return null;
   }
@@ -90,6 +142,10 @@ function compose(row: Claimed, language: string): { title?: string; body: string
 
 /** Where tapping the push goes. The app maps this onto its routes. */
 function destination(row: Claimed): Record<string, string> {
+  if (row.event_id) {
+    const comments = ['meetup_comment', 'meetup_reply', 'meetup_mention'].includes(row.kind);
+    return { open: 'meetup', id: row.event_id, ...(comments ? { comments: '1' } : {}) };
+  }
   if (row.post_id) {
     const comments = ['comment', 'reply', 'mention'].includes(row.kind);
     return { open: 'post', id: row.post_id, ...(comments ? { comments: '1' } : {}) };
