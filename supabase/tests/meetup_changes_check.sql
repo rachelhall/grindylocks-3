@@ -1743,6 +1743,7 @@ insert into t_results select 'commenter hears about the reply', count(*) = 1, co
 select set_config('request.jwt.claims', '{"sub":"d5000000-0000-4000-8000-0000000000a1","role":"authenticated"}', true);
 insert into event_comments (event_id, author_id, body)
 values ((select id from t_ids where name = 'fo'), 'd5000000-0000-4000-8000-0000000000a1', 'hey @mc_mentioned @mc_blocker @mc_goer');
+insert into t_ids select 'hcomment', id from event_comments where author_id = 'd5000000-0000-4000-8000-0000000000a1';
 reset role;
 insert into t_results select 'mentions only reach people who can see the meetup',
   (select count(*) from notifications where kind = 'meetup_comment' and event_id = (select id from t_ids where name = 'fo')) = 1
@@ -1843,7 +1844,8 @@ exception when others then
 end $$;
 select file_report(meetup => (select id from t_ids where name = 'pub'), reason => 'spam');
 select file_report(meetup => (select id from t_ids where name = 'pub'), reason => 'spam');
-select file_report(meetup_comment => (select id from event_comments where author_id = 'd5000000-0000-4000-8000-0000000000a1'), reason => 'inappropriate');
+select set_config('request.jwt.claims', '{"sub":"d5000000-0000-4000-8000-0000000000a3","role":"authenticated"}', true);
+select file_report(meetup_comment => (select id from t_ids where name = 'hcomment'), reason => 'inappropriate');
 reset role;
 insert into t_results select 'a repeat report changes nothing', count(*) = 1, count(*)::text
   from reports where event_id = (select id from t_ids where name = 'pub');
@@ -1867,7 +1869,7 @@ insert into t_results select 'the detail pane shows the meetup and its host',
   (moderation_report_detail('meetup', (select id from t_ids where name = 'pub')) -> 'meetup' ->> 'host') = 'mc_host', '';
 select moderate_reports('meetup', (select id from t_ids where name = 'pub'), 'keep_hidden', 'Not a real meetup');
 insert into t_results select 'kept hidden: the date is hidden', (select hidden_at is not null from events where id = (select id from t_ids where name = 'pub')), '';
-select moderate_reports('meetup_comment', (select id from event_comments where author_id = 'd5000000-0000-4000-8000-0000000000a1'), 'keep_hidden');
+select moderate_reports('meetup_comment', (select id from t_ids where name = 'hcomment'), 'keep_hidden');
 select set_config('request.jwt.claims', '{"sub":"d5000000-0000-4000-8000-0000000000a1","role":"authenticated"}', true);
 insert into t_results select 'host hears the date was hidden, with the note', count(*) = 1 and min(n.comment_body) = 'Not a real meetup',
   count(*)::text || ' ' || coalesce(min(n.comment_body), '')
