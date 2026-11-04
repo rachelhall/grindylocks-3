@@ -1504,6 +1504,43 @@
     "moreBrandsLabel_one": "Mostrar {{count}} marca más",
     "moreBrandsLabel_other": "Mostrar {{count}} marcas más"
   },
+  "shopFix": {
+    "menu": "Sugerir una corrección",
+    "menuBody": "Horario, dirección, marcas u otra cosa. Lo revisa el admin de la ciudad.",
+    "label": "{{name}} · NO OFICIAL",
+    "title": "¿Qué está mal?",
+    "field": {
+      "hours": "Horario",
+      "location_type": "Tienda física o no",
+      "location": "Dirección o pin",
+      "brands_carried": "Marcas que tiene",
+      "website": "Web",
+      "closed": "Cerrada para siempre",
+      "other": "Otra cosa"
+    },
+    "listedNow": "AHORA DICE",
+    "listedType": {
+      "storefront": "Tienda física, con pin en el mapa",
+      "by_appointment": "Con cita previa",
+      "online_only": "Solo online"
+    },
+    "listedHours": "El horario de la página",
+    "listedOpen": "Abierta",
+    "shouldBe": "Lo que debería decir",
+    "whatsWrong": "¿Qué está mal?",
+    "placeholder": {
+      "hours": "mar–vie 12–18, sáb 11–17",
+      "location": "Calle y número, ciudad",
+      "brands_carried": "Marcas que tienen, o que ya no tienen",
+      "website": "tienda.com",
+      "other": "Cuéntanos qué no cuadra"
+    },
+    "note": "Nota",
+    "who": "El admin de la ciudad lo revisa antes de cambiar nada. Te avisaremos cuando tu corrección esté publicada.",
+    "send": "Enviar corrección",
+    "sentTitle": "Gracias, está enviado",
+    "sentBody": "Te avisaremos cuando tu corrección esté publicada."
+  },
   "catalog": {
     "title": "Productos",
     "pastHidden_one": "{{count}} modelo antiguo oculto",

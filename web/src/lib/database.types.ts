@@ -807,10 +807,12 @@ export type Database = {
           message: string | null
           obstacle_id: string | null
           park_id: string | null
+          page_id: string | null
           park_info_report_id: string | null
           post_id: string | null
           report_ids: string[]
           snapshot: Json | null
+          subject_id: string | null
           suspended_until: string | null
           target_user_id: string | null
         }
@@ -825,10 +827,12 @@ export type Database = {
           message?: string | null
           obstacle_id?: string | null
           park_id?: string | null
+          page_id?: string | null
           park_info_report_id?: string | null
           post_id?: string | null
           report_ids?: string[]
           snapshot?: Json | null
+          subject_id?: string | null
           suspended_until?: string | null
           target_user_id?: string | null
         }
@@ -843,10 +847,12 @@ export type Database = {
           message?: string | null
           obstacle_id?: string | null
           park_id?: string | null
+          page_id?: string | null
           park_info_report_id?: string | null
           post_id?: string | null
           report_ids?: string[]
           snapshot?: Json | null
+          subject_id?: string | null
           suspended_until?: string | null
           target_user_id?: string | null
         }
@@ -1713,12 +1719,77 @@ export type Database = {
           },
         ]
       }
+      page_fix_reports: {
+        Row: {
+          created_at: string
+          escalated_at: string | null
+          field: Database["public"]["Enums"]["page_fix_field"]
+          id: string
+          note: string | null
+          page_id: string
+          reporter_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["review_status"]
+          value: string | null
+        }
+        Insert: {
+          created_at?: string
+          escalated_at?: string | null
+          field: Database["public"]["Enums"]["page_fix_field"]
+          id?: string
+          note?: string | null
+          page_id: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["review_status"]
+          value?: string | null
+        }
+        Update: {
+          created_at?: string
+          escalated_at?: string | null
+          field?: Database["public"]["Enums"]["page_fix_field"]
+          id?: string
+          note?: string | null
+          page_id?: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["review_status"]
+          value?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_fix_reports_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_fix_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "page_fix_reports_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_suggestions: {
         Row: {
           created_at: string
           id: string
           link: string | null
           name: string
+          outcome: string | null
           page_id: string | null
           reviewed_at: string | null
           reviewed_by: string | null
@@ -1732,6 +1803,7 @@ export type Database = {
           id?: string
           link?: string | null
           name: string
+          outcome?: string | null
           page_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1745,6 +1817,7 @@ export type Database = {
           id?: string
           link?: string | null
           name?: string
+          outcome?: string | null
           page_id?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
@@ -1803,6 +1876,7 @@ export type Database = {
           longitude: number | null
           main_language: string
           managed_at: string | null
+          needs_translations_at: string | null
           metro_area_id: string | null
           region: string | null
           roles: Database["public"]["Enums"]["page_role"][]
@@ -1842,6 +1916,7 @@ export type Database = {
           longitude?: number | null
           main_language?: string
           managed_at?: string | null
+          needs_translations_at?: string | null
           metro_area_id?: string | null
           region?: string | null
           roles: Database["public"]["Enums"]["page_role"][]
@@ -1881,6 +1956,7 @@ export type Database = {
           longitude?: number | null
           main_language?: string
           managed_at?: string | null
+          needs_translations_at?: string | null
           metro_area_id?: string | null
           region?: string | null
           roles?: Database["public"]["Enums"]["page_role"][]
@@ -3169,6 +3245,108 @@ export type Database = {
         }[]
       }
       withdraw_page_claim: { Args: { claim: string }; Returns: undefined }
+      admin_page_blocks: {
+        Args: { lifted?: boolean; page?: string }
+        Returns: {
+          blocked_by: string | null
+          blocked_by_role: string | null
+          created_at: string
+          flagged: boolean
+          id: string
+          lifted_at: string | null
+          lifted_by: string | null
+          page_city: string | null
+          page_country: string | null
+          page_handle: string
+          page_id: string
+          page_name: string
+          page_roles: string[]
+          skater: string | null
+          week_count: number
+        }[]
+      }
+      approve_page_suggestion: {
+        Args: {
+          address?: string
+          city?: string
+          country?: string
+          handle: string
+          latitude?: number
+          line: string
+          location_type?: Database["public"]["Enums"]["shop_location_type"]
+          longitude?: number
+          metro?: string
+          name: string
+          role: Database["public"]["Enums"]["page_role"]
+          suggestion: string
+          website?: string
+        }
+        Returns: string
+      }
+      catalog_export: {
+        Args: { page: string }
+        Returns: {
+          disciplines: string
+          edition: string | null
+          entry_type: string
+          family: string | null
+          first_year: string | null
+          includes_frame: string | null
+          model: string
+          notes: string | null
+          partner: string | null
+          part_type: string
+          pro_rider: string | null
+          product_id: string
+          sources: string | null
+          status: string
+          stock_parts: string | null
+        }[]
+      }
+      claim_review_detail: { Args: { claim: string }; Returns: Json }
+      claimable_pages: {
+        Args: { max_results?: number; q?: string }
+        Returns: {
+          city: string | null
+          country: string | null
+          display_name: string
+          followers: number
+          handle: string
+          id: string
+          roles: string[]
+        }[]
+      }
+      file_page_fix: {
+        Args: {
+          field: Database["public"]["Enums"]["page_fix_field"]
+          note?: string
+          page: string
+          value?: string
+        }
+        Returns: undefined
+      }
+      flagged_page_count: { Args: never; Returns: number }
+      lift_page_block: { Args: { block: string }; Returns: undefined }
+      page_block_detail: { Args: { block: string }; Returns: Json }
+      page_fix_review_detail: { Args: { report: string }; Returns: Json }
+      page_report_review_detail: { Args: { page: string }; Returns: Json }
+      page_suggestion_review_detail: { Args: { suggestion: string }; Returns: Json }
+      product_suggestion_review_detail: { Args: { suggestion: string }; Returns: Json }
+      resolve_page_reports: { Args: { actioned: boolean; page: string }; Returns: undefined }
+      review_page_fix: {
+        Args: { action: string; report: string; value?: string }
+        Returns: undefined
+      }
+      review_page_suggestion: {
+        Args: { action: string; page?: string; suggestion: string }
+        Returns: undefined
+      }
+      review_product_suggestion: {
+        Args: { action: string; part_type?: string; suggestion: string; value?: string }
+        Returns: string
+      }
+      set_claim_checked: { Args: { checked: boolean; claim: string }; Returns: undefined }
+      set_page_translated: { Args: { page: string }; Returns: undefined }
       before_user_created: { Args: { event: Json }; Returns: Json }
       can_delete_meetup: { Args: { event: string }; Returns: boolean }
       can_hide_meetup: { Args: { event: string }; Returns: boolean }
@@ -3487,6 +3665,12 @@ export type Database = {
           target: string
           username: string | null
           waiting_since: string
+          page_id: string | null
+          page_name: string | null
+          page_handle: string | null
+          page_roles: string[] | null
+          page_place: string | null
+          flag: boolean | null
         }[]
       }
       moderation_report_detail: {
@@ -4148,6 +4332,14 @@ export type Database = {
         | "street_plaza"
       page_claim_proof: "email" | "posted_code"
       page_claim_status: "draft" | "pending" | "approved" | "declined" | "withdrawn"
+      page_fix_field:
+        | "hours"
+        | "location_type"
+        | "location"
+        | "brands_carried"
+        | "website"
+        | "closed"
+        | "other"
       page_invite_kind: "team" | "ownership" | "claim"
       page_member_role: "staff" | "manager" | "owner"
       page_role: "brand" | "shop"
@@ -4411,6 +4603,15 @@ export const Constants = {
       ],
       page_claim_proof: ["email", "posted_code"],
       page_claim_status: ["draft", "pending", "approved", "declined", "withdrawn"],
+      page_fix_field: [
+        "hours",
+        "location_type",
+        "location",
+        "brands_carried",
+        "website",
+        "closed",
+        "other",
+      ],
       page_invite_kind: ["team", "ownership", "claim"],
       page_member_role: ["staff", "manager", "owner"],
       page_role: ["brand", "shop"],

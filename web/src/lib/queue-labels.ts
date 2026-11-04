@@ -4,6 +4,11 @@
 import { Constants, type Database, type Json } from "@/lib/database.types";
 
 type ObstacleType = Database["public"]["Enums"]["obstacle_type"];
+
+export type QueueTab = "all" | "reports" | "park-info" | "obstacles" | "claims" | "suggested-brands" | "product-suggestions";
+
+/** Every queue tab, for reading ?tab= on the server. Rachel's last three are hidden for other admins. */
+export const TAB_VALUES: QueueTab[] = ["all", "reports", "park-info", "obstacles", "claims", "suggested-brands", "product-suggestions"];
 type ParkField = Database["public"]["Enums"]["park_field"];
 
 export const reasonLabel: Record<string, string> = {

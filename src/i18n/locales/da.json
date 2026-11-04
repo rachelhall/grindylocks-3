@@ -1504,6 +1504,43 @@
     "moreBrandsLabel_one": "Vis {{count}} mærke mere",
     "moreBrandsLabel_other": "Vis {{count}} mærker mere"
   },
+  "shopFix": {
+    "menu": "Foreslå en rettelse",
+    "menuBody": "Åbningstider, adresse, mærker eller noget andet. Byens admin tjekker det.",
+    "label": "{{name}} · UOFFICIEL",
+    "title": "Hvad er forkert?",
+    "field": {
+      "hours": "Åbningstider",
+      "location_type": "Butik eller ej",
+      "location": "Adresse eller pin",
+      "brands_carried": "Mærker de har",
+      "website": "Hjemmeside",
+      "closed": "Lukket for altid",
+      "other": "Noget andet"
+    },
+    "listedNow": "STÅR NU",
+    "listedType": {
+      "storefront": "Butik, med pin på kortet",
+      "by_appointment": "Efter aftale",
+      "online_only": "Kun online"
+    },
+    "listedHours": "Åbningstiderne på siden",
+    "listedOpen": "Åben",
+    "shouldBe": "Hvad der burde stå",
+    "whatsWrong": "Hvad er forkert?",
+    "placeholder": {
+      "hours": "tir–fre 12–18, lør 11–17",
+      "location": "Gade og nummer, by",
+      "brands_carried": "Mærker de har, eller ikke har længere",
+      "website": "butik.dk",
+      "other": "Fortæl os, hvad der ikke passer"
+    },
+    "note": "Note",
+    "who": "Byens admin tjekker det, før noget ændres. Vi giver besked, når din rettelse er live.",
+    "send": "Send rettelse",
+    "sentTitle": "Tak, den er sendt",
+    "sentBody": "Vi giver besked, når din rettelse er live."
+  },
   "catalog": {
     "title": "Produkter",
     "pastHidden_one": "{{count}} tidligere model skjult",

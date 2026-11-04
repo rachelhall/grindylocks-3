@@ -32,6 +32,7 @@
   --color-gl-on-role: var(--gl-on-role);
   --color-gl-focus: var(--gl-focus);
   --color-gl-danger: var(--gl-danger);
+  --color-gl-warning: var(--gl-warning);
   --color-gl-on-danger: var(--gl-on-danger);
   --color-gl-overlay: var(--gl-overlay);
   --color-gl-ink: var(--gl-brand-ink);

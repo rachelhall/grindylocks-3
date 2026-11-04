@@ -378,6 +378,30 @@ export function useFilePageReport() {
   });
 }
 
+/** What a shop fix is about (Shop-Fix), in the mockup's order. */
+export type PageFixField = Enums['page_fix_field'];
+export const PAGE_FIX_FIELDS: PageFixField[] = ['hours', 'location_type', 'location', 'brands_carried', 'website', 'closed', 'other'];
+export const MAX_PAGE_FIX = 300;
+
+/**
+ * Suggest a fix on an unofficial shop. Like a park fix, nothing changes until
+ * the shop's city admin (or Rachel) checks it; the suggester hears when it's
+ * live. A repeat of an open fix for the same thing is quietly accepted.
+ */
+export function useFilePageFix() {
+  return useMutation({
+    mutationFn: async ({ pageId, field, value, note }: { pageId: string; field: PageFixField; value: string; note: string }) => {
+      const { error } = await supabase.rpc('file_page_fix', {
+        page: pageId,
+        field,
+        value: field === 'closed' ? undefined : value.trim() || undefined,
+        note: note.trim() || undefined,
+      });
+      if (error) throw error;
+    },
+  });
+}
+
 /** Same limits as the database. */
 export const MAX_SUGGEST_NAME = 60;
 export const MAX_SUGGEST_TEXT = 200;

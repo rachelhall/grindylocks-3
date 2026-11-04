@@ -8,7 +8,20 @@ export type ObstacleType = Database["public"]["Enums"]["obstacle_type"];
 export type ParkField = Database["public"]["Enums"]["park_field"];
 export type Discipline = Database["public"]["Enums"]["discipline"];
 
-export type QueueKind = "report" | "park_info" | "obstacle";
+export type QueueKind =
+  | "report"
+  | "park_info"
+  | "obstacle"
+  // Rachel only (brand and shop accounts, PR 6):
+  | "claim"
+  | "page_suggestion"
+  | "product_suggestion"
+  | "page_report"
+  // The shop's city admin, with Rachel as backup:
+  | "shop_fix";
+
+/** Every kind but reports has one row per thing, keyed by its own id. */
+const SIMPLE_KINDS: QueueKind[] = ["park_info", "obstacle", "claim", "page_suggestion", "product_suggestion", "page_report", "shop_fix"];
 export type ReportTarget = "post" | "comment" | "person" | "meetup" | "meetup_comment";
 export type QueueState = "sent_to_you" | "auto_hidden" | "hidden" | "open";
 
@@ -34,6 +47,14 @@ export type QueueItem = {
   latestAt: string;
   /** "2 h", "1 d", worked out on the server so it renders the same on both sides. */
   ago: string;
+  /**
+   * Brand and shop rows: the page (for a suggested brand, the closest existing
+   * one). flag: claim = the email's domain matches; page_suggestion = there's a
+   * possible match; product_suggestion = it can be applied from the queue;
+   * shop_fix = a city admin sent it on to Rachel.
+   */
+  page: { id: string; name: string; handle: string; roles: string[]; place: string | null } | null;
+  flag: boolean | null;
 };
 
 export function ago(iso: string, now = Date.now()): string {
@@ -51,15 +72,15 @@ export function itemKey(kind: QueueKind, target: string, id: string): string {
 /** Parses an item key from the URL; null if it isn't one. */
 export function parseItemKey(
   key: string | undefined,
-): { kind: "report"; target: ReportTarget; id: string } | { kind: "park_info" | "obstacle"; id: string } | null {
+): { kind: "report"; target: ReportTarget; id: string } | { kind: Exclude<QueueKind, "report">; id: string } | null {
   if (!key) return null;
   const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const parts = key.split(":");
   if (parts[0] === "report" && parts.length === 3 && ["post", "comment", "person", "meetup", "meetup_comment"].includes(parts[1]) && uuid.test(parts[2])) {
     return { kind: "report", target: parts[1] as ReportTarget, id: parts[2] };
   }
-  if ((parts[0] === "park_info" || parts[0] === "obstacle") && parts.length === 2 && uuid.test(parts[1])) {
-    return { kind: parts[0], id: parts[1] };
+  if (SIMPLE_KINDS.includes(parts[0] as QueueKind) && parts.length === 2 && uuid.test(parts[1])) {
+    return { kind: parts[0] as Exclude<QueueKind, "report">, id: parts[1] };
   }
   return null;
 }
@@ -90,6 +111,10 @@ export async function fetchQueue(metro?: string | null): Promise<QueueItem[]> {
     state: r.state as QueueState,
     latestAt: r.latest_at,
     ago: ago(r.latest_at, now),
+    page: r.page_id
+      ? { id: r.page_id, name: r.page_name ?? "", handle: r.page_handle ?? "", roles: r.page_roles ?? [], place: r.page_place }
+      : null,
+    flag: r.flag,
   }));
 }
 
