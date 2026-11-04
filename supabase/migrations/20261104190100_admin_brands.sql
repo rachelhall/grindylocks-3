@@ -621,6 +621,7 @@ declare
   product uuid;
   shown text;
   brand_disciplines discipline[];
+  part_disciplines discipline[];
 begin
   select * into s from product_suggestions where id = suggestion for update;
   if not found or s.status <> 'open' then
@@ -643,13 +644,13 @@ begin
       end if;
       -- The brand's own disciplines that this part type is for; else all of
       -- the part type's.
+      select t.disciplines into part_disciplines from part_types t where t.key = pt;
       select coalesce(array_agg(distinct d), '{}') into brand_disciplines
         from products p, unnest(p.disciplines) d
-       where p.page_id = s.page_id and d = any ((select t.disciplines from part_types t where t.key = pt));
+       where p.page_id = s.page_id and d = any (part_disciplines);
       insert into products (page_id, part_type, name, entry_type, disciplines, status, sort)
       values (s.page_id, pt, v, 'model',
-              case when cardinality(brand_disciplines) > 0 then brand_disciplines
-                   else (select t.disciplines from part_types t where t.key = pt) end,
+              case when cardinality(brand_disciplines) > 0 then brand_disciplines else part_disciplines end,
               'unknown',
               coalesce((select max(p.sort) + 1 from products p where p.page_id = s.page_id), 0))
       returning id into product;
