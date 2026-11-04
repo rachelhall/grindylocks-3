@@ -485,9 +485,8 @@ language plpgsql security definer
 set search_path = ''
 as $$
 begin
-  if tg_table_name = 'page_blocks' and new.lifted_at is not null then
-    return new;
-  end if;
+  -- Both tables have user_id and page_id; page_blocks fires on insert only,
+  -- when the block is new.
   delete from public.page_follows where user_id = new.user_id and page_id = new.page_id;
   return new;
 end $$;
