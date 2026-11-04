@@ -213,9 +213,9 @@
       "button": "Filters",
       "buttonOn": "Filters, {{count}} on",
       "title": "Filters",
-      "whoCanSkate": "WHO CAN SKATE",
+      "whoCanSkate": "WHO CAN SKATE · PARKS",
       "whoCanSkateHint": "Parks that allow any you pick.",
-      "setting": "SETTING",
+      "setting": "SETTING · PARKS",
       "settings": {
         "indoor": "Indoor",
         "covered": "Covered",
@@ -224,20 +224,33 @@
       "settingHint": "Parks with indoor and outdoor sections show for either.",
       "onlyShow": "ONLY SHOW",
       "openNow": "Open now",
-      "openNowHint": "By each park's hours, on its own clock",
+      "openNowHint": "Parks and shops, each on its own clock",
       "free": "Free",
       "lit": "Lit at night",
-      "litHint": "Lights are unknown for some parks, so they're hidden",
+      "litHint": "Parks only. Lights are unknown for some parks, so they're hidden",
       "clear": "Clear",
       "show_one": "Show {{count}} park",
       "show_other": "Show {{count}} parks",
-      "showLoading": "Counting parks…"
+      "showLoading": "Counting…",
+      "onTheMap": "ON THE MAP",
+      "showShops": "Show shops",
+      "showShopsHint": "Skate shops you can walk into",
+      "freeHint": "Parks only",
+      "parks_one": "{{count}} park",
+      "parks_other": "{{count}} parks",
+      "shops_one": "{{count}} shop",
+      "shops_other": "{{count}} shops",
+      "showBoth": "Show {{parks}} · {{shops}}"
     },
     "edge": {
       "label": "{{park}}, {{distance}} away, off the map",
       "labelNoDistance": "{{park}}, off the map",
       "hint": "Moves the map to this park"
-    }
+    },
+    "shopPin": "Shop: {{shop}}",
+    "shopPinSelected": "Shop: {{shop}}, selected",
+    "closeCard": "Close card",
+    "viewShop": "View shop"
   },
   "search": {
     "back": "Back to map",
@@ -318,7 +331,8 @@
     "nothingPostedBody": "Skated {{park}}? Tag it in your next post and it shows up here.",
     "postHere": "Post a clip here",
     "postHereToo": "Post a clip here too",
-    "morePosts": "More posts"
+    "morePosts": "More posts",
+    "runBy": "Run by {{name}}"
   },
   "disciplines": {
     "inline": "Inline",
@@ -1425,5 +1439,24 @@
     },
     "closed": "This shop has closed. Its page stays up as an archive, with its posts.",
     "logo": "{{name}} logo"
+  },
+  "shop": {
+    "type": {
+      "storefront": "Storefront",
+      "by_appointment": "By appointment",
+      "online_only": "Online only"
+    },
+    "directions": "Directions",
+    "hours": "Hours",
+    "usualHours": "Usual hours",
+    "hoursIn": "Hours · {{city}} time",
+    "usualHoursIn": "Usual hours · {{city}} time",
+    "closed": "Closed",
+    "dayRange": "{{from}}–{{to}}",
+    "brandsWeCarry": "Brands we carry",
+    "moreBrands_one": "+{{count}} more",
+    "moreBrands_other": "+{{count}} more",
+    "moreBrandsLabel_one": "Show {{count}} more brand",
+    "moreBrandsLabel_other": "Show {{count}} more brands"
   }
 }

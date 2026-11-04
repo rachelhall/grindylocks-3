@@ -7,8 +7,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import MapView, { Marker, type Region } from 'react-native-maps';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { EdgeTag, FilterButton, FilterSheet } from '@/components/map-filters';
+import { EdgeTag, FilterButton, type FilterCount, FilterSheet } from '@/components/map-filters';
+import { PageTile, StampTape } from '@/components/pages';
 import { IconButton, openDirections, SaveButton, StatusChip, useParkLine } from '@/components/parks';
+import { ClosedUntilChip } from '@/components/shop';
 import { Button, Icon } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
@@ -24,7 +26,15 @@ import {
   project,
   tagPosition,
 } from '@/lib/map-edge';
-import { type MapFilters, matchesFilters, needsFacets, NO_FILTERS, useParkFacets } from '@/lib/map-filters';
+import {
+  type MapFilters,
+  matchesFilters,
+  needsFacets,
+  NO_FILTERS,
+  shopMatchesFilters,
+  useParkFacets,
+} from '@/lib/map-filters';
+import { isOfficial, stampFor } from '@/lib/pages';
 import {
   type Bounds,
   busiestMetroId,
@@ -41,6 +51,7 @@ import {
   useSavedParks,
 } from '@/lib/parks';
 import { fresh, keys } from '@/lib/query';
+import { type ShopPin, shopOpenState, useShopsInBounds } from '@/lib/shops';
 import { fontFamily, size, space, stroke, Text, useColors, useColorSchemeName } from '@/theme';
 
 type LatLng = { latitude: number; longitude: number };
@@ -74,6 +85,11 @@ function farRegion(here: LatLng): Region {
  * The map: parks around you (or around your home city if location is off),
  * a search bar for cities and parks, and a preview card for the picked park.
  * Opening with ?metro=<id> (from city search) fits the map to that city.
+ *
+ * Shops (part A, PR 3; the Map-Shops mockup) show next to parks by default:
+ * the park pin's square, inverted (ink with a paper storefront), and their
+ * own preview card with View shop and Directions. Edge markers stay parks
+ * only.
  */
 export default function MapScreen() {
   const { t, i18n } = useTranslation();
@@ -92,6 +108,7 @@ export default function MapScreen() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [tagSizes, setTagSizes] = useState<Record<string, { width: number; height: number }>>({});
   const [selected, setSelected] = useState<ParkPin | null>(null);
+  const [selectedShop, setSelectedShop] = useState<ShopPin | null>(null);
   const [me, setMe] = useState<LatLng | null>(null);
   const [locationOn, setLocationOn] = useState(false);
   const [mapReady, setMapReady] = useState(false);
@@ -99,6 +116,19 @@ export default function MapScreen() {
   const [far, setFar] = useState<ParkPin | null>(null);
   const [farCardHeight, setFarCardHeight] = useState(180);
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // One preview card at a time: picking a park (from a pin, an edge marker,
+  // Go to closest or the first open) closes a shop's card.
+  const [lastSelected, setLastSelected] = useState(selected);
+  if (selected !== lastSelected) {
+    setLastSelected(selected);
+    if (selected) setSelectedShop(null);
+  }
+  const pickShop = (shop: ShopPin) => {
+    setSelected(null);
+    setSelectedShop(shop);
+  };
+  const cardOpen = selected !== null || selectedShop !== null;
 
   /* What's on screen -------------------------------------------------------- */
 
@@ -269,13 +299,22 @@ export default function MapScreen() {
   const passes = useCallback((p: ParkPin, f: MapFilters) => matchesFilters(p, facets?.get(p.id), f), [facets]);
   const pins = useMemo(() => inView.filter((p) => passes(p, filters)), [inView, passes, filters]);
 
-  // How many parks in view the sheet's draft would show; null while it's still working that out.
+  // Shops in view, fetched while they're shown (or the sheet is open to count them).
+  const shopsQuery = useShopsInBounds(session?.user.id, bounds, filters.showShops || filtersOpen);
+  const shopsInView = useMemo(() => shopsQuery.data ?? [], [shopsQuery.data]);
+  const shopPins = useMemo(() => shopsInView.filter((s) => shopMatchesFilters(s, filters)), [shopsInView, filters]);
+
+  // How many parks and shops in view the sheet's draft would show; null while it's still working that out.
   const countFor = useCallback(
-    (draft: MapFilters) => {
+    (draft: MapFilters): FilterCount => {
       if (needsFacets(draft) && (!facets || facetsLoading)) return null;
-      return inView.filter((p) => passes(p, draft)).length;
+      if (draft.showShops && shopsQuery.data === undefined) return null;
+      return {
+        parks: inView.filter((p) => passes(p, draft)).length,
+        shops: shopsInView.filter((s) => shopMatchesFilters(s, draft)).length,
+      };
     },
-    [facets, facetsLoading, inView, passes],
+    [facets, facetsLoading, inView, passes, shopsInView, shopsQuery.data],
   );
 
   function applyFilters(next: MapFilters) {
@@ -283,6 +322,7 @@ export default function MapScreen() {
     setFiltersOpen(false);
     // A picked park that no longer matches closes its card.
     if (selected && !matchesFilters(selected, facets?.get(selected.id), next)) setSelected(null);
+    if (selectedShop && !shopMatchesFilters(selectedShop, next)) setSelectedShop(null);
   }
 
   // The card needs hours and the metro's time zone for "open now". It's the
@@ -353,7 +393,7 @@ export default function MapScreen() {
       left: space[3],
       right: w - space[3],
       top: searchBottom + space[3],
-      bottom: h - (selected ? LOCATE_ABOVE_CARD : LOCATE_BOTTOM) - size.tapMin - space[3],
+      bottom: h - (cardOpen ? LOCATE_ABOVE_CARD : LOCATE_BOTTOM) - size.tapMin - space[3],
     };
     if (frame.right - frame.left < 120 || frame.bottom - frame.top < 120) return [];
     const mid = { x: w / 2, y: h / 2 };
@@ -373,7 +413,7 @@ export default function MapScreen() {
       placed.push({ park, ...box, angle: hit.angle, edge: hit.edge });
     }
     return placed;
-  }, [bounds, mapSize, middle, selected, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
+  }, [bounds, mapSize, middle, selected, cardOpen, showFar, nearCentre, passes, filters, tagSizes, searchBottom]);
 
   function goToEdgePark(park: ParkPin) {
     setSelected(park);
@@ -399,6 +439,14 @@ export default function MapScreen() {
 
   // Keep the selected pin on the map even when it's outside the last fetch.
   const shown = selected && !pins.some((p) => p.id === selected.id) ? [...pins, selected] : pins;
+  const shownShops =
+    selectedShop && !shopPins.some((s) => s.id === selectedShop.id) ? [...shopPins, selectedShop] : shopPins;
+
+  // The shop card: open now on the shop's own clock, and its distance from you.
+  const shopState = selectedShop ? shopOpenState(selectedShop) : null;
+  const shopDistance =
+    selectedShop && me ? formatDistance(distanceMeters(me, selectedShop), metric, i18n.language) : null;
+  const openShop = (shop: ShopPin) => router.push({ pathname: '/page/[handle]', params: { handle: shop.handle } });
 
   return (
     <View
@@ -413,7 +461,10 @@ export default function MapScreen() {
         onRegionChangeComplete={onRegionChangeComplete}
         // Tapping the map (not a pin) closes the preview card.
         onPress={(e) => {
-          if (e.nativeEvent.action !== 'marker-press') setSelected(null);
+          if (e.nativeEvent.action !== 'marker-press') {
+            setSelected(null);
+            setSelectedShop(null);
+          }
         }}
         showsUserLocation={locationOn}
         showsMyLocationButton={false}
@@ -448,6 +499,30 @@ export default function MapScreen() {
                   <Icon name="pin" color={c.text} size={18} />
                 </View>
               )}
+            </Marker>
+          );
+        })}
+        {shownShops.map((shop) => {
+          const isSelected = shop.id === selectedShop?.id;
+          return (
+            <Marker
+              key={`shop-${shop.id}-${isSelected ? 's' : 'n'}`}
+              coordinate={{ latitude: shop.latitude, longitude: shop.longitude }}
+              onPress={() => pickShop(shop)}
+              tracksViewChanges={false}
+              anchor={{ x: 0.5, y: 0.5 }}
+              zIndex={isSelected ? 2 : 1}
+              accessibilityLabel={
+                isSelected
+                  ? t('map.shopPinSelected', { shop: shop.displayName })
+                  : t('map.shopPin', { shop: shop.displayName })
+              }
+            >
+              <View style={[styles.shopRing, { borderColor: isSelected ? c.accent : 'transparent' }]}>
+                <View style={[styles.pin, { backgroundColor: c.mapPinOutline, borderColor: c.mapPinOutline }]}>
+                  <Icon name="storefront" color={c.surfaceRaised} size={18} />
+                </View>
+              </View>
             </Marker>
           );
         })}
@@ -507,7 +582,7 @@ export default function MapScreen() {
       <View
         style={[
           styles.locate,
-          { bottom: selected ? LOCATE_ABOVE_CARD : showFar ? space[3] + farCardHeight + space[3] : LOCATE_BOTTOM },
+          { bottom: cardOpen ? LOCATE_ABOVE_CARD : showFar ? space[3] + farCardHeight + space[3] : LOCATE_BOTTOM },
         ]}
       >
         <Pressable
@@ -588,6 +663,59 @@ export default function MapScreen() {
         </View>
       ) : null}
 
+      {/* Shop preview card */}
+      {selectedShop ? (
+        <View style={[styles.card, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => openShop(selectedShop)}
+            style={({ pressed }) => [styles.shopMain, pressed && styles.pressed]}
+          >
+            <PageTile page={selectedShop} />
+            <View style={styles.shopText}>
+              <Text variant="label" color="textSecondary" numberOfLines={1}>
+                {[t('page.shop'), selectedShop.city, shopDistance].filter(Boolean).join(' · ').toUpperCase()}
+              </Text>
+              <View style={styles.shopName}>
+                <Text variant="title" numberOfLines={1} style={styles.flexShrink}>
+                  {selectedShop.displayName}
+                </Text>
+                {isOfficial(selectedShop) ? <StampTape stamp={stampFor(selectedShop)} small /> : null}
+              </View>
+            </View>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('map.closeCard')}
+              onPress={() => setSelectedShop(null)}
+              hitSlop={4}
+              style={({ pressed }) => [styles.close, pressed && styles.pressed]}
+            >
+              <Icon name="close" color={c.text} size={22} />
+            </Pressable>
+          </Pressable>
+          {selectedShop.tempClosedAt ? (
+            <ClosedUntilChip until={selectedShop.tempClosedUntil} />
+          ) : (
+            <StatusChip state={shopState} />
+          )}
+          <View style={styles.cardActions}>
+            <Button label={t('map.viewShop')} onPress={() => openShop(selectedShop)} style={styles.flex} />
+            <IconButton
+              icon="directions"
+              label={t('map.directions')}
+              onPress={() =>
+                openDirections({
+                  latitude: selectedShop.latitude,
+                  longitude: selectedShop.longitude,
+                  display_name: selectedShop.displayName,
+                  address: selectedShop.address,
+                })
+              }
+            />
+          </View>
+        </View>
+      ) : null}
+
       <FilterSheet
         visible={filtersOpen}
         filters={filters}
@@ -644,6 +772,12 @@ const styles = StyleSheet.create({
     gap: space[3],
   },
   cardMain: { gap: space[1] },
+  shopRing: { borderWidth: 3, padding: 0 },
+  shopMain: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  shopText: { flex: 1, minWidth: 0, gap: 2 },
+  shopName: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  flexShrink: { flexShrink: 1 },
+  close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
   cardActions: { flexDirection: 'row', gap: space[2], alignItems: 'center' },
   farActions: { gap: space[2] },
 });

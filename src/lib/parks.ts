@@ -203,6 +203,8 @@ export type ParkDetail = {
   entry_fee: string | null;
   verified_at: string | null;
   metro: { id: string; name: string; timezone: string | null } | null;
+  /** The business that runs a private park ("Run by Rocketown"); set by Rachel. */
+  runBy: { handle: string; displayName: string } | null;
   sessions: SessionRow[];
   obstacles: Obstacle[];
   descriptions: { locale: string; body: string }[];
@@ -215,6 +217,7 @@ export async function fetchPark(slug: string): Promise<ParkDetail | null> {
       `id, slug, display_name, official_name, address, city, region, country, latitude, longitude,
        status, park_type, setting, night_lighting, surface, helmet_required, is_paid, entry_fee, verified_at,
        metro_areas(id, name, timezone),
+       run_by:pages!parks_run_by_page_id_fkey(handle, display_name),
        park_sessions(id, season_start_month, season_start_day, season_end_month, season_end_day, days,
                      start_anchor, start_time, end_anchor, end_time, disciplines, note),
        obstacles(id, name, general_type, notes, status, merged_into, archived_at, created_at),
@@ -235,8 +238,10 @@ export async function fetchPark(slug: string): Promise<ParkDetail | null> {
     })
     .map(({ id, name, general_type, notes }) => ({ id, name, general_type, notes }));
 
+  const { run_by: runBy, ...rest } = data;
   return {
-    ...data,
+    ...rest,
+    runBy: runBy ? { handle: runBy.handle, displayName: runBy.display_name } : null,
     metro: data.metro_areas,
     sessions: data.park_sessions,
     obstacles,

@@ -1,7 +1,8 @@
 /**
  * The map's filter button, filter sheet and edge markers (v2, Nov 2), laid
  * out from the Map (v2) row of the Mockups canvas: "Map · edge markers",
- * "Filter sheet" and "Map · 3 filters on".
+ * "Filter sheet" and "Map · 3 filters on". The sheet's On the map section
+ * and its park-only labels come from Map-Filters-Shops (part A, PR 3).
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -59,9 +60,12 @@ export function FilterButton({ filters, onPress }: { filters: MapFilters; onPres
 
 const toggle = <T,>(list: T[], item: T) => (list.includes(item) ? list.filter((x) => x !== item) : [...list, item]);
 
+/** How many parks and shops in view a draft would show; null while it's still working that out. */
+export type FilterCount = { parks: number; shops: number } | null;
+
 /**
- * The sheet edits a draft; "Show N parks" applies it, ✕ or the dimmed strip
- * drops it. `countFor` says how many parks in view a draft would show.
+ * The sheet edits a draft; "Show 7 parks · 2 shops" applies it, ✕ or the
+ * dimmed strip drops it. `countFor` says what's in view for a draft.
  */
 export function FilterSheet({
   visible,
@@ -74,7 +78,7 @@ export function FilterSheet({
   filters: MapFilters;
   onApply: (next: MapFilters) => void;
   onClose: () => void;
-  countFor: (draft: MapFilters) => number | null;
+  countFor: (draft: MapFilters) => FilterCount;
 }) {
   const { t } = useTranslation();
   const c = useColors();
@@ -93,6 +97,11 @@ export function FilterSheet({
   return (
     <Sheet visible={visible} title={t('map.filters.title')} onClose={onClose}>
       <ScrollView contentContainerStyle={styles.sheetBody}>
+        <Caption>{t('map.filters.onTheMap')}</Caption>
+        <View style={[styles.rows, { borderTopColor: c.borderSubtle }]}>
+          <ShowShopsRow on={draft.showShops} onPress={() => set({ showShops: !draft.showShops })} />
+        </View>
+
         <Caption>{t('map.filters.whoCanSkate')}</Caption>
         <View style={styles.chips} accessibilityRole="none">
           {FILTER_DISCIPLINES.map((d: Discipline) => (
@@ -131,7 +140,12 @@ export function FilterSheet({
             checked={draft.openNow}
             onPress={() => set({ openNow: !draft.openNow })}
           />
-          <CheckRow title={t('map.filters.free')} checked={draft.free} onPress={() => set({ free: !draft.free })} />
+          <CheckRow
+            title={t('map.filters.free')}
+            note={t('map.filters.freeHint')}
+            checked={draft.free}
+            onPress={() => set({ free: !draft.free })}
+          />
           <CheckRow
             title={t('map.filters.lit')}
             note={t('map.filters.litHint')}
@@ -144,12 +158,55 @@ export function FilterSheet({
       <View style={[styles.footer, { borderTopColor: c.borderSubtle }]}>
         <Button variant="secondary" label={t('map.filters.clear')} onPress={() => setDraft(NO_FILTERS)} />
         <Button
-          label={count === null ? t('map.filters.showLoading') : t('map.filters.show', { count })}
+          label={
+            count === null
+              ? t('map.filters.showLoading')
+              : draft.showShops
+                ? t('map.filters.showBoth', {
+                    parks: t('map.filters.parks', { count: count.parks }),
+                    shops: t('map.filters.shops', { count: count.shops }),
+                  })
+                : t('map.filters.show', { count: count.parks })
+          }
           onPress={() => onApply(draft)}
           style={styles.flex}
         />
       </View>
     </Sheet>
+  );
+}
+
+/** Show shops: a switch with the shop pin's own ink square beside it. */
+function ShowShopsRow({ on, onPress }: { on: boolean; onPress: () => void }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityState={{ checked: on }}
+      accessibilityLabel={`${t('map.filters.showShops')}, ${t('map.filters.showShopsHint')}`}
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, { borderBottomColor: c.borderSubtle }, pressed && styles.pressed]}
+    >
+      <View style={[styles.shopIcon, { backgroundColor: c.text }]}>
+        <Icon name="storefront" color={c.surface} size={18} />
+      </View>
+      <View style={styles.flex}>
+        <Text variant="headline">{t('map.filters.showShops')}</Text>
+        <Text variant="caption" color="textSecondary">
+          {t('map.filters.showShopsHint')}
+        </Text>
+      </View>
+      <View
+        style={[
+          styles.switch,
+          { borderColor: c.border, backgroundColor: on ? c.accent : c.surfaceRaised },
+          on ? styles.switchOn : null,
+        ]}
+      >
+        <View style={[styles.knob, { backgroundColor: on ? c.onAccent : c.border }]} />
+      </View>
+    </Pressable>
   );
 }
 
@@ -290,6 +347,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
   },
   footer: { flexDirection: 'row', gap: space[2], padding: space[4], borderTopWidth: 1 },
+  shopIcon: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  switch: { width: 40, height: 22, borderWidth: stroke.rule, padding: 2, justifyContent: 'center' },
+  switchOn: { alignItems: 'flex-end' },
+  knob: { width: 14, height: 14 },
   edge: {
     position: 'absolute',
     height: 44,

@@ -22,7 +22,7 @@ begin;
 --    Beach and Fritzy's from their address points (node 340495016, way
 --    89757752, way 35340212), since OSM doesn't map those shops yet.
 --    Oak City is by appointment without a pin, and L.O.W is online only.
--- 4. Hours for the storefronts as Rachel sends them, and Bo's old name.
+-- 4. Hours for the four storefronts (from Rachel, Nov 4), and Bo's old name.
 
 /* 1. Shop pins -------------------------------------------------------------------------- */
 
@@ -145,17 +145,31 @@ update public.pages p
 
 /* 4. Hours for the seeded storefronts (from Rachel, Nov 4) ------------------------------- */
 
--- Bo's Boots on Wheels: Tue, Wed, Fri 12:00–18:00; Sat and Sun 11:00–17:00;
--- closed Mon and Thu. Only added while the shop has no hours yet.
+-- On each shop's own clock. Days not listed are closed. Only added while a
+-- shop has no hours yet, so a team's own hours are never overwritten.
+--   Bo's Boots on Wheels: Tue, Wed, Fri 12:00–18:00; Sat, Sun 11:00–17:00.
+--   8SET: Mon, Tue, Thu, Fri 10:00–17:00; Wed 11:00–14:30 and 15:45–17:00;
+--         Sat 10:00–14:00.
+--   Asphalt Beach: Mon–Sat 10:00–16:00.
+--   Fritzy's: Tue–Thu 12:00–18:00; Fri 12:00–19:00; Sat 11:00–19:00;
+--             Sun 11:00–17:00.
 insert into public.page_hours (page_id, days, start_anchor, start_time, end_anchor, end_time)
 select p.id, v.days, 'clock', v.start_time, 'clock', v.end_time
-  from public.pages p
- cross join (values
-   (array[2, 3, 5]::smallint[], time '12:00', time '18:00'),
-   (array[6, 7]::smallint[], time '11:00', time '17:00')
- ) as v(days, start_time, end_time)
- where lower(p.handle::text) = 'bos_bootsonwheels'
-   and not exists (select 1 from public.page_hours h where h.page_id = p.id);
+  from (values
+    ('bos_bootsonwheels', array[2, 3, 5]::smallint[], time '12:00', time '18:00'),
+    ('bos_bootsonwheels', array[6, 7]::smallint[], time '11:00', time '17:00'),
+    ('8set_store', array[1, 2, 4, 5]::smallint[], time '10:00', time '17:00'),
+    ('8set_store', array[3]::smallint[], time '11:00', time '14:30'),
+    ('8set_store', array[3]::smallint[], time '15:45', time '17:00'),
+    ('8set_store', array[6]::smallint[], time '10:00', time '14:00'),
+    ('asphaltbeachskateshop', array[1, 2, 3, 4, 5, 6]::smallint[], time '10:00', time '16:00'),
+    ('fritzys_roller_skate_shop', array[2, 3, 4]::smallint[], time '12:00', time '18:00'),
+    ('fritzys_roller_skate_shop', array[5]::smallint[], time '12:00', time '19:00'),
+    ('fritzys_roller_skate_shop', array[6]::smallint[], time '11:00', time '19:00'),
+    ('fritzys_roller_skate_shop', array[7]::smallint[], time '11:00', time '17:00')
+  ) as v(handle, days, start_time, end_time)
+  join public.pages p on lower(p.handle::text) = v.handle
+ where not exists (select 1 from public.page_hours h where h.page_id = p.id);
 
 -- Bo's was Sin City Skates before, so Search finds it by the old name.
 insert into public.page_aliases (page_id, name)
@@ -180,8 +194,8 @@ values ('e3000000-0000-4000-8000-0000000000a1', 'park_contributor', (select id f
 -- As the owner: the seed data landed.
 insert into t_results select 'four storefronts have pins', count(*) = 4, string_agg(handle::text, ',' order by handle)
   from pages where location is not null and 'shop' = any (roles);
-insert into t_results select 'Bo''s has two hours rows', count(*) = 2, count(*)::text
-  from page_hours h join pages p on p.id = h.page_id where lower(p.handle::text) = 'bos_bootsonwheels';
+insert into t_results select 'hours rows per shop', string_agg(lower(p.handle::text) || '=' || n, ',' order by p.handle) = '8set_store=4,asphaltbeachskateshop=1,bos_bootsonwheels=2,fritzys_roller_skate_shop=4', string_agg(lower(p.handle::text) || '=' || n, ',' order by p.handle)
+  from pages p join lateral (select count(*) n from page_hours h where h.page_id = p.id) c on c.n > 0;
 insert into t_results select 'Bo''s is formerly Sin City Skates', count(*) = 1, count(*)::text
   from page_aliases a join pages p on p.id = a.page_id where lower(p.handle::text) = 'bos_bootsonwheels' and a.name = 'Sin City Skates';
 

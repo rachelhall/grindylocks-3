@@ -213,9 +213,9 @@
       "button": "Filtros",
       "buttonOn": "Filtros, {{count}} activos",
       "title": "Filtros",
-      "whoCanSkate": "QUIÉN PUEDE PATINAR",
+      "whoCanSkate": "QUIÉN PUEDE PATINAR · PARQUES",
       "whoCanSkateHint": "Parques que permiten cualquiera que elijas.",
-      "setting": "ENTORNO",
+      "setting": "ENTORNO · PARQUES",
       "settings": {
         "indoor": "Interior",
         "covered": "Cubierto",
@@ -224,20 +224,33 @@
       "settingHint": "Los parques con zona interior y exterior salen con cualquiera de las dos.",
       "onlyShow": "MOSTRAR SOLO",
       "openNow": "Abierto ahora",
-      "openNowHint": "Según el horario de cada parque, en su hora local",
+      "openNowHint": "Parques y tiendas, cada uno en su hora local",
       "free": "Gratis",
       "lit": "Con luz de noche",
-      "litHint": "No sabemos si algunos parques tienen luz, así que no salen",
+      "litHint": "Solo parques. No sabemos si algunos parques tienen luz, así que no salen",
       "clear": "Borrar",
       "show_one": "Ver {{count}} parque",
       "show_other": "Ver {{count}} parques",
-      "showLoading": "Contando parques…"
+      "showLoading": "Contando…",
+      "onTheMap": "EN EL MAPA",
+      "showShops": "Mostrar tiendas",
+      "showShopsHint": "Tiendas de patines a las que puedes ir",
+      "freeHint": "Solo parques",
+      "parks_one": "{{count}} parque",
+      "parks_other": "{{count}} parques",
+      "shops_one": "{{count}} tienda",
+      "shops_other": "{{count}} tiendas",
+      "showBoth": "Mostrar {{parks}} · {{shops}}"
     },
     "edge": {
       "label": "{{park}}, a {{distance}}, fuera del mapa",
       "labelNoDistance": "{{park}}, fuera del mapa",
       "hint": "Mueve el mapa a este parque"
-    }
+    },
+    "shopPin": "Tienda: {{shop}}",
+    "shopPinSelected": "Tienda: {{shop}}, seleccionada",
+    "closeCard": "Cerrar tarjeta",
+    "viewShop": "Ver tienda"
   },
   "search": {
     "back": "Volver al mapa",
@@ -318,7 +331,8 @@
     "nothingPostedBody": "¿Has patinado en {{park}}? Etiquétalo en tu próxima publicación y saldrá aquí.",
     "postHere": "Publicar un clip aquí",
     "postHereToo": "Publica un clip aquí tú también",
-    "morePosts": "Más publicaciones"
+    "morePosts": "Más publicaciones",
+    "runBy": "Gestionado por {{name}}"
   },
   "disciplines": {
     "inline": "Inline",
@@ -1425,5 +1439,24 @@
     },
     "closed": "Esta tienda ha cerrado. Su página sigue como archivo, con sus publicaciones.",
     "logo": "Logo de {{name}}"
+  },
+  "shop": {
+    "type": {
+      "storefront": "Tienda física",
+      "by_appointment": "Con cita",
+      "online_only": "Solo online"
+    },
+    "directions": "Cómo llegar",
+    "hours": "Horario",
+    "usualHours": "Horario habitual",
+    "hoursIn": "Horario · hora de {{city}}",
+    "usualHoursIn": "Horario habitual · hora de {{city}}",
+    "closed": "Cerrado",
+    "dayRange": "{{from}}–{{to}}",
+    "brandsWeCarry": "Marcas que tenemos",
+    "moreBrands_one": "+{{count}} más",
+    "moreBrands_other": "+{{count}} más",
+    "moreBrandsLabel_one": "Mostrar {{count}} marca más",
+    "moreBrandsLabel_other": "Mostrar {{count}} marcas más"
   }
 }

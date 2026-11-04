@@ -231,6 +231,18 @@ export default function ParkScreen() {
               {subtitle}
             </Text>
           ) : null}
+          {/* A private park links to the business that runs it (part A, PR 3). */}
+          {park.runBy ? (
+            <Text
+              variant="bodySm"
+              color="accentText"
+              accessibilityRole="link"
+              onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: park.runBy!.handle } })}
+              style={{ fontFamily: fontFamily.sansSemiBold }}
+            >
+              {t('park.runBy', { name: park.runBy.displayName })}
+            </Text>
+          ) : null}
           <View style={styles.chipRow}>
             <StatusChip state={state} />
             {park.verified_at ? (

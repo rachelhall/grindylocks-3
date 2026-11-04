@@ -18,6 +18,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import type { Database } from './database.types';
+import type { HoursRow } from './hours';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
 
@@ -51,7 +52,22 @@ export type Page = {
   links: string[];
   /** "Formerly …" names, newest first. */
   formerly: string[];
+  /* Shops (PR 3). Null or empty on brand pages. */
+  locationType: Enums['shop_location_type'] | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  /** By-appointment shops choose whether their pin shows. */
+  showPin: boolean;
+  /** The shop's own clock: its metro area's time zone, else the page's. */
+  timeZone: string | null;
+  hours: HoursRow[];
+  /** "Brands we carry", by name. */
+  brandsCarried: CarriedBrand[];
 };
+
+/** A brand on a shop's "Brands we carry". */
+export type CarriedBrand = { id: string; handle: string; displayName: string; state: PageState; logoPath: string | null };
 
 /** A page in Search or the @ list. */
 export type PageResult = {
@@ -149,12 +165,22 @@ type PageRow = Database['public']['Tables']['pages']['Row'] & {
   page_descriptions: { locale: string; body: string }[];
   page_links: { position: number; url: string }[];
   page_aliases: { name: string; created_at: string }[];
+  metro_areas: { timezone: string | null } | null;
+  page_hours: HoursRow[];
+  page_brands_carried: {
+    brand: { id: string; handle: string; display_name: string; state: PageState; logo_path: string | null } | null;
+  }[];
 };
 
 const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, website, logo_path, founded_label,
   ended_label, main_language, managed_at, founding_partner_at, closed_at, suspended_at, temp_closed_at,
   temp_closed_until, temp_closed_note, page_descriptions (locale, body), page_links (position, url),
-  page_aliases (name, created_at)`;
+  page_aliases (name, created_at),
+  location_type, address, latitude, longitude, show_pin, timezone, metro_areas (timezone),
+  page_hours (id, season_start_month, season_start_day, season_end_month, season_end_day, days,
+              start_anchor, start_time, end_anchor, end_time, note),
+  page_brands_carried!page_brands_carried_shop_id_fkey (
+    brand:pages!page_brands_carried_brand_id_fkey (id, handle, display_name, state, logo_path))`;
 
 function toPage(row: PageRow): Page {
   return {
@@ -183,6 +209,19 @@ function toPage(row: PageRow): Page {
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map((a) => a.name)
       .filter((name, i, all) => name !== row.display_name && all.indexOf(name) === i),
+    locationType: row.location_type,
+    address: row.address,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    showPin: row.show_pin,
+    timeZone: row.metro_areas?.timezone ?? row.timezone ?? null,
+    hours: row.page_hours ?? [],
+    // Name-only brands still link (gear depends on them); archives don't sell anything new.
+    brandsCarried: (row.page_brands_carried ?? [])
+      .map((b) => b.brand)
+      .filter((b): b is NonNullable<typeof b> => Boolean(b) && b!.state !== 'out_of_business')
+      .map((b) => ({ id: b.id, handle: b.handle, displayName: b.display_name, state: b.state, logoPath: b.logo_path }))
+      .sort((a, b) => a.displayName.localeCompare(b.displayName)),
   };
 }
 
@@ -307,9 +346,11 @@ export function usePageRelation(userId: string | undefined, pageId: string | und
     onError: (_error, _vars, context) => {
       if (context?.previous) client.setQueryData(key, context.previous);
     },
-    onSettled: () => {
+    onSettled: (_data, _error, { what }) => {
       void client.invalidateQueries({ queryKey: key });
       void client.invalidateQueries({ queryKey: ['page-search'] });
+      // A shop you blocked leaves the map.
+      if (what === 'block') void client.invalidateQueries({ queryKey: ['shops'] });
     },
   });
 }
