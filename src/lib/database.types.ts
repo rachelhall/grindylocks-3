@@ -1504,8 +1504,10 @@ export type Database = {
           header_path: string | null
           id: string
           latitude: number | null
-          location: unknown | null
-          location_type: Database["public"]["Enums"]["shop_location_type"] | null
+          location: unknown
+          location_type:
+            | Database["public"]["Enums"]["shop_location_type"]
+            | null
           logo_path: string | null
           longitude: number | null
           main_language: string
@@ -1540,8 +1542,10 @@ export type Database = {
           header_path?: string | null
           id?: string
           latitude?: number | null
-          location?: unknown | null
-          location_type?: Database["public"]["Enums"]["shop_location_type"] | null
+          location?: unknown
+          location_type?:
+            | Database["public"]["Enums"]["shop_location_type"]
+            | null
           logo_path?: string | null
           longitude?: number | null
           main_language?: string
@@ -1576,8 +1580,10 @@ export type Database = {
           header_path?: string | null
           id?: string
           latitude?: number | null
-          location?: unknown | null
-          location_type?: Database["public"]["Enums"]["shop_location_type"] | null
+          location?: unknown
+          location_type?:
+            | Database["public"]["Enums"]["shop_location_type"]
+            | null
           logo_path?: string | null
           longitude?: number | null
           main_language?: string
@@ -3555,7 +3561,12 @@ export type Database = {
       page_invite_kind: "team" | "ownership"
       page_member_role: "staff" | "manager" | "owner"
       page_role: "brand" | "shop"
-      page_state: "unofficial" | "name_only" | "managed" | "out_of_business" | "closed"
+      page_state:
+        | "unofficial"
+        | "name_only"
+        | "managed"
+        | "out_of_business"
+        | "closed"
       park_field:
         | "hours"
         | "status"
@@ -3793,7 +3804,13 @@ export const Constants = {
       page_invite_kind: ["team", "ownership"],
       page_member_role: ["staff", "manager", "owner"],
       page_role: ["brand", "shop"],
-      page_state: ["unofficial", "name_only", "managed", "out_of_business", "closed"],
+      page_state: [
+        "unofficial",
+        "name_only",
+        "managed",
+        "out_of_business",
+        "closed",
+      ],
       park_field: [
         "hours",
         "status",
