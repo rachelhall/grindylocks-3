@@ -177,6 +177,12 @@ export const keys = {
   product: (id: string) => ['catalog', 'product', id] as const,
   /** Search's Pages filter and the @ list's Pages heading. */
   pageSearch: (q: string, forMention: boolean) => ['page-search', forMention ? 'mention' : 'search', q] as const,
+  /** Empty states (Nov 5): skaters who are regulars at parks you skate or saved. */
+  skatersAtParks: (userId: string, parkIds: string[]) => ['suggest', 'at-parks', userId, ...parkIds] as const,
+  /** Empty states: regulars across your home metro area. */
+  skatersInMetro: (userId: string, metroId: string) => ['suggest', 'in-metro', userId, metroId] as const,
+  /** Search's recent searches, kept on the phone only. */
+  recentSearches: (userId: string) => ['recent-searches', userId] as const,
   /** Your latest claim on a page (Claim this page, PR 5). */
   myPageClaim: (userId: string, pageId: string) => ['page', 'claim', userId, pageId] as const,
   /** Your open page invites, for the bell's Page invites box. */
