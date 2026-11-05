@@ -38,6 +38,15 @@ export function usesMetric(): boolean {
   return getLocales()[0]?.measurementSystem !== 'us';
 }
 
+/** "Denmark" for "DK", in the reader's language; falls back to the code. */
+export function countryName(code: string, locale: string): string {
+  try {
+    return new Intl.DisplayNames([locale], { type: 'region' }).of(code) ?? code;
+  } catch {
+    return code;
+  }
+}
+
 const i18n = createInstance();
 
 i18n.use(initReactI18next).init({

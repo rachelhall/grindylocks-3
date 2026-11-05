@@ -84,7 +84,8 @@ function farRegion(here: LatLng): Region {
 /**
  * The map: parks around you (or around your home city if location is off),
  * a search bar for cities and parks, and a preview card for the picked park.
- * Opening with ?metro=<id> (from city search) fits the map to that city.
+ * Opening with ?metro=<id> (from city search or a Places result in Search)
+ * fits the map to that city; a new `at` re-fits it when it's the same city.
  *
  * Shops (part A, PR 3; the Map-Shops mockup) show next to parks by default:
  * the park pin's square, inverted (ink with a paper storefront), and their
@@ -97,7 +98,7 @@ export default function MapScreen() {
   const scheme = useColorSchemeName();
   const insets = useSafeAreaInsets();
   const { session, profile } = useAuth();
-  const { metro } = useLocalSearchParams<{ metro?: string }>();
+  const { metro, at } = useLocalSearchParams<{ metro?: string; at?: string }>();
   const mapRef = useRef<MapView>(null);
   const { saved, toggle } = useSavedParks(session?.user.id);
   const describe = useParkLine();
@@ -246,7 +247,7 @@ export default function MapScreen() {
     return () => {
       cancelled = true;
     };
-  }, [mapReady, metro, fitTo, locate, showHomeCity, animateTo]);
+  }, [mapReady, metro, at, fitTo, locate, showHomeCity, animateTo]);
 
   /* Pins for the visible area --------------------------------------------- */
 

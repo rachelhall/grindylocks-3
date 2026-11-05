@@ -11,7 +11,7 @@ import { PageRow, SuggestPageBox } from '@/components/pages';
 import { ParkRow, useParkLine } from '@/components/parks';
 import { RecentSearchRows, SectionHead, SkaterRow } from '@/components/suggestions';
 import { Button, Icon } from '@/components/ui';
-import { usesMetric } from '@/i18n';
+import { countryName, usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { type PageResult, searchPages } from '@/lib/pages';
 import { type PersonResult, searchPeople } from '@/lib/people';
@@ -23,6 +23,7 @@ import {
   parksNear,
   type SearchResult,
   searchDirectory,
+  showMetroOnMap,
   useMetro,
   useParksByIds,
   useParksInMetro,
@@ -36,6 +37,8 @@ type Filter = 'all' | 'people' | 'parks' | 'pages';
 type Point = { latitude: number; longitude: number };
 type Results = {
   people: PersonResult[];
+  /** Cities (metro areas) whose name, or a town inside them, matches. */
+  places: SearchResult[];
   parks: SearchResult[];
   pages: PageResult[];
   coords: Map<string, Point>;
@@ -70,11 +73,12 @@ const DEBOUNCE_MS = 250;
 /**
  * Search tab (Nov 1): one box for people, parks and brand and shop pages, an
  * All / People / Parks / Pages switch, and results grouped by type. People
- * match on username; parks on display name, official name and aliases;
- * pages on handle, name and "Formerly" names, all accent-insensitive. Under
+ * match on username; parks on display name, official name, aliases and
+ * city; pages on handle, name and "Formerly" names, all accent-insensitive. Under
  * the results (All and Pages), "Can't find a brand or shop? Suggest it"
- * (Search-Pages mockup, v2). The map's own search bar stays for picking a
- * city to plan a trip.
+ * (Search-Pages mockup, v2). Places (Nov 5): a city that matches shows as
+ * "Copenhagen, Denmark · 12 parks" above the parks, and opens the Map tab on
+ * that city, the same result as the map's own city search.
  */
 export default function Search() {
   const { t, i18n } = useTranslation();
@@ -168,11 +172,12 @@ export default function Search() {
         return [] as PageResult[];
       }),
     ]);
+    const places = directory.filter((r) => r.kind === 'metro');
     const parks = directory.filter((r) => r.kind === 'park');
     // Coordinates come separately, so distances can show once location arrives.
     const coords = await parkCoords(parks.map((p) => p.id)).catch(() => new Map<string, Point>());
     if (latest.current !== query) return;
-    setResults({ people, parks, pages, coords, failed });
+    setResults({ people, places, parks, pages, coords, failed });
     setSearching(false);
   }
 
@@ -194,10 +199,16 @@ export default function Search() {
       .join(' · ');
   }
 
+  function describePlace(p: SearchResult) {
+    const where = [p.name, p.country ? countryName(p.country, i18n.language) : null].filter(Boolean).join(', ');
+    return [where, t('search.parkCount', { count: p.park_count ?? 0 })].join(' · ');
+  }
+
   const showPeople = (filter === 'all' || filter === 'people') && (results?.people.length ?? 0) > 0;
+  const showPlaces = (filter === 'all' || filter === 'parks') && (results?.places.length ?? 0) > 0;
   const showParks = (filter === 'all' || filter === 'parks') && (results?.parks.length ?? 0) > 0;
   const showPages = (filter === 'all' || filter === 'pages') && (results?.pages.length ?? 0) > 0;
-  const nothing = results !== null && !showPeople && !showParks && !showPages;
+  const nothing = results !== null && !showPeople && !showPlaces && !showParks && !showPages;
   // Offered under any search that could have been for a brand or shop.
   const offerSuggest = results !== null && (filter === 'all' || filter === 'pages');
 
@@ -337,6 +348,24 @@ export default function Search() {
                     onPress={() => {
                       remember();
                       router.push({ pathname: '/profile/[username]', params: { username: p.username } });
+                    }}
+                  />
+                ))}
+              </View>
+            ) : null}
+            {showPlaces ? (
+              <View style={styles.list}>
+                <Text variant="label" color="textSecondary" accessibilityRole="header">
+                  {t('find.places')}
+                </Text>
+                {results?.places.map((p) => (
+                  <PlaceRow
+                    key={p.id}
+                    line={describePlace(p)}
+                    region={p.detail}
+                    onPress={() => {
+                      remember();
+                      showMetroOnMap(p.id);
                     }}
                   />
                 ))}
@@ -615,6 +644,38 @@ function SearchIdle({
   return <>{sections}</>;
 }
 
+/**
+ * A city in the results: "Copenhagen, Denmark · 12 parks", with the region
+ * (Capital Region) under it when there is one. Opens the Map tab on that city,
+ * the same as picking it in the map's own search.
+ */
+function PlaceRow({ line, region, onPress }: { line: string; region: string | null; onPress: () => void }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={[line, region].filter(Boolean).join(', ')}
+      accessibilityHint={t('find.placeHint')}
+      onPress={onPress}
+      style={({ pressed }) => [styles.place, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
+    >
+      <Icon name="map" color={c.text} size={20} />
+      <View style={styles.personMain}>
+        <Text variant="headline" numberOfLines={1}>
+          {line}
+        </Text>
+        {region ? (
+          <Text variant="bodySm" color="textSecondary" numberOfLines={1}>
+            {region}
+          </Text>
+        ) : null}
+      </View>
+      <Icon name="chevron" color={c.textSecondary} size={18} />
+    </Pressable>
+  );
+}
+
 /** A person in the results: initials, username (lock if private), one line, and "Following". */
 function PersonRow({ person, line, onPress }: { person: PersonResult; line: string; onPress: () => void }) {
   const { t } = useTranslation();
@@ -687,6 +748,14 @@ const styles = StyleSheet.create({
   content: { padding: space[4], gap: space[6] },
   list: { gap: 6 },
   person: {
+    minHeight: 64,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    paddingHorizontal: space[3],
+    paddingVertical: 10,
+  },
+  place: {
     minHeight: 64,
     flexDirection: 'row',
     alignItems: 'center',
