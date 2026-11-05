@@ -1,4 +1,4 @@
--- Rolled-back check for 20261105070100_page_meetups (apply 20261105070000_page_meetups_enums first).
+-- Rolled-back check for 20261105164207_page_meetups (apply 20261105155246_page_meetups_enums first).
 -- Runs the migration and the checks in one transaction, then raises CHECK <ok> of <total>: <failures>,
 -- so nothing is kept. Member checks run as throwaway members made in the transaction.
 begin;
@@ -1537,6 +1537,12 @@ $$;
 
 /* 12. Moderation -------------------------------------------------------------------------- */
 
+-- A report names what it's about. A page meetup (or a page's comment on it)
+-- has no person behind it, so the meetup or comment itself is enough.
+alter table public.reports drop constraint if exists reports_check;
+alter table public.reports add constraint reports_check
+  check (num_nonnulls(post_id, comment_id, reported_user_id, event_id, event_comment_id) >= 1);
+
 create or replace function private.can_moderate_report_target(post uuid, comment uuid, meetup uuid, meetup_comment uuid)
 returns boolean
 language sql stable security definer
@@ -1921,7 +1927,9 @@ begin
   exception when invalid_parameter_value then ok := ok + 1; end;
 
   total := total + 1;
+  perform set_config('request.jwt.claims', json_build_object('sub', a, 'role', 'authenticated')::text, true);
   update public.parks set run_by_page_id = shop where id = park;
+  perform set_config('request.jwt.claims', json_build_object('sub', s, 'role', 'authenticated')::text, true);
   ev_park := public.create_meetup(park => park, starts_at => now() + interval '3 days', as_page => shop,
                                   weekdays => array[1, 3, 5]::smallint[]);
   if public.meetup_official((select e from public.events e where e.id = ev_park))
@@ -2146,7 +2154,7 @@ begin
   total := total + 1;
   perform set_config('request.jwt.claims', json_build_object('sub', z, 'role', 'authenticated')::text, true);
   ev := public.create_meetup(park => park, starts_at => now() + interval '1 day', note => 'Memo at 4');
-  if (select host_id = z and host_page_id is null and place = 'park' from public.event_series s join public.events e on e.series_id = s.id where e.id = ev)
+  if (select s.host_id = z and s.host_page_id is null and s.place = 'park' from public.event_series s join public.events e on e.series_id = s.id where e.id = ev)
      and (select (x -> 0 ->> 'kind') = 'person' from public.host_list((select e from public.events e where e.id = ev)) x)
   then ok := ok + 1; else r := r || 'FAIL a person''s meetup; '; end if;
 

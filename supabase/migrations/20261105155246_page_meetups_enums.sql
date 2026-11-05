@@ -1,6 +1,6 @@
 -- Brand and shop accounts part A, PR 9: pages as meetup hosts (enums).
 -- New enum values can't be used in the same transaction they're added in,
--- so they come in their own migration before 20261105070100_page_meetups.
+-- so they come in their own migration before 20261105164207_page_meetups.
 
 -- Cancelled by the page tools: Close for good ("8SET has closed") and
 -- Suspend with "cancel upcoming meetups" ("It's no longer happening", since

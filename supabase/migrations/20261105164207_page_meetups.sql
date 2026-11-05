@@ -1532,6 +1532,12 @@ $$;
 
 /* 12. Moderation -------------------------------------------------------------------------- */
 
+-- A report names what it's about. A page meetup (or a page's comment on it)
+-- has no person behind it, so the meetup or comment itself is enough.
+alter table public.reports drop constraint if exists reports_check;
+alter table public.reports add constraint reports_check
+  check (num_nonnulls(post_id, comment_id, reported_user_id, event_id, event_comment_id) >= 1);
+
 create or replace function private.can_moderate_report_target(post uuid, comment uuid, meetup uuid, meetup_comment uuid)
 returns boolean
 language sql stable security definer
