@@ -202,7 +202,7 @@ export function Sheet({
 }
 
 /** The search box at the top of a sheet: a 2px outline with a search icon. */
-function SearchBox({ value, onChangeText, placeholder }: { value: string; onChangeText: (v: string) => void; placeholder: string }) {
+export function SearchBox({ value, onChangeText, placeholder }: { value: string; onChangeText: (v: string) => void; placeholder: string }) {
   const c = useColors();
   return (
     <View style={styles.searchWrap}>

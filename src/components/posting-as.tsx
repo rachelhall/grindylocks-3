@@ -54,6 +54,7 @@ export function PostingAsRow({
   pages,
   value,
   onChange,
+  reach: showReach = true,
 }: {
   username: string;
   avatarPath: string | null;
@@ -61,16 +62,18 @@ export function PostingAsRow({
   /** The page picked, or null for you. */
   value: string | null;
   onChange: (pageId: string | null) => void;
+  /** The post's reach line (Near you, regulars); meetups (PR 9) say theirs in the footer. */
+  reach?: boolean;
 }) {
   const { t } = useTranslation();
   const c = useColors();
   const [open, setOpen] = useState(false);
   const page = pages.find((p) => p.pageId === value) ?? null;
-  const nearYou = usePageNearYou(page?.pageId ?? null);
+  const nearYou = usePageNearYou(showReach ? (page?.pageId ?? null) : null);
   const name = page?.displayName ?? username;
 
   const reach = (() => {
-    if (!page) return null;
+    if (!page || !showReach) return null;
     const s = nearYou.data;
     if (s?.reaches && s.metroName) return t('postingAs.reachNearYou', { name: page.displayName, metro: s.metroName });
     if (s && !s.reaches && s.metroName && s.usedToday) return t('postingAs.reachUsedToday', { name: page.displayName });
