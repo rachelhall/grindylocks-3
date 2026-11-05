@@ -222,6 +222,28 @@ export function useFollowing(userId: string | undefined, enabled = true) {
   });
 }
 
+/**
+ * Follow someone from a suggestion list (empty states). Suggestions are only
+ * ever public accounts, so this is a follow, not a request. The list isn't
+ * told straight away, so the row can stay put and read "Following"; it
+ * drops out of suggestions the next time they load.
+ */
+export function useFollowFromList(viewerId: string | undefined) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationFn: async (targetId: string) => {
+      if (!viewerId) throw new Error('signed out');
+      const { error } = await supabase.from('follows').insert({ follower_id: viewerId, followee_id: targetId });
+      // 23505: already following (a double tap).
+      if (error && error.code !== '23505') throw error;
+    },
+    onSettled: () => {
+      void client.invalidateQueries({ queryKey: keys.profiles() });
+      void client.invalidateQueries({ queryKey: keys.feedFollowing(viewerId ?? '') });
+    },
+  });
+}
+
 /** Accept or decline a request. Declining deletes it; they can ask again. */
 export function useAnswerFollowRequest(userId: string | undefined) {
   const client = useQueryClient();

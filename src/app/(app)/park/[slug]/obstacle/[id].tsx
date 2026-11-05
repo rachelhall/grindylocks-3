@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, RefreshControl, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { EmptyState } from '@/components/empty-state';
 import { MasonryGrid } from '@/components/profile';
 import { BackButton, Button } from '@/components/ui';
 import { type ObstacleType, usePark } from '@/lib/parks';
@@ -117,11 +118,25 @@ export default function ObstacleScreen() {
             <Button label={t('common.retry')} variant="secondary" onPress={() => void posts.refetch()} />
           </View>
         ) : grid.length === 0 ? (
-          <View style={styles.head}>
-            <Text variant="body" color="textSecondary">
-              {t('obstacle.empty')}
-            </Text>
-          </View>
+          <EmptyState
+            title={t('empty.obstacleTitle')}
+            body={
+              obstacle && park
+                ? t('empty.obstacleBody', { obstacle: obstacle.name, park: park.display_name })
+                : t('obstacle.empty')
+            }
+            action={
+              park
+                ? {
+                    label: t('park.postHere'),
+                    icon: 'add',
+                    kind: 'accent',
+                    onPress: () =>
+                      router.push({ pathname: '/new-post', params: { park: park.id, parkName: park.display_name } }),
+                  }
+                : undefined
+            }
+          />
         ) : (
           <>
             <MasonryGrid posts={grid} width={width} />

@@ -1,13 +1,16 @@
+import { useQuery } from '@tanstack/react-query';
 import * as Location from 'expo-location';
-import { router } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { EmptyState } from '@/components/empty-state';
 import { PageRow, SuggestPageBox } from '@/components/pages';
-import { ParkRow } from '@/components/parks';
-import { Icon } from '@/components/ui';
+import { ParkRow, useParkLine } from '@/components/parks';
+import { RecentSearchRows, SectionHead, SkaterRow } from '@/components/suggestions';
+import { Button, Icon } from '@/components/ui';
 import { usesMetric } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { type PageResult, searchPages } from '@/lib/pages';
@@ -16,10 +19,17 @@ import {
   distanceMeters,
   formatDistance,
   parkCoords,
+  type ParkPin,
+  parksNear,
   type SearchResult,
   searchDirectory,
+  useMetro,
+  useParksByIds,
+  useParksInMetro,
   useSavedParks,
 } from '@/lib/parks';
+import { fresh, keys } from '@/lib/query';
+import { useRecentSearches, useSkatersAtYourParks, useSkatersInMetro } from '@/lib/suggestions';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 type Filter = 'all' | 'people' | 'parks' | 'pages';
@@ -33,6 +43,28 @@ type Results = {
 };
 
 const MIN_CHARS = 2;
+
+const asFilter = (v: string | undefined): Filter | null =>
+  v === 'all' || v === 'people' || v === 'parks' || v === 'pages' ? v : null;
+
+type Located = { state: 'on' | 'off'; here: Point | null };
+
+/** Whether location is allowed and, if so, where the phone is. `ask` shows the prompt (or Settings). */
+async function readLocation(ask: boolean): Promise<Located> {
+  let perm = await Location.getForegroundPermissionsAsync().catch(() => null);
+  if (perm && !perm.granted && ask) {
+    if (!perm.canAskAgain) {
+      void Linking.openSettings();
+      return { state: 'off', here: null };
+    }
+    perm = await Location.requestForegroundPermissionsAsync().catch(() => null);
+  }
+  if (!perm?.granted) return { state: 'off', here: null };
+  const pos =
+    (await Location.getLastKnownPositionAsync().catch(() => null)) ??
+    (await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced }).catch(() => null));
+  return { state: 'on', here: pos ? { latitude: pos.coords.latitude, longitude: pos.coords.longitude } : null };
+}
 const DEBOUNCE_MS = 250;
 
 /**
@@ -51,26 +83,41 @@ export default function Search() {
   const { saved, toggle } = useSavedParks(session?.user.id);
 
   const [q, setQ] = useState('');
-  const [filter, setFilter] = useState<Filter>('all');
+  // Home's "Find skaters" opens Search on People.
+  const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
+  const [filter, setFilter] = useState<Filter>(() => asFilter(filterParam) ?? 'all');
+  const [seenParam, setSeenParam] = useState(filterParam);
+  if (filterParam !== seenParam) {
+    setSeenParam(filterParam);
+    const next = asFilter(filterParam);
+    if (next) setFilter(next);
+  }
   const [results, setResults] = useState<Results | null>(null);
   const [searching, setSearching] = useState(false);
   const [here, setHere] = useState<Point | null>(null);
+  // 'off' until location is allowed: the idle screen then offers to turn it on.
+  const [locationState, setLocationState] = useState<'checking' | 'on' | 'off'>('checking');
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const latest = useRef('');
+  const recent = useRecentSearches(session?.user.id);
 
-  // Distances only when location is already allowed; Search never asks.
+  // Distances only when location is already allowed; Search only asks when
+  // the member taps Turn on location.
+  const apply = useCallback((found: Located) => {
+    setLocationState(found.state);
+    if (found.here) setHere(found.here);
+  }, []);
+  const locate = useCallback(async (ask: boolean) => apply(await readLocation(ask)), [apply]);
+
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      const perm = await Location.getForegroundPermissionsAsync().catch(() => null);
-      if (!perm?.granted) return;
-      const pos = await Location.getLastKnownPositionAsync().catch(() => null);
-      if (pos && !cancelled) setHere({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-    })();
+    void readLocation(false).then((found) => {
+      if (!cancelled) apply(found);
+    });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [apply]);
 
   useEffect(
     () => () => {
@@ -92,6 +139,16 @@ export default function Search() {
     }
     setSearching(true);
     timer.current = setTimeout(() => void run(query), DEBOUNCE_MS);
+  }
+
+  /** Opening a result remembers what was typed (on the phone only). */
+  function remember() {
+    recent.add(q);
+  }
+
+  function searchAgain(text: string) {
+    onChangeQuery(text);
+    recent.add(text);
   }
 
   async function run(query: string) {
@@ -171,6 +228,7 @@ export default function Search() {
             autoCapitalize="none"
             autoCorrect={false}
             returnKeyType="search"
+            onSubmitEditing={remember}
             style={[styles.inputText, { color: c.text }]}
           />
           {q ? (
@@ -220,15 +278,50 @@ export default function Search() {
 
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         {results === null && !searching ? (
-          <Text variant="body" color="textSecondary">
-            {t('find.hint')}
-          </Text>
+          <SearchIdle
+            filter={filter}
+            here={here}
+            locationState={locationState}
+            onTurnOnLocation={() => void locate(true)}
+            recent={recent.recent}
+            onPickRecent={searchAgain}
+            onRemoveRecent={recent.remove}
+            onClearRecent={recent.clear}
+          />
         ) : searching && results === null ? (
           <ActivityIndicator color={c.text} accessibilityLabel={t('common.loading')} />
+        ) : nothing && results?.failed ? (
+          <EmptyState
+            icon="cloudOff"
+            title={t('empty.searchErrorTitle')}
+            body={t('find.error')}
+            action={{ label: t('common.retry'), onPress: () => void run(q.trim()) }}
+          />
         ) : nothing ? (
-          <Text variant="body" color={results?.failed ? 'statusClosed' : 'textSecondary'} accessibilityLiveRegion="polite">
-            {results?.failed ? t('find.error') : t('search.noResults', { q: q.trim() })}
-          </Text>
+          <EmptyState
+            align="start"
+            title={t('empty.noResultsTitle')}
+            body={
+              <View style={styles.noResults} accessibilityLiveRegion="polite">
+                <Text variant="body">{t('empty.noResultsBody', { q: q.trim() })}</Text>
+                <Text variant="bodySm" color="textSecondary">
+                  {t('empty.noResultsHow')}
+                </Text>
+              </View>
+            }
+          >
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => router.navigate('/city-search')}
+              style={({ pressed }) => [styles.cityLink, { backgroundColor: c.surfaceRaised }, pressed && styles.pressed]}
+            >
+              <Icon name="map" color={c.text} size={20} />
+              <Text variant="body" style={styles.cityLinkText}>
+                {t('empty.findByCity')}
+              </Text>
+              <Icon name="chevron" color={c.textSecondary} size={16} />
+            </Pressable>
+          </EmptyState>
         ) : (
           <>
             {showPeople ? (
@@ -241,9 +334,10 @@ export default function Search() {
                     key={p.id}
                     person={p}
                     line={describePerson(p)}
-                    onPress={() =>
-                      router.push({ pathname: '/profile/[username]', params: { username: p.username } })
-                    }
+                    onPress={() => {
+                      remember();
+                      router.push({ pathname: '/profile/[username]', params: { username: p.username } });
+                    }}
                   />
                 ))}
               </View>
@@ -260,7 +354,10 @@ export default function Search() {
                     line={describePark(p)}
                     status={p.status}
                     saved={saved.has(p.id)}
-                    onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: p.slug } })}
+                    onPress={() => {
+                      remember();
+                      router.push({ pathname: '/park/[slug]', params: { slug: p.slug } });
+                    }}
                     onSave={() => void toggle(p.id)}
                   />
                 ))}
@@ -275,7 +372,10 @@ export default function Search() {
                   <PageRow
                     key={p.id}
                     page={p}
-                    onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: p.handle } })}
+                    onPress={() => {
+                      remember();
+                      router.push({ pathname: '/page/[handle]', params: { handle: p.handle } });
+                    }}
                   />
                 ))}
               </View>
@@ -286,6 +386,233 @@ export default function Search() {
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+/** How many rows each idle section shows (All is a sampler; a filter shows more). */
+const SAMPLE = 3;
+const MORE = 5;
+
+/**
+ * Search with nothing typed (Empty states · Search, Nov 5): real content
+ * instead of a hint. All: Recent, Parks near you, Skaters at your parks.
+ * People: skaters at your parks, then your discipline in your home city.
+ * Parks: near you, then Want to skate. Pages: pages you follow, plus the
+ * suggest box. With location off, a card offers to turn it on (the screen's
+ * one pink button) and parks come from your home city, without distances.
+ */
+function SearchIdle({
+  filter,
+  here,
+  locationState,
+  onTurnOnLocation,
+  recent,
+  onPickRecent,
+  onRemoveRecent,
+  onClearRecent,
+}: {
+  filter: Filter;
+  here: Point | null;
+  locationState: 'checking' | 'on' | 'off';
+  onTurnOnLocation: () => void;
+  recent: string[];
+  onPickRecent: (q: string) => void;
+  onRemoveRecent: (q: string) => void;
+  onClearRecent: () => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const c = useColors();
+  const { session, profile } = useAuth();
+  const userId = session?.user.id;
+  const metroId = profile?.home_metro_area_id ?? null;
+  const metro = useMetro(metroId);
+  const city = metro.data?.name ?? '';
+  const { saved, toggle } = useSavedParks(userId);
+  const savedIds = useMemo(() => [...saved], [saved]);
+  const parkLine = useParkLine();
+  const goPark = (slug: string) => router.push({ pathname: '/park/[slug]', params: { slug } });
+
+  const wantsParks = filter === 'all' || filter === 'parks';
+  const wantsPeople = filter === 'all' || filter === 'people';
+  const off = locationState === 'off';
+
+  // Parks near you, by distance, once location is on.
+  const nearMax = filter === 'parks' ? MORE : SAMPLE;
+  const near = useQuery({
+    queryKey: here ? keys.parksNear(here.latitude, here.longitude, nearMax) : ['parks', 'near', 'none'],
+    queryFn: () => parksNear(here!.latitude, here!.longitude, nearMax),
+    enabled: wantsParks && Boolean(here),
+    staleTime: fresh.parks,
+  });
+  // Location off: the home city's parks instead, without distances.
+  const cityParks = useParksInMetro(wantsParks && off ? metroId : null);
+  const savedParks = useParksByIds(filter === 'parks' ? savedIds : []);
+
+  const atParks = useSkatersAtYourParks(userId, profile?.home_park_id, savedIds, filter === 'people' ? MORE : SAMPLE);
+  // Your first discipline, for People's second section; page joiners may have none.
+  const discipline = profile?.disciplines[0] ?? null;
+  const inCity = useSkatersInMetro(userId, wantsPeople ? metroId : null, filter === 'people' ? discipline : null, filter === 'people' ? MORE : SAMPLE);
+
+  const followedPages = useQuery({
+    queryKey: keys.pageSearch('', true),
+    queryFn: () => searchPages('', true, 50),
+    enabled: filter === 'pages',
+    staleTime: fresh.search,
+  });
+
+  const distance = (p: ParkPin) =>
+    here ? formatDistance(p.distance_m ?? distanceMeters(here, p), usesMetric(), i18n.language) : null;
+  const parkRow = (p: ParkPin, withDistance: boolean) => (
+    <ParkRow
+      key={p.id}
+      name={p.display_name}
+      line={[parkLine(p, p.city), withDistance ? distance(p) : null].filter(Boolean).join(' · ')}
+      status={p.status}
+      saved={saved.has(p.id)}
+      onPress={() => goPark(p.slug)}
+      onSave={() => void toggle(p.id)}
+    />
+  );
+
+  const seeMap = {
+    label: t('empty.seeMap'),
+    onPress: () => router.navigate(off && metroId ? { pathname: '/', params: { metro: metroId } } : '/'),
+  };
+  const sections: ReactNode[] = [];
+
+  if (filter === 'all' && recent.length) {
+    sections.push(
+      <View key="recent" style={styles.list}>
+        <SectionHead title={t('empty.recent')} link={{ label: t('empty.clear'), onPress: onClearRecent }} />
+        <RecentSearchRows items={recent} onPick={onPickRecent} onRemove={onRemoveRecent} />
+      </View>,
+    );
+  }
+
+  if (wantsParks) {
+    if (off) {
+      sections.push(
+        <View key="location" style={[styles.locationCard, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
+          <View style={styles.locationText}>
+            <Icon name="pinOff" color={c.text} size={24} />
+            <View style={styles.flex}>
+              <Text variant="headline">{t('empty.parksNearYou')}</Text>
+              <Text variant="bodySm" color="textSecondary">
+                {t('empty.locationBody')}
+              </Text>
+            </View>
+          </View>
+          <Button
+            label={t('empty.turnOnLocation')}
+            onPress={onTurnOnLocation}
+            palette={{ fill: c.accent, text: c.onAccent, border: c.onAccent }}
+            style={styles.locationButton}
+          />
+        </View>,
+      );
+      const list = (cityParks.data ?? []).slice(0, nearMax);
+      if (list.length) {
+        sections.push(
+          <View key="city-parks" style={styles.list}>
+            <SectionHead title={t('empty.parksIn', { city })} link={seeMap} />
+            <Text variant="caption" color="textSecondary">
+              {t('empty.parksInNote')}
+            </Text>
+            {list.map((p) => parkRow(p, false))}
+          </View>,
+        );
+      }
+    } else if (near.data?.length) {
+      sections.push(
+        <View key="near" style={styles.list}>
+          <SectionHead title={filter === 'parks' ? t('empty.nearYou') : t('empty.parksNearYou')} link={seeMap} />
+          {near.data.map((p) => parkRow(p, true))}
+        </View>,
+      );
+    }
+  }
+
+  if (filter === 'parks') {
+    const list = (savedParks.data ?? []).filter((p) => saved.has(p.id));
+    if (list.length) {
+      sections.push(
+        <View key="saved" style={styles.list}>
+          <SectionHead title={t('empty.wantToSkate')} />
+          <Text variant="caption" color="textSecondary">
+            {t('empty.wantToSkateNote')}
+          </Text>
+          {list.map((p) => parkRow(p, true))}
+        </View>,
+      );
+    }
+  }
+
+  if (wantsPeople) {
+    const atList = atParks.people ?? [];
+    const cityList = inCity.people ?? [];
+    if (atList.length) {
+      sections.push(
+        <View key="at-parks" style={styles.list}>
+          <SectionHead title={t('empty.skatersAtYourParks')} />
+          {filter === 'people' ? (
+            <Text variant="caption" color="textSecondary">
+              {t('empty.skatersAtYourParksNote')}
+            </Text>
+          ) : null}
+          {atList.map((p) => (
+            <SkaterRow key={p.id} person={p} />
+          ))}
+        </View>,
+      );
+    }
+    // People always shows the home city; All only when your parks have nobody yet.
+    const cityShown = filter === 'people' ? cityList.filter((p) => !atList.some((a) => a.id === p.id)) : atList.length ? [] : cityList;
+    if (cityShown.length && city) {
+      sections.push(
+        <View key="in-city" style={styles.list}>
+          <SectionHead
+            title={
+              filter === 'people' && discipline
+                ? t('empty.disciplineIn', { discipline: t(`disciplines.${discipline}`), city })
+                : t('empty.skatersIn', { city })
+            }
+          />
+          {cityShown.map((p) => (
+            <SkaterRow key={p.id} person={p} />
+          ))}
+        </View>,
+      );
+    }
+  }
+
+  if (filter === 'pages') {
+    const pages = followedPages.data ?? [];
+    if (pages.length) {
+      sections.push(
+        <View key="pages" style={styles.list}>
+          <SectionHead title={t('empty.pagesYouFollow')} />
+          {pages.map((p) => (
+            <PageRow
+              key={p.id}
+              page={p}
+              onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: p.handle } })}
+            />
+          ))}
+        </View>,
+      );
+    }
+    sections.push(<SuggestPageBox key="suggest" />);
+  }
+
+  // Nothing to show yet (a new city, or still loading): the one-line hint.
+  if (sections.length === 0 || (filter === 'pages' && sections.length === 1)) {
+    sections.unshift(
+      <Text key="hint" variant="body" color="textSecondary">
+        {t('find.hint')}
+      </Text>,
+    );
+  }
+
+  return <>{sections}</>;
 }
 
 /** A person in the results: initials, username (lock if private), one line, and "Following". */
@@ -372,4 +699,11 @@ const styles = StyleSheet.create({
   personMain: { flex: 1, minWidth: 0, gap: 3 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   shrink: { flexShrink: 1 },
+  flex: { flex: 1 },
+  noResults: { gap: space[2] },
+  cityLink: { minHeight: size.tapMin, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], marginTop: space[2] },
+  cityLinkText: { flex: 1, fontFamily: fontFamily.sansSemiBold },
+  locationCard: { borderWidth: stroke.rule, padding: 14, gap: space[3] },
+  locationText: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  locationButton: { minHeight: size.tapMin },
 });

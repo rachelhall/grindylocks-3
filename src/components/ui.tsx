@@ -129,6 +129,9 @@ const icons = {
   // Rachel's page tools (PR 6b): a suspended page, a page split off another.
   pauseCircle: { ios: 'pause.circle', android: 'pause_circle' },
   split: { ios: 'arrow.triangle.branch', android: 'call_split' },
+  // Empty states (Nov 5 mockups).
+  cloudOff: { ios: 'icloud.slash', android: 'cloud_off' },
+  history: { ios: 'clock.arrow.circlepath', android: 'history' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

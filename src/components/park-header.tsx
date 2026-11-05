@@ -147,10 +147,13 @@ export function HalftoneGround({
   fadeStart = HALFTONE.fadeStart,
   fadeEnd = HALFTONE.fadeEnd,
   fromTopRight = false,
+  ground = brand.ink,
 }: {
   fadeStart?: number;
   fadeEnd?: number;
   fromTopRight?: boolean;
+  /** What the dots sit on: ink for headers, the raised surface for empty-state blocks. */
+  ground?: string;
 }) {
   const [box, setBox] = useState<{ width: number; height: number } | null>(null);
   const onLayout = (e: LayoutChangeEvent) => {
@@ -171,7 +174,7 @@ export function HalftoneGround({
                 fadeStart,
                 fadeEnd,
                 pink: rgba(brand.pink),
-                ink: rgba(brand.ink),
+                ink: rgba(ground),
               }}
             />
           </Fill>

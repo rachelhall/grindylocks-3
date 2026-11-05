@@ -20,6 +20,7 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { Avatar } from '@/components/avatar';
 import { CheckInTag } from '@/components/check-in-tag';
+import { EmptyState } from '@/components/empty-state';
 import { MediaTag } from '@/components/media';
 import { ProfileMeetups } from '@/components/park-meetups';
 import { ParkRow, useParkLine } from '@/components/parks';
@@ -231,7 +232,18 @@ function FollowButton({ viewerId, profile }: { viewerId: string; profile: Profil
 
 /* Tabs ---------------------------------------------------------------------------------- */
 
-function ProfileTabs({ tabs, current, onChange }: { tabs: Tab[]; current: Tab; onChange: (tab: Tab) => void }) {
+function ProfileTabs({
+  tabs,
+  current,
+  onChange,
+  locked,
+}: {
+  tabs: Tab[];
+  current: Tab | null;
+  onChange: (tab: Tab) => void;
+  /** A private profile you don't follow: the tabs show, but nothing opens. */
+  locked?: boolean;
+}) {
   const { t } = useTranslation();
   const c = useColors();
   return (
@@ -251,10 +263,11 @@ function ProfileTabs({ tabs, current, onChange }: { tabs: Tab[]; current: Tab; o
           <Pressable
             key={tab}
             accessibilityRole="tab"
-            accessibilityState={{ selected: on }}
+            accessibilityState={{ selected: on, disabled: locked }}
             accessibilityLabel={tab === 'saved' ? `${label}, ${t('profile.onlyYou')}` : label}
+            disabled={locked}
             onPress={() => onChange(tab)}
-            style={({ pressed }) => [styles.tab, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.tab, locked && styles.tabLocked, pressed && styles.pressed]}
           >
             <View style={styles.tabLabel}>
               {tab === 'saved' ? <Icon name="lock" color={on ? c.text : c.textSecondary} size={14} /> : null}
@@ -363,7 +376,15 @@ function SavedParks({ userId }: { userId: string }) {
   const ids = useMemo(() => [...saved], [saved]);
   const { data: parks, isPending, isError, refetch } = useParksByIds(ids);
 
-  if (ids.length === 0) return <EmptyTab text={t('profile.emptySaved')} />;
+  if (ids.length === 0) {
+    return (
+      <EmptyState
+        title={t('empty.savedTitle')}
+        body={t('empty.savedBody')}
+        action={{ label: t('empty.browseMap'), icon: 'map', onPress: () => router.navigate('/') }}
+      />
+    );
+  }
   if (isError && !parks) {
     return (
       <View style={styles.empty}>
@@ -408,7 +429,7 @@ function GridTab({
   query: { isPending: boolean; isError: boolean; isFetchingNextPage: boolean; refetch: () => unknown };
   posts: GridPost[];
   width: number;
-  empty: string;
+  empty: ReactNode;
 }) {
   const { t } = useTranslation();
   const c = useColors();
@@ -425,7 +446,7 @@ function GridTab({
       </View>
     );
   }
-  if (posts.length === 0) return <EmptyTab text={empty} />;
+  if (posts.length === 0) return <>{empty}</>;
   return (
     <>
       <MasonryGrid posts={posts} width={width} />
@@ -604,7 +625,20 @@ export function ProfileView({ username }: { username?: string }) {
         />
         {isMe && myId ? <PagesYouManage userId={myId} /> : null}
         {!canSeePosts ? (
-          <EmptyTab icon="lock" text={t('profile.privateBody')} />
+          // Locked (Rachel, Nov 5): Posts, Tagged and Filmed stay visible but
+          // inactive; Meetups stays hidden.
+          <>
+            <ProfileTabs tabs={['posts', 'tagged', 'filmed']} current={null} onChange={() => undefined} locked />
+            <EmptyState
+              icon="lock"
+              title={t('empty.privateTitle')}
+              body={
+                profile.followStatus === 'pending'
+                  ? t('empty.privateRequested', { username: name })
+                  : t('empty.privateBody', { username: name })
+              }
+            />
+          </>
         ) : (
           <>
             <ProfileTabs tabs={tabs} current={tab} onChange={openTab} />
@@ -619,7 +653,18 @@ export function ProfileView({ username }: { username?: string }) {
                   <Button label={t('common.retry')} variant="secondary" onPress={() => void posts.refetch()} />
                 </View>
               ) : gridPosts.length === 0 ? (
-                <EmptyTab text={isMe ? t('profile.emptyPostsOwn') : t('profile.emptyPosts', { username: name })} />
+                isMe ? (
+                  // The brand layer: your own empty Posts tab invites you to post.
+                  <EmptyState
+                    variant="brand"
+                    title={t('empty.ownPostsTitle')}
+                    body={t('empty.ownPostsBody')}
+                    action={{ label: t('feed.newPost'), icon: 'add', kind: 'accent', onPress: () => router.push('/new-post') }}
+                    style={styles.brandEmpty}
+                  />
+                ) : (
+                  <EmptyState title={t('empty.noPostsYet')} body={t('empty.theirPostsBody', { username: name })} />
+                )
               ) : (
                 <>
                   <MasonryGrid posts={gridPosts} width={width} />
@@ -631,14 +676,24 @@ export function ProfileView({ username }: { username?: string }) {
                 query={tagged}
                 posts={taggedPosts}
                 width={width}
-                empty={isMe ? t('profile.emptyTaggedOwn') : t('profile.emptyTagged', { username: name })}
+                empty={
+                  <EmptyState
+                    title={t('empty.taggedTitle')}
+                    body={isMe ? t('empty.taggedOwnBody') : t('profile.emptyTagged', { username: name })}
+                  />
+                }
               />
             ) : tab === 'filmed' ? (
               <GridTab
                 query={filmed}
                 posts={filmedPosts}
                 width={width}
-                empty={isMe ? t('profile.emptyFilmedOwn') : t('profile.emptyFilmed', { username: name })}
+                empty={
+                  <EmptyState
+                    title={t('empty.filmedTitle')}
+                    body={isMe ? t('empty.filmedOwnBody') : t('profile.emptyFilmed', { username: name })}
+                  />
+                }
               />
             ) : tab === 'meetups' ? (
               <ProfileMeetups userId={profile.id} isMe={isMe} username={name} />
@@ -695,6 +750,7 @@ const styles = StyleSheet.create({
   tabLabel: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingBottom: space[2] },
   // Sits on the bar's bottom rule (the scroll view would clip a negative margin).
   tabLine: { height: 3 },
+  tabLocked: { opacity: 0.5 },
   grid: { flexDirection: 'row', gap: GRID_GAP, paddingTop: space[1], alignItems: 'flex-start' },
   column: { gap: GRID_GAP },
   tileEmpty: { flex: 1, alignItems: 'center', justifyContent: 'center' },
@@ -703,4 +759,5 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', gap: space[3], paddingHorizontal: space[6], paddingTop: space[8] },
   center: { textAlign: 'center' },
   savedList: { gap: 6, padding: space[4] },
+  brandEmpty: { margin: space[4] },
 });

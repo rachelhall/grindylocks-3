@@ -397,9 +397,17 @@ export default function ParkScreen() {
             </Text>
           </Text>
           {park.obstacles.length === 0 ? (
-            <Text variant="body" color="textSecondary">
-              {t('park.noObstacles')}
-            </Text>
+            // A dashed box, like No regulars yet: tag one when you post here,
+            // or report what's missing (Empty-Park-NoObstacles).
+            <View style={[styles.noObstacles, { borderColor: c.textMuted }]}>
+              <Icon name="category" color={c.textSecondary} size={22} />
+              <Text variant="bodySm" color="textSecondary" style={styles.flex}>
+                {t('empty.noObstaclesBody')}{' '}
+                <Text variant="bodySm" color="accentText" accessibilityRole="link" onPress={reportInfo} style={styles.linkText}>
+                  {t('empty.reportMissing')}
+                </Text>
+              </Text>
+            </View>
           ) : (
             <View style={styles.obstacles}>
               {park.obstacles.map((o) => {
@@ -524,6 +532,8 @@ const styles = StyleSheet.create({
   hoursDays: { minWidth: 96 },
   fees: { gap: 2, marginTop: space[2] },
   obstacles: { gap: 6 },
+  noObstacles: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4], flexDirection: 'row', alignItems: 'flex-start', gap: space[3] },
+  linkText: { fontFamily: fontFamily.sansSemiBold, textDecorationLine: 'underline' },
   obstacle: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], paddingVertical: space[2] },
   footer: { gap: space[1] },
 });
