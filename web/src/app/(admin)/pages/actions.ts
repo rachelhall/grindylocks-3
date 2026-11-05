@@ -66,8 +66,13 @@ function badId(...ids: (string | null | undefined)[]): Result<never> | null {
   return ids.every((id) => !id || UUID.test(id)) ? null : { ok: false, error: messages.not_found };
 }
 
-export async function suspendPage(page: string, reason: string, hideRecent: boolean): Promise<Result<number>> {
-  return badId(page) ?? run<number>("suspend_page", { page, reason, hide_recent: hideRecent, cancel_meetups: false });
+export async function suspendPage(
+  page: string,
+  reason: string,
+  hideRecent: boolean,
+  cancelMeetups: boolean,
+): Promise<Result<number>> {
+  return badId(page) ?? run<number>("suspend_page", { page, reason, hide_recent: hideRecent, cancel_meetups: cancelMeetups });
 }
 
 export async function liftSuspension(page: string): Promise<Result<number>> {

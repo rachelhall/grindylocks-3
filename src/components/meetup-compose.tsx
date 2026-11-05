@@ -268,6 +268,7 @@ export function RepeatsSheet({
   visible,
   value,
   startLabel,
+  seasons: withSeasons = true,
   onChange,
   onClose,
 }: {
@@ -275,6 +276,8 @@ export function RepeatsSheet({
   value: RepeatDraft;
   /** "18:00–21:00 · Copenhagen time", or null before a time is picked. */
   startLabel: string | null;
+  /** Seasons pick each date's park, so they're for meetups at parks (PR 9). */
+  seasons?: boolean;
   onChange: (next: RepeatDraft) => void;
   onClose: () => void;
 }) {
@@ -337,6 +340,8 @@ export function RepeatsSheet({
           </Text>
         ) : null}
 
+        {withSeasons ? (
+        <>
         <View style={styles.headingRow}>
           <Caption>{t('meetupCompose.seasons')}</Caption>
           <Text variant="caption" color="textSecondary" style={styles.flexEnd}>
@@ -398,6 +403,8 @@ export function RepeatsSheet({
               {t('meetupCompose.addSeason')}
             </Text>
           </Pressable>
+        ) : null}
+        </>
         ) : null}
 
         <Caption>{t('meetupCompose.ends')}</Caption>

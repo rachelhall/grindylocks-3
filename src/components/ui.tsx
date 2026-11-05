@@ -132,6 +132,12 @@ const icons = {
   // Empty states (Nov 5 mockups).
   cloudOff: { ios: 'icloud.slash', android: 'cloud_off' },
   history: { ios: 'clock.arrow.circlepath', android: 'history' },
+  // Pages as meetup hosts (PR 9).
+  dateRange: { ios: 'calendar.day.timeline.left', android: 'date_range' },
+  ticket: { ios: 'ticket', android: 'confirmation_number' },
+  idBadge: { ios: 'person.text.rectangle', android: 'badge' },
+  editLocation: { ios: 'mappin.and.ellipse', android: 'edit_location_alt' },
+  minus: { ios: 'minus', android: 'remove' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

@@ -49,9 +49,13 @@ export type ReportTarget =
    */
   | { kind: 'comment'; id: string; personId: string | null; username: string; page?: { onBlock: () => void } }
   | { kind: 'person'; id: string; personId: string; username: string }
-  /** A meetup date: `personId` and `username` are its host; `parkName` where it's routed. */
-  | { kind: 'meetup'; id: string; personId: string; username: string; parkName: string | null }
-  | { kind: 'meetup_comment'; id: string; personId: string; username: string; parkName: string | null };
+  /**
+   * A meetup date: `personId` and `username` are its host; `parkName` where
+   * it's routed. A page's meetup or comment (PR 9) has no person behind it:
+   * `personId` is null and `username` is the page's name.
+   */
+  | { kind: 'meetup'; id: string; personId: string | null; username: string; parkName: string | null }
+  | { kind: 'meetup_comment'; id: string; personId: string | null; username: string; parkName: string | null };
 
 /** Same limit as the database. */
 export const MAX_REPORT_DETAILS = 500;

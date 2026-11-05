@@ -99,12 +99,13 @@ function compose(row: Claimed, language: string): { title?: string; body: string
   const metro = row.metro_name ?? '';
   const say = (key: keyof Sentences, extra: Record<string, string> = {}) => fill(s[key], { a, username, metro, ...extra });
   const lang = language in strings ? language : 'en';
-  const meetup = row.event_title ?? row.park_name ?? '';
-  const park = row.park_name ?? '';
   const page = row.page_name ?? '';
+  // A page's meetup (PR 9) may be at its shop or an address: then the page names the place.
+  const meetup = row.event_title ?? row.park_name ?? page;
+  const park = row.park_name ?? page;
   const reasonOf = (r: string) => {
     const key = `reason_${r}` as keyof Sentences;
-    return key in s ? s[key] : s.reason_other;
+    return key in s ? fill(s[key], { name: page }) : s.reason_other;
   };
 
   switch (row.kind) {
@@ -135,6 +136,12 @@ function compose(row: Claimed, language: string): { title?: string; body: string
     case 'meetup_cancelled': {
       if (!meetup) return null;
       const [reason, scope] = (row.detail ?? 'other').split(':');
+      // The page tools: "8SET has closed", or "It's no longer happening" for a suspension.
+      if (reason === 'page_closed' || reason === 'page_suspended') {
+        return scope === 'series'
+          ? { body: say('meetupEndedPage', { meetup, reason: reasonOf(reason) }) }
+          : { body: say('meetupCancelledPage', { meetup, date: meetupTime(row, lang, 'date'), reason: reasonOf(reason) }) };
+      }
       return scope === 'series'
         ? { body: say('meetupEnded', { meetup, reason: reasonOf(reason) }) }
         : { body: say('meetupCancelled', { meetup, date: meetupTime(row, lang, 'date'), reason: reasonOf(reason) }) };

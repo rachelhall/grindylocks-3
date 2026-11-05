@@ -6,6 +6,13 @@
  * who can see a meetup, who's named on the going list, what hosts and
  * co-hosts may do. This file only asks. A meetup is a series (one-off or
  * repeating); each date is its own row (`events`), and the app opens dates.
+ *
+ * Pages as hosts (brand and shop accounts part A, PR 9, migration
+ * `page_meetups`): a meetup can be hosted by a page instead of a person, and
+ * then can meet at the page's own shop or an address instead of a park, run
+ * over several days, and carry a capacity, a ticket link and 18+. The
+ * computed fields (`meetup_host_page`, `meetup_place_info`, …) answer what
+ * the screens need, so a page meetup never names the member who made it.
  */
 import {
   type InfiniteData,
@@ -31,23 +38,55 @@ type Enums = Database['public']['Enums'];
 export type MeetupVisibility = Enums['meetup_visibility'];
 export type MeetupCancelReason = Enums['meetup_cancel_reason'];
 export type Discipline = Enums['discipline'];
+export type MeetupPlace = Enums['meetup_place'];
 
 export const MEETUP_TITLE_MAX = 80;
 export const MEETUP_NOTE_MAX = 280;
 export const MAX_CO_HOSTS = 10;
 export const COVER_BUCKET = 'meetup-covers';
+/** Pages: spots, a meetup over several days, and the ticket link (as the database checks them). */
+export const MAX_CAPACITY = 10000;
+export const MAX_DAYS = 14;
+export const MAX_TICKET_URL = 500;
 
+// The park is a left join: a page meetup can be at the page's shop or an address.
 const MEETUP_SELECT = `
   id, series_id, park_id, starts_at, ends_at, disciplines, title, note, cover_path,
   status, cancel_reason, cancel_note, went_count, hidden_at,
-  series:event_series!inner(id, host_id, visibility, weekdays, ended_at),
-  park:parks!inner(id, slug, display_name, latitude, longitude, metro:metro_areas(timezone))
+  place, capacity, ticket_url, adults_only, multi_day,
+  series:event_series!inner(id, host_id, host_page_id, visibility, weekdays, ended_at),
+  park:parks(id, slug, display_name, latitude, longitude, metro:metro_areas(timezone)),
+  meetup_host_page, meetup_place_info, meetup_timezone, meetup_official, spots_taken, meetup_days, i_run_meetup
 `;
+
+/** The page hosting a meetup (PR 9). */
+export type HostPage = {
+  id: string;
+  handle: string;
+  display_name: string;
+  logo_path: string | null;
+  state: Enums['page_state'];
+  roles: Enums['page_role'][];
+};
+
+/** Where a date happens: a park, the host page's own shop (live), or an address with a pin. */
+export type PlaceInfo = {
+  kind: MeetupPlace;
+  park: { id: string; slug: string; display_name: string } | null;
+  page: { id: string; handle: string; display_name: string; address: string | null } | null;
+  address: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  metro_name: string | null;
+};
+
+/** One day of a meetup over several days, on the place's clock. */
+export type MeetupDay = { day: string; starts_at: string; ends_at: string };
 
 export type Meetup = {
   id: string;
   series_id: string;
-  park_id: string;
+  park_id: string | null;
   starts_at: string;
   ends_at: string;
   disciplines: Discipline[];
@@ -60,7 +99,21 @@ export type Meetup = {
   went_count: number | null;
   /** Hidden by park admins: then only hosts and moderators see it. */
   hidden_at: string | null;
-  series: { id: string; host_id: string; visibility: MeetupVisibility; weekdays: number[]; ended_at: string | null };
+  place: MeetupPlace;
+  /** Pages only: spots (hosts and co-hosts don't take one), a https:// ticket link, 18+. */
+  capacity: number | null;
+  ticket_url: string | null;
+  adults_only: boolean;
+  multi_day: boolean;
+  series: {
+    id: string;
+    host_id: string | null;
+    host_page_id: string | null;
+    visibility: MeetupVisibility;
+    weekdays: number[];
+    ended_at: string | null;
+  };
+  /** Null when the meetup isn't at a park (a page's shop or an address). */
   park: {
     id: string;
     slug: string;
@@ -68,8 +121,61 @@ export type Meetup = {
     latitude: number | null;
     longitude: number | null;
     metro: { timezone: string | null } | null;
-  };
+  } | null;
+  meetup_host_page: HostPage | null;
+  meetup_place_info: PlaceInfo | null;
+  meetup_timezone: string | null;
+  /** Hosted by the page that runs the park. */
+  meetup_official: boolean | null;
+  /** Everyone going, when there's a capacity. */
+  spots_taken: number | null;
+  meetup_days: MeetupDay[] | null;
+  /** You're on the host page's team (you manage it as the page). */
+  i_run_meetup: boolean | null;
 };
+
+/** The place's clock: the park's, else the host page's own. */
+export function meetupTz(m: Pick<Meetup, 'meetup_timezone' | 'park'>): string | null {
+  return m.meetup_timezone ?? m.park?.metro?.timezone ?? null;
+}
+
+/**
+ * Where it is, in a word: the park's name, "8SET (the shop)", or the
+ * address's first line.
+ */
+export function meetupPlaceName(
+  m: { park?: { display_name: string } | null; meetup_place_info?: PlaceInfo | null; place?: MeetupPlace },
+  t: TFunction,
+): string {
+  const info = m.meetup_place_info ?? null;
+  const kind = info?.kind ?? m.place ?? 'park';
+  if (kind === 'page' && info?.page) return t('pageMeet.theShop', { name: info.page.display_name });
+  if (kind === 'address' && info?.address) return info.address.split(/\n|,/)[0].trim();
+  return m.park?.display_name ?? info?.park?.display_name ?? '';
+}
+
+/**
+ * Why a date was cancelled, as a tag reads it. The page tools' reasons
+ * (PR 9): Close for good reads "The shop has closed"; Suspend reads "No
+ * longer happening", since skaters aren't told about a suspension.
+ */
+export function cancelReasonLabel(
+  reason: MeetupCancelReason | null,
+  hostPage: Pick<HostPage, 'roles'> | null,
+  t: TFunction,
+): string {
+  if (reason === 'page_closed') return hostPage?.roles.includes('shop') === false ? t('pageMeet.brandClosed') : t('pageMeet.shopClosed');
+  if (reason === 'page_suspended') return t('pageMeet.noLongerHappening');
+  const key = (['rained_out', 'park_closed', 'something_came_up'] as const).find((r) => r === reason) ?? 'other';
+  return t(`meetup.reason.${key}`);
+}
+
+/** Spots left, or null without a capacity. */
+export function spotsLeft(m: Pick<Meetup, 'capacity' | 'spots_taken'>): number | null {
+  if (m.capacity === null) return null;
+  return Math.max(0, m.capacity - (m.spots_taken ?? 0));
+}
+
 
 /** One date of a meetup, or null when you can't see it (or it's gone). */
 export function useMeetup(eventId: string | undefined) {
@@ -89,8 +195,11 @@ export function useMeetup(eventId: string | undefined) {
  * A meetup's headline: its title, or (Nov 3) its one line when it has no
  * title, or "Meetup at Memo" when it has neither.
  */
-export function meetupHeadline(m: { title: string | null; note: string | null; park: { display_name: string } }, t: TFunction) {
-  return m.title ?? m.note ?? t('meetup.fallbackTitle', { park: m.park.display_name });
+export function meetupHeadline(
+  m: { title: string | null; note: string | null; park?: { display_name: string } | null; meetup_place_info?: PlaceInfo | null },
+  t: TFunction,
+) {
+  return m.title ?? m.note ?? t('meetup.fallbackTitle', { park: meetupPlaceName(m, t) });
 }
 
 /** "Every Thursday", "Every Mon, Wed and Fri", or null for a one-off. */
@@ -159,12 +268,13 @@ export function useGoing(eventId: string | undefined) {
 export function useSetGoing(eventId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (args: { going: boolean; goingPrivately?: boolean; remindMe?: boolean }) => {
+    mutationFn: async (args: { going: boolean; goingPrivately?: boolean; remindMe?: boolean; confirmedAdult?: boolean }) => {
       const { error } = await supabase.rpc('set_going', {
         event: eventId!,
         going: args.going,
         going_privately: args.goingPrivately,
         remind_me: args.remindMe,
+        confirmed_adult: args.confirmedAdult,
       });
       if (error) throw error;
     },
@@ -172,6 +282,12 @@ export function useSetGoing(eventId: string | undefined) {
     // park page, profiles) pick up the new count and button too.
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
   });
+}
+
+/** set_going's refusals the Going sheet explains (PR 9): 18+ needs the confirm, and a full meetup. */
+export function goingError(err: unknown): 'adult_confirm_needed' | 'meetup_full' | null {
+  const message = (err as { message?: string } | null)?.message;
+  return message === 'adult_confirm_needed' || message === 'meetup_full' ? message : null;
 }
 
 /** Whether you follow a repeating meetup, and the switch. */
@@ -237,7 +353,10 @@ export function useSetGoingPrivatelyDefault(userId: string | undefined) {
 
 /* Comments ---------------------------------------------------------------------------- */
 
-export type MeetupComment = Fns['meetup_comments']['Returns'][number];
+/** A comment; `page` is set when the host page made it (PR 9), and then there's no author. */
+export type MeetupComment = Omit<Fns['meetup_comments']['Returns'][number], 'page'> & {
+  page: { id: string; handle: string; display_name: string; logo_path: string | null } | null;
+};
 export type MeetupThread = { comment: MeetupComment; replies: MeetupComment[] };
 
 export function useMeetupComments(eventId: string | undefined) {
@@ -248,7 +367,7 @@ export function useMeetupComments(eventId: string | undefined) {
       if (error) throw error;
       const threads: MeetupThread[] = [];
       const byId = new Map<string, MeetupThread>();
-      for (const c of data ?? []) {
+      for (const c of (data ?? []) as unknown as MeetupComment[]) {
         if (!c.parent_id) {
           const thread = { comment: c, replies: [] };
           threads.push(thread);
@@ -267,10 +386,12 @@ export function useMeetupComments(eventId: string | undefined) {
 export function useAddMeetupComment(eventId: string | undefined, userId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (args: { body: string; parentId?: string | null; replyToUserId?: string | null }) => {
+    mutationFn: async (args: { body: string; parentId?: string | null; replyToUserId?: string | null; asPage?: string | null }) => {
+      // As the host page (PR 9): no author; the database keeps who wrote it.
       const { error } = await supabase.from('event_comments').insert({
         event_id: eventId!,
-        author_id: userId!,
+        author_id: args.asPage ? null : userId!,
+        page_id: args.asPage ?? null,
         body: args.body,
         parent_id: args.parentId ?? null,
         reply_to_user_id: args.replyToUserId ?? null,
@@ -296,8 +417,21 @@ export function useDeleteMeetupComment(eventId: string | undefined) {
 
 export type Season = { park: { id: string; name: string }; fromMonth: number; toMonth: number };
 
+/** A day of a meetup over several days, as picked (on the place's clock). */
+export type DraftDay = { startsAt: Date; endsAt: Date };
+
 export type MeetupDraft = {
+  /** The page it's posted as (PR 9), or null for you. */
+  asPage: string | null;
+  place: MeetupPlace;
   park: { id: string; name: string; timeZone: string | null } | null;
+  /** place 'address': the address and its pin. */
+  address: { text: string; latitude: number; longitude: number } | null;
+  /** Several days (pages only), 2 to 14 in a row; null for one day. */
+  days: DraftDay[] | null;
+  capacity: number | null;
+  ticketUrl: string;
+  adultsOnly: boolean;
   startsAt: Date | null;
   endsAt: Date | null;
   note: string;
@@ -315,20 +449,31 @@ export function useCreateMeetup(userId: string | undefined) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (d: MeetupDraft): Promise<string> => {
-      if (!userId || !d.park || !d.startsAt) throw new Error('incomplete');
+      const placed = d.place === 'park' ? Boolean(d.park) : d.place === 'address' ? Boolean(d.address) : true;
+      if (!userId || !placed || (!d.startsAt && !d.days)) throw new Error('incomplete');
       const coverPath = d.cover ? await uploadMeetupCover(userId, d.cover.uri) : null;
+      const page = d.asPage;
       const { data, error } = await supabase.rpc('create_meetup', {
-        park: d.park.id,
-        starts_at: d.startsAt.toISOString(),
-        ends_at: d.endsAt?.toISOString(),
+        park: d.place === 'park' ? d.park?.id : undefined,
+        starts_at: d.days ? undefined : d.startsAt?.toISOString(),
+        ends_at: d.days ? undefined : d.endsAt?.toISOString(),
+        as_page: page ?? undefined,
+        place: page ? d.place : undefined,
+        address: page && d.place === 'address' ? d.address?.text : undefined,
+        latitude: page && d.place === 'address' ? d.address?.latitude : undefined,
+        longitude: page && d.place === 'address' ? d.address?.longitude : undefined,
+        capacity: page && d.capacity ? d.capacity : undefined,
+        ticket_url: page && d.ticketUrl.trim() ? d.ticketUrl.trim() : undefined,
+        adults_only: page && d.adultsOnly ? true : undefined,
+        days: page && d.days ? (d.days.map((x) => ({ starts_at: x.startsAt.toISOString(), ends_at: x.endsAt.toISOString() })) as never) : undefined,
         note: d.note.trim() || undefined,
         title: d.title.trim() || undefined,
         visibility: d.visibility,
         disciplines: d.disciplines,
         cover_path: coverPath ?? undefined,
-        weekdays: d.weekdays.length ? d.weekdays : undefined,
+        weekdays: d.weekdays.length && !d.days ? d.weekdays : undefined,
         repeat_ends_on: d.repeatEndsOn ?? undefined,
-        seasons: d.seasons.length
+        seasons: d.seasons.length && d.place === 'park'
           ? d.seasons.map((s) => ({ park: s.park.id, from_month: s.fromMonth, to_month: s.toMonth }))
           : undefined,
         co_hosts: d.coHosts.length ? d.coHosts.map((p) => p.id) : undefined,
@@ -439,7 +584,16 @@ const CARD_SELECT = `${MEETUP_SELECT},
   feed_at, going_total, going_faces, i_am_going, host_list, meetup_comment_count, linked_post_count`;
 
 export type MeetupFace = { id: string; username: string | null; avatar_path: string | null; following: boolean };
-export type MeetupHost = { id: string; username: string | null; avatar_path: string | null; role: 'host' | 'co_host' };
+/** A host on a card: a page host comes first as kind 'page' (`username` is its name). */
+export type MeetupHost = {
+  kind?: 'page' | 'person';
+  id: string;
+  username: string | null;
+  avatar_path: string | null;
+  handle?: string;
+  logo_path?: string | null;
+  role: 'host' | 'co_host';
+};
 
 export type MeetupCard = Meetup & {
   feed_at: string;
@@ -456,7 +610,8 @@ type CardFn =
   | 'park_meetups'
   | 'park_past_meetups'
   | 'profile_meetups'
-  | 'profile_past_meetups';
+  | 'profile_past_meetups'
+  | 'page_meetups';
 
 async function cardsFrom(fn: CardFn, args: Record<string, unknown>): Promise<MeetupCard[]> {
   const { data, error } = await supabase.rpc(fn as never, args as never).select(CARD_SELECT);
@@ -567,6 +722,17 @@ export function useProfilePastMeetups(userId: string | undefined, enabled = true
   );
 }
 
+/** A page's Upcoming (PR 9): each meetup once at its next date, cancelled ones crossed out. */
+export function usePageMeetups(pageId: string | undefined, max = 5, enabled = true) {
+  return useQuery({
+    queryKey: [...keys.pageMeetups(pageId ?? ''), max],
+    queryFn: () => cardsFrom('page_meetups', { page: pageId, max_results: max }),
+    enabled: Boolean(pageId) && enabled,
+    staleTime: fresh.social,
+    placeholderData: keepPreviousData,
+  });
+}
+
 /* From this session -------------------------------------------------------------------- */
 
 export type RecentMeetup = Fns['my_recent_meetups']['Returns'][number];
@@ -609,6 +775,16 @@ export async function fetchCheckInParks(latitude: number, longitude: number): Pr
 /** The fields an edit can change; only the ones that changed are sent. */
 export type MeetupChanges = {
   park?: string;
+  /** Pages (PR 9): the place, the page-only fields and the days of a meetup over several days. */
+  place?: MeetupPlace;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+  /** An empty string clears it. */
+  capacity?: number | '';
+  ticket_url?: string;
+  adults_only?: boolean;
+  days?: { starts_at: string; ends_at: string }[];
   starts_at?: string;
   ends_at?: string;
   title?: string;

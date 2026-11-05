@@ -143,6 +143,8 @@ export const keys = {
   homeMeetups: (userId: string, newerThan: string) => ['meetups', 'home', userId, newerThan] as const,
   /** A park's Upcoming meetups. */
   parkMeetups: (parkId: string) => ['meetups', 'park', parkId] as const,
+  /** A page's Upcoming meetups (PR 9). */
+  pageMeetups: (pageId: string) => ['meetups', 'page', pageId] as const,
   /** A park's Past meetups (paged) and how many there are. */
   parkPastMeetups: (parkId: string) => ['meetups', 'park-past', parkId] as const,
   parkPastMeetupCount: (parkId: string) => ['meetups', 'park-past-count', parkId] as const,
