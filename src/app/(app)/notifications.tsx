@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
@@ -28,7 +28,7 @@ import {
   useMyPageNotifications,
 } from '@/lib/claims';
 import { useRestriction } from '@/lib/moderation';
-import { isOfficial, pageKind } from '@/lib/pages';
+import { isOfficial, pageKind, usePageRelation } from '@/lib/pages';
 import { keys } from '@/lib/query';
 import { type FollowRequest, useAnswerFollowRequest, useFollowRequests } from '@/lib/social';
 import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
@@ -63,6 +63,9 @@ import { brand, fontFamily, space, stroke, Text, useColors } from '@/theme';
  *   type badge: claim approved (opens the logo screen), claim declined with
  *   Rachel's reason (opens the page to try again), a followed page joining,
  *   team changes and a suggestion going live.
+ * - Rachel's page tools (PR 6b): the team hears when its page is suspended,
+ *   lifted, renamed, merged away, closed for good or reopened; followers of a
+ *   page that was split get "FR Skates has its own page" with Follow.
  */
 
 const BADGES: Record<NotificationKind, IconName> = {
@@ -404,7 +407,21 @@ export default function Notifications() {
         text = taken ? t('notifications.page.claimTaken', { name }) : t('notifications.page.claimDeclined', { name });
         icon = 'block';
         break;
-      case 'page_team_change':
+      case 'page_team_change': {
+        const [what, old = ''] = (p.message ?? '').split(/:(.*)/s);
+        // From Rachel's page tools (PR 6b): the page's whole team hears these.
+        const tools: Record<string, [string, IconName]> = {
+          suspended: [t('notifications.page.suspended', { name }), 'pauseCircle'],
+          suspension_lifted: [t('notifications.page.suspensionLifted', { name }), 'check'],
+          renamed: [t('notifications.page.renamed', { name, old }), 'edit'],
+          merged: [t('notifications.page.merged', { name, old }), 'badgeRole'],
+          closed: [t('notifications.page.closed', { name }), 'archive'],
+          reopened: [t('notifications.page.reopened', { name }), 'storefront'],
+        };
+        if (tools[what]) {
+          [text, icon] = tools[what];
+          break;
+        }
         text =
           p.message === 'removed'
             ? t('notifications.page.removed', { name })
@@ -417,6 +434,11 @@ export default function Notifications() {
                   : t('notifications.page.madeRole', { name, role: t(`pageInvite.roleA.${p.message === 'role:manager' ? 'manager' : 'staff'}`) });
         icon = 'badgeRole';
         break;
+      }
+      case 'page_split':
+        text = t('notifications.page.split', { name, old: p.message ?? '' });
+        icon = 'split';
+        break;
       case 'page_claimed':
         text = t('notifications.page.joined', { name });
         icon = 'storefront';
@@ -427,12 +449,23 @@ export default function Notifications() {
         break;
     }
     const excerpt = p.kind === 'page_claim_declined' && !taken && p.message ? p.message : null;
+    // The old name in "Seba's FR line has its own page" and renames and merges.
+    const boldOld =
+      p.kind === 'page_split'
+        ? (p.message ?? '')
+        : p.kind === 'page_team_change' && /^(renamed|merged):/.test(p.message ?? '')
+          ? (p.message ?? '').replace(/^[a-z]+:/, '')
+          : '';
     const after =
       p.kind === 'page_claim_declined' && !taken
         ? t('notifications.page.tryAgain')
         : p.kind === 'page_claimed'
           ? t('notifications.page.joinedNote')
-          : null;
+          : p.kind === 'page_team_change' && p.message === 'suspended'
+            ? t('notifications.page.suspendedNote')
+            : p.kind === 'page_split'
+              ? t('notifications.page.splitNote', { old: p.message ?? '' })
+              : null;
     const open = () => {
       if (p.kind === 'page_claim_approved' && !isOfficial(p.page)) {
         router.push({ pathname: '/page-edit/[handle]', params: { handle: p.page.handle } });
@@ -455,7 +488,7 @@ export default function Notifications() {
         </View>
         <View style={styles.rowText}>
           <Text variant="bodySm" style={{ color: ink }}>
-            {withBoldNames(text, p.actorUsername ? [name, p.actorUsername] : [name]).map((part, i) =>
+            {withBoldNames(text, [name, p.actorUsername ?? '', boldOld]).map((part, i) =>
               part.bold ? (
                 <Text key={i} variant="bodySm" style={{ color: ink, fontFamily: fontFamily.sansSemiBold }}>
                   {part.text}
@@ -475,6 +508,7 @@ export default function Notifications() {
               {after}
             </Text>
           ) : null}
+          {p.kind === 'page_split' ? <SplitFollow notice={p} userId={userId} /> : null}
           <Text variant="caption" style={{ color: secondary }}>
             {when}
           </Text>
@@ -692,7 +726,52 @@ export default function Notifications() {
   );
 }
 
+/**
+ * Follow on "FR Skates has its own page": followers of the old page aren't
+ * moved over, so this is the one place they're asked.
+ */
+function SplitFollow({ notice, userId }: { notice: PageNotice; userId: string | undefined }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const qc = useQueryClient();
+  const relation = usePageRelation(userId, notice.page.id);
+  const [following, setFollowing] = useState(notice.following);
+  if (following) {
+    return (
+      <View style={styles.splitFollowing}>
+        <Icon name="check" color={c.textSecondary} size={16} />
+        <Text variant="bodySm" color="textSecondary">
+          {t('page.following')}
+        </Text>
+      </View>
+    );
+  }
+  return (
+    <View style={styles.splitFollow}>
+      <Button
+        label={t('page.follow')}
+        variant="secondary"
+        loading={relation.isPending}
+        onPress={() =>
+          relation.mutate(
+            { what: 'follow', on: true },
+            {
+              onSuccess: () => {
+                setFollowing(true);
+                void qc.invalidateQueries({ queryKey: keys.myPageNotifications(userId ?? '') });
+              },
+              onError: () => Alert.alert(t('page.followFailed')),
+            },
+          )
+        }
+      />
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  splitFollow: { alignSelf: 'flex-start', paddingTop: space[1] },
+  splitFollowing: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingTop: space[1] },
   screen: { flex: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[4], paddingTop: space[4], paddingBottom: space[2] },
   title: { flex: 1 },

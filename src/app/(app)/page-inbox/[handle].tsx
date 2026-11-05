@@ -5,7 +5,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } fro
 
 import { Avatar } from '@/components/avatar';
 import { timeAgo } from '@/components/post-card';
-import { useTeamErrorAlert } from '@/components/page-team';
+import { SuspendedNotice, useTeamErrorAlert } from '@/components/page-team';
 import { PageTile } from '@/components/pages';
 import { SafeAreaView } from '@/components/safe-area';
 import { BackButton, Button, Icon, Toggle, useActionSheet } from '@/components/ui';
@@ -212,6 +212,8 @@ function Inbox({ page, canBlock }: { page: Page; canBlock: boolean }) {
         </View>
       </View>
       <ScrollView contentContainerStyle={styles.content}>
+        {/* Rachel's suspension notice, pinned here too (PR 6b). */}
+        <SuspendedNotice page={page} last />
         <View style={[styles.followers, { backgroundColor: brand.ink }]} accessible accessibilityLabel={`${t('pageInbox.followersLine', { count: followers.data ?? 0, name })}. ${t('pageInbox.followersNote')}`}>
           <View>
             <Text variant="display" style={[styles.count, { color: brand.pink }]} accessibilityElementsHidden>

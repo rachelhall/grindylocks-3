@@ -441,7 +441,13 @@ export function useSetPageLogo(userId: string | undefined) {
 
 /* The bell ---------------------------------------------------------------------------------- */
 
-export type PageNoticeKind = 'page_claim_approved' | 'page_claim_declined' | 'page_team_change' | 'page_claimed' | 'suggestion_live';
+export type PageNoticeKind =
+  | 'page_claim_approved'
+  | 'page_claim_declined'
+  | 'page_team_change'
+  | 'page_claimed'
+  | 'suggestion_live'
+  | 'page_split';
 
 /** A page notification in the bell, beside the people ones. */
 export type PageNotice = {
@@ -454,12 +460,24 @@ export type PageNotice = {
   /**
    * Declined: Rachel's reason ('another_claim_approved' when someone else's
    * went through). Team change: 'role:manager', 'role:staff', 'removed' or
-   * 'owner'. Suggestion live: what went live.
+   * 'owner', and from Rachel's page tools (PR 6b) 'suspended',
+   * 'suspension_lifted', 'renamed:<old name>', 'merged:<old name>',
+   * 'closed' or 'reopened'. Suggestion live: what went live. Split: the name
+   * of the page the new one was split from.
    */
   message: string | null;
+  /** Whether you follow the page (the split row's Follow button). */
+  following: boolean;
 };
 
-const NOTICE_KINDS = new Set<string>(['page_claim_approved', 'page_claim_declined', 'page_team_change', 'page_claimed', 'suggestion_live']);
+const NOTICE_KINDS = new Set<string>([
+  'page_claim_approved',
+  'page_claim_declined',
+  'page_team_change',
+  'page_claimed',
+  'suggestion_live',
+  'page_split',
+]);
 
 export function useMyPageNotifications(userId: string | undefined) {
   return useQuery({
@@ -484,6 +502,7 @@ export function useMyPageNotifications(userId: string | undefined) {
           },
           actorUsername: r.actor_username,
           message: r.message,
+          following: r.following,
         }));
     },
     enabled: Boolean(userId),

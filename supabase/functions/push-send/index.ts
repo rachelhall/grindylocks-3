@@ -35,7 +35,9 @@ type Claimed = {
    * What changed ("time", "park", "time,park"), or the cancel reason
    * (":series" when the rest of a series was cancelled). Pages: the invite
    * ("team:staff", "ownership"), the decline reason, the team change
-   * ("role:manager", "removed", "owner") or what went live.
+   * ("role:manager", "removed", "owner"; from Rachel's page tools "suspended",
+   * "suspension_lifted", "renamed:<old name>", "merged:<old name>", "closed",
+   * "reopened") or what went live.
    * A page_comment: "post" (on the page's post) or "reply" (to its comment).
    */
   detail: string | null;
@@ -164,6 +166,14 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       if (!page) return null;
       if (row.detail === 'removed') return { body: say('page_removed', { name: page }) };
       if (row.detail === 'owner') return { body: say('page_owner', { name: page }) };
+      // Rachel's page tools (PR 6b): told to the whole team. Renames and merges
+      // carry the old name after the colon.
+      if (row.detail === 'suspended') return { body: say('page_suspended', { name: page }) };
+      if (row.detail === 'suspension_lifted') return { body: say('page_suspensionLifted', { name: page }) };
+      if (row.detail === 'closed') return { body: say('page_closed', { name: page }) };
+      if (row.detail === 'reopened') return { body: say('page_reopened', { name: page }) };
+      if (row.detail?.startsWith('renamed:')) return { body: say('page_renamed', { name: page, old: row.detail.slice(8) }) };
+      if (row.detail?.startsWith('merged:')) return { body: say('page_merged', { name: page, old: row.detail.slice(7) }) };
       // Running a page (PR 7a): a hand-over accepted or declined, told to the owner.
       if (row.detail === 'handed_over') return { body: say('page_handedOver', { name: page }) };
       if (row.detail === 'ownership_declined') return { body: say('page_ownershipDeclined', { name: page }) };
