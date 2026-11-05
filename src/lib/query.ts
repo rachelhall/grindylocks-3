@@ -191,6 +191,8 @@ export const keys = {
   pageBlocked: (pageId: string) => ['page-team', pageId, 'blocked'] as const,
   /** The page's inbox as you see it (New is per member). */
   pageInbox: (userId: string, pageId: string) => ['page-team', pageId, 'inbox', userId] as const,
+  /** Why a page is suspended, for its team (Rachel's page tools, PR 6b). */
+  pageSuspension: (pageId: string) => ['page-team', pageId, 'suspension'] as const,
   /** The number of people following a page, for its team. */
   pageFollowers: (pageId: string) => ['page-team', pageId, 'followers'] as const,
   /** The pages you own, for Delete account's stop. */

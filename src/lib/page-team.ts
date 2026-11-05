@@ -316,6 +316,26 @@ export function usePageFollowerCount(pageId: string | undefined) {
   });
 }
 
+/* A suspended page (Rachel's page tools, PR 6b) ----------------------------------------- */
+
+/**
+ * When and why Rachel suspended a page, for its team only (nobody else is
+ * told). Null when it isn't suspended.
+ */
+export function usePageSuspension(pageId: string | undefined, enabled: boolean) {
+  return useQuery({
+    queryKey: keys.pageSuspension(pageId ?? ''),
+    queryFn: async (): Promise<{ since: string; reason: string } | null> => {
+      const { data, error } = await supabase.rpc('page_suspension_notice', { page: pageId! });
+      if (error) throw error;
+      const row = data?.[0];
+      return row ? { since: row.suspended_at, reason: row.reason } : null;
+    },
+    enabled: Boolean(pageId) && enabled,
+    staleTime: fresh.mine,
+  });
+}
+
 /* Edit page ------------------------------------------------------------------------------ */
 
 /** After an edit, the page and anything that shows it (Search, the map, your pages). */

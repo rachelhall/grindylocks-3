@@ -166,7 +166,7 @@ export function linkKind(raw: string): LinkKind {
 type PageRow = Database['public']['Tables']['pages']['Row'] & {
   page_descriptions: { locale: string; body: string }[];
   page_links: { position: number; url: string }[];
-  page_aliases: { name: string; created_at: string }[];
+  page_aliases: { name: string; created_at: string; formerly: boolean }[];
   metro_areas: { timezone: string | null } | null;
   page_hours: HoursRow[];
   page_brands_carried: {
@@ -177,7 +177,7 @@ type PageRow = Database['public']['Tables']['pages']['Row'] & {
 const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, website, logo_path, header_path, founded_label,
   ended_label, main_language, managed_at, founding_partner_at, closed_at, suspended_at, temp_closed_at,
   temp_closed_until, temp_closed_note, page_descriptions (locale, body), page_links (position, url),
-  page_aliases (name, created_at),
+  page_aliases (name, created_at, formerly),
   location_type, address, latitude, longitude, show_pin, timezone, metro_areas (timezone),
   page_hours (id, season_start_month, season_start_day, season_end_month, season_end_day, days,
               start_anchor, start_time, end_anchor, end_time, note),
@@ -208,7 +208,9 @@ function toPage(row: PageRow): Page {
     tempClosedNote: row.temp_closed_note,
     descriptions: row.page_descriptions ?? [],
     links: [...(row.page_links ?? [])].sort((a, b) => a.position - b.position).map((l) => l.url),
+    // An old name Rachel didn't keep as Formerly (PR 6b) only keeps the old handle redirecting.
     formerly: [...(row.page_aliases ?? [])]
+      .filter((a) => a.formerly)
       .sort((a, b) => b.created_at.localeCompare(a.created_at))
       .map((a) => a.name)
       .filter((name, i, all) => name !== row.display_name && all.indexOf(name) === i),

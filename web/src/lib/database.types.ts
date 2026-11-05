@@ -1084,6 +1084,7 @@ export type Database = {
       page_aliases: {
         Row: {
           created_at: string
+          formerly: boolean
           handle: string | null
           id: string
           name: string
@@ -1092,6 +1093,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          formerly?: boolean
           handle?: string | null
           id?: string
           name: string
@@ -1100,6 +1102,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          formerly?: boolean
           handle?: string | null
           id?: string
           name?: string
@@ -3116,6 +3119,57 @@ export type Database = {
       }
     }
     Functions: {
+      admin_close_page: {
+        Args: { ended?: string; founded?: string; page: string }
+        Returns: string
+      }
+      admin_handle_check: {
+        Args: { handle: string; page?: string }
+        Returns: string
+      }
+      admin_page_detail: { Args: { page: string }; Returns: Json }
+      admin_pages: {
+        Args: { kind?: string; q?: string }
+        Returns: {
+          city: string | null
+          closed_at: string | null
+          country: string | null
+          display_name: string
+          ended_label: string | null
+          followers: number
+          founded_label: string | null
+          frozen: boolean
+          handle: string
+          has_logo: boolean
+          id: string
+          matched_alias: string | null
+          open_claims: number
+          owner_username: string | null
+          roles: string[]
+          state: string
+          suspended_at: string | null
+          team_count: number
+        }[]
+      }
+      admin_rename_page: {
+        Args: {
+          display_name: string
+          handle: string
+          keep_formerly?: boolean
+          page: string
+        }
+        Returns: undefined
+      }
+      admin_transfer_page: {
+        Args: {
+          new_owner?: string
+          note?: string
+          old_owner_stays?: boolean
+          page: string
+          username?: string
+        }
+        Returns: string
+      }
       answer_page_invite: {
         Args: { accept: boolean; invite: string }
         Returns: string
@@ -3134,6 +3188,12 @@ export type Database = {
         }
         Returns: string
       }
+      lift_page_suspension: { Args: { page: string }; Returns: number }
+      merge_pages: {
+        Args: { confirm: string; source: string; target: string }
+        Returns: Json
+      }
+      merge_preview: { Args: { source: string; target: string }; Returns: Json }
       my_page_invites: {
         Args: never
         Returns: {
@@ -3161,6 +3221,7 @@ export type Database = {
           actor_avatar_path: string | null
           actor_username: string | null
           created_at: string
+          following: boolean
           id: string
           kind: string
           message: string | null
@@ -3251,7 +3312,15 @@ export type Database = {
           role: string | null
         }[]
       }
+      page_suspension_notice: {
+        Args: { page: string }
+        Returns: {
+          reason: string
+          suspended_at: string
+        }[]
+      }
       redeem_my_page_invite: { Args: never; Returns: string | null }
+      reopen_page: { Args: { page: string }; Returns: string }
       resend_page_claim_code: {
         Args: { claim: string; language?: string }
         Returns: string
@@ -3301,6 +3370,28 @@ export type Database = {
       leave_page_team: { Args: { page: string }; Returns: undefined }
       offer_page_ownership: { Args: { member: string; page: string }; Returns: string }
       block_from_page: { Args: { page: string; who: string }; Returns: undefined }
+      split_page: {
+        Args: {
+          city?: string
+          country?: string
+          handle: string
+          line: string
+          name: string
+          page: string
+          products?: string[]
+          role: Database["public"]["Enums"]["page_role"]
+        }
+        Returns: string
+      }
+      suspend_page: {
+        Args: {
+          cancel_meetups?: boolean
+          hide_recent?: boolean
+          page: string
+          reason: string
+        }
+        Returns: number
+      }
       unblock_from_page: { Args: { page: string; who: string }; Returns: undefined }
       page_blocked_people: {
         Args: { page: string }
@@ -4457,6 +4548,7 @@ export type Database = {
         | "suggestion_live"
         | "page_mention"
         | "page_comment"
+        | "page_split"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -4728,6 +4820,7 @@ export const Constants = {
         "suggestion_live",
         "page_mention",
         "page_comment",
+        "page_split",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [

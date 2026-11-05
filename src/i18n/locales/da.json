@@ -431,7 +431,7 @@
       "teamInvite": "{{name}} har inviteret dig med på sit team som {{role}}",
       "ownership": "{{a}} vil gøre dig til ejer af {{name}}",
       "claimInvite": "{{name}} har inviteret dig til at styre sin side",
-      "ownershipNote": "Du ville styre teamet og kunne fjerne managere. Siger du nej, vælger Grindylocks den nye ejer.",
+      "ownershipNote": "Du ville styre teamet og kunne fjerne managere. Siger du nej, bliver siden hos sin ejer.",
       "becomeOwner": "Bliv ejer",
       "from": "Fra {{username}}",
       "youAre": {
@@ -456,7 +456,16 @@
       "ownershipDeclined": "{{a}} sagde nej til at overtage {{name}}",
       "mention": "{{a}} nævnte {{name}}",
       "commentPost": "{{a}} kommenterede {{name}}s opslag",
-      "commentReply": "{{a}} svarede {{name}}"
+      "commentReply": "{{a}} svarede {{name}}",
+      "suspended": "Grindylocks har suspenderet {{name}}. Indtil videre kan ingen poste eller kommentere som siden.",
+      "suspendedNote": "Åbn siden for at se hvorfor.",
+      "suspensionLifted": "Suspenderingen af {{name}} er ophævet. Du kan poste som siden igen.",
+      "renamed": "{{old}} hedder nu {{name}}",
+      "merged": "{{old}} er lagt sammen med {{name}}. Du er ikke længere på dens team.",
+      "closed": "Grindylocks har markeret {{name}} som lukket for altid. Dit team kan ikke længere poste som siden.",
+      "reopened": "{{name}} er åben igen",
+      "split": "{{name}} har fået sin egen side",
+      "splitNote": "Den var før en del af {{old}}, som du følger."
     }
   },
   "feed": {
@@ -1786,7 +1795,8 @@
       "inbox": "Indbakke",
       "label": "Administrer {{name}}",
       "onlyTeam": "Kun dit team kan se denne bjælke.",
-      "newCount": "{{count}} nye"
+      "newCount": "{{count}} nye",
+      "lockedLabel": "{{label}}, låst mens siden er suspenderet"
     },
     "youAre": {
       "owner": "Du er ejer",
@@ -1848,7 +1858,13 @@
     "blocked": "Blokeret · {{count}}",
     "blockedNote": "De kan ikke følge, nævne eller kommentere {{name}}, og de får ikke besked. Grindylocks ser alle blokeringer.",
     "blockedBy": "Blokeret af {{username}} · {{when}}",
-    "unblock": "Fjern blokering"
+    "unblock": "Fjern blokering",
+    "suspended": {
+      "title": "{{name}} er suspenderet",
+      "body": "Ingen kan poste, kommentere eller holde meetups som {{name}}, før Grindylocks ophæver det. Din egen konto er ikke berørt.",
+      "questions": "Spørgsmål:",
+      "skatersSee": "Skatere ser siden som normalt, uden denne besked."
+    }
   },
   "pageEdit": {
     "title": "Rediger side",

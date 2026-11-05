@@ -1,14 +1,15 @@
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { PageTile, Sheet, SheetHead } from '@/components/pages';
 import { useExplainRestriction } from '@/components/safety';
 import { Button, Icon, type IconName, Toggle } from '@/components/ui';
 import { type MyPage, useMyPages } from '@/lib/claims';
 import { localNow } from '@/lib/hours';
-import { MAX_CLOSED_NOTE, useSetTempClosed } from '@/lib/page-team';
+import { appConfig } from '@/lib/config';
+import { MAX_CLOSED_NOTE, usePageSuspension, useSetTempClosed } from '@/lib/page-team';
 import { type Page, type PageMemberRole, pageKind } from '@/lib/pages';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
@@ -87,13 +88,27 @@ function ManagedRow({ page, line }: { page: MyPage; line: string }) {
 
 /**
  * Edit page, Team and Inbox, under the page's header for the team only. The
- * Inbox gets a pink dot when something's new for you.
+ * Inbox gets a pink dot when something's new for you. While Rachel has the
+ * page suspended (`locked`), Edit page and Team are locked and only the Inbox
+ * opens (Page-Suspended).
  */
-export function TeamBar({ page, inboxNew }: { page: Page; inboxNew: number }) {
+export function TeamBar({ page, inboxNew, locked = false }: { page: Page; inboxNew: number; locked?: boolean }) {
   const { t } = useTranslation();
-  const items: { key: string; icon: IconName; label: string; onPress: () => void; dot?: boolean }[] = [
-    { key: 'edit', icon: 'edit', label: t('pageTeam.bar.edit'), onPress: () => router.push({ pathname: '/page-edit/[handle]', params: { handle: page.handle } }) },
-    { key: 'team', icon: 'people', label: t('pageTeam.bar.team'), onPress: () => router.push({ pathname: '/page-team/[handle]', params: { handle: page.handle } }) },
+  const items: { key: string; icon: IconName; label: string; onPress: () => void; dot?: boolean; locked?: boolean }[] = [
+    {
+      key: 'edit',
+      icon: 'edit',
+      label: t('pageTeam.bar.edit'),
+      locked,
+      onPress: () => router.push({ pathname: '/page-edit/[handle]', params: { handle: page.handle } }),
+    },
+    {
+      key: 'team',
+      icon: 'people',
+      label: t('pageTeam.bar.team'),
+      locked,
+      onPress: () => router.push({ pathname: '/page-team/[handle]', params: { handle: page.handle } }),
+    },
     {
       key: 'inbox',
       icon: 'mail',
@@ -109,11 +124,19 @@ export function TeamBar({ page, inboxNew }: { page: Page; inboxNew: number }) {
           <Pressable
             key={item.key}
             accessibilityRole="button"
-            accessibilityLabel={item.dot ? `${item.label}, ${t('pageTeam.bar.newCount', { count: inboxNew })}` : item.label}
+            accessibilityState={{ disabled: item.locked }}
+            accessibilityLabel={
+              item.locked
+                ? t('pageTeam.bar.lockedLabel', { label: item.label })
+                : item.dot
+                  ? `${item.label}, ${t('pageTeam.bar.newCount', { count: inboxNew })}`
+                  : item.label
+            }
+            disabled={item.locked}
             onPress={item.onPress}
-            style={({ pressed }) => [styles.barItem, i < items.length - 1 && styles.barRule, pressed && styles.pressed]}
+            style={({ pressed }) => [styles.barItem, i < items.length - 1 && styles.barRule, pressed && styles.pressed, item.locked && styles.barLocked]}
           >
-            <Icon name={item.icon} color={brand.paper} size={20} />
+            <Icon name={item.locked ? 'lock' : item.icon} color={brand.paper} size={20} />
             <Text variant="bodySm" style={{ color: brand.paper, fontFamily: fontFamily.sansSemiBold }}>
               {item.label}
             </Text>
@@ -122,8 +145,56 @@ export function TeamBar({ page, inboxNew }: { page: Page; inboxNew: number }) {
         ))}
       </View>
       <Text variant="bodySm" color="textSecondary">
-        {t('pageTeam.bar.onlyTeam')}
+        {locked ? t('pageTeam.suspended.skatersSee') : t('pageTeam.bar.onlyTeam')}
       </Text>
+    </View>
+  );
+}
+
+/**
+ * Rachel suspended the page (Page-Suspended): her reason, what it means and
+ * where to ask. Only the team sees it, on the page and pinned in the inbox;
+ * skaters see the page as usual.
+ */
+export function SuspendedNotice({ page, inset = true, last = false }: { page: Page; inset?: boolean; last?: boolean }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const suspension = usePageSuspension(page.id, Boolean(page.suspendedAt));
+  if (!page.suspendedAt) return null;
+  const reason = suspension.data?.reason;
+  const name = page.displayName;
+  return (
+    <View
+      accessibilityRole="alert"
+      style={[
+        styles.suspended,
+        inset && styles.suspendedInset,
+        last && styles.suspendedSpaced,
+        { borderColor: c.danger, backgroundColor: c.surfaceRaised },
+      ]}
+    >
+      <View style={styles.suspendedHead}>
+        <Icon name="pauseCircle" color={c.danger} size={20} />
+        <Text variant="label" style={{ color: c.danger }}>
+          {t('pageTeam.suspended.title', { name })}
+        </Text>
+      </View>
+      {reason ? <Text variant="body">“{reason}”</Text> : null}
+      <Text variant="bodySm" color="textSecondary">
+        {t('pageTeam.suspended.body', { name })}
+      </Text>
+      <Pressable
+        accessibilityRole="link"
+        onPress={() => void Linking.openURL(`mailto:${appConfig.supportEmail}`).catch(() => undefined)}
+        style={({ pressed }) => pressed && styles.pressed}
+      >
+        <Text variant="bodySm" color="textSecondary">
+          {t('pageTeam.suspended.questions')}{' '}
+          <Text variant="bodySm" style={{ color: c.accentText, fontFamily: fontFamily.sansSemiBold }}>
+            {appConfig.supportEmail}
+          </Text>
+        </Text>
+      </Pressable>
     </View>
   );
 }
@@ -302,6 +373,11 @@ const styles = StyleSheet.create({
   barItem: { flex: 1, minHeight: 52, alignItems: 'center', justifyContent: 'center', gap: 2, paddingVertical: space[1] },
   // A hairline between the items, in paper at low strength (the ink bar is dark in both themes).
   barRule: { borderRightWidth: 1, borderRightColor: 'rgba(242, 239, 230, 0.25)' },
+  barLocked: { opacity: 0.6 },
+  suspended: { borderWidth: stroke.rule, padding: space[3], gap: space[2] },
+  suspendedInset: { marginHorizontal: space[4], marginTop: space[4] },
+  suspendedSpaced: { marginTop: 0, marginBottom: space[4] },
+  suspendedHead: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   barDot: { position: 'absolute', top: 8, right: '28%', width: 10, height: 10, borderWidth: stroke.rule },
   sheetBody: { gap: space[3], paddingBottom: space[2] },
   switchRow: { flexDirection: 'row', alignItems: 'center', gap: space[3], minHeight: size.tapMin },

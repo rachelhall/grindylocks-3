@@ -431,7 +431,7 @@
       "teamInvite": "{{name}} hat dich ins Team eingeladen, als {{role}}",
       "ownership": "{{a}} möchte dich zum Inhaber von {{name}} machen",
       "claimInvite": "{{name}} hat dich eingeladen, die Seite zu betreuen",
-      "ownershipNote": "Du würdest das Team leiten und könntest Manager entfernen. Wenn du ablehnst, wählt Grindylocks den neuen Inhaber.",
+      "ownershipNote": "Du würdest das Team leiten und könntest Manager entfernen. Wenn du ablehnst, bleibt die Seite beim Inhaber.",
       "becomeOwner": "Inhaber werden",
       "from": "Von {{username}}",
       "youAre": {
@@ -456,7 +456,16 @@
       "ownershipDeclined": "{{a}} hat die Übernahme von {{name}} abgelehnt",
       "mention": "{{a}} hat {{name}} erwähnt",
       "commentPost": "{{a}} hat den Beitrag von {{name}} kommentiert",
-      "commentReply": "{{a}} hat {{name}} geantwortet"
+      "commentReply": "{{a}} hat {{name}} geantwortet",
+      "suspended": "Grindylocks hat {{name}} gesperrt. Vorerst kann niemand als die Seite posten oder kommentieren.",
+      "suspendedNote": "Öffne die Seite, um zu sehen, warum.",
+      "suspensionLifted": "Die Sperre von {{name}} wurde aufgehoben. Du kannst wieder als die Seite posten.",
+      "renamed": "{{old}} heißt jetzt {{name}}",
+      "merged": "{{old}} wurde mit {{name}} zusammengelegt. Du bist nicht mehr in ihrem Team.",
+      "closed": "Grindylocks hat {{name}} als endgültig geschlossen markiert. Dein Team kann nicht mehr als die Seite posten.",
+      "reopened": "{{name}} ist wieder offen",
+      "split": "{{name}} hat jetzt eine eigene Seite",
+      "splitNote": "Sie gehörte früher zu {{old}}, der du folgst."
     }
   },
   "feed": {
@@ -1786,7 +1795,8 @@
       "inbox": "Posteingang",
       "label": "{{name}} verwalten",
       "onlyTeam": "Nur dein Team sieht diese Leiste.",
-      "newCount": "{{count}} neu"
+      "newCount": "{{count}} neu",
+      "lockedLabel": "{{label}}, gesperrt, solange die Seite gesperrt ist"
     },
     "youAre": {
       "owner": "Du bist Inhaber",
@@ -1848,7 +1858,13 @@
     "blocked": "Blockiert · {{count}}",
     "blockedNote": "Sie können {{name}} nicht folgen, erwähnen oder kommentieren und erfahren es nicht. Grindylocks sieht jede Blockierung.",
     "blockedBy": "Blockiert von {{username}} · {{when}}",
-    "unblock": "Freigeben"
+    "unblock": "Freigeben",
+    "suspended": {
+      "title": "{{name}} ist gesperrt",
+      "body": "Niemand kann als {{name}} posten, kommentieren oder Meetups veranstalten, bis Grindylocks die Sperre aufhebt. Dein eigenes Konto ist nicht betroffen.",
+      "questions": "Fragen:",
+      "skatersSee": "Skater sehen die Seite wie immer, ohne diesen Hinweis."
+    }
   },
   "pageEdit": {
     "title": "Seite bearbeiten",

@@ -21,6 +21,8 @@ const pageKeys = [
   'handedOver', 'ownershipDeclined', 'mention',
   // Commenting as a page (PR 8b): comments in a page's inbox.
   'commentPost', 'commentReply',
+  // Rachel's page tools (PR 6b): notices to a page's team.
+  'suspended', 'suspensionLifted', 'renamed', 'merged', 'closed', 'reopened',
 ];
 /** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
 const roles = ['staff', 'manager'];

@@ -9,7 +9,7 @@ import { ClaimFooter } from '@/components/claim';
 import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
-import { TeamBar } from '@/components/page-team';
+import { SuspendedNotice, TeamBar } from '@/components/page-team';
 import { MasonryGrid } from '@/components/profile';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { useShopFixSheet } from '@/components/shop-fix';
@@ -71,6 +71,10 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * Running a page (PR 7a, Page-TeamView): the team sees "You're the owner"
  * (or manager, or staff) under the handle and an ink bar with Edit page,
  * Team and Inbox, with a dot when the inbox has something new.
+ *
+ * Suspended (PR 6b, Page-Suspended): the team sees Rachel's reason in a red
+ * notice, with Edit page and Team locked and the Inbox still open; skaters
+ * see the page as usual.
  *
  * Posts (PR 8a, Page-TeamView): the page's own posts in the masonry grid;
  * the team sees "by [member]" on each tile, nobody else learns who posted.
@@ -146,8 +150,10 @@ function PageBody({ page }: { page: Page }) {
   const myPages = useMyPages(onTeam ? userId : undefined);
   const inboxNew = myPages.data?.find((p) => p.pageId === page.id)?.inboxNew ?? 0;
   const leave = useLeaveTeam(page.id, userId);
-  // The team runs a managed page from here; an archive or a suspended page has nothing to run.
+  // The team runs a managed page from here; an archive has nothing to run.
   const running = onTeam && page.state === 'managed' && !page.suspendedAt;
+  // Rachel suspended it (PR 6b, Page-Suspended): the team sees why, and only the Inbox opens.
+  const suspendedForTeam = onTeam && page.state === 'managed' && Boolean(page.suspendedAt);
   const headerHeight = nameOnly ? PLAIN_HEADER_HEIGHT : PAGE_HEADER_HEIGHT;
 
   const block = () =>
@@ -203,7 +209,7 @@ function PageBody({ page }: { page: Page }) {
             },
           ]
         : [];
-    menu.open({ name, handle: page.handle, stamp }, [...(running ? items : []), ...leaveItem]);
+    menu.open({ name, handle: page.handle, stamp }, [...(running ? items : suspendedForTeam ? items.slice(2) : []), ...leaveItem]);
   };
 
   const openMenu = () => {
@@ -327,7 +333,7 @@ function PageBody({ page }: { page: Page }) {
         stamp={stamp}
         moreLabel={archive ? t('page.moreReport') : t('page.more')}
         onBack={() => (router.canGoBack() ? router.back() : router.replace('/search'))}
-        onMore={onTeam ? (running || state?.teamRole !== 'owner' ? openTeamMenu : undefined) : openMenu}
+        onMore={onTeam ? (running || suspendedForTeam || state?.teamRole !== 'owner' ? openTeamMenu : undefined) : openMenu}
       />
       <Animated.ScrollView
         contentInsetAdjustmentBehavior="never"
@@ -373,7 +379,8 @@ function PageBody({ page }: { page: Page }) {
             ) : null}
           </View>
 
-          {running ? <TeamBar page={page} inboxNew={inboxNew} /> : null}
+          {suspendedForTeam ? <SuspendedNotice page={page} /> : null}
+          {running || suspendedForTeam ? <TeamBar page={page} inboxNew={inboxNew} locked={suspendedForTeam} /> : null}
 
           {shop ? <ShopPlace page={page} /> : null}
           {shop && page.tempClosedAt && page.tempClosedNote ? <ClosedNote page={page} /> : null}

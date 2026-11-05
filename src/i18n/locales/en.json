@@ -431,7 +431,7 @@
       "teamInvite": "{{name}} invited you to join its team as {{role}}",
       "ownership": "{{a}} wants to make you the owner of {{name}}",
       "claimInvite": "{{name}} invited you to manage its page",
-      "ownershipNote": "You'd handle the team and could remove managers. If you decline, Grindylocks picks the new owner.",
+      "ownershipNote": "You'd handle the team and could remove managers. If you decline, the page stays with its owner.",
       "becomeOwner": "Become owner",
       "from": "From {{username}}",
       "youAre": {
@@ -456,7 +456,16 @@
       "ownershipDeclined": "{{a}} declined to take over {{name}}",
       "mention": "{{a}} mentioned {{name}}",
       "commentPost": "{{a}} commented on {{name}}'s post",
-      "commentReply": "{{a}} replied to {{name}}"
+      "commentReply": "{{a}} replied to {{name}}",
+      "suspended": "Grindylocks suspended {{name}}. Nobody can post or comment as it for now.",
+      "suspendedNote": "Open the page to see why.",
+      "suspensionLifted": "{{name}}'s suspension was lifted. You can post as it again.",
+      "renamed": "{{old}} is now {{name}}",
+      "merged": "{{old}} was merged into {{name}}. You're no longer on its team.",
+      "closed": "Grindylocks marked {{name}} as closed for good. Your team can't post as it any more.",
+      "reopened": "{{name}} is open again",
+      "split": "{{name}} has its own page",
+      "splitNote": "It used to be part of {{old}}, which you follow."
     }
   },
   "feed": {
@@ -1786,7 +1795,8 @@
       "inbox": "Inbox",
       "label": "Manage {{name}}",
       "onlyTeam": "Only your team sees this bar.",
-      "newCount": "{{count}} new"
+      "newCount": "{{count}} new",
+      "lockedLabel": "{{label}}, locked while the page is suspended"
     },
     "youAre": {
       "owner": "You're the owner",
@@ -1848,7 +1858,13 @@
     "blocked": "Blocked · {{count}}",
     "blockedNote": "They can't follow, mention or comment on {{name}}, and they aren't told. Grindylocks sees every block.",
     "blockedBy": "Blocked by {{username}} · {{when}}",
-    "unblock": "Unblock"
+    "unblock": "Unblock",
+    "suspended": {
+      "title": "{{name}} is suspended",
+      "body": "Nobody can post, comment or host meetups as {{name}} until Grindylocks lifts it. Your own account isn't affected.",
+      "questions": "Questions:",
+      "skatersSee": "Skaters see the page as usual, without this notice."
+    }
   },
   "pageEdit": {
     "title": "Edit page",

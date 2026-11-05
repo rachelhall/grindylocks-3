@@ -431,7 +431,7 @@
       "teamInvite": "{{name}} te invitó a su equipo como {{role}}",
       "ownership": "{{a}} quiere hacerte propietario de {{name}}",
       "claimInvite": "{{name}} te invitó a gestionar su página",
-      "ownershipNote": "Llevarías el equipo y podrías quitar gerentes. Si lo rechazas, Grindylocks elige al nuevo propietario.",
+      "ownershipNote": "Llevarías el equipo y podrías quitar gerentes. Si lo rechazas, la página sigue con su propietario.",
       "becomeOwner": "Ser propietario",
       "from": "De {{username}}",
       "youAre": {
@@ -456,7 +456,16 @@
       "ownershipDeclined": "{{a}} no aceptó hacerse cargo de {{name}}",
       "mention": "{{a}} mencionó a {{name}}",
       "commentPost": "{{a}} comentó en la publicación de {{name}}",
-      "commentReply": "{{a}} respondió a {{name}}"
+      "commentReply": "{{a}} respondió a {{name}}",
+      "suspended": "Grindylocks suspendió {{name}}. Por ahora nadie puede publicar ni comentar como la página.",
+      "suspendedNote": "Abre la página para ver por qué.",
+      "suspensionLifted": "Se levantó la suspensión de {{name}}. Ya puedes publicar como la página.",
+      "renamed": "{{old}} ahora es {{name}}",
+      "merged": "{{old}} se unió a {{name}}. Ya no estás en su equipo.",
+      "closed": "Grindylocks marcó {{name}} como cerrada definitivamente. Tu equipo ya no puede publicar como la página.",
+      "reopened": "{{name}} vuelve a estar abierta",
+      "split": "{{name}} tiene su propia página",
+      "splitNote": "Antes era parte de {{old}}, que sigues."
     }
   },
   "feed": {
@@ -1786,7 +1795,8 @@
       "inbox": "Bandeja",
       "label": "Gestionar {{name}}",
       "onlyTeam": "Solo tu equipo ve esta barra.",
-      "newCount": "{{count}} nuevos"
+      "newCount": "{{count}} nuevos",
+      "lockedLabel": "{{label}}, bloqueado mientras la página está suspendida"
     },
     "youAre": {
       "owner": "Eres el dueño",
@@ -1848,7 +1858,13 @@
     "blocked": "Bloqueados · {{count}}",
     "blockedNote": "No pueden seguir, mencionar ni comentar en {{name}}, y no se les avisa. Grindylocks ve cada bloqueo.",
     "blockedBy": "Bloqueado por {{username}} · {{when}}",
-    "unblock": "Desbloquear"
+    "unblock": "Desbloquear",
+    "suspended": {
+      "title": "{{name}} está suspendida",
+      "body": "Nadie puede publicar, comentar ni organizar quedadas como {{name}} hasta que Grindylocks levante la suspensión. Tu propia cuenta no se ve afectada.",
+      "questions": "Preguntas:",
+      "skatersSee": "Los patinadores ven la página como siempre, sin este aviso."
+    }
   },
   "pageEdit": {
     "title": "Editar página",

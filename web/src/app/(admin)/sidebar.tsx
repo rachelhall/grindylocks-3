@@ -16,7 +16,8 @@ import { NavLink } from "./nav-link";
  * come later), and
  * the signed-in admin with Sign out at the bottom. Under 768px it's a top bar.
  * Requests (invite requests from grindylocks.com) shows for the owner only,
- * with the count of requests not yet invited, and so does Page blocks, with
+ * with the count of requests not yet invited, and so do Pages (every brand
+ * and shop page with Rachel's page tools; no badge) and Page blocks, with
  * the count of flagged pages (more than 5 blocks in 7 days).
  */
 export function Sidebar() {
@@ -67,6 +68,9 @@ async function OwnerLinks() {
     <>
       <NavLink href="/requests" icon="person_add" badge={waiting} badgeLabel="not invited">
         Requests
+      </NavLink>
+      <NavLink href="/pages" icon="storefront">
+        Pages
       </NavLink>
       <NavLink href="/page-blocks" icon="block" badge={flagged} badgeLabel={flagged === 1 ? "page flagged" : "pages flagged"}>
         Page blocks
