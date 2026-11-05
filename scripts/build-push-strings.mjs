@@ -13,6 +13,8 @@ const keys = [
   'commentOne', 'reply', 'mention', 'captionMention', 'tag', 'filmer', 'inviteUsed', 'someoneNew', 'visiting', 'visitingPark', 'parkFixLive',
   // Meetups (PR 5).
   'meetupChanged', 'meetupCancelled', 'meetupEnded', 'meetupReminder', 'meetupCommentOne', 'meetupReply', 'meetupMention',
+  // Pages as meetup hosts (PR 9): cancelled by the page tools.
+  'meetupCancelledPage', 'meetupEndedPage',
 ];
 /** Brand and shop pages (PRs 5 and 7a), from `notifications.page`, as page_<key>. */
 const pageKeys = [
@@ -27,7 +29,7 @@ const pageKeys = [
 /** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
 const roles = ['staff', 'manager'];
 /** Cancel reasons, from `meetup.reason`, as reason_<key>. */
-const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other'];
+const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other', 'page_closed', 'page_suspended'];
 
 export function pushStrings() {
   const out = {};

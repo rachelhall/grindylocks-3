@@ -174,15 +174,20 @@ type DialogProps = { page: PageDetail; onClose: () => void; onDone: (message: st
 function SuspendDialog({ page, onClose, onDone }: DialogProps) {
   const [reason, setReason] = useState("");
   const [hide, setHide] = useState(false);
+  const [cancelMeetups, setCancelMeetups] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const team = page.team.length;
 
   const submit = () =>
     start(async () => {
-      const r = await suspendPage(page.id, reason, hide);
+      const r = await suspendPage(page.id, reason, hide, cancelMeetups);
       if (!r.ok) return setError(r.error);
-      onDone(`${page.name} is suspended.${r.value ? ` ${r.value} ${r.value === 1 ? "post" : "posts"} hidden.` : ""} The team is told.`);
+      onDone(
+        `${page.name} is suspended.${r.value ? ` ${r.value} ${r.value === 1 ? "post" : "posts"} hidden.` : ""}${
+          cancelMeetups ? " Its upcoming meetups are cancelled." : ""
+        } The team is told.`,
+      );
     });
 
   return (
@@ -210,7 +215,9 @@ function SuspendDialog({ page, onClose, onDone }: DialogProps) {
         <Check checked={hide} onChange={setHide}>
           Hide {page.name}&apos;s posts from the last 7 days ({page.recentPosts})
         </Check>
-        <p className="type-caption text-gl-text-secondary">Cancelling upcoming meetups comes when pages can host them.</p>
+        <Check checked={cancelMeetups} onChange={setCancelMeetups}>
+          Cancel {page.name}&apos;s upcoming meetups (people going are told &ldquo;It&apos;s no longer happening&rdquo;)
+        </Check>
       </fieldset>
       <Note icon="notifications">
         {team === 1 ? "The 1 team member gets" : `All ${team} team members get`} a notice in their bell, and it&apos;s pinned in the page&apos;s
@@ -906,8 +913,9 @@ function CloseDialog({ page, onClose, onDone }: DialogProps) {
           <li>No Follow button. Followers stay and aren&apos;t told.</li>
           {!shop && <li>All its gear shows, with no Show past gear toggle.</li>}
           <li>No new posts, comments or meetups as the page; past posts stay.</li>
+          <li>Its upcoming meetups are cancelled, and people going are told &ldquo;{page.name} has closed&rdquo;.</li>
           {page.state === "managed" && <li>A managed page loses its logo and OFFICIAL; its team stays, read-only, and is told.</li>}
-          {shop && <li>The shop leaves the map, Near you and brands-carried lists, and upcoming meetups are cancelled.</li>}
+          {shop && <li>The shop leaves the map, Near you and brands-carried lists.</li>}
           <li>You can reopen it from the page&apos;s pane.{shop ? " A shop can still be removed completely on request." : ""}</li>
         </ul>
       </section>
