@@ -74,6 +74,9 @@ function EditForm({ profile }: { profile: Profile }) {
   const save = useSaveProfile(userId);
 
   const [photo, setPhoto] = useState<string | null>(null);
+  // The photo library can take a moment to open, so the button shows a
+  // spinner from the tap until the picker closes (and the crop is resized).
+  const [picking, setPicking] = useState(false);
   const [username, setUsername] = useState(profile.username);
   const [bio, setBio] = useState(profile.bio ?? '');
   const [disciplines, setDisciplines] = useState<Discipline[]>(profile.disciplines);
@@ -115,11 +118,15 @@ function EditForm({ profile }: { profile: Profile }) {
   }
 
   async function changePhoto() {
+    if (picking) return;
+    setPicking(true);
     try {
       const uri = await pickAvatar();
       if (uri) setPhoto(uri);
     } catch {
       Alert.alert(t('errors.generic'));
+    } finally {
+      setPicking(false);
     }
   }
 
@@ -232,10 +239,20 @@ function EditForm({ profile }: { profile: Profile }) {
             <Avatar path={profile.avatarPath} username={name || profile.username} localUri={photo} />
             <Pressable
               accessibilityRole="button"
+              accessibilityState={{ disabled: picking, busy: picking }}
+              disabled={picking}
               onPress={changePhoto}
-              style={({ pressed }) => [styles.outlineButton, { borderColor: c.border }, pressed && styles.pressed]}
+              style={({ pressed }) => [
+                styles.outlineButton,
+                { borderColor: c.border },
+                (pressed || picking) && styles.pressed,
+              ]}
             >
-              <Icon name="camera" color={c.text} size={20} />
+              {picking ? (
+                <ActivityIndicator color={c.text} style={styles.pickingSpinner} />
+              ) : (
+                <Icon name="camera" color={c.text} size={20} />
+              )}
               <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
                 {t('editProfile.changePhoto')}
               </Text>
@@ -432,6 +449,8 @@ const styles = StyleSheet.create({
   saveButton: { minHeight: size.tapMin, minWidth: 72, paddingHorizontal: space[4], borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center' },
   content: { paddingHorizontal: 20, paddingTop: space[4], paddingBottom: space[12], gap: space[6] },
   photoRow: { flexDirection: 'row', alignItems: 'center', gap: space[4] },
+  // Same footprint as the 20px camera icon, so the label doesn't shift.
+  pickingSpinner: { width: 20, height: 20 },
   outlineButton: { minHeight: size.tapMin, paddingHorizontal: space[4], borderWidth: stroke.rule, flexDirection: 'row', alignItems: 'center', gap: space[2] },
   group: { gap: 6 },
   badge: { borderWidth: stroke.rule, paddingHorizontal: 6, paddingVertical: 2 },

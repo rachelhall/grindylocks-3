@@ -37,16 +37,22 @@ export function PageLogoForm({
   const setLogo = useSetPageLogo(session?.user.id);
   const [local, setLocal] = useState<string | null>(null);
   const [finishing, setFinishing] = useState<'save' | 'skip' | null>(null);
+  // Spinner from the tap until the photo library closes (it can be slow to open).
+  const [picking, setPicking] = useState(false);
   const name = page.displayName;
   const tape = [t(`page.${pageKind(page)}`), page.city].filter(Boolean).join(' · ').toUpperCase();
 
   async function choose() {
+    if (picking) return;
+    setPicking(true);
     try {
       const uri = await pickLogo();
       if (uri) setLocal(uri);
     } catch (err) {
       Sentry.captureException(err);
       Alert.alert(t('errors.generic'));
+    } finally {
+      setPicking(false);
     }
   }
 
@@ -136,6 +142,7 @@ export function PageLogoForm({
         variant="secondary"
         label={local ? t('pageLogo.change') : t('pageLogo.choose')}
         onPress={choose}
+        loading={picking}
         disabled={finishing !== null}
       />
       <Text variant="bodySm" color="textSecondary">
