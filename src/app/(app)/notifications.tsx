@@ -200,7 +200,8 @@ export default function Notifications() {
   }
 
   /** "Thursday blade night", or "Meetup at Memo" without a title or line. */
-  const meetupName = (n: AppNotification) => n.meetup?.title ?? t('meetup.fallbackTitle', { park: n.park?.name ?? '' });
+  const meetupName = (n: AppNotification) =>
+    n.meetup?.title ?? t('meetup.fallbackTitle', { park: n.park?.name ?? n.people[0]?.page?.displayName ?? '' });
   /** On the park's clock: "Thursday", "Thu, Nov 5", "7:00 PM". */
   const meetupWhen = (n: AppNotification, style: 'day' | 'date' | 'dateTime' | 'time') => {
     if (!n.meetup) return '';
@@ -218,7 +219,8 @@ export default function Notifications() {
   function describe(n: AppNotification): string {
     const name = (i: number) => n.people[i]?.username ?? t('common.deletedUser');
     const a = name(0);
-    const park = n.park?.name ?? '';
+    // A page meetup (PR 9) may be at the shop or an address: then the page, or the meetup, names the place.
+    const park = n.park?.name ?? n.people.find((p) => p.page)?.page?.displayName ?? n.meetup?.title ?? '';
     switch (n.kind) {
       case 'meetup_going': {
         const when = meetupWhen(n, 'day');
@@ -230,6 +232,16 @@ export default function Notifications() {
         return t('notifications.meetupChanged', { meetup: meetupName(n), when: meetupWhen(n, 'dateTime'), park });
       case 'meetup_cancelled': {
         const [reason, scope] = (n.detail ?? 'other').split(':');
+        // The page tools (PR 9): "8SET has closed", or "It's no longer happening" for a suspension.
+        if (reason === 'page_closed' || reason === 'page_suspended') {
+          const why =
+            reason === 'page_closed'
+              ? t('meetup.reason.page_closed', { name: n.people[0]?.page?.displayName ?? '' })
+              : t('meetup.reason.page_suspended');
+          return scope === 'series'
+            ? t('notifications.meetupEndedPage', { meetup: meetupName(n), reason: why })
+            : t('notifications.meetupCancelledPage', { meetup: meetupName(n), date: meetupWhen(n, 'date'), reason: why });
+        }
         const key = (['rained_out', 'park_closed', 'something_came_up'] as const).find((r) => r === reason) ?? 'other';
         const why = t(`meetup.reason.${key}`);
         return scope === 'series'
@@ -305,8 +317,11 @@ export default function Notifications() {
       case 'warning':
       case 'suspension':
         return [describe(n)];
-      case 'meetup_changed':
       case 'meetup_cancelled':
+        return n.detail?.startsWith('page_closed') && n.people[0]?.page
+          ? [meetupName(n), n.people[0].page.displayName]
+          : [meetupName(n)];
+      case 'meetup_changed':
       case 'meetup_reminder':
       case 'meetup_hidden':
         return [meetupName(n)];

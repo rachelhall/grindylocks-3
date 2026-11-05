@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -19,17 +20,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoingList, GoingSheet, MeetupCommentComposer, MeetupComments, type MeetupReply } from '@/components/meetup';
 import { CancelMeetupSheet, CoHostsSheet, confirmDeleteMeetup, MeetupMenu } from '@/components/meetup-manage';
+import { AdultsChip, dayHours, daysRangeLabel, HostedBy } from '@/components/page-meetup';
 import { HalftoneGround, PHOTOCOPY } from '@/components/park-header';
+import { openDirections } from '@/components/parks';
 import { MasonryGrid } from '@/components/profile';
 import { SafeAreaView } from '@/components/safe-area';
 import { useReportSheet } from '@/components/safety';
 import { BackButton, Button, CheckBox, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
+import { useMyPages } from '@/lib/claims';
 import { formatClock, localNow } from '@/lib/hours';
 import {
+  cancelReasonLabel,
   clocksDiffer,
   meetupHeadline,
+  meetupPlaceName,
+  meetupTz,
   repeatLabel,
+  spotsLeft,
   useCanDeleteMeetup,
   useCanHideMeetup,
   useCoverUrl,
@@ -43,6 +51,7 @@ import {
   useRespondCoHost,
   useSeriesFollow,
 } from '@/lib/meetups';
+import { roleRank } from '@/lib/page-team';
 import { useMyProfile } from '@/lib/profiles';
 import { Sentry } from '@/lib/sentry';
 import { toGridPost, useMeetupPosts } from '@/lib/posts';
@@ -61,6 +70,15 @@ import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme
  * The ⋯ button (PR 5) opens the host menu (Edit, Co-hosts, Cancel, Delete)
  * for hosts and co-hosts, Report for everyone else, and Hide this date for
  * the park's admins. Hosts can take someone off Going from the list.
+ *
+ * Hosted by a page (PR 9, PageMeet-Page and PageMeet-Camp): the "Hosted by"
+ * strip, OFFICIAL when it's the park's own page, the place (a park, the
+ * shop or an address, with Directions), each day of a meetup over several
+ * days, "18 of 30 spots taken" with FULL, the 18+ chip, Get tickets, and
+ * the page as HOST in the going list and on its comments. The page's team
+ * manages it as hosts and can comment as the page. Delete, ending the series
+ * and co-hosts are for the page's managers and owner (and the member who
+ * made it; the database decides).
  */
 export default function MeetupScreen() {
   const { id, going: openGoing } = useLocalSearchParams<{ id: string; going?: string }>();
@@ -78,11 +96,16 @@ export default function MeetupScreen() {
   const respond = useRespondCoHost(meetup?.series_id);
   const cover = useCoverUrl(meetup?.cover_path);
   const { data: myProfile } = useMyProfile(myId);
+  const hostPage = meetup?.meetup_host_page ?? null;
+  const myPages = useMyPages(hostPage ? myId : undefined);
+  const myPageRole = hostPage ? (myPages.data?.find((p) => p.pageId === hostPage.id)?.role ?? null) : null;
   const [goingOpen, setGoingOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [coHostsOpen, setCoHostsOpen] = useState(false);
-  const mainHost = Boolean(meetup && myId && meetup.series.host_id === myId);
+  const mainHost = Boolean(
+    meetup && myId && (meetup.series.host_id === myId || (meetup.i_run_meetup && roleRank(myPageRole) >= 2)),
+  );
   const canDelete = useCanDeleteMeetup(id, mainHost && menuOpen);
   const canHide = useCanHideMeetup(id, (myProfile?.roles.length ?? 0) > 0);
   const remove = useDeleteMeetup(id);
@@ -143,17 +166,28 @@ export default function MeetupScreen() {
     );
   }
 
-  const tz = meetup.park.metro?.timezone ?? null;
+  const tz = meetupTz(meetup);
   const start = new Date(meetup.starts_at);
   const end = new Date(meetup.ends_at);
   const over = end.getTime() <= now;
   const cancelled = meetup.status === 'cancelled';
   const headline = meetupHeadline(meetup, t);
   const repeats = repeatLabel(meetup.series.weekdays, t, locale);
-  const dayLine = `${new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start)} · ${t('meetup.timeRange', {
-    start: formatClock(localNow(start, tz).minutes, locale),
-    end: formatClock(localNow(end, tz).minutes, locale),
-  })}`;
+  const place = meetup.meetup_place_info;
+  const placeName = meetupPlaceName(meetup, t);
+  // The clock's name: the park's, else the host page's.
+  const clockName = meetup.park?.display_name ?? place?.page?.display_name ?? hostPage?.display_name ?? placeName;
+  const days = meetup.multi_day ? (meetup.meetup_days ?? []) : [];
+  const several = days.length >= 2;
+  const dayLine = several
+    ? daysRangeLabel(new Date(days[0].starts_at), new Date(days[days.length - 1].starts_at), tz, locale, t)
+    : `${new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start)} · ${t('meetup.timeRange', {
+        start: formatClock(localNow(start, tz).minutes, locale),
+        end: formatClock(localNow(end, tz).minutes, locale),
+      })}`;
+  const left = spotsLeft(meetup);
+  const full = left === 0;
+  const ofThePark = Boolean(meetup.meetup_official);
   const yourTime = clocksDiffer(tz, start)
     ? new Intl.DateTimeFormat(locale, { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(start)
     : null;
@@ -163,7 +197,7 @@ export default function MeetupScreen() {
   const iHost = Boolean(summary?.i_host);
   const isHost = hostRow.data?.role === 'host' || (hostRow.data?.role === 'co_host' && hostRow.data.accepted_at);
   const invited = hostRow.data?.role === 'co_host' && !hostRow.data.accepted_at;
-  const goingLine = [headline, dayLine, meetup.park.display_name].join(' · ');
+  const goingLine = [headline, dayLine, placeName].join(' · ');
   const pastDate = new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start);
   const linkedPosts = linked.data?.pages.flat() ?? [];
   const linkedCount = counts.data?.linked_post_count ?? linkedPosts.length;
@@ -171,7 +205,11 @@ export default function MeetupScreen() {
   const hosting = iHost || Boolean(isHost);
   const dateLabel = new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(start);
   const dayName = new Intl.DateTimeFormat(locale, { weekday: 'long', timeZone: tz ?? undefined }).format(start);
-  const hostName = meetup.series.host_id === myId ? (myProfile?.username ?? '') : (going.data?.people.find((p) => p.role === 'host')?.username ?? '');
+  const hostName = hostPage
+    ? hostPage.display_name
+    : meetup.series.host_id === myId
+      ? (myProfile?.username ?? '')
+      : (going.data?.people.find((p) => p.role === 'host')?.username ?? '');
 
   const deleteIt = () =>
     confirmDeleteMeetup(t, () =>
@@ -257,14 +295,23 @@ export default function MeetupScreen() {
               ) : null}
             </View>
             <View style={styles.headerText}>
-              <View style={[styles.tape, { backgroundColor: brand.pink }]}>
-                <Text variant="label" style={{ color: brand.ink }}>
-                  {over
-                    ? t('meetupCard.pastTape', { date: pastDate })
-                    : repeats
-                      ? t('meetup.tapeRepeating', { repeats })
-                      : t('meetup.tape')}
-                </Text>
+              <View style={styles.tapes}>
+                <View style={[styles.tape, { backgroundColor: brand.pink }]}>
+                  <Text variant="label" style={{ color: brand.ink }}>
+                    {over
+                      ? t('meetupCard.pastTape', { date: pastDate })
+                      : repeats
+                        ? t('meetup.tapeRepeating', { repeats })
+                        : t('meetup.tape')}
+                  </Text>
+                </View>
+                {ofThePark ? (
+                  <View style={[styles.officialTape, { borderColor: brand.paper }]}>
+                    <Text variant="label" style={{ color: brand.paper }}>
+                      {t('page.stamp.official')}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
               <Text
                 variant="display"
@@ -276,6 +323,8 @@ export default function MeetupScreen() {
               </Text>
             </View>
           </View>
+
+          {hostPage ? <HostedBy page={hostPage} ofThePark={ofThePark} /> : null}
 
           {meetup.hidden_at ? (
             <View style={[styles.block, styles.cancelled, { borderColor: c.border }]}>
@@ -291,7 +340,7 @@ export default function MeetupScreen() {
           {cancelled ? (
             <View style={[styles.block, styles.cancelled, { borderColor: c.statusClosed }]}>
               <Text variant="label" color="statusClosed">
-                {t('meetup.cancelled', { reason: t(`meetup.reason.${meetup.cancel_reason ?? 'other'}`) })}
+                {t('meetup.cancelled', { reason: cancelReasonLabel(meetup.cancel_reason, hostPage, t) })}
               </Text>
               {meetup.cancel_note ? <Text variant="bodySm">{meetup.cancel_note}</Text> : null}
             </View>
@@ -320,33 +369,89 @@ export default function MeetupScreen() {
 
           <View style={styles.block}>
             <View style={styles.fact}>
-              <Icon name="calendar" color={c.text} size={20} />
+              <Icon name={several ? 'dateRange' : 'calendar'} color={c.text} size={20} />
               <View style={styles.flex}>
                 <Text variant="body" style={{ fontFamily: fontFamily.sansSemiBold }}>
                   {dayLine}
                 </Text>
                 <Text variant="caption" color="textSecondary">
-                  {yourTime
-                    ? t('meetup.parkTimeAndYours', { park: meetup.park.display_name, time: yourTime })
-                    : t('meetup.parkTime', { park: meetup.park.display_name })}
+                  {[
+                    several ? t('pageMeet.days', { count: days.length }) : null,
+                    yourTime
+                      ? t('meetup.parkTimeAndYours', { park: clockName, time: yourTime })
+                      : t('meetup.parkTime', { park: clockName }),
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
                 </Text>
               </View>
             </View>
-            <Pressable
-              accessibilityRole="link"
-              onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: meetup.park.slug } })}
-              style={styles.fact}
-            >
-              <Icon name="pin" color={c.text} size={20} />
-              <Text variant="body" color="accentText" style={{ fontFamily: fontFamily.sansSemiBold }}>
-                {meetup.park.display_name}
-              </Text>
-            </Pressable>
+            {meetup.place === 'park' && meetup.park ? (
+              <Pressable
+                accessibilityRole="link"
+                onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: meetup.park!.slug } })}
+                style={styles.fact}
+              >
+                <Icon name="pin" color={c.text} size={20} />
+                <Text variant="body" color="accentText" style={{ fontFamily: fontFamily.sansSemiBold }}>
+                  {meetup.park.display_name}
+                </Text>
+              </Pressable>
+            ) : (
+              <View style={[styles.fact, styles.factTop]}>
+                <Icon name={meetup.place === 'page' ? 'storefront' : 'editLocation'} color={c.text} size={20} />
+                <View style={[styles.flex, styles.placeText]}>
+                  {meetup.place === 'page' && place?.page ? (
+                    <Text
+                      variant="body"
+                      color="accentText"
+                      accessibilityRole="link"
+                      onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: place.page!.handle } })}
+                      style={{ fontFamily: fontFamily.sansSemiBold }}
+                    >
+                      {placeName}
+                    </Text>
+                  ) : null}
+                  {place?.address ? (
+                    <Text variant={meetup.place === 'page' ? 'bodySm' : 'body'} color={meetup.place === 'page' ? 'textSecondary' : 'text'} style={meetup.place === 'page' ? undefined : { fontFamily: fontFamily.sansSemiBold }}>
+                      {[place.address, place.metro_name].filter(Boolean).join(', ')}
+                    </Text>
+                  ) : null}
+                  {place && (place.latitude !== null || place.address) ? (
+                    <Text
+                      variant="bodySm"
+                      color="accentText"
+                      accessibilityRole="link"
+                      onPress={() =>
+                        openDirections({ latitude: place.latitude, longitude: place.longitude, display_name: placeName, address: place.address })
+                      }
+                      style={[styles.directions, { fontFamily: fontFamily.sansSemiBold }]}
+                    >
+                      {t('shop.directions')}
+                    </Text>
+                  ) : null}
+                </View>
+              </View>
+            )}
+            {meetup.capacity !== null ? (
+              <View style={styles.fact}>
+                <Icon name="people" color={c.text} size={20} />
+                <Text variant="body">{t('pageMeet.spotsTaken', { taken: meetup.spots_taken ?? 0, capacity: meetup.capacity })}</Text>
+                {full ? (
+                  <View style={[styles.fullTag, { backgroundColor: c.text }]}>
+                    <Text variant="label" style={{ color: c.surface }}>
+                      {t('pageMeet.full')}
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
+            ) : null}
             <View style={styles.fact}>
               <Icon name={meetup.series.visibility === 'public' ? 'globe' : 'people'} color={c.text} size={20} />
               <Text variant="bodySm" color="textSecondary" style={styles.flex}>
                 {meetup.series.visibility === 'public' ? t('meetupCompose.public') : t('meetupCompose.followersOnly')}
               </Text>
+              {meetup.adults_only ? <AdultsChip /> : null}
               {meetup.disciplines.map((d) => (
                 <View key={d} style={[styles.chip, { borderColor: c.border }]}>
                   <Text variant="caption" style={{ fontFamily: fontFamily.sansSemiBold }}>
@@ -357,10 +462,44 @@ export default function MeetupScreen() {
             </View>
           </View>
 
+          {several ? (
+            <View style={styles.block}>
+              <Text variant="label" color="textSecondary">
+                {t('pageMeet.eachDay')}
+              </Text>
+              <View style={[styles.days, { backgroundColor: c.surfaceRaised, borderTopColor: c.borderSubtle }]}>
+                {days.map((d) => (
+                  <View key={d.day} style={[styles.dayRow, { borderBottomColor: c.borderSubtle }]}>
+                    <Text variant="bodySm" style={[styles.dayName, { fontFamily: fontFamily.sansSemiBold }]}>
+                      {new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz ?? undefined }).format(
+                        new Date(d.starts_at),
+                      )}
+                    </Text>
+                    <Text variant="bodySm">{dayHours(new Date(d.starts_at), new Date(d.ends_at), tz, locale)}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : null}
+
           {meetup.title && meetup.note ? (
             <Text variant="body" style={styles.block}>
               {meetup.note}
             </Text>
+          ) : null}
+
+          {meetup.ticket_url && !cancelled && !over ? (
+            <View style={styles.block}>
+              <Button
+                label={t('pageMeet.getTickets')}
+                icon="external"
+                onPress={() => void Linking.openURL(meetup.ticket_url!).catch(() => Alert.alert(t('errors.generic')))}
+                palette={{ fill: c.accent, text: c.onAccent, border: c.onAccent }}
+              />
+              <Text variant="caption" color="textSecondary" style={styles.center}>
+                {t('pageMeet.ticketsNote', { name: hostPage?.display_name ?? '' })}
+              </Text>
+            </View>
           ) : null}
 
           {/* Going and Follow series. */}
@@ -401,6 +540,18 @@ export default function MeetupScreen() {
                     {summary.my_remind_me ? t('meetup.goingReminder') : t('meetup.going')}
                   </Text>
                 </Pressable>
+              ) : full ? (
+                <View
+                  accessible
+                  accessibilityRole="button"
+                  accessibilityState={{ disabled: true }}
+                  style={[styles.hosting, styles.fullButton, { borderColor: c.textSecondary }]}
+                >
+                  <Icon name="block" color={c.textSecondary} size={18} />
+                  <Text variant="body" color="textSecondary" style={{ fontFamily: fontFamily.sansSemiBold }}>
+                    {t('pageMeet.full')}
+                  </Text>
+                </View>
               ) : (
                 <Button label={t('meetup.imGoing')} icon="check" onPress={() => setGoingOpen(true)} style={styles.flex} />
               )}
@@ -412,6 +563,12 @@ export default function MeetupScreen() {
                 />
               ) : null}
             </View>
+          ) : null}
+
+          {full && !over && !cancelled && !summary?.i_am_going && !(iHost || isHost) ? (
+            <Text variant="caption" color="textSecondary" style={[styles.block, styles.center]}>
+              {t('pageMeet.fullNote')}
+            </Text>
           ) : null}
 
           {/* Going list: gone for everyone but the hosts once it's over. */}
@@ -431,6 +588,7 @@ export default function MeetupScreen() {
                 </Text>
               ) : (
                 <GoingList
+                  hostPage={hostPage}
                   people={going.data?.people ?? []}
                   unnamed={summary?.unnamed ?? 0}
                   hostView={iHost}
@@ -469,16 +627,19 @@ export default function MeetupScreen() {
             eventId={meetup.id}
             userId={myId}
             canModerate={iHost}
+            onTeam={Boolean(meetup.i_run_meetup)}
             onReport={(cm) =>
-              cm.author_id && cm.username
-                ? report.open({
-                    kind: 'meetup_comment',
-                    id: cm.id,
-                    personId: cm.author_id,
-                    username: cm.username,
-                    parkName: meetup.park.display_name,
-                  })
-                : undefined
+              cm.page
+                ? report.open({ kind: 'meetup_comment', id: cm.id, personId: null, username: cm.page.display_name, parkName: placeName })
+                : cm.author_id && cm.username
+                  ? report.open({
+                      kind: 'meetup_comment',
+                      id: cm.id,
+                      personId: cm.author_id,
+                      username: cm.username,
+                      parkName: placeName,
+                    })
+                  : undefined
             }
             onReply={(target) => {
               setReplyTo(target);
@@ -491,6 +652,7 @@ export default function MeetupScreen() {
           <MeetupCommentComposer
             eventId={meetup.id}
             userId={myId}
+            asPage={meetup.i_run_meetup && hostPage ? hostPage : null}
             replyTo={replyTo}
             onClearReply={() => setReplyTo(null)}
             inputRef={inputRef}
@@ -517,7 +679,7 @@ export default function MeetupScreen() {
             id: meetup.id,
             personId: meetup.series.host_id,
             username: hostName,
-            parkName: meetup.park.display_name,
+            parkName: placeName,
           })
         }
         onHide={setHidden}
@@ -541,6 +703,9 @@ export default function MeetupScreen() {
         userId={myId}
         summary={summary}
         line={goingLine}
+        adultsOnlyBy={meetup.adults_only ? (hostPage?.display_name ?? hostName) : null}
+        spotsLeft={left}
+        hasTickets={Boolean(meetup.ticket_url)}
         onClose={() => setGoingOpen(false)}
       />
     </View>
@@ -567,7 +732,18 @@ const styles = StyleSheet.create({
   headerButtons: { flexDirection: 'row', justifyContent: 'space-between' },
   headerButton: { width: size.tapMin, height: size.tapMin, backgroundColor: brand.paper, alignItems: 'center', justifyContent: 'center' },
   headerText: { gap: space[3], alignItems: 'flex-start' },
+  tapes: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
   tape: { paddingHorizontal: space[2], paddingVertical: 4, transform: [{ rotate: '-2deg' }] },
+  officialTape: { borderWidth: stroke.rule, paddingHorizontal: 6, paddingVertical: 2 },
+  center: { textAlign: 'center' },
+  factTop: { alignItems: 'flex-start' },
+  placeText: { gap: 2 },
+  directions: { paddingVertical: 4 },
+  fullTag: { paddingHorizontal: 6, paddingVertical: 2 },
+  fullButton: { flexDirection: 'row', gap: space[2] },
+  days: { borderTopWidth: stroke.hairline },
+  dayRow: { flexDirection: 'row', alignItems: 'baseline', gap: space[3], paddingHorizontal: space[3], paddingVertical: 10, borderBottomWidth: stroke.hairline },
+  dayName: { width: 96 },
   headline: {
     color: brand.paper,
     textShadowColor: brand.pink,

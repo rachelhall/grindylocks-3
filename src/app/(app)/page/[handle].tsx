@@ -10,6 +10,7 @@ import { ProductsList } from '@/components/catalog';
 import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } from '@/components/page-header';
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
 import { SuspendedNotice, TeamBar } from '@/components/page-team';
+import { PageUpcomingMeetups } from '@/components/park-meetups';
 import { MasonryGrid } from '@/components/profile';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { useShopFixSheet } from '@/components/shop-fix';
@@ -79,7 +80,9 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * Posts (PR 8a, Page-TeamView): the page's own posts in the masonry grid;
  * the team sees "by [member]" on each tile, nobody else learns who posted.
  *
- * Coming with PR 9: the page's meetups.
+ * Upcoming (PR 9, PageMeet-ShopUpcoming): the page's meetups, each once at
+ * its next date, after the shop's hours and brands (or a brand's links);
+ * the team gets "Plan a meetup as …" while the page can host.
  */
 export default function PageScreen() {
   const { handle, logo } = useLocalSearchParams<{ handle: string; logo?: string }>();
@@ -421,6 +424,9 @@ function PageBody({ page }: { page: Page }) {
           {shop ? descriptionBlock : null}
           {shop ? <ShopHours page={page} /> : null}
           {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
+          {page.state === 'managed' || page.state === 'closed' ? (
+            <PageUpcomingMeetups pageId={page.id} planAs={running && official ? name : null} />
+          ) : null}
           {tabbed ? null : showPosts ? (
             <View style={styles.section}>
               <Text variant="title" accessibilityRole="header">

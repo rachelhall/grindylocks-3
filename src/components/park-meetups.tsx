@@ -3,7 +3,9 @@
  * Upcoming between Here now and Plan a meetup, each meetup once at its next
  * date, and Past meetups as a collapsed row lower down that loads when
  * opened. Cancelled dates show crossed out with their reason. Also the
- * profile's Meetups tab, which uses the same rows.
+ * profile's Meetups tab, which uses the same rows, and (PR 9,
+ * PageMeet-ShopUpcoming) a page screen's Upcoming, where the team gets
+ * "Plan a meetup as …".
  */
 import { router } from 'expo-router';
 import { useState } from 'react';
@@ -14,6 +16,7 @@ import { EmptyState } from '@/components/empty-state';
 import { MeetupRow, PastMeetupRow } from '@/components/meetup-card';
 import { Button, Icon } from '@/components/ui';
 import {
+  usePageMeetups,
   useParkMeetups,
   useParkPastMeetupCount,
   useParkPastMeetups,
@@ -58,6 +61,70 @@ export function ParkUpcomingMeetups({ parkId }: { parkId: string }) {
       {!all && list.length >= FIRST ? (
         <Button label={t('meetupCard.allUpcoming')} variant="secondary" onPress={() => setAll(true)} />
       ) : null}
+    </View>
+  );
+}
+
+/**
+ * A page's Upcoming: each meetup once at its next date. Nothing for
+ * visitors when there are none; the team (`planAs`, when the page can host)
+ * sees "Plan a meetup as …" either way.
+ */
+export function PageUpcomingMeetups({
+  pageId,
+  planAs,
+}: {
+  pageId: string;
+  /** The page's name, when you can make meetups as it. */
+  planAs: string | null;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const [all, setAll] = useState(false);
+  const upcoming = usePageMeetups(pageId, all ? 50 : FIRST);
+  const list = upcoming.data ?? [];
+  const plan = planAs ? (
+    <Button
+      label={t('pageMeet.planAs', { name: planAs })}
+      icon="add"
+      variant="secondary"
+      onPress={() => router.push({ pathname: '/new-meetup', params: { asPage: pageId } })}
+    />
+  ) : null;
+
+  if (upcoming.isError) {
+    return (
+      <View style={styles.pageBlock}>
+        <Text variant="bodySm" color="statusClosed">
+          {t('errors.network')}
+        </Text>
+        <Button label={t('common.retry')} variant="secondary" onPress={() => void upcoming.refetch()} />
+      </View>
+    );
+  }
+  if (upcoming.isPending) return planAs ? <ActivityIndicator color={c.text} style={styles.pageBlock} /> : null;
+  if (list.length === 0 && !planAs) return null;
+
+  return (
+    <View style={styles.pageBlock}>
+      <Text variant="title" accessibilityRole="header">
+        {t('meetupCard.upcoming')}
+      </Text>
+      {list.length === 0 ? (
+        <Text variant="bodySm" color="textSecondary">
+          {t('pageMeet.noneYet')}
+        </Text>
+      ) : (
+        <View style={styles.list}>
+          {list.map((m) => (
+            <MeetupRow key={m.id} m={m} place="page" />
+          ))}
+        </View>
+      )}
+      {!all && list.length >= FIRST ? (
+        <Button label={t('meetupCard.allUpcoming')} variant="tertiary" onPress={() => setAll(true)} />
+      ) : null}
+      {plan}
     </View>
   );
 }
@@ -113,6 +180,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   pressed: { opacity: 0.75 },
   block: { paddingHorizontal: space[4], gap: space[2] },
+  pageBlock: { paddingHorizontal: space[4], paddingTop: space[6], gap: space[3] },
   list: { gap: space[2] },
   toggle: { minHeight: 52, borderTopWidth: stroke.rule, flexDirection: 'row', alignItems: 'center', gap: space[2] },
   loading: { paddingVertical: space[3] },

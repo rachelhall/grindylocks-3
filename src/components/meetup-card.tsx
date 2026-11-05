@@ -11,6 +11,12 @@
  *
  * Everything shown is computed in the database (`meetups_everywhere`), so a
  * card never names someone the viewer may not see.
+ *
+ * Page meetups (PR 9, PageMeet-Home and PageMeet-ShopUpcoming): the card
+ * gets the page's ink header (logo, name, OFFICIAL, SHOP or BRAND, a person
+ * co-host), the place can be the shop or an address, and chips add 18+,
+ * spots left (or FULL) and Tickets. MeetupRow's `page` place is a page
+ * screen's Upcoming.
  */
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
@@ -18,9 +24,21 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { AdultsChip, daysRangeLabel } from '@/components/page-meetup';
+import { PageTile, StampTape } from '@/components/pages';
 import { Button, Icon } from '@/components/ui';
 import { formatClock, localNow } from '@/lib/hours';
-import { type MeetupCard, type MeetupFace, meetupHeadline, repeatLabel } from '@/lib/meetups';
+import {
+  cancelReasonLabel,
+  type MeetupCard,
+  type MeetupFace,
+  meetupHeadline,
+  meetupPlaceName,
+  meetupTz,
+  repeatLabel,
+  spotsLeft,
+} from '@/lib/meetups';
+import { isOfficial, pageKind } from '@/lib/pages';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /* Shared ------------------------------------------------------------------------------ */
@@ -29,12 +47,17 @@ const openMeetup = (id: string, going?: boolean) =>
   router.push({ pathname: '/meetup/[id]', params: going ? { id, going: '1' } : { id } });
 
 function tzOf(m: MeetupCard) {
-  return m.park.metro?.timezone ?? null;
+  return meetupTz(m);
 }
 
-/** "7:00–9:00 PM", on the park's clock. */
+/** "7:00–9:00 PM", on the park's clock; a meetup over several days is "Dec 4 – Dec 6 · 3 days". */
 export function meetupTimes(m: MeetupCard, t: TFunction, locale: string) {
   const tz = tzOf(m);
+  const days = m.meetup_days ?? [];
+  if (m.multi_day && days.length >= 2) {
+    const range = daysRangeLabel(new Date(days[0].starts_at), new Date(days[days.length - 1].starts_at), tz, locale, t);
+    return `${range} · ${t('pageMeet.days', { count: days.length })}`;
+  }
   return t('meetup.timeRange', {
     start: formatClock(localNow(new Date(m.starts_at), tz).minutes, locale),
     end: formatClock(localNow(new Date(m.ends_at), tz).minutes, locale),
@@ -144,8 +167,93 @@ function CancelledTag({ m }: { m: MeetupCard }) {
   return (
     <View style={[styles.cancelTag, { borderColor: c.statusClosed }]}>
       <Text variant="label" color="statusClosed">
-        {t(`meetup.reason.${m.cancel_reason ?? 'other'}`)}
+        {cancelReasonLabel(m.cancel_reason, m.meetup_host_page, t)}
       </Text>
+    </View>
+  );
+}
+
+/** The page-only chips: 18+, spots left or FULL, and Tickets. */
+function PageChips({ m, withDisciplines }: { m: MeetupCard; withDisciplines?: boolean }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const left = spotsLeft(m);
+  if (!m.adults_only && left === null && !m.ticket_url && !(withDisciplines && m.disciplines.length)) return null;
+  return (
+    <View style={styles.chips}>
+      {m.adults_only ? <AdultsChip /> : null}
+      {withDisciplines
+        ? m.disciplines.map((d) => (
+            <View key={d} style={[styles.chip, { borderColor: c.border }]}>
+              <Text variant="caption" style={styles.semi}>
+                {t(`disciplines.${d}`)}
+              </Text>
+            </View>
+          ))
+        : null}
+      {left === 0 ? (
+        <View style={[styles.chip, { borderColor: c.text, backgroundColor: c.text }]}>
+          <Text variant="label" style={{ color: c.surface }}>
+            {t('pageMeet.full')}
+          </Text>
+        </View>
+      ) : left !== null ? (
+        <View style={[styles.chip, { borderColor: c.border }]}>
+          <Text variant="caption" style={styles.semi}>
+            {t('pageMeet.spotsLeft', { count: left })}
+          </Text>
+        </View>
+      ) : null}
+      {m.ticket_url ? (
+        <View style={[styles.chip, { borderColor: c.border }]}>
+          <Text variant="caption" style={styles.semi}>
+            {t('pageMeet.ticketsChip')}
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
+/** A page meetup's header on Home (PageMeet-Home): the page's ink strip, like its posts'. */
+function PageHead({ m }: { m: MeetupCard }) {
+  const { t } = useTranslation();
+  const page = m.meetup_host_page!;
+  const coHost = m.host_list.find((h) => h.kind !== 'page' && h.role === 'co_host');
+  const tile = { displayName: page.display_name, state: page.state, logoPath: page.logo_path };
+  return (
+    <View style={[styles.head, styles.pageHead, { backgroundColor: brand.ink }]}>
+      <Pressable
+        accessibilityRole="link"
+        accessibilityLabel={page.display_name}
+        onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: page.handle } })}
+        style={({ pressed }) => [styles.headWho, pressed && styles.pressed]}
+      >
+        <View style={[styles.logoRing, { borderColor: brand.paper }]}>
+          <PageTile page={tile} size={32} />
+        </View>
+        <View style={styles.flex}>
+          <View style={styles.pageName}>
+            <Text variant="bodySm" numberOfLines={1} style={[styles.shrink, styles.semi, { color: brand.paper }]}>
+              {page.display_name}
+            </Text>
+            {isOfficial(tile) ? <StampTape stamp="official" small /> : null}
+            <Text variant="label" style={{ color: brand.paper, opacity: 0.75 }}>
+              {t(`page.${pageKind(page)}`)}
+            </Text>
+          </View>
+          {coHost?.username ? (
+            <Text variant="caption" numberOfLines={1} style={{ color: brand.paper, opacity: 0.75 }}>
+              {t('meetupCard.withCoHost', { username: coHost.username })}
+            </Text>
+          ) : null}
+        </View>
+      </Pressable>
+      <View style={[styles.tape, { backgroundColor: brand.pink }]}>
+        <Text variant="label" style={{ color: brand.ink }}>
+          {t('meetup.tape')}
+        </Text>
+      </View>
     </View>
   );
 }
@@ -170,10 +278,15 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
   const headline = meetupHeadline(m, t);
   const repeats = repeatLabel(m.series.weekdays, t, locale);
   const times = [meetupTimes(m, t, locale), repeats].filter(Boolean).join(' · ');
-  const iHost = Boolean(viewerId) && m.host_list.some((h) => h.id === viewerId);
+  const iHost = Boolean(m.i_run_meetup) || (Boolean(viewerId) && m.host_list.some((h) => h.kind !== 'page' && h.id === viewerId));
+  const place = meetupPlaceName(m, t);
+  const full = spotsLeft(m) === 0;
 
   return (
     <View style={[styles.feedCard, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}>
+      {m.meetup_host_page ? (
+        <PageHead m={m} />
+      ) : (
       <View style={styles.head}>
         <Pressable
           accessibilityRole="link"
@@ -199,10 +312,11 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
           </Text>
         </View>
       </View>
+      )}
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={[headline, spokenDate(m, locale), times, m.park.display_name, cancelled ? t('meetupCard.cancelledA11y') : null]
+        accessibilityLabel={[headline, spokenDate(m, locale), times, place, cancelled ? t('meetupCard.cancelledA11y') : null]
           .filter(Boolean)
           .join(', ')}
         onPress={() => openMeetup(m.id)}
@@ -217,9 +331,9 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
             {times}
           </Text>
           <View style={styles.parkLine}>
-            <Icon name="pin" color={c.accentText} size={16} />
+            <Icon name={m.place === 'page' ? 'storefront' : 'pin'} color={c.accentText} size={16} />
             <Text variant="bodySm" color="accentText" numberOfLines={1} style={styles.semi}>
-              {m.park.display_name}
+              {place}
             </Text>
           </View>
         </View>
@@ -236,7 +350,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
         </View>
       ) : (
         <>
-          <DisciplineChips m={m} />
+          {m.meetup_host_page ? <PageChips m={m} withDisciplines /> : <DisciplineChips m={m} />}
           {over ? null : <GoingRow m={m} />}
         </>
       )}
@@ -255,6 +369,13 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
             <View style={[styles.statusBox, styles.dashed, { borderColor: c.border }]}>
               <Text variant="body" style={styles.semi}>
                 {t('meetup.youreHosting')}
+              </Text>
+            </View>
+          ) : full && !m.i_am_going ? (
+            <View style={[styles.statusBox, styles.dashed, { borderColor: c.textSecondary }]}>
+              <Icon name="block" color={c.textSecondary} size={18} />
+              <Text variant="body" color="textSecondary" style={styles.semi}>
+                {t('pageMeet.full')}
               </Text>
             </View>
           ) : m.i_am_going ? (
@@ -296,7 +417,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
  * An Upcoming row. On a park page the third line names the hosts; on a
  * profile it says where ("7:00 PM · Memo · Every Thursday").
  */
-export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profile' }) {
+export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profile' | 'page' }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const locale = i18n.language;
@@ -306,10 +427,13 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
   const hosts = new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(
     m.host_list.map((h) => h.username).filter((n): n is string => Boolean(n)),
   );
+  const where = meetupPlaceName(m, t);
   const second =
     place === 'park'
       ? [meetupTimes(m, t, locale), repeats].filter(Boolean).join(' · ')
-      : [formatClock(localNow(new Date(m.starts_at), tzOf(m)).minutes, locale), m.park.display_name, repeats].filter(Boolean).join(' · ');
+      : place === 'page'
+        ? [meetupTimes(m, t, locale), where, repeats].filter(Boolean).join(' · ')
+        : [formatClock(localNow(new Date(m.starts_at), tzOf(m)).minutes, locale), where, repeats].filter(Boolean).join(' · ');
 
   return (
     <Pressable
@@ -329,7 +453,7 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
           </Text>
           {cancelled ? (
             <CancelledTag m={m} />
-          ) : place === 'park' ? (
+          ) : place === 'page' ? null : place === 'park' ? (
             hosts ? (
               <Text variant="bodySm" color="textSecondary" numberOfLines={1}>
                 {hosts}
@@ -342,6 +466,7 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
           )}
         </View>
       </View>
+      {place === 'page' && !cancelled ? <PageChips m={m} withDisciplines /> : null}
       {place === 'park' && !cancelled ? <GoingRow m={m} /> : null}
     </Pressable>
   );
@@ -400,6 +525,10 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   pressed: { opacity: 0.75 },
   semi: { fontFamily: fontFamily.sansSemiBold },
+  shrink: { flexShrink: 1 },
+  pageHead: { paddingVertical: space[2] },
+  pageName: { flexDirection: 'row', alignItems: 'center', gap: space[1], minWidth: 0 },
+  logoRing: { borderWidth: 2 },
   struck: { textDecorationLine: 'line-through' },
   stamp: { backgroundColor: brand.ink, alignItems: 'center', justifyContent: 'center', gap: 2 },
   stampBig: { width: 64, height: 72 },

@@ -190,31 +190,33 @@ function ReportSheetContent({
                 {sentBody}
               </Text>
             </View>
-            <View style={[styles.blockBox, { backgroundColor: c.surfaceRaised, borderColor: c.borderSubtle }]}>
-              <Text variant="headline">{t('report.blockToo', { username })}</Text>
-              <Text variant="bodySm" color="textSecondary">
-                {t('report.blockTooBody')}
-              </Text>
-              <Button
-                label={t('report.blockPerson', { username })}
-                variant="secondary"
-                palette={{ fill: 'transparent', text: c.danger, border: c.danger }}
-                onPress={() => {
-                  // A page post or comment: block the page (its own confirm), not a person.
-                  if ((target.kind === 'post' || target.kind === 'comment') && target.page) {
-                    onClose();
-                    target.page.onBlock();
-                    return;
-                  }
-                  if (!target.personId) return;
-                  confirmBlock({ id: target.personId, username }, () => {
-                    onClose();
-                    onBlocked?.();
-                  });
-                }}
-                style={styles.outline}
-              />
-            </View>
+            {target.personId || ((target.kind === 'post' || target.kind === 'comment') && target.page) ? (
+              <View style={[styles.blockBox, { backgroundColor: c.surfaceRaised, borderColor: c.borderSubtle }]}>
+                <Text variant="headline">{t('report.blockToo', { username })}</Text>
+                <Text variant="bodySm" color="textSecondary">
+                  {t('report.blockTooBody')}
+                </Text>
+                <Button
+                  label={t('report.blockPerson', { username })}
+                  variant="secondary"
+                  palette={{ fill: 'transparent', text: c.danger, border: c.danger }}
+                  onPress={() => {
+                    // A page post or comment: block the page (its own confirm), not a person.
+                    if ((target.kind === 'post' || target.kind === 'comment') && target.page) {
+                      onClose();
+                      target.page.onBlock();
+                      return;
+                    }
+                    if (!target.personId) return;
+                    confirmBlock({ id: target.personId, username }, () => {
+                      onClose();
+                      onBlocked?.();
+                    });
+                  }}
+                  style={styles.outline}
+                />
+              </View>
+            ) : null}
             <Button label={t('report.done')} palette={{ fill: c.accent, text: c.onAccent, border: c.accent }} onPress={onClose} />
           </View>
         ) : (

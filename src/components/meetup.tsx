@@ -6,6 +6,11 @@
  * take someone off Going, comments can be reported, @names in them link to
  * profiles, and the comment box has an @ list of people who can see the
  * meetup.
+ *
+ * Pages as hosts (PR 9): the host page is the first row of the going list
+ * with HOST; an 18+ meetup asks "I'm 18 or older" in the Going sheet, which
+ * also says how many spots are left; and the page's team can comment as the
+ * page, labelled HOST.
  */
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
@@ -14,15 +19,18 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
 import { MentionedText, MentionList } from '@/components/mentions';
+import { PageTile } from '@/components/pages';
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { Sheet } from '@/components/tagging';
-import { Button, Icon, Toggle } from '@/components/ui';
+import { Button, CheckBox, Icon, Toggle } from '@/components/ui';
 import { MAX_COMMENT } from '@/lib/engagement';
 import { activeMention, insertMention, MAX_SUGGESTIONS } from '@/lib/mentions';
 import { usePageMentions } from '@/lib/pages';
 import {
+  goingError,
   type GoingPerson,
+  type HostPage,
   type MeetupComment,
   type MeetupThread,
   useAddMeetupComment,
@@ -33,7 +41,7 @@ import {
   useSetGoing,
 } from '@/lib/meetups';
 import { Sentry } from '@/lib/sentry';
-import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
+import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /* Going list ------------------------------------------------------------------------ */
 
@@ -51,11 +59,14 @@ export function HostLabel({ role }: { role: 'host' | 'co_host' }) {
 }
 
 export function GoingList({
+  hostPage,
   people,
   unnamed,
   hostView,
   onRemove,
 }: {
+  /** A page meetup's host (PR 9): its first row, with HOST. */
+  hostPage?: HostPage | null;
   people: GoingPerson[];
   unnamed: number;
   hostView: boolean;
@@ -110,8 +121,26 @@ export function GoingList({
     </Text>
   );
 
+  const nobodyElse = hosts.length + followed.length + others.length === 0 && unnamed === 0;
   return (
     <View style={{ backgroundColor: c.surfaceRaised }}>
+      {hostPage ? (
+        <Pressable
+          accessibilityRole="link"
+          onPress={() => router.push({ pathname: '/page/[handle]', params: { handle: hostPage.handle } })}
+          style={({ pressed }) => [
+            styles.personRow,
+            !nobodyElse && { borderBottomWidth: stroke.hairline, borderBottomColor: c.borderSubtle },
+            pressed && styles.pressed,
+          ]}
+        >
+          <PageTile page={{ displayName: hostPage.display_name, state: hostPage.state, logoPath: hostPage.logo_path }} size={36} />
+          <Text variant="body" numberOfLines={1} style={[styles.flex, { fontFamily: fontFamily.sansSemiBold }]}>
+            {hostPage.display_name}
+          </Text>
+          <HostLabel role="host" />
+        </Pressable>
+      ) : null}
       {hosts.map((p, i) => row(p, i === hosts.length - 1 && followed.length + others.length === 0 && unnamed === 0))}
       {followed.length > 0 && !hostView ? sub(t('meetup.peopleYouFollow')) : null}
       {followed.map((p, i) => row(p, i === followed.length - 1 && others.length === 0 && unnamed === 0))}
@@ -146,6 +175,9 @@ export function GoingSheet({
   userId,
   summary,
   line,
+  adultsOnlyBy = null,
+  spotsLeft = null,
+  hasTickets = false,
   onClose,
 }: {
   visible: boolean;
@@ -154,6 +186,12 @@ export function GoingSheet({
   summary: { i_am_going: boolean; my_going_privately: boolean; my_remind_me: boolean } | null;
   /** "Thursday blade night · Thu, Nov 5 · 7:00 PM · Memo" */
   line: string;
+  /** An 18+ meetup (PR 9): who made it for people 18 and older, asked once per meetup. */
+  adultsOnlyBy?: string | null;
+  /** Spots left on a meetup with a capacity. */
+  spotsLeft?: number | null;
+  /** It has a ticket link: going isn't buying a ticket. */
+  hasTickets?: boolean;
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -164,11 +202,17 @@ export function GoingSheet({
   const [priv, setPriv] = useState(false);
   const [remind, setRemind] = useState(false);
   const [noticeSeen, setNoticeSeen] = useState(true);
+  const [adult, setAdult] = useState(false);
+  const [needAdult, setNeedAdult] = useState(false);
   const [wasVisible, setWasVisible] = useState(false);
+  // Asked once per meetup: someone already going isn't asked again.
+  const askAdult = Boolean(adultsOnlyBy) && !going;
 
   if (visible !== wasVisible) {
     setWasVisible(visible);
     if (visible) {
+      setAdult(false);
+      setNeedAdult(false);
       setPriv(going ? (summary?.my_going_privately ?? false) : defaultPrivate);
       setRemind(going ? (summary?.my_remind_me ?? false) : false);
     }
@@ -180,20 +224,37 @@ export function GoingSheet({
       .catch(() => setNoticeSeen(false));
   }, [visible]);
 
-  const save = (next: boolean) =>
+  const save = (next: boolean) => {
+    if (next && askAdult && !adult) {
+      setNeedAdult(true);
+      return;
+    }
     setGoing.mutate(
-      { going: next, goingPrivately: next ? priv : undefined, remindMe: next ? remind : undefined },
+      {
+        going: next,
+        goingPrivately: next ? priv : undefined,
+        remindMe: next ? remind : undefined,
+        confirmedAdult: next && askAdult ? adult : undefined,
+      },
       {
         onSuccess: () => {
           if (next) void AsyncStorage.setItem(NOTICE_KEY, '1').catch(() => undefined);
           onClose();
         },
         onError: (err) => {
+          const known = goingError(err);
+          if (known === 'adult_confirm_needed') return setNeedAdult(true);
+          if (known === 'meetup_full') {
+            onClose();
+            Alert.alert(t('pageMeet.fullTitle'), t('pageMeet.fullBody'));
+            return;
+          }
           Sentry.captureException(err);
           Alert.alert(t('errors.generic'));
         },
       },
     );
+  };
 
   return (
     <Sheet visible={visible} title={going ? t('meetup.youreGoing') : t('meetup.imGoing')} onClose={onClose}>
@@ -213,6 +274,37 @@ export function GoingSheet({
               </Text>
             </View>
           </View>
+        ) : null}
+        {askAdult ? (
+          <>
+            <View style={[styles.adultNotice, { backgroundColor: brand.ink }]}>
+              <View style={[styles.adultTag, { backgroundColor: brand.paper }]}>
+                <Text variant="label" style={{ color: brand.ink }}>
+                  {t('pageMeet.adults')}
+                </Text>
+              </View>
+              <Text variant="bodySm" style={[styles.flex, { color: brand.paper }]}>
+                {t('pageMeet.adultNotice', { name: adultsOnlyBy })}
+              </Text>
+            </View>
+            <Pressable
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: adult }}
+              onPress={() => {
+                setAdult((a) => !a);
+                setNeedAdult(false);
+              }}
+              style={[styles.adultRow, { borderBottomColor: c.borderSubtle }]}
+            >
+              <CheckBox checked={adult} c={c} />
+              <Text variant="headline">{t('pageMeet.adultConfirm')}</Text>
+            </Pressable>
+            {needAdult ? (
+              <Text variant="bodySm" color="statusClosed" accessibilityLiveRegion="polite">
+                {t('pageMeet.adultNeeded')}
+              </Text>
+            ) : null}
+          </>
         ) : null}
       </View>
       <View style={[styles.switches, { borderTopColor: c.borderSubtle }]}>
@@ -238,6 +330,13 @@ export function GoingSheet({
         </View>
       </View>
       <View style={styles.sheetBody}>
+        {(spotsLeft !== null || hasTickets) && !going ? (
+          <Text variant="bodySm" color="textSecondary">
+            {[spotsLeft !== null ? `${t('pageMeet.spotsLeft', { count: spotsLeft })}.` : null, hasTickets ? t('pageMeet.noTicket') : null]
+              .filter(Boolean)
+              .join(' ')}
+          </Text>
+        ) : null}
         <Button
           label={going ? t('meetup.save') : t('meetup.imGoing')}
           icon="check"
@@ -268,6 +367,7 @@ export function MeetupComments({
   eventId,
   userId,
   canModerate,
+  onTeam = false,
   onReply,
   onReport,
 }: {
@@ -275,6 +375,8 @@ export function MeetupComments({
   userId: string | undefined;
   /** Hosts and co-hosts can delete any comment on their meetup. */
   canModerate: boolean;
+  /** You're on the host page's team: the page's own comments are yours to manage, not report. */
+  onTeam?: boolean;
   onReply: (target: MeetupReply) => void;
   /** Someone else's comment: Report. */
   onReport: (comment: MeetupComment) => void;
@@ -304,11 +406,20 @@ export function MeetupComments({
         </Text>
       ) : (
         <>
-          <Avatar path={cm.avatar_path} username={cm.username ?? ''} size={small ? 28 : 36} />
+          {cm.page ? (
+            <PageTile page={{ displayName: cm.page.display_name, state: 'managed', logoPath: cm.page.logo_path }} size={small ? 28 : 36} />
+          ) : (
+            <Avatar path={cm.avatar_path} username={cm.username ?? ''} size={small ? 28 : 36} />
+          )}
           <View style={styles.flex}>
             <View style={styles.commentHead}>
-              <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
-                {cm.username ?? t('common.deletedUser')}
+              <Text
+                variant="bodySm"
+                accessibilityRole={cm.page ? 'link' : undefined}
+                onPress={cm.page ? () => router.push({ pathname: '/page/[handle]', params: { handle: cm.page!.handle } }) : undefined}
+                style={{ fontFamily: fontFamily.sansSemiBold }}
+              >
+                {cm.page?.display_name ?? cm.username ?? t('common.deletedUser')}
               </Text>
               {cm.author_role === 'host' || cm.author_role === 'co_host' ? <HostLabel role={cm.author_role} /> : null}
               <Text variant="caption" color="textSecondary">
@@ -326,8 +437,8 @@ export function MeetupComments({
             <View style={styles.commentActions}>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel={t('comments.replyTo', { username: cm.username ?? '' })}
-                onPress={() => onReply({ threadId, userId: cm.author_id, username: cm.username })}
+                accessibilityLabel={t('comments.replyTo', { username: cm.page?.display_name ?? cm.username ?? '' })}
+                onPress={() => onReply({ threadId, userId: cm.author_id, username: cm.page ? null : cm.username })}
                 hitSlop={6}
                 style={styles.action}
               >
@@ -335,7 +446,7 @@ export function MeetupComments({
                   {t('comments.reply')}
                 </Text>
               </Pressable>
-              {userId && (cm.author_id === userId || canModerate) ? (
+              {userId && (cm.author_id === userId || canModerate || (cm.page && onTeam)) ? (
                 <Pressable
                   accessibilityRole="button"
                   accessibilityLabel={t('comments.deleteLabel')}
@@ -348,10 +459,10 @@ export function MeetupComments({
                   </Text>
                 </Pressable>
               ) : null}
-              {userId && cm.author_id && cm.author_id !== userId ? (
+              {userId && ((cm.author_id && cm.author_id !== userId) || (cm.page && !onTeam)) ? (
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={t('meetup.reportComment', { username: cm.username ?? '' })}
+                  accessibilityLabel={t('meetup.reportComment', { username: cm.page?.display_name ?? cm.username ?? '' })}
                   onPress={() => onReport(cm)}
                   hitSlop={6}
                   style={styles.action}
@@ -405,12 +516,15 @@ export function MeetupComments({
 export function MeetupCommentComposer({
   eventId,
   userId,
+  asPage = null,
   replyTo,
   onClearReply,
   inputRef,
 }: {
   eventId: string;
   userId: string | undefined;
+  /** The host page, when you're on its team (PR 9): you can comment as it. */
+  asPage?: HostPage | null;
   replyTo: MeetupReply | null;
   onClearReply: () => void;
   inputRef: RefObject<TextInput | null>;
@@ -420,6 +534,8 @@ export function MeetupCommentComposer({
   const add = useAddMeetupComment(eventId, userId);
   const [text, setText] = useState('');
   const [cursor, setCursor] = useState(0);
+  const [asIt, setAsIt] = useState(false);
+  const page = asIt ? asPage : null;
   const ready = text.trim().length > 0 && !add.isPending;
 
   // Typing @ opens the list: only people who can see this meetup (decided Nov 3).
@@ -445,7 +561,7 @@ export function MeetupCommentComposer({
   const send = () => {
     if (!ready) return;
     add.mutate(
-      { body: text.trim(), parentId: replyTo?.threadId ?? null, replyToUserId: replyTo?.userId ?? null },
+      { body: text.trim(), parentId: replyTo?.threadId ?? null, replyToUserId: replyTo?.userId ?? null, asPage: page?.id ?? null },
       {
         onSuccess: () => {
           setText('');
@@ -465,6 +581,28 @@ export function MeetupCommentComposer({
         <MentionList candidates={candidates} pages={pages} typed={mention?.query.length ?? 0} parkName={null} onPick={pick} />
       ) : null}
       <View style={[styles.composer, { borderTopColor: c.borderSubtle, backgroundColor: c.surface }]}>
+        {asPage ? (
+          <Pressable
+            accessibilityRole="switch"
+            accessibilityState={{ checked: asIt }}
+            accessibilityLabel={t('commentAs.toggleLabel', { name: page?.display_name ?? t('commentAs.you') })}
+            accessibilityHint={t('commentAs.toggleHint')}
+            onPress={() => setAsIt((v) => !v)}
+            style={({ pressed }) => [
+              styles.asChip,
+              { borderColor: c.text, backgroundColor: asIt ? c.accentSubtle : c.surface },
+              pressed && styles.pressed,
+            ]}
+          >
+            {asIt ? (
+              <PageTile page={{ displayName: asPage.display_name, state: asPage.state, logoPath: asPage.logo_path }} size={20} />
+            ) : null}
+            <Text variant="caption" style={{ color: asIt ? c.onAccentSubtle : c.text, fontFamily: fontFamily.sansSemiBold }}>
+              {asIt ? t('commentAs.asPage', { name: asPage.display_name }) : t('commentAs.asYou')}
+            </Text>
+            <Icon name="repeat" color={asIt ? c.onAccentSubtle : c.text} size={14} />
+          </Pressable>
+        ) : null}
         {replyTo ? (
           <View style={styles.replying}>
             <Text variant="caption" color="textSecondary" style={styles.flex}>
@@ -481,11 +619,11 @@ export function MeetupCommentComposer({
             value={text}
             onChangeText={(v) => setText(v.slice(0, MAX_COMMENT))}
             onSelectionChange={(e) => setCursor(e.nativeEvent.selection.end)}
-            placeholder={t('comments.placeholder')}
+            placeholder={page ? t('commentAs.placeholder', { name: page.display_name }) : t('comments.placeholder')}
             placeholderTextColor={c.textSecondary}
             multiline
             maxLength={MAX_COMMENT}
-            accessibilityLabel={t('comments.placeholder')}
+            accessibilityLabel={page ? t('commentAs.placeholder', { name: page.display_name }) : t('comments.placeholder')}
             style={[styles.composerInput, { borderColor: c.border, backgroundColor: c.surfaceRaised, color: c.text }]}
           />
           <Pressable
@@ -535,6 +673,18 @@ const styles = StyleSheet.create({
   action: { minHeight: 36, justifyContent: 'center' },
   composer: { borderTopWidth: stroke.hairline, paddingHorizontal: space[4], paddingTop: space[2], paddingBottom: space[3], gap: space[1] },
   replying: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  asChip: {
+    alignSelf: 'flex-start',
+    minHeight: 32,
+    borderWidth: stroke.rule,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: space[2],
+  },
+  adultNotice: { flexDirection: 'row', alignItems: 'flex-start', gap: space[3], padding: space[3] },
+  adultTag: { paddingHorizontal: 6, paddingVertical: 2 },
+  adultRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space[3], borderBottomWidth: stroke.hairline },
   composerRow: { flexDirection: 'row', gap: space[2], alignItems: 'flex-end' },
   composerInput: {
     flex: 1,
