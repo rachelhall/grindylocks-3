@@ -1,5 +1,6 @@
 /** Park directory data: map pins, near me, search and park pages. */
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { useMemo } from 'react';
 
 import type { Database } from './database.types';
@@ -94,6 +95,15 @@ export async function parkCoords(ids: string[]): Promise<Map<string, { latitude:
 }
 
 export type Metro = { id: string; name: string; region: string | null; country: string };
+
+/**
+ * Opens the Map tab fitted to a city's parks (a Places result in Search, or
+ * the Map toggle in city search). `at` makes each pick a new navigation, so
+ * picking the same city again re-fits the map after it's been panned away.
+ */
+export function showMetroOnMap(metroId: string) {
+  router.navigate({ pathname: '/', params: { metro: metroId, at: String(Date.now()) } });
+}
 
 export async function fetchMetro(id: string): Promise<Metro | null> {
   const { data } = await supabase.from('metro_areas').select('id, name, region, country').eq('id', id).maybeSingle();

@@ -6,19 +6,18 @@ import { SafeAreaView } from '@/components/safe-area';
 
 import { ParkRow, useParkLine } from '@/components/parks';
 import { BackButton, Icon } from '@/components/ui';
+import { countryName } from '@/i18n';
 import { useAuth } from '@/lib/auth';
 import { hasIndoor } from '@/lib/map-filters';
-import { type ParkPin, useDirectorySearch, useMetro, useParksInMetro, useSavedParks } from '@/lib/parks';
+import {
+  type ParkPin,
+  showMetroOnMap,
+  useDirectorySearch,
+  useMetro,
+  useParksInMetro,
+  useSavedParks,
+} from '@/lib/parks';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
-
-/** "Denmark" for "DK", in the reader's language; falls back to the code. */
-function countryName(code: string, locale: string): string {
-  try {
-    return new Intl.DisplayNames([locale], { type: 'region' }).of(code) ?? code;
-  } catch {
-    return code;
-  }
-}
 
 /**
  * City search, per the City search mockup. Typing finds cities (metro areas,
@@ -143,7 +142,7 @@ export default function CitySearch() {
                 <Pressable
                   accessibilityRole="radio"
                   accessibilityState={{ selected: false }}
-                  onPress={() => router.navigate({ pathname: '/', params: { metro: metro.id } })}
+                  onPress={() => showMetroOnMap(metro.id)}
                   style={({ pressed }) => [
                     styles.toggleItem,
                     { backgroundColor: c.surfaceRaised },
