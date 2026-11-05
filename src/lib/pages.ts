@@ -63,6 +63,8 @@ export type Page = {
   showPin: boolean;
   /** The shop's own clock: its metro area's time zone, else the page's. */
   timeZone: string | null;
+  /** The page's metro area (Rachel sets it): needed to meet at an address (PR 9). */
+  metroAreaId: string | null;
   hours: HoursRow[];
   /** "Brands we carry", by name. */
   brandsCarried: CarriedBrand[];
@@ -178,7 +180,7 @@ const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, web
   ended_label, main_language, managed_at, founding_partner_at, closed_at, suspended_at, temp_closed_at,
   temp_closed_until, temp_closed_note, page_descriptions (locale, body), page_links (position, url),
   page_aliases (name, created_at, formerly),
-  location_type, address, latitude, longitude, show_pin, timezone, metro_areas (timezone),
+  location_type, address, latitude, longitude, show_pin, timezone, metro_area_id, metro_areas (timezone),
   page_hours (id, season_start_month, season_start_day, season_end_month, season_end_day, days,
               start_anchor, start_time, end_anchor, end_time, note),
   page_brands_carried!page_brands_carried_shop_id_fkey (
@@ -220,6 +222,7 @@ function toPage(row: PageRow): Page {
     longitude: row.longitude,
     showPin: row.show_pin,
     timeZone: row.metro_areas?.timezone ?? row.timezone ?? null,
+    metroAreaId: row.metro_area_id ?? null,
     hours: row.page_hours ?? [],
     // Name-only brands still link (gear depends on them); archives don't sell anything new.
     brandsCarried: (row.page_brands_carried ?? [])

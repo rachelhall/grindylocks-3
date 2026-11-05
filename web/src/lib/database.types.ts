@@ -261,32 +261,35 @@ export type Database = {
       }
       event_comments: {
         Row: {
-          author_id: string
+          author_id: string | null
           body: string
           created_at: string
           deleted_at: string | null
           event_id: string
           id: string
+          page_id: string | null
           parent_id: string | null
           reply_to_user_id: string | null
         }
         Insert: {
-          author_id: string
+          author_id?: string | null
           body: string
           created_at?: string
           deleted_at?: string | null
           event_id: string
           id?: string
+          page_id?: string | null
           parent_id?: string | null
           reply_to_user_id?: string | null
         }
         Update: {
-          author_id?: string
+          author_id?: string | null
           body?: string
           created_at?: string
           deleted_at?: string | null
           event_id?: string
           id?: string
+          page_id?: string | null
           parent_id?: string | null
           reply_to_user_id?: string | null
         }
@@ -321,8 +324,38 @@ export type Database = {
           },
         ]
       }
+      event_days: {
+        Row: {
+          day: string
+          ends_at: string
+          event_id: string
+          starts_at: string
+        }
+        Insert: {
+          day: string
+          ends_at: string
+          event_id: string
+          starts_at: string
+        }
+        Update: {
+          day?: string
+          ends_at?: string
+          event_id?: string
+          starts_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_days_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_going: {
         Row: {
+          confirmed_adult_at: string | null
           created_at: string
           event_id: string
           going_privately: boolean
@@ -331,6 +364,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          confirmed_adult_at?: string | null
           created_at?: string
           event_id: string
           going_privately?: boolean
@@ -339,6 +373,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          confirmed_adult_at?: string | null
           created_at?: string
           event_id?: string
           going_privately?: boolean
@@ -414,16 +449,26 @@ export type Database = {
       }
       event_series: {
         Row: {
+          address: string | null
+          adults_only: boolean
+          capacity: number | null
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
+          place: Database["public"]["Enums"]["meetup_place"]
+          ticket_url: string | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
           duration: string
           ended_at: string | null
           ends_on: string | null
-          host_id: string
+          host_id: string | null
+          host_page_id: string | null
           id: string
           note: string | null
-          park_id: string
+          park_id: string | null
           start_time: string
           starts_on: string
           title: string | null
@@ -432,16 +477,26 @@ export type Database = {
           weekdays: number[]
         }
         Insert: {
+          address?: string | null
+          adults_only?: boolean
+          capacity?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          metro_area_id?: string | null
+          multi_day?: boolean
+          place?: Database["public"]["Enums"]["meetup_place"]
+          ticket_url?: string | null
           cover_path?: string | null
           created_at?: string
           disciplines?: Database["public"]["Enums"]["discipline"][]
           duration: string
           ended_at?: string | null
           ends_on?: string | null
-          host_id: string
+          host_id?: string | null
+          host_page_id?: string | null
           id?: string
           note?: string | null
-          park_id: string
+          park_id?: string | null
           start_time: string
           starts_on: string
           title?: string | null
@@ -450,16 +505,26 @@ export type Database = {
           weekdays?: number[]
         }
         Update: {
+          address?: string | null
+          adults_only?: boolean
+          capacity?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          metro_area_id?: string | null
+          multi_day?: boolean
+          place?: Database["public"]["Enums"]["meetup_place"]
+          ticket_url?: string | null
           cover_path?: string | null
           created_at?: string
           disciplines?: Database["public"]["Enums"]["discipline"][]
           duration?: string
           ended_at?: string | null
           ends_on?: string | null
-          host_id?: string
+          host_id?: string | null
+          host_page_id?: string | null
           id?: string
           note?: string | null
-          park_id?: string
+          park_id?: string | null
           start_time?: string
           starts_on?: string
           title?: string | null
@@ -558,6 +623,9 @@ export type Database = {
       }
       events: {
         Row: {
+          address: string | null
+          adults_only: boolean
+          capacity: number | null
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
@@ -570,11 +638,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -585,8 +659,18 @@ export type Database = {
           i_am_going: boolean | null
           linked_post_count: number | null
           meetup_comment_count: number | null
+          i_run_meetup: boolean | null
+          meetup_days: Json | null
+          meetup_host_page: Json | null
+          meetup_official: boolean | null
+          meetup_place_info: Json | null
+          meetup_timezone: string | null
+          spots_taken: number | null
         }
         Insert: {
+          address?: string | null
+          adults_only?: boolean
+          capacity?: number | null
           cancel_note?: string | null
           cancel_reason?:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
@@ -599,16 +683,25 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metro_area_id?: string | null
+          multi_day?: boolean
           note?: string | null
-          park_id: string
+          park_id?: string | null
+          place?: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status?: Database["public"]["Enums"]["meetup_status"]
+          ticket_url?: string | null
           title?: string | null
           updated_at?: string
           went_count?: number | null
         }
         Update: {
+          address?: string | null
+          adults_only?: boolean
+          capacity?: number | null
           cancel_note?: string | null
           cancel_reason?:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
@@ -621,11 +714,17 @@ export type Database = {
           hidden_at?: string | null
           hidden_by?: string | null
           id?: string
+          latitude?: number | null
+          longitude?: number | null
+          metro_area_id?: string | null
+          multi_day?: boolean
           note?: string | null
-          park_id?: string
+          park_id?: string | null
+          place?: Database["public"]["Enums"]["meetup_place"]
           series_id?: string
           starts_at?: string
           status?: Database["public"]["Enums"]["meetup_status"]
+          ticket_url?: string | null
           title?: string | null
           updated_at?: string
           went_count?: number | null
@@ -3179,6 +3278,10 @@ export type Database = {
         Args: { approve: boolean; claim: string; reason?: string }
         Returns: undefined
       }
+      i_run_meetup: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: boolean
+      }
       invite_to_page: {
         Args: {
           language?: string
@@ -3189,6 +3292,26 @@ export type Database = {
         Returns: string
       }
       lift_page_suspension: { Args: { page: string }; Returns: number }
+      meetup_days: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json
+      }
+      meetup_host_page: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json | null
+      }
+      meetup_official: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: boolean
+      }
+      meetup_place_info: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json
+      }
+      meetup_timezone: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: string | null
+      }
       merge_pages: {
         Args: { confirm: string; source: string; target: string }
         Returns: Json
@@ -3312,6 +3435,46 @@ export type Database = {
           role: string | null
         }[]
       }
+      page_meetups: {
+        Args: { max_results?: number; page: string }
+        Returns: {
+          address: string | null
+          adults_only: boolean
+          cancel_note: string | null
+          cancel_reason:
+            | Database["public"]["Enums"]["meetup_cancel_reason"]
+            | null
+          cancelled_at: string | null
+          capacity: number | null
+          cover_path: string | null
+          created_at: string
+          disciplines: Database["public"]["Enums"]["discipline"][]
+          ends_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
+          note: string | null
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
+          series_id: string
+          starts_at: string
+          status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
+          title: string | null
+          updated_at: string
+          went_count: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "events"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       page_suspension_notice: {
         Args: { page: string }
         Returns: {
@@ -3382,6 +3545,10 @@ export type Database = {
           role: Database["public"]["Enums"]["page_role"]
         }
         Returns: string
+      }
+      spots_taken: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: number | null
       }
       suspend_page: {
         Args: {
@@ -3626,15 +3793,24 @@ export type Database = {
       }
       create_meetup: {
         Args: {
+          address?: string
+          adults_only?: boolean
+          as_page?: string
+          capacity?: number
           co_hosts?: string[]
           cover_path?: string
+          days?: Json
           disciplines?: Database["public"]["Enums"]["discipline"][]
           ends_at?: string
+          latitude?: number
+          longitude?: number
           note?: string
-          park: string
+          park?: string
           repeat_ends_on?: string
           seasons?: Json
-          starts_at: string
+          place?: Database["public"]["Enums"]["meetup_place"]
+          starts_at?: string
+          ticket_url?: string
           title?: string
           visibility?: Database["public"]["Enums"]["meetup_visibility"]
           weekdays?: number[]
@@ -3696,11 +3872,14 @@ export type Database = {
       feed_meetups: {
         Args: { max_results?: number; newer_than?: string; up_to?: string }
         Returns: {
+          address: string | null
+          adults_only: boolean
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
             | null
           cancelled_at: string | null
+          capacity: number | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
@@ -3708,11 +3887,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -3863,6 +4048,7 @@ export type Database = {
           created_at: string
           deleted: boolean
           id: string
+          page: Json | null
           parent_id: string | null
           reply_to_username: string | null
           username: string | null
@@ -4067,11 +4253,14 @@ export type Database = {
       park_meetups: {
         Args: { max_results?: number; park: string }
         Returns: {
+          address: string | null
+          adults_only: boolean
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
             | null
           cancelled_at: string | null
+          capacity: number | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
@@ -4079,11 +4268,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -4104,11 +4299,14 @@ export type Database = {
           park: string
         }
         Returns: {
+          address: string | null
+          adults_only: boolean
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
             | null
           cancelled_at: string | null
+          capacity: number | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
@@ -4116,11 +4314,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -4201,11 +4405,14 @@ export type Database = {
       profile_meetups: {
         Args: { max_results?: number; person: string }
         Returns: {
+          address: string | null
+          adults_only: boolean
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
             | null
           cancelled_at: string | null
+          capacity: number | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
@@ -4213,11 +4420,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -4237,11 +4450,14 @@ export type Database = {
           person: string
         }
         Returns: {
+          address: string | null
+          adults_only: boolean
           cancel_note: string | null
           cancel_reason:
             | Database["public"]["Enums"]["meetup_cancel_reason"]
             | null
           cancelled_at: string | null
+          capacity: number | null
           cover_path: string | null
           created_at: string
           disciplines: Database["public"]["Enums"]["discipline"][]
@@ -4249,11 +4465,17 @@ export type Database = {
           hidden_at: string | null
           hidden_by: string | null
           id: string
+          latitude: number | null
+          longitude: number | null
+          metro_area_id: string | null
+          multi_day: boolean
           note: string | null
-          park_id: string
+          park_id: string | null
+          place: Database["public"]["Enums"]["meetup_place"]
           series_id: string
           starts_at: string
           status: Database["public"]["Enums"]["meetup_status"]
+          ticket_url: string | null
           title: string | null
           updated_at: string
           went_count: number | null
@@ -4396,6 +4618,7 @@ export type Database = {
       }
       set_going: {
         Args: {
+          confirmed_adult?: boolean
           event: string
           going: boolean
           going_privately?: boolean
@@ -4517,7 +4740,10 @@ export type Database = {
         | "park_closed"
         | "something_came_up"
         | "other"
+        | "page_closed"
+        | "page_suspended"
       meetup_host_role: "host" | "co_host"
+      meetup_place: "park" | "page" | "address"
       meetup_status: "scheduled" | "cancelled"
       meetup_visibility: "public" | "followers"
       notification_kind:
@@ -4788,8 +5014,11 @@ export const Constants = {
         "park_closed",
         "something_came_up",
         "other",
+        "page_closed",
+        "page_suspended",
       ],
       meetup_host_role: ["host", "co_host"],
+      meetup_place: ["park", "page", "address"],
       meetup_status: ["scheduled", "cancelled"],
       meetup_visibility: ["public", "followers"],
       notification_kind: [
