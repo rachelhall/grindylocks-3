@@ -238,18 +238,31 @@ export function usePageBlock(pageId: string | undefined, userId: string | undefi
 
 export type InboxItem = {
   id: string;
-  kind: 'caption' | 'comment' | 'meetup_comment';
+  /**
+   * @mentions: 'caption', 'comment', 'meetup_comment'. Since PR 8b also
+   * 'post_comment' (a comment on the page's post) and 'reply' (an answer to
+   * one of the page's comments).
+   */
+  kind: 'caption' | 'comment' | 'meetup_comment' | 'post_comment' | 'reply';
   createdAt: string;
   unread: boolean;
-  authorId: string;
+  /** Null when another page wrote it (authorPage is set instead). */
+  authorId: string | null;
   authorUsername: string | null;
   authorAvatarPath: string | null;
+  authorPage: { id: string; handle: string; displayName: string; logoPath: string | null; state: PageState } | null;
   body: string | null;
   postId: string | null;
   commentId: string | null;
   eventId: string | null;
   eventTitle: string | null;
 };
+
+function inboxPage(raw: unknown): InboxItem['authorPage'] {
+  if (!raw || typeof raw !== 'object') return null;
+  const p = raw as { id: string; handle: string; display_name: string; logo_path: string | null; state: PageState };
+  return { id: p.id, handle: p.handle, displayName: p.display_name, logoPath: p.logo_path, state: p.state };
+}
 
 export function usePageInbox(userId: string | undefined, pageId: string | undefined) {
   return useQuery({
@@ -265,6 +278,7 @@ export function usePageInbox(userId: string | undefined, pageId: string | undefi
         authorId: r.author_id,
         authorUsername: r.author_username,
         authorAvatarPath: r.author_avatar_path,
+        authorPage: inboxPage(r.author_page),
         body: r.body,
         postId: r.post_id,
         commentId: r.comment_id,

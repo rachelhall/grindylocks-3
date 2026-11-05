@@ -5,21 +5,32 @@
  * stays in the same thread with an @mention of the person you're answering.
  * Comments can be deleted (your own, or any on your post), never edited.
  * Anyone else's comment can be reported (M5), from the same line as Reply.
+ *
+ * Commenting as a page (PR 8b, PostingAs-Comment mockup): a comment made as
+ * a page shows the page's tile and name, and opens the page. Team members
+ * see an "as you / as 8SET" toggle beside "Replying to" where the page may
+ * comment (its own posts, and posts that mention it); who may delete what
+ * comes from the database.
  */
-import { Fragment, type RefObject, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
+import { type RefObject, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
 
+import { PageTile } from '@/components/pages';
 import { timeAgo } from '@/components/post-card';
 import { Avatar } from '@/components/profile';
 import { useExplainRestriction, useReportSheet } from '@/components/safety';
 import { Icon } from '@/components/ui';
 import {
   type Comment,
+  type CommentAsPage,
   MAX_COMMENT,
   type ReplyTarget,
   type Thread,
   useAddComment,
+  useCommentAsPages,
   useComments,
   useDeleteComment,
 } from '@/lib/engagement';
@@ -27,8 +38,11 @@ import { MentionedText, MentionList, openProfile } from '@/components/mentions';
 import { activeMention, buildCandidates, insertMention, useMentionSearch } from '@/lib/mentions';
 import { usePageMentions } from '@/lib/pages';
 import { useParkRegulars, usePost } from '@/lib/posts';
+import { keys } from '@/lib/query';
 import { Sentry } from '@/lib/sentry';
 import { useBlockedAccounts, useFollowing } from '@/lib/social';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/lib/auth';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 const COLLAPSE_AFTER = 2;
@@ -81,16 +95,28 @@ function CommentRow({
     );
   }
 
-  const username = comment.username;
+  // A comment made as a page shows the page, never the member who wrote it.
+  const page = comment.page;
+  const username = page ? page.displayName : comment.username;
+  const openAuthor = page
+    ? () => router.push({ pathname: '/page/[handle]', params: { handle: page.handle } })
+    : comment.username
+      ? () => openProfile(comment.username!)
+      : undefined;
+  const side = reply ? 28 : 32;
   return (
     <View style={[styles.row, reply && styles.reply]}>
       <Pressable
-        accessibilityRole={username ? 'link' : undefined}
+        accessibilityRole={openAuthor ? 'link' : undefined}
         accessibilityLabel={username ?? t('common.deletedUser')}
-        disabled={!username}
-        onPress={() => username && openProfile(username)}
+        disabled={!openAuthor}
+        onPress={openAuthor}
       >
-        <Avatar path={comment.avatarPath} username={username ?? '?'} size={reply ? 28 : 32} />
+        {page ? (
+          <PageTile page={page} size={side} />
+        ) : (
+          <Avatar path={comment.avatarPath} username={username ?? '?'} size={side} />
+        )}
       </Pressable>
       <View style={styles.flex}>
         <View style={styles.nameLine}>
@@ -98,10 +124,15 @@ function CommentRow({
             variant="bodySm"
             color={username ? 'text' : 'textSecondary'}
             style={{ fontFamily: fontFamily.sansSemiBold }}
-            onPress={username ? () => openProfile(username) : undefined}
+            onPress={openAuthor}
           >
             {username ?? t('common.deletedUser')}
           </Text>
+          {page ? (
+            <Text variant="caption" color="textSecondary">
+              {t(page.roles.includes('shop') ? 'page.shop' : 'page.brand')}
+            </Text>
+          ) : null}
           {comment.isPoster ? (
             <View style={[styles.poster, { borderColor: c.text }]}>
               <Text variant="label" style={styles.posterText}>
@@ -176,12 +207,16 @@ function ThreadView({
   const { t } = useTranslation();
   const c = useColors();
   const collapsed = !expanded && thread.replies.length > COLLAPSE_AFTER;
-  const target = (comment: Comment): ReplyTarget => ({
-    threadId: thread.comment.id,
-    // Replying to the thread's own first comment needs no @mention.
-    username: comment.id === thread.comment.id ? null : comment.username,
-    userId: comment.id === thread.comment.id ? null : comment.authorId,
-  });
+  // Replying to the thread's own first comment needs no @mention; answering
+  // a page's reply @mentions the page's handle.
+  const target = (comment: Comment): ReplyTarget =>
+    comment.page
+      ? { threadId: thread.comment.id, username: comment.page.handle, userId: null, pageId: comment.page.id }
+      : {
+          threadId: thread.comment.id,
+          username: comment.id === thread.comment.id ? null : comment.username,
+          userId: comment.id === thread.comment.id ? null : comment.authorId,
+        };
   return (
     <View>
       <CommentRow
@@ -191,7 +226,11 @@ function ThreadView({
         onReply={() =>
           thread.comment.deleted
             ? undefined
-            : onReply({ threadId: thread.comment.id, username: thread.comment.username, userId: null })
+            : onReply({
+                threadId: thread.comment.id,
+                username: thread.comment.page ? thread.comment.page.handle : thread.comment.username,
+                userId: null,
+              })
         }
         onDelete={() => onDelete(thread.comment)}
         onReport={reportFor(thread.comment)}
@@ -236,7 +275,7 @@ export function CommentList({
   expandThread,
 }: {
   postId: string;
-  /** Null for a page post (comments as a page come with PR 8b). */
+  /** Null for a page post. Who may delete what comes with each comment. */
   postAuthorId: string | null;
   userId: string | undefined;
   onReply: (target: ReplyTarget) => void;
@@ -250,12 +289,45 @@ export function CommentList({
   const report = useReportSheet();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const canDelete = (comment: Comment) =>
-    !comment.deleted && Boolean(userId) && (comment.authorId === userId || postAuthorId === userId);
+  const qc = useQueryClient();
+  const canDelete = (comment: Comment) => !comment.deleted && Boolean(userId) && comment.canDelete;
+
+  // "Block 8SET too?" after reporting a page's comment.
+  const blockPage = (pageId: string, name: string) =>
+    Alert.alert(t('page.menu.blockConfirm', { name }), t('page.menu.blockBody'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('block.block'),
+        style: 'destructive',
+        onPress: async () => {
+          const { error } = await supabase.from('user_page_blocks').insert({ user_id: userId!, page_id: pageId });
+          if (error && error.code !== '23505') {
+            Alert.alert(t('errors.generic'), t('errors.network'));
+            return;
+          }
+          void qc.invalidateQueries({ queryKey: keys.comments(postId) });
+          void qc.invalidateQueries({ queryKey: keys.pageState(userId ?? '', pageId) });
+        },
+      },
+    ]);
 
   const reportFor = (comment: Comment) => {
+    if (comment.deleted || !userId) return undefined;
+    const { page } = comment;
+    if (page) {
+      // Your own page's comments aren't yours to report.
+      if (comment.byMyPage) return undefined;
+      return () =>
+        report.open({
+          kind: 'comment',
+          id: comment.id,
+          personId: null,
+          username: page.displayName,
+          page: { onBlock: () => blockPage(page.id, page.displayName) },
+        });
+    }
     const { authorId, username } = comment;
-    if (comment.deleted || !userId || !authorId || !username || authorId === userId) return undefined;
+    if (!authorId || !username || authorId === userId) return undefined;
     return () => report.open({ kind: 'comment', id: comment.id, personId: authorId, username });
   };
 
@@ -323,11 +395,20 @@ export function CommentComposer({
 }) {
   const { t } = useTranslation();
   const c = useColors();
+  const { profile } = useAuth();
   const add = useAddComment(postId, userId);
   const explainRestriction = useExplainRestriction();
   const [text, setText] = useState('');
   const [cursor, setCursor] = useState(0);
   const ready = text.trim().length > 0 && !add.isPending;
+
+  // Commenting as a page: only offered where the page may comment.
+  const asPages = useCommentAsPages(postId, userId).data ?? [];
+  const [asPageId, setAsPageId] = useState<string | null>(null);
+  const [choosing, setChoosing] = useState(false);
+  // If the page can no longer comment here (a block, a mention deleted), it
+  // drops out of the list and the comment goes back to being yours.
+  const asPage: CommentAsPage | null = asPages.find((p) => p.pageId === asPageId) ?? null;
 
   // Typing @ opens the mention list. Everything it reads is already cached
   // by post detail except who you follow and search matches.
@@ -366,7 +447,7 @@ export function CommentComposer({
     if (!ready) return;
     const threadId = replyTo?.threadId ?? null;
     add.mutate(
-      { body: text, replyTo },
+      { body: text, replyTo, asPage: asPage?.pageId ?? null },
       {
         onSuccess: () => {
           setText('');
@@ -375,6 +456,11 @@ export function CommentComposer({
         },
         onError: async (err) => {
           if (await explainRestriction(err)) return;
+          // Row-level refusal while commenting as a page: it can't comment here any more.
+          if (asPage && (err as { code?: string }).code === '42501') {
+            Alert.alert(t('comments.failed'), t('commentAs.notHere', { name: asPage.displayName }));
+            return;
+          }
           Sentry.captureException(err);
           Alert.alert(t('comments.failed'), t('errors.network'));
         },
@@ -393,22 +479,62 @@ export function CommentComposer({
           onPick={pick}
         />
       ) : null}
+      {choosing && asPages.length > 0 ? (
+        <CommentAsList
+          you={{ username: profile?.username ?? '', avatarPath: null }}
+          pages={asPages}
+          value={asPageId}
+          onChange={(next) => {
+            setAsPageId(next);
+            setChoosing(false);
+          }}
+        />
+      ) : null}
       <View style={[styles.composer, { backgroundColor: c.surfaceRaised, borderTopColor: c.border }]}>
-        {replyTo ? (
-          <View style={[styles.replying, { backgroundColor: c.accentSubtle }]}>
-            <Text variant="caption" style={[styles.flex, { color: c.onAccentSubtle }]} numberOfLines={1}>
-              {replyTo.username
-                ? t('comments.replyingTo', { username: replyTo.username })
-                : t('comments.replyingToThread')}
-            </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('comments.cancelReply')}
-              onPress={onClearReply}
-              hitSlop={10}
-            >
-              <Icon name="close" color={c.onAccentSubtle} size={16} />
-            </Pressable>
+        {replyTo || asPages.length > 0 ? (
+          <View style={styles.composerTop}>
+            {replyTo ? (
+              <View style={[styles.replying, styles.flex, { backgroundColor: c.accentSubtle }]}>
+                <Text variant="caption" style={[styles.flex, { color: c.onAccentSubtle }]} numberOfLines={1}>
+                  {replyTo.username
+                    ? t('comments.replyingTo', { username: replyTo.username })
+                    : t('comments.replyingToThread')}
+                </Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('comments.cancelReply')}
+                  onPress={onClearReply}
+                  hitSlop={10}
+                >
+                  <Icon name="close" color={c.onAccentSubtle} size={16} />
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.flex} />
+            )}
+            {asPages.length > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('commentAs.toggleLabel', { name: asPage?.displayName ?? profile?.username ?? '' })}
+                accessibilityHint={t('commentAs.toggleHint')}
+                accessibilityState={{ expanded: choosing }}
+                onPress={() => setChoosing((v) => !v)}
+                style={({ pressed }) => [
+                  styles.asToggle,
+                  { borderColor: c.text, backgroundColor: asPage ? c.accentSubtle : c.surface },
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text
+                  variant="caption"
+                  numberOfLines={1}
+                  style={{ color: asPage ? c.onAccentSubtle : c.text, fontFamily: fontFamily.sansSemiBold }}
+                >
+                  {asPage ? t('commentAs.asPage', { name: asPage.displayName }) : t('commentAs.asYou')}
+                </Text>
+                <Icon name={choosing ? 'chevronUp' : 'chevronDown'} color={asPage ? c.onAccentSubtle : c.text} size={16} />
+              </Pressable>
+            ) : null}
           </View>
         ) : null}
         <View style={styles.inputRow}>
@@ -417,9 +543,9 @@ export function CommentComposer({
             value={text}
             onChangeText={setText}
             onSelectionChange={(e) => setCursor(e.nativeEvent.selection.end)}
-            placeholder={t('comments.placeholder')}
+            placeholder={asPage ? t('commentAs.placeholder', { name: asPage.displayName }) : t('comments.placeholder')}
             placeholderTextColor={c.textMuted}
-            accessibilityLabel={t('comments.placeholder')}
+            accessibilityLabel={asPage ? t('commentAs.placeholder', { name: asPage.displayName }) : t('comments.placeholder')}
             selectionColor={c.accent}
             cursorColor={c.text}
             multiline
@@ -447,8 +573,78 @@ export function CommentComposer({
             )}
           </Pressable>
         </View>
+        {asPage ? (
+          <Text variant="caption" color="textSecondary">
+            {t('commentAs.where', { name: asPage.displayName })}
+          </Text>
+        ) : null}
       </View>
     </>
+  );
+}
+
+/** The "Comment as" list that opens above the comment box: you, then your pages. */
+function CommentAsList({
+  you,
+  pages,
+  value,
+  onChange,
+}: {
+  you: { username: string; avatarPath: string | null };
+  pages: CommentAsPage[];
+  value: string | null;
+  onChange: (pageId: string | null) => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const option = (key: string, selected: boolean, title: string, subtitle: string, tile: React.ReactNode, pick: () => void) => (
+    <Pressable
+      key={key}
+      accessibilityRole="radio"
+      accessibilityState={{ checked: selected }}
+      accessibilityLabel={`${title}, ${subtitle}`}
+      onPress={pick}
+      style={({ pressed }) => [
+        styles.asOption,
+        { borderBottomColor: c.borderSubtle, backgroundColor: selected ? c.accentSubtle : 'transparent' },
+        pressed && styles.pressed,
+      ]}
+    >
+      {tile}
+      <Text variant="headline" numberOfLines={1} style={[styles.flex, selected && { color: c.onAccentSubtle }]}>
+        {title}{' '}
+        <Text variant="body" style={{ color: selected ? c.onAccentSubtleSecondary : c.textSecondary }}>
+          · {subtitle}
+        </Text>
+      </Text>
+      <View
+        style={[
+          styles.asBox,
+          { borderColor: selected ? c.onAccentSubtle : c.text, backgroundColor: selected ? c.accent : c.surfaceRaised },
+        ]}
+      >
+        {selected ? <Icon name="check" color={c.onAccent} size={16} /> : null}
+      </View>
+    </Pressable>
+  );
+  return (
+    <View
+      accessibilityRole="radiogroup"
+      accessibilityLabel={t('commentAs.title')}
+      style={[styles.asList, { backgroundColor: c.surfaceRaised, borderColor: c.border }]}
+    >
+      <Text variant="label" color="textSecondary" style={styles.asHeading}>
+        {t('commentAs.title').toUpperCase()}
+      </Text>
+      {option('you', value === null, you.username, t('commentAs.you'), <Avatar path={you.avatarPath} username={you.username} size={32} />, () =>
+        onChange(null),
+      )}
+      {pages.map((p) =>
+        option(p.pageId, value === p.pageId, p.displayName, t('commentAs.page'), <PageTile page={p} size={32} />, () =>
+          onChange(p.pageId),
+        ),
+      )}
+    </View>
   );
 }
 
@@ -470,6 +666,12 @@ const styles = StyleSheet.create({
   viewRepliesRule: { width: 24, height: stroke.hairline },
   composer: { borderTopWidth: stroke.rule, paddingHorizontal: space[3], paddingTop: space[2], paddingBottom: space[2], gap: space[2] },
   replying: { flexDirection: 'row', alignItems: 'center', gap: space[2], paddingHorizontal: space[3], paddingVertical: 6 },
+  composerTop: { flexDirection: 'row', alignItems: 'center', gap: space[2] },
+  asToggle: { minHeight: 32, maxWidth: 180, borderWidth: stroke.rule, flexDirection: 'row', alignItems: 'center', gap: 4, paddingHorizontal: space[2] },
+  asList: { marginHorizontal: space[4], borderWidth: stroke.rule, borderBottomWidth: 0 },
+  asHeading: { paddingHorizontal: space[3], paddingTop: space[2], paddingBottom: 2 },
+  asOption: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], borderBottomWidth: stroke.hairline },
+  asBox: { width: 22, height: 22, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center' },
   inputRow: { flexDirection: 'row', alignItems: 'flex-end', gap: space[2] },
   input: {
     flex: 1,

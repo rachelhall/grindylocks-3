@@ -454,7 +454,9 @@
       "suggestionLiveWhat": "Dein Vorschlag für {{name}} ist jetzt live: {{what}}",
       "handedOver": "{{a}} ist jetzt Inhaber von {{name}}. Du bist Manager.",
       "ownershipDeclined": "{{a}} hat die Übernahme von {{name}} abgelehnt",
-      "mention": "{{a}} hat {{name}} erwähnt"
+      "mention": "{{a}} hat {{name}} erwähnt",
+      "commentPost": "{{a}} hat den Beitrag von {{name}} kommentiert",
+      "commentReply": "{{a}} hat {{name}} geantwortet"
     }
   },
   "feed": {
@@ -865,6 +867,18 @@
     "mentionFollowing": "Du folgst",
     "mentionRegular": "Stammgast in {{park}}",
     "mentionHost": "Host"
+  },
+  "commentAs": {
+    "title": "Kommentieren als",
+    "you": "du",
+    "page": "Seite",
+    "asYou": "als du",
+    "asPage": "als {{name}}",
+    "toggleLabel": "Du kommentierst als {{name}}",
+    "toggleHint": "Wähle, ob du als du selbst oder als eine Seite kommentierst, bei der du dabei bist",
+    "placeholder": "Als {{name}} kommentieren",
+    "where": "{{name}} kann eigene Beiträge kommentieren und Beiträge, die es erwähnen.",
+    "notHere": "{{name}} kann diesen Beitrag nicht mehr kommentieren."
   },
   "clip": {
     "play": "Clip abspielen",
@@ -1922,11 +1936,16 @@
     "followersLine_one": "Person folgt {{name}}",
     "followersLine_other": "Personen folgen {{name}}",
     "followersNote": "Nur dein Team sieht diese Zahl. Niemand sieht, wer.",
-    "empty": "Wenn jemand {{name}} in einer Bildunterschrift oder einem Kommentar @erwähnt, erscheint es hier.",
+    "empty": "Wenn jemand die Beiträge von {{name}} kommentiert, ihm antwortet oder es @erwähnt, erscheint es hier.",
     "new": "Neu",
     "earlier": "Früher",
     "push": "Push für diesen Posteingang",
-    "pushBody": "Nur für dich. Alle im Team stellen das selbst ein."
+    "pushBody": "Nur für dich. Alle im Team stellen das selbst ein.",
+    "postComment": "{{username}} hat den Beitrag von {{name}} kommentiert",
+    "postComments_one": "{{username}} und {{count}} weitere Person haben den Beitrag von {{name}} kommentiert",
+    "postComments_other": "{{username}} und {{count}} weitere haben den Beitrag von {{name}} kommentiert",
+    "reply": "{{username}} hat {{name}} geantwortet",
+    "viewPage": "Seite ansehen"
   },
   "pageAddress": {
     "title": "Adresse und Pin",

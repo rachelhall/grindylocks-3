@@ -43,7 +43,11 @@ export type ReportTarget =
       parkName: string | null;
       page?: { onBlock: () => void };
     }
-  | { kind: 'comment'; id: string; personId: string; username: string }
+  /**
+   * A comment made as a page (PR 8b): `personId` is null, `username` is the
+   * page's name, and "Block them too?" blocks the page.
+   */
+  | { kind: 'comment'; id: string; personId: string | null; username: string; page?: { onBlock: () => void } }
   | { kind: 'person'; id: string; personId: string; username: string }
   /** A meetup date: `personId` and `username` are its host; `parkName` where it's routed. */
   | { kind: 'meetup'; id: string; personId: string; username: string; parkName: string | null }

@@ -193,33 +193,39 @@ export type Database = {
       }
       comments: {
         Row: {
-          author_id: string
+          author_id: string | null
           body: string
           created_at: string
           deleted_at: string | null
           id: string
           parent_id: string | null
+          page_id: string | null
           post_id: string
+          reply_to_page_id: string | null
           reply_to_user_id: string | null
         }
         Insert: {
-          author_id: string
+          author_id?: string | null
           body: string
           created_at?: string
           deleted_at?: string | null
           id?: string
           parent_id?: string | null
+          page_id?: string | null
           post_id: string
+          reply_to_page_id?: string | null
           reply_to_user_id?: string | null
         }
         Update: {
-          author_id?: string
+          author_id?: string | null
           body?: string
           created_at?: string
           deleted_at?: string | null
           id?: string
           parent_id?: string | null
+          page_id?: string | null
           post_id?: string
+          reply_to_page_id?: string | null
           reply_to_user_id?: string | null
         }
         Relationships: [
@@ -911,6 +917,7 @@ export type Database = {
       notifications: {
         Row: {
           actor_id: string | null
+          actor_page_id: string | null
           comment_id: string | null
           created_at: string
           event_comment_id: string | null
@@ -927,6 +934,7 @@ export type Database = {
         }
         Insert: {
           actor_id?: string | null
+          actor_page_id?: string | null
           comment_id?: string | null
           created_at?: string
           event_comment_id?: string | null
@@ -943,6 +951,7 @@ export type Database = {
         }
         Update: {
           actor_id?: string | null
+          actor_page_id?: string | null
           comment_id?: string | null
           created_at?: string
           event_comment_id?: string | null
@@ -1564,7 +1573,8 @@ export type Database = {
       }
       page_mentions: {
         Row: {
-          author_id: string
+          author_id: string | null
+          by_page_id: string | null
           comment_id: string | null
           created_at: string
           event_comment_id: string | null
@@ -1573,7 +1583,8 @@ export type Database = {
           post_id: string | null
         }
         Insert: {
-          author_id: string
+          author_id?: string | null
+          by_page_id?: string | null
           comment_id?: string | null
           created_at?: string
           event_comment_id?: string | null
@@ -1582,7 +1593,8 @@ export type Database = {
           post_id?: string | null
         }
         Update: {
-          author_id?: string
+          author_id?: string | null
+          by_page_id?: string | null
           comment_id?: string | null
           created_at?: string
           event_comment_id?: string | null
@@ -3341,7 +3353,8 @@ export type Database = {
         Args: { max_rows?: number; page: string }
         Returns: {
           author_avatar_path: string | null
-          author_id: string
+          author_id: string | null
+          author_page: Json | null
           author_username: string | null
           body: string | null
           comment_id: string | null
@@ -4067,6 +4080,21 @@ export type Database = {
           parent_id: string | null
           reply_to_username: string | null
           username: string | null
+          page: Json | null
+          reply_to_page_id: string | null
+          can_delete: boolean
+          by_my_page: boolean
+        }[]
+      }
+      comment_as_pages: {
+        Args: { post: string }
+        Returns: {
+          display_name: string
+          handle: string
+          logo_path: string | null
+          page_id: string
+          roles: string[]
+          state: string
         }[]
       }
       profile_check_in: {
@@ -4428,6 +4456,7 @@ export type Database = {
         | "page_claimed"
         | "suggestion_live"
         | "page_mention"
+        | "page_comment"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -4698,6 +4727,7 @@ export const Constants = {
         "page_claimed",
         "suggestion_live",
         "page_mention",
+        "page_comment",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [

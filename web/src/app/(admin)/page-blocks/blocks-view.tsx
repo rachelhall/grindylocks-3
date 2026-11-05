@@ -358,7 +358,15 @@ function BlockDetail({
               <li key={i} className="flex flex-col gap-1 border-t border-gl-border-subtle p-3 first:border-t-0">
                 <span className="type-caption text-gl-text-secondary">
                   {new Date(m.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "UTC" })} ·{" "}
-                  {m.where === "caption" ? "in a caption" : m.where === "meetup_comment" ? "in a meetup comment" : "in a comment"}
+                  {m.where === "post"
+                    ? `commented on ${d.page.name}'s post`
+                    : m.where === "reply"
+                      ? `replied to ${d.page.name}`
+                      : m.where === "caption"
+                        ? "mentioned it in a caption"
+                        : m.where === "meetup_comment"
+                          ? "mentioned it in a meetup comment"
+                          : "mentioned it in a comment"}
                 </span>
                 {m.deleted ? (
                   <span className="type-body-sm text-gl-text-secondary italic">Deleted</span>
@@ -369,10 +377,10 @@ function BlockDetail({
             ))}
           </ul>
         ) : (
-          <p className="type-body-sm text-gl-text-secondary">Nothing that mentions {d.page.name}.</p>
+          <p className="type-body-sm text-gl-text-secondary">No comments to or mentions of {d.page.name}.</p>
         )}
         <p className="type-caption text-gl-text-secondary">
-          Captions and comments that @mention the page. Comments on the page&apos;s own posts join this list once pages can post.
+          Comments on the page&apos;s posts, replies to its comments, and captions and comments that @mention it.
         </p>
       </section>
 

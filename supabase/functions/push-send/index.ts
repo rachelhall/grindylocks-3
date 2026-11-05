@@ -36,6 +36,7 @@ type Claimed = {
    * (":series" when the rest of a series was cancelled). Pages: the invite
    * ("team:staff", "ownership"), the decline reason, the team change
    * ("role:manager", "removed", "owner") or what went live.
+   * A page_comment: "post" (on the page's post) or "reply" (to its comment).
    */
   detail: string | null;
   /** Page notifications: the page's handle and name. */
@@ -89,7 +90,8 @@ function meetupTime(row: Claimed, language: string, style: 'date' | 'dateTime' |
  */
 function compose(row: Claimed, language: string): { title?: string; body: string } | null {
   const s: Sentences = strings[(language in strings ? language : 'en') as Language];
-  // Tags, credits and caption mentions on a page post come from the page.
+  // Tags, credits, caption mentions and comments made as a page come from
+  // the page; a page that mentions or comments is named in actor_username.
   const username = row.actor_username ?? row.page_name ?? '';
   const a = username ? `@${username}` : '';
   const metro = row.metro_name ?? '';
@@ -172,6 +174,14 @@ function compose(row: Claimed, language: string): { title?: string; body: string
     // sentence in the title and what was said in the body, like a mention.
     case 'page_mention':
       return page ? { title: say('page_mention', { name: page }), body: row.comment_body ?? '' } : null;
+    // Commenting as a page (PR 8b): a comment on the page's post, or a reply
+    // to one of its comments, for members who switched its inbox push on.
+    case 'page_comment':
+      if (!page) return null;
+      return {
+        title: say(row.detail === 'reply' ? 'page_commentReply' : 'page_commentPost', { name: page }),
+        body: row.comment_body ?? '',
+      };
     case 'suggestion_live':
       return page ? { title: say('page_suggestionLive', { name: page }), body: row.detail ?? '' } : null;
     default:
@@ -186,7 +196,7 @@ function destination(row: Claimed): Record<string, string> {
     return { open: 'meetup', id: row.event_id, ...(comments ? { comments: '1' } : {}) };
   }
   if (row.post_id) {
-    const comments = ['comment', 'reply', 'mention'].includes(row.kind);
+    const comments = ['comment', 'reply', 'mention', 'page_comment'].includes(row.kind);
     return { open: 'post', id: row.post_id, ...(comments ? { comments: '1' } : {}) };
   }
   if (row.kind === 'park_report_accepted' && row.park_slug) return { open: 'park', slug: row.park_slug };

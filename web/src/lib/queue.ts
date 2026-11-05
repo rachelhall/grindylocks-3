@@ -204,6 +204,14 @@ export type ReportDetail = {
   } | null;
   canBan: boolean;
   canEscalate: boolean;
+  /**
+   * PR 8b: the page a reported post or comment was made as (there's no
+   * person to warn or suspend), the page whose post a reported comment is on,
+   * and, for Rachel only, the team member who made it.
+   */
+  page: { name: string; handle: string; isShop: boolean } | null;
+  postPage: { name: string; handle: string } | null;
+  madeBy: string | null;
 };
 
 type RawReportDetail = {
@@ -256,6 +264,9 @@ type RawReportDetail = {
   } | null;
   can_ban: boolean;
   can_escalate: boolean;
+  page?: { display_name: string; handle: string; roles: string[] } | null;
+  post_page?: { display_name: string; handle: string } | null;
+  made_by?: string | null;
 };
 
 function streamThumbnail(videoId: string | null): string | null {
@@ -351,6 +362,9 @@ export async function fetchReportDetail(target: ReportTarget, id: string): Promi
     },
     canBan: raw.can_ban,
     canEscalate: raw.can_escalate,
+    page: raw.page ? { name: raw.page.display_name, handle: raw.page.handle, isShop: raw.page.roles.includes("shop") } : null,
+    postPage: raw.post_page ? { name: raw.post_page.display_name, handle: raw.post_page.handle } : null,
+    madeBy: raw.made_by ?? null,
   };
 }
 

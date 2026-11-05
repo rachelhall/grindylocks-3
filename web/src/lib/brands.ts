@@ -466,7 +466,17 @@ export type PageBlockDetail = {
   blockedByRole: string | null;
   page: PageSummary;
   week: { count: number; by: (string | null)[] };
-  mentions: { createdAt: string; where: "comment" | "meetup_comment" | "caption"; text: string | null; deleted: boolean }[];
+  /**
+   * What the skater wrote to or about the page in the last 30 days, newest
+   * first: comments on its posts and replies to its comments (PR 8b), then
+   * @mentions elsewhere.
+   */
+  mentions: {
+    createdAt: string;
+    where: "comment" | "meetup_comment" | "caption" | "post" | "reply";
+    text: string | null;
+    deleted: boolean;
+  }[];
 };
 
 export async function fetchPageBlockDetail(id: string): Promise<PageBlockDetail | null> {
@@ -481,6 +491,7 @@ export async function fetchPageBlockDetail(id: string): Promise<PageBlockDetail 
     page: RawPage;
     week: { count: number; by: (string | null)[] };
     mentions: { created_at: string; where: "comment" | "meetup_comment" | "caption"; text: string | null; deleted: boolean }[];
+    comments?: { created_at: string; where: "post" | "reply"; text: string | null; deleted: boolean }[];
   }>("page_block_detail", { block: id });
   if (!raw) return null;
   return {
@@ -493,7 +504,9 @@ export async function fetchPageBlockDetail(id: string): Promise<PageBlockDetail 
     blockedByRole: raw.blocked_by_role,
     page: page(raw.page),
     week: raw.week,
-    mentions: raw.mentions.map((m) => ({ createdAt: m.created_at, where: m.where, text: m.text, deleted: m.deleted })),
+    mentions: [...(raw.comments ?? []), ...raw.mentions]
+      .map((m) => ({ createdAt: m.created_at, where: m.where, text: m.text, deleted: m.deleted }))
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
   };
 }
 

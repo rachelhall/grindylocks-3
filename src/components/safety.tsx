@@ -200,8 +200,8 @@ function ReportSheetContent({
                 variant="secondary"
                 palette={{ fill: 'transparent', text: c.danger, border: c.danger }}
                 onPress={() => {
-                  // A page post: block the page (its own confirm), not a person.
-                  if (target.kind === 'post' && target.page) {
+                  // A page post or comment: block the page (its own confirm), not a person.
+                  if ((target.kind === 'post' || target.kind === 'comment') && target.page) {
                     onClose();
                     target.page.onBlock();
                     return;
