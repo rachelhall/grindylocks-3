@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
+import { EmptyState } from '@/components/empty-state';
 import { MeetupRow, PastMeetupRow } from '@/components/meetup-card';
 import { Button, Icon } from '@/components/ui';
 import {
@@ -156,12 +157,11 @@ export function ProfileMeetups({ userId, isMe, username }: { userId: string; isM
   }
   if (!coming.length && !done.length) {
     return (
-      <View style={[styles.block, styles.tabTop]}>
-        <Text variant="body" color="textSecondary" style={styles.center}>
-          {isMe ? t('meetupCard.emptyOwn') : t('meetupCard.empty', { username })}
-        </Text>
-        {isMe ? <Button label={t('meetup.plan')} icon="add" variant="secondary" onPress={() => router.push('/new-meetup')} /> : null}
-      </View>
+      <EmptyState
+        title={t('empty.meetupsTitle')}
+        body={isMe ? t('empty.meetupsOwnBody') : t('meetupCard.empty', { username })}
+        action={isMe ? { label: t('meetup.plan'), icon: 'add', onPress: () => router.push('/new-meetup') } : undefined}
+      />
     );
   }
 

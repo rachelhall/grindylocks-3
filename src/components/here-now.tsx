@@ -62,6 +62,17 @@ export function HereNowSection({ park }: { park: ParkForHereNow }) {
   const leave = () =>
     checkOut.mutate(undefined, { onError: () => Alert.alert(t('errors.generic')) });
 
+  // Nobody checked in (Empty states, Nov 5): no heading and no "nobody"
+  // line, only the way to check in, so an empty park page stays short.
+  if (!isPending && !isError && people.length === 0 && unnamed === 0) {
+    return (
+      <View style={styles.block}>
+        <Button label={t('hereNow.imHere')} variant="secondary" icon="checkIn" onPress={() => setCheckingIn(true)} />
+        <CheckInSheet park={park} visible={checkingIn} onClose={() => setCheckingIn(false)} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.block}>
       <View style={styles.headingRow}>
@@ -134,11 +145,6 @@ export function HereNowSection({ park }: { park: ParkForHereNow }) {
             </Text>
           ) : null}
 
-          {people.length === 0 && unnamed === 0 ? (
-            <Text variant="bodySm" color="textSecondary">
-              {t('hereNow.nobody')}
-            </Text>
-          ) : null}
         </>
       )}
 
