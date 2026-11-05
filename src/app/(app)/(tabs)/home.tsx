@@ -14,19 +14,23 @@ import {
 } from 'react-native';
 import { SafeAreaView } from '@/components/safe-area';
 
+import { EmptyState } from '@/components/empty-state';
 import { FeedHeader } from '@/components/feed';
 import { UploadCard } from '@/components/media';
 import { MeetupFeedCard } from '@/components/meetup-card';
 import { PostCard } from '@/components/post-card';
+import { SkaterStrip } from '@/components/suggestions';
 import { Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { useNotificationsUnread } from '@/lib/engagement';
 import { type MeetupCard, useHomeMeetups } from '@/lib/meetups';
-import { useMetro } from '@/lib/parks';
+import { useMetro, useSavedParks } from '@/lib/parks';
 import { ActivePostContext } from '@/lib/playback';
 import { type Post, useFollowingFeed, useNearbyFeed } from '@/lib/posts';
 import { useAskForPushOnce } from '@/lib/push';
 import { keys } from '@/lib/query';
+import { useFollowing } from '@/lib/social';
+import { useSkatersAtYourParks, useSkatersInMetro } from '@/lib/suggestions';
 import { type PostJob, uploads, useUploads } from '@/lib/uploads';
 import { fontFamily, space, stroke, Text, useColors } from '@/theme';
 
@@ -36,6 +40,8 @@ type Item =
   | { kind: 'post'; post: Post; section: 'following' | 'nearby' }
   | { kind: 'meetup'; meetup: MeetupCard }
   | { kind: 'caughtUp' }
+  | { kind: 'noFollows' }
+  | { kind: 'nothingNear' }
   | { kind: 'empty' };
 
 const SIDE = space[4];
@@ -76,6 +82,17 @@ export default function Home() {
   const [now, setNow] = useState(() => Date.now());
   const [refreshing, setRefreshing] = useState(false);
 
+  // Following nobody yet (Empty states · Home feed): a plain card and a strip
+  // of skaters near you above the Near you posts. Skaters come from your
+  // parks' regulars lists, then your home city's.
+  const followingPeople = useFollowing(userId);
+  const followsNobody = followingPeople.isSuccess && followingPeople.data.length === 0;
+  const { saved } = useSavedParks(userId);
+  const savedIds = useMemo(() => [...saved], [saved]);
+  const atParks = useSkatersAtYourParks(followsNobody ? userId : undefined, profile?.home_park_id, savedIds, 8);
+  const inCity = useSkatersInMetro(followsNobody ? userId : undefined, metroId, null, 8);
+  const skatersNear = atParks.people?.length ? atParks.people : (inCity.people ?? []);
+
   // The bell's dot: checked whenever Home comes back into view.
   const unread = useNotificationsUnread(userId);
   const refetchUnread = unread.refetch;
@@ -108,6 +125,8 @@ export default function Home() {
     const mine = following.data?.pages.flat() ?? [];
     const near = nearby.data?.pages.flat() ?? [];
     const cards = meetups.data ?? [];
+    const nearDone = nearby.isSuccess && !nearby.hasNextPage;
+    if (followsNobody && !cards.length) out.push({ kind: 'noFollows' });
     if (mine.length || cards.length) {
       out.push({ kind: 'label', text: t('home.followingLabel') });
       // Both lists are newest first; merge them by time.
@@ -125,12 +144,14 @@ export default function Home() {
       if (near.length) {
         out.push({ kind: 'label', text: t('home.nearLabel', { metro: metro.data?.name ?? '' }) });
         for (const post of near) out.push({ kind: 'post', post, section: 'nearby' });
-      } else if (!mine.length && !cards.length && nearby.isSuccess && !nearby.hasNextPage) {
-        out.push({ kind: 'empty' });
+      } else if (nearDone) {
+        // Near you stays strictly local (Rachel, Nov 5): an empty metro area
+        // says so rather than borrowing a neighbouring one's posts.
+        out.push({ kind: mine.length || cards.length ? 'nothingNear' : 'empty' });
       }
     }
     return out;
-  }, [queued, following.data, nearby.data, meetups.data, followingDone, nearby.isSuccess, nearby.hasNextPage, metro.data, t]);
+  }, [queued, following.data, nearby.data, meetups.data, followingDone, nearby.isSuccess, nearby.hasNextPage, metro.data, followsNobody, t]);
 
   function loadMore() {
     if (following.hasNextPage) {
@@ -158,6 +179,14 @@ export default function Home() {
     following.isLoading || (followingDone && nearby.isLoading) || following.isFetchingNextPage || nearby.isFetchingNextPage;
   const failed = following.isError || nearby.isError || meetups.isError;
   const cardWidth = width - SIDE * 2;
+  const cityName = metro.data?.name ?? '';
+  const seeParks = {
+    label: cityName ? t('empty.seeParksIn', { city: cityName }) : t('empty.seeMap'),
+    icon: 'map' as const,
+    onPress: () => router.navigate(metroId ? { pathname: '/', params: { metro: metroId } } : '/'),
+  };
+  // Couldn't load anything at all: one plain message and Try again.
+  const nothingLoaded = failed && !items.some((i) => i.kind === 'post' || i.kind === 'meetup');
 
   return (
     <SafeAreaView edges={['top', 'left', 'right']} style={[styles.screen, { backgroundColor: c.surface }]}>
@@ -203,21 +232,61 @@ export default function Home() {
                   </Text>
                 </View>
               );
+            case 'noFollows':
+              return (
+                <View style={styles.noFollows}>
+                  <View style={[styles.plainCard, { backgroundColor: c.surfaceRaised }]}>
+                    <Text variant="headline" accessibilityRole="header">
+                      {t('empty.notFollowingTitle')}
+                    </Text>
+                    <Text variant="bodySm" color="textSecondary">
+                      {t('empty.notFollowingBody')}
+                    </Text>
+                  </View>
+                  {skatersNear.length ? <SkaterStrip people={skatersNear} title={t('empty.skatersNearYou')} /> : null}
+                </View>
+              );
+            case 'nothingNear':
+              return (
+                <EmptyState
+                  variant="brand"
+                  title={t('empty.nothingNearTitle')}
+                  body={t('empty.nothingNearBody', { city: cityName })}
+                  action={seeParks}
+                />
+              );
             case 'empty':
               return (
-                <View style={[styles.empty, { borderColor: c.textSecondary }]}>
-                  <Text variant="headline">{t('home.emptyTitle')}</Text>
-                  <Text variant="bodySm" color="textSecondary">
-                    {t('home.emptyBody')}
-                  </Text>
-                  <Button label={t('home.emptyPost')} onPress={() => router.push('/new-post')} />
-                  <Button label={t('home.emptyFind')} variant="secondary" onPress={() => router.push('/search')} />
-                </View>
+                <EmptyState
+                  variant="brand"
+                  title={t('empty.noPostsTitle')}
+                  body={t('empty.noPostsBody', { city: cityName })}
+                  action={seeParks}
+                >
+                  <Button
+                    label={t('home.emptyFind')}
+                    icon="findPeople"
+                    variant="secondary"
+                    palette={{ fill: c.surfaceRaised, text: c.text, border: c.border }}
+                    onPress={() => router.navigate({ pathname: '/search', params: { filter: 'people' } })}
+                    style={styles.secondAction}
+                  />
+                </EmptyState>
               );
           }
         }}
+        ListEmptyComponent={
+          nothingLoaded ? (
+            <EmptyState
+              icon="cloudOff"
+              title={t('empty.cantLoadTitle')}
+              body={t('empty.cantLoadBody')}
+              action={{ label: t('empty.tryAgain'), onPress: () => void refresh() }}
+            />
+          ) : null
+        }
         ListFooterComponent={
-          failed ? (
+          failed && items.length > 0 ? (
             <View style={styles.footer}>
               <Text variant="bodySm" color="statusClosed">
                 {t('home.loadError')}
@@ -240,6 +309,8 @@ const styles = StyleSheet.create({
   label: { paddingTop: space[2] },
   caughtUp: { flexDirection: 'row', alignItems: 'center', gap: 6, borderTopWidth: stroke.rule, paddingTop: space[3], marginTop: space[3] },
   caughtUpText: { fontFamily: fontFamily.sansSemiBold },
-  empty: { borderWidth: stroke.rule, borderStyle: 'dashed', padding: space[4], gap: space[3] },
+  noFollows: { gap: space[4] },
+  plainCard: { padding: space[4], gap: space[1] },
+  secondAction: { minHeight: 48, alignSelf: 'stretch' },
   footer: { paddingVertical: space[6], gap: space[3] },
 });
