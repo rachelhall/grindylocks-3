@@ -138,6 +138,8 @@ const icons = {
   idBadge: { ios: 'person.text.rectangle', android: 'badge' },
   editLocation: { ios: 'mappin.and.ellipse', android: 'edit_location_alt' },
   minus: { ios: 'minus', android: 'remove' },
+  // Organizers and Who it's for.
+  whoFor: { ios: 'person.3', android: 'diversity_3' },
 } as const satisfies Record<string, SymbolViewProps['name']>;
 
 export type IconName = keyof typeof icons;

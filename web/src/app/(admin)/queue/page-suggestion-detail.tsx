@@ -67,7 +67,7 @@ function Segmented<T extends string>({
  */
 export function PageSuggestionDetailPane({ detail: d }: { detail: PageSuggestionDetail }) {
   const { done } = useQueue();
-  const [role, setRole] = useState<"brand" | "shop">(d.role);
+  const [role, setRole] = useState<"brand" | "shop" | "organizer">(d.role);
   const [name, setName] = useState(d.name);
   const [handle, setHandle] = useState(d.suggestedHandle ?? "");
   const [city, setCity] = useState("");
@@ -211,7 +211,12 @@ export function PageSuggestionDetailPane({ detail: d }: { detail: PageSuggestion
       <PaneSection title="New page · edit before approving">
         <div className="flex flex-col gap-4">
           <Field id="ps-type" label="Type">
-            <Segmented label="Type" value={role} onChange={setRole} options={[["brand", "Brand"], ["shop", "Shop"]]} />
+            <Segmented
+              label="Type"
+              value={role}
+              onChange={setRole}
+              options={[["brand", "Brand"], ["shop", "Shop"], ["organizer", "Organizer"]]}
+            />
           </Field>
           <Field id="ps-name" label="Name">
             <input id="ps-name" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} className={inputClass} />
@@ -262,6 +267,18 @@ export function PageSuggestionDetailPane({ detail: d }: { detail: PageSuggestion
           <Field id="ps-website" label="Website">
             <input id="ps-website" value={website} maxLength={200} onChange={(e) => setWebsite(e.target.value)} className={inputClass} />
           </Field>
+          {role === "organizer" && (
+            <Field id="ps-metro" label="Metro area" hint="Sets its clock and lets it meet at an address. Its team adds a base themselves, if it has one.">
+              <select id="ps-metro" value={metro} onChange={(e) => setMetro(e.target.value)} className={inputClass}>
+                <option value="">None (outside the beta cities)</option>
+                {d.metros.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          )}
           {role === "shop" && (
             <>
               <Field id="ps-visit" label="How people visit">

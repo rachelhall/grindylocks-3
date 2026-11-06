@@ -17,6 +17,10 @@
  * co-host), the place can be the shop or an address, and chips add 18+,
  * spots left (or FULL) and Tickets. MeetupRow's `page` place is a page
  * screen's Upcoming.
+ *
+ * Who it's for (WhoFor-Cards): when a meetup has the line, it sits under
+ * the title with a people icon, as plain bold text rather than a chip so it
+ * doesn't read as a filter. Meetups without one look as they did.
  */
 import { router } from 'expo-router';
 import type { TFunction } from 'i18next';
@@ -316,7 +320,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={[headline, spokenDate(m, locale), times, place, cancelled ? t('meetupCard.cancelledA11y') : null]
+        accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), times, place, cancelled ? t('meetupCard.cancelledA11y') : null]
           .filter(Boolean)
           .join(', ')}
         onPress={() => openMeetup(m.id)}
@@ -327,11 +331,12 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
           <Text variant="headline" numberOfLines={3} style={cancelled && [styles.struck, { color: c.textSecondary }]}>
             {headline}
           </Text>
+          <WhoForLine text={m.who_for} />
           <Text variant="bodySm" color="textSecondary">
             {times}
           </Text>
           <View style={styles.parkLine}>
-            <Icon name={m.place === 'page' ? 'storefront' : 'pin'} color={c.accentText} size={16} />
+            <Icon name={m.place === 'page' ? (organizerHost(m) ? 'homePin' : 'storefront') : 'pin'} color={c.accentText} size={16} />
             <Text variant="bodySm" color="accentText" numberOfLines={1} style={styles.semi}>
               {place}
             </Text>
@@ -411,6 +416,27 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
   );
 }
 
+/** Hosted by an organizer, so its own place is its base. */
+const organizerHost = (m: Pick<MeetupCard, 'meetup_host_page'>) => Boolean(m.meetup_host_page && pageKind(m.meetup_host_page) === 'organizer');
+
+/**
+ * Who it's for, under the title: a people icon and plain bold text (not a
+ * chip, so it doesn't read as a filter). Nothing when there's no line.
+ */
+export function WhoForLine({ text, color, size: textSize = 14 }: { text: string | null | undefined; color?: string; size?: number }) {
+  const c = useColors();
+  if (!text) return null;
+  const fg = color ?? c.text;
+  return (
+    <View style={styles.whoFor}>
+      <Icon name="whoFor" color={fg} size={textSize + 4} />
+      <Text variant="bodySm" style={[styles.semi, styles.shrink, { color: fg, fontSize: textSize }]}>
+        {text}
+      </Text>
+    </View>
+  );
+}
+
 /* Park page and profile ---------------------------------------------------------------- */
 
 /**
@@ -438,7 +464,9 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={[headline, spokenDate(m, locale), second, cancelled ? t('meetupCard.cancelledA11y') : null].filter(Boolean).join(', ')}
+      accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), second, cancelled ? t('meetupCard.cancelledA11y') : null]
+        .filter(Boolean)
+        .join(', ')}
       onPress={() => openMeetup(m.id)}
       style={({ pressed }) => [styles.row, { backgroundColor: c.surfaceRaised, borderColor: c.border }, pressed && styles.pressed]}
     >
@@ -448,6 +476,7 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
           <Text variant="body" numberOfLines={2} style={[styles.semi, cancelled && [styles.struck, { color: c.textSecondary }]]}>
             {headline}
           </Text>
+          <WhoForLine text={m.who_for} />
           <Text variant="bodySm" color="textSecondary">
             {second}
           </Text>
@@ -548,6 +577,7 @@ const styles = StyleSheet.create({
   main: { flexDirection: 'row', gap: space[3], paddingHorizontal: space[3], paddingTop: space[1], paddingBottom: space[3] },
   mainText: { flex: 1, minWidth: 0, gap: 3 },
   parkLine: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  whoFor: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   note: { paddingHorizontal: space[3], paddingBottom: space[3] },
   padded: { paddingHorizontal: space[3], paddingBottom: space[3] },
   actions: { flexDirection: 'row', gap: space[2], paddingHorizontal: space[3], paddingBottom: space[3] },

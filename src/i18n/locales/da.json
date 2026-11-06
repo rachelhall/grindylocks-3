@@ -1444,7 +1444,8 @@
       "official": "Officiel",
       "unofficial": "Uofficiel",
       "retired": "Ophørt",
-      "closed": "Lukket"
+      "closed": "Lukket",
+      "inactive": "Ikke længere aktiv"
     },
     "foundingPartner": "Stiftende partner",
     "officialPage": "Officiel side",
@@ -1517,10 +1518,16 @@
       "people": "Personer",
       "brandFollowing": "Brand du følger",
       "shopFollowing": "Butik du følger",
-      "inbox": "Når du nævner en side, lander det i sidens indbakke."
+      "inbox": "Når du nævner en side, lander det i sidens indbakke.",
+      "organizerFollowing": "Arrangør du følger"
     },
     "closed": "Butikken er lukket. Siden bliver stående som arkiv med sine opslag.",
-    "logo": "{{name}}s logo"
+    "logo": "{{name}}s logo",
+    "organizer": "Arrangør",
+    "unofficialOrganizer": "Uofficiel, ikke styret af denne arrangør",
+    "inactive": "{{name}} er ikke længere aktiv. Siden bliver stående som arkiv med sine opslag og tidligere meetups.",
+    "base": "Base",
+    "baseA11y": "Base: {{address}}"
   },
   "shop": {
     "type": {
@@ -1772,7 +1779,8 @@
       "staff": "medarbejder",
       "manager": "manager",
       "owner": "ejer"
-    }
+    },
+    "claimOrganizer": "Skriv som {{name}} og hold dens meetups."
   },
   "pageTeam": {
     "roleName": {
@@ -1933,7 +1941,14 @@
       "none": "Tilføj de mærker, I fører. De vises på jeres side og linker til deres.",
       "remove": "Fjern {{name}}"
     },
-    "notSet": "Ikke angivet"
+    "notSet": "Ikke angivet",
+    "base": "Base (valgfri)",
+    "baseNote": "Kun hvis du kører tingene fra et fast sted, som et lejrhus eller en skole. Det vises på din side og som et sted til dine meetups. Lad det stå tomt, hvis du flytter rundt.",
+    "inactiveOrganizer": "Marker {{name}} som ikke længere aktiv",
+    "inactiveNote": "Siden bliver stående som arkiv med sine opslag. Kommende meetups bliver aflyst.",
+    "inactiveConfirm": "Marker {{name}} som ikke længere aktiv?",
+    "inactiveBody": "Ingen kan følge den, teamet kan ikke poste som den, og dens kommende meetups bliver aflyst. Opslag, tidligere meetups og følgere bliver. Kun Rachel kan bringe den tilbage.",
+    "inactiveButton": "Ikke længere aktiv"
   },
   "pageInbox": {
     "caption": "{{username}} nævnte {{name}} i et opslag",
@@ -1980,7 +1995,8 @@
     "city": "By",
     "noCity": "Ikke angivet",
     "cityNote": "Jeres by bestemmer I nærheden og jeres lokale admin. Flytter I til en anden by? ",
-    "citySubject": "Flyt {{name}} til en anden by"
+    "citySubject": "Flyt {{name}} til en anden by",
+    "mapLabelBase": "Kort med din bases nål i midten. Flyt kortet for at flytte nålen."
   },
   "pageHours": {
     "title": "Åbningstider",
@@ -2202,6 +2218,22 @@
     "planAs": "Planlæg et meetup som {{name}}",
     "noneYet": "Ingen meetups planlagt endnu. Følgere ser nye på Hjem.",
     "cantHost": "{{name}} kan ikke være vært for meetups lige nu.",
-    "failedPage": "Tjek stedet og tiderne, og prøv igen."
+    "failedPage": "Tjek stedet og tiderne, og prøv igen.",
+    "theBase": "{{name}} (basen)",
+    "yourBase": "Din base",
+    "organizerClosed": "Arrangøren er ikke længere aktiv",
+    "placeHintBase": "Sider kan vælge en park, din base eller en adresse."
+  },
+  "whoFor": {
+    "title": "Hvem det er for",
+    "add": "Tilføj en linje",
+    "body": "En kort linje under titlen, så folk ved, om det er for dem.",
+    "label": "Hvem det er for",
+    "placeholder": "Begyndere er velkomne",
+    "examples": "For eksempel: Begyndere er velkomne · Piger og kvinder · 40+ session · Kun quads",
+    "note": "Det er information til folk, ikke en regel. Alle, der kan se meetuppet, kan stadig sige, at de kommer.",
+    "clear": "Ryd",
+    "done": "Færdig",
+    "counterA11y": "{{count}} af {{max}} tegn"
   }
 }

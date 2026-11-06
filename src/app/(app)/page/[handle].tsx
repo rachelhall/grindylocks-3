@@ -11,6 +11,7 @@ import { LOGO_OVERLAP, PAGE_HEADER_HEIGHT, PageHeader, PLAIN_HEADER_HEIGHT } fro
 import { usePageMenu, usePageReportSheet } from '@/components/pages';
 import { SuspendedNotice, TeamBar } from '@/components/page-team';
 import { PageUpcomingMeetups } from '@/components/park-meetups';
+import { openDirections } from '@/components/parks';
 import { MasonryGrid } from '@/components/profile';
 import { PinnedBar, useBarHeight } from '@/components/pinned-bar';
 import { useShopFixSheet } from '@/components/shop-fix';
@@ -42,7 +43,7 @@ import { Sentry } from '@/lib/sentry';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
 /**
- * A brand or shop page (part A, PR 2), per the Brand accounts (v2) mockups:
+ * A brand, shop or organizer page (part A, PR 2), per the Brand accounts (v2) mockups:
  * Brand-Unofficial, Brand-NameOnly, Brand-OutOfBusiness (Retired),
  * Brand-Managed, Shop-Closed and the "Closed until" part of Shop-TempClosed.
  *
@@ -83,6 +84,12 @@ import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
  * Upcoming (PR 9, PageMeet-ShopUpcoming): the page's meetups, each once at
  * its next date, after the shop's hours and brands (or a brand's links);
  * the team gets "Plan a meetup as …" while the page can host.
+ *
+ * Organizers (Org-Page, Org-Inactive): ORGANIZER on the tape, the
+ * description and links, the base when it has one, Upcoming and Posts; no
+ * hours, Brands we carry or Products. No longer active is their archive:
+ * the stamp, the years on the tape, the archive note, no Follow, Past
+ * meetups and Posts kept, and only Report in the ⋯ menu.
  */
 export default function PageScreen() {
   const { handle, logo } = useLocalSearchParams<{ handle: string; logo?: string }>();
@@ -254,14 +261,16 @@ function PageBody({ page }: { page: Page }) {
   const shopButtons = shop && (shopHasDirections(page) || links.length > 0);
   const statusLine =
     page.state === 'unofficial' || (page.state === 'managed' && !official)
-      ? t(kind === 'shop' ? 'page.unofficialShop' : 'page.unofficialBrand')
+      ? t(kind === 'shop' ? 'page.unofficialShop' : kind === 'organizer' ? 'page.unofficialOrganizer' : 'page.unofficialBrand')
       : official
         ? t('page.officialPage')
         : nameOnly
           ? t('page.nameOnly')
           : null;
 
-  const showPosts = page.state === 'managed' || page.state === 'closed';
+  const showPosts = page.state === 'managed' || page.state === 'closed' || page.state === 'inactive';
+  // An organizer's base, when it has one (Org-Edit: only for a fixed place).
+  const base = kind === 'organizer' && !archive && page.address ? page.address : null;
   const hasProducts = (catalog.data?.length ?? 0) > 0;
   const products = catalog.data ? (
     <ProductsList page={{ id: page.id, displayName: name }} entries={catalog.data} archive={archive} />
@@ -390,6 +399,8 @@ function PageBody({ page }: { page: Page }) {
 
           {shop ? null : descriptionBlock}
 
+          {base ? <BaseLine page={page} address={base} /> : null}
+
           {!shop && links.length > 0 ? (
             <View style={styles.links}>
               {links.map((url) => (
@@ -424,7 +435,7 @@ function PageBody({ page }: { page: Page }) {
           {shop ? descriptionBlock : null}
           {shop ? <ShopHours page={page} /> : null}
           {shop ? <BrandsCarried brands={page.brandsCarried} /> : null}
-          {page.state === 'managed' || page.state === 'closed' ? (
+          {showPosts ? (
             <PageUpcomingMeetups pageId={page.id} planAs={running && official ? name : null} />
           ) : null}
           {tabbed ? null : showPosts ? (
@@ -511,12 +522,17 @@ function PagePosts({ pageId, onTeam, empty }: { pageId: string; onTeam: boolean;
   );
 }
 
-/** "Senate stopped making gear around 2005…" or "This shop closed in March 2026…". */
+/**
+ * "Senate stopped making gear around 2005…", "This shop closed in March
+ * 2026…" or "Rolling School is no longer active…".
+ */
 function ArchiveNote({ page }: { page: Page }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   let text: string;
-  if (page.state === 'closed') {
+  if (page.state === 'inactive') {
+    text = t('page.inactive', { name: page.displayName });
+  } else if (page.state === 'closed') {
     text = page.closedAt
       ? t('page.closedIn', {
           date: new Intl.DateTimeFormat(i18n.language, { month: 'long', year: 'numeric' }).format(new Date(page.closedAt)),
@@ -554,6 +570,32 @@ function ClosedNote({ page }: { page: Page }) {
         </Text>
       </View>
     </View>
+  );
+}
+
+/** An organizer's base: the address, opening directions to its pin. */
+function BaseLine({ page, address }: { page: Page; address: string }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={t('page.baseA11y', { address })}
+      accessibilityHint={t('shop.directions')}
+      onPress={() => openDirections({ latitude: page.latitude, longitude: page.longitude, display_name: page.displayName, address })}
+      style={({ pressed }) => [styles.base, pressed && styles.pressed]}
+    >
+      <Icon name="homePin" color={c.text} size={20} />
+      <View style={styles.flex}>
+        <Text variant="label" color="textSecondary">
+          {t('page.base')}
+        </Text>
+        <Text variant="bodySm" style={{ fontFamily: fontFamily.sansSemiBold }}>
+          {address}
+        </Text>
+      </View>
+      <Icon name="chevron" color={c.textSecondary} size={20} />
+    </Pressable>
   );
 }
 
@@ -621,4 +663,5 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: 'row', gap: 22, borderBottomWidth: stroke.rule },
   tab: { minHeight: size.tapMin, justifyContent: 'center', marginBottom: -stroke.rule, borderColor: 'transparent', borderBottomWidth: 3 },
   note: { marginHorizontal: space[4], marginTop: space[4], padding: space[3], flexDirection: 'row', gap: 10, alignItems: 'flex-start' },
+  base: { minHeight: size.tapMin, marginHorizontal: space[4], marginTop: space[3], flexDirection: 'row', alignItems: 'center', gap: space[2] },
 });

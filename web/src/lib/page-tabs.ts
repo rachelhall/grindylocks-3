@@ -36,7 +36,7 @@ export function inTab(p: PageRow, tab: PageTab): boolean {
     case "suspended":
       return !!p.suspendedAt;
     case "archived":
-      return p.state === "out_of_business" || p.state === "closed";
+      return p.state === "out_of_business" || p.state === "closed" || p.state === "inactive";
     default:
       return true;
   }

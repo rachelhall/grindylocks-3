@@ -19,6 +19,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { GoingList, GoingSheet, MeetupCommentComposer, MeetupComments, type MeetupReply } from '@/components/meetup';
+import { WhoForLine } from '@/components/meetup-card';
 import { CancelMeetupSheet, CoHostsSheet, confirmDeleteMeetup, MeetupMenu } from '@/components/meetup-manage';
 import { AdultsChip, dayHours, daysRangeLabel, HostedBy } from '@/components/page-meetup';
 import { HalftoneGround, PHOTOCOPY } from '@/components/park-header';
@@ -52,6 +53,7 @@ import {
   useSeriesFollow,
 } from '@/lib/meetups';
 import { roleRank } from '@/lib/page-team';
+import { pageKind } from '@/lib/pages';
 import { useMyProfile } from '@/lib/profiles';
 import { Sentry } from '@/lib/sentry';
 import { toGridPost, useMeetupPosts } from '@/lib/posts';
@@ -321,6 +323,8 @@ export default function MeetupScreen() {
               >
                 {headline}
               </Text>
+              {/* Who it's for (Org-Meetup): paper on the ink header. */}
+              <WhoForLine text={meetup.who_for} color={brand.paper} size={15} />
             </View>
           </View>
 
@@ -399,7 +403,11 @@ export default function MeetupScreen() {
               </Pressable>
             ) : (
               <View style={[styles.fact, styles.factTop]}>
-                <Icon name={meetup.place === 'page' ? 'storefront' : 'editLocation'} color={c.text} size={20} />
+                <Icon
+                  name={meetup.place === 'page' ? (hostPage && pageKind(hostPage) === 'organizer' ? 'homePin' : 'storefront') : 'editLocation'}
+                  color={c.text}
+                  size={20}
+                />
                 <View style={[styles.flex, styles.placeText]}>
                   {meetup.place === 'page' && place?.page ? (
                     <Text

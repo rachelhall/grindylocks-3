@@ -1444,7 +1444,8 @@
       "official": "Official",
       "unofficial": "Unofficial",
       "retired": "Retired",
-      "closed": "Closed"
+      "closed": "Closed",
+      "inactive": "No longer active"
     },
     "foundingPartner": "Founding partner",
     "officialPage": "Official page",
@@ -1517,10 +1518,16 @@
       "people": "People",
       "brandFollowing": "Brand you follow",
       "shopFollowing": "Shop you follow",
-      "inbox": "Mentioning a page sends it to the page's inbox."
+      "inbox": "Mentioning a page sends it to the page's inbox.",
+      "organizerFollowing": "Organizer you follow"
     },
     "closed": "This shop has closed. Its page stays up as an archive, with its posts.",
-    "logo": "{{name}} logo"
+    "logo": "{{name}} logo",
+    "organizer": "Organizer",
+    "unofficialOrganizer": "Unofficial, not managed by this organizer",
+    "inactive": "{{name}} is no longer active. This page stays up as an archive with its posts and past meetups.",
+    "base": "Base",
+    "baseA11y": "Base: {{address}}"
   },
   "shop": {
     "type": {
@@ -1772,7 +1779,8 @@
       "staff": "staff",
       "manager": "manager",
       "owner": "owner"
-    }
+    },
+    "claimOrganizer": "Post as {{name}} and plan its meetups."
   },
   "pageTeam": {
     "roleName": {
@@ -1933,7 +1941,14 @@
       "none": "Add the brands you carry. They show on your page and link to theirs.",
       "remove": "Take {{name}} off"
     },
-    "notSet": "Not set"
+    "notSet": "Not set",
+    "base": "Base (optional)",
+    "baseNote": "Only if you run things from a fixed place, like a camp house or a school. It shows on your page and as a place for your meetups. Leave it empty if you move around.",
+    "inactiveOrganizer": "Mark {{name}} as no longer active",
+    "inactiveNote": "The page stays up as an archive with its posts. Upcoming meetups are cancelled.",
+    "inactiveConfirm": "Mark {{name}} as no longer active?",
+    "inactiveBody": "Nobody can follow it, the team can't post as it, and its upcoming meetups are cancelled. Its posts, past meetups and followers stay. Only Rachel can bring it back.",
+    "inactiveButton": "No longer active"
   },
   "pageInbox": {
     "caption": "{{username}} mentioned {{name}} in a post",
@@ -1980,7 +1995,8 @@
     "city": "City",
     "noCity": "Not set",
     "cityNote": "Your city decides Near you and your local admin. Moving to another city? ",
-    "citySubject": "Moving {{name}} to another city"
+    "citySubject": "Moving {{name}} to another city",
+    "mapLabelBase": "Map with your base's pin in the middle. Move the map to move the pin."
   },
   "pageHours": {
     "title": "Hours",
@@ -2202,6 +2218,22 @@
     "planAs": "Plan a meetup as {{name}}",
     "noneYet": "No meetups planned yet. Followers see new ones on Home.",
     "cantHost": "{{name}} can't host meetups right now.",
-    "failedPage": "Check the place and the times, and try again."
+    "failedPage": "Check the place and the times, and try again.",
+    "theBase": "{{name}} base",
+    "yourBase": "Your base",
+    "organizerClosed": "The organizer is no longer active",
+    "placeHintBase": "Pages can pick a park, your base or an address."
+  },
+  "whoFor": {
+    "title": "Who it's for",
+    "add": "Add a line",
+    "body": "A short line under the title, so people know if it's for them.",
+    "label": "Who it's for",
+    "placeholder": "Beginners welcome",
+    "examples": "For example: Beginners welcome · Girls and women · 40+ session · Quads only",
+    "note": "It's information for people, not a rule. Anyone who can see the meetup can still say they're going.",
+    "clear": "Clear",
+    "done": "Done",
+    "counterA11y": "{{count}} of {{max}} characters"
   }
 }

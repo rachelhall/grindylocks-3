@@ -19,6 +19,7 @@ import {
   MAX_CO_HOSTS,
   MEETUP_TITLE_MAX,
   type Season,
+  WHO_FOR_MAX,
   zonedToUtc,
 } from '@/lib/meetups';
 import { searchPeople } from '@/lib/people';
@@ -251,6 +252,67 @@ export function TitleSheet({
         <Text variant="bodySm" color="textSecondary">
           {t('meetupCompose.titleHint')}
         </Text>
+      </View>
+    </Sheet>
+  );
+}
+
+/**
+ * Who it's for (WhoFor-Sheet): one line under the title, so people know if
+ * it's for them. A counter, a few examples and a note that it's information,
+ * not a rule. Clear empties it; Done keeps what's typed.
+ */
+export function WhoForSheet({
+  visible,
+  value,
+  onChange,
+  onClose,
+}: {
+  visible: boolean;
+  value: string;
+  onChange: (next: string) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <Sheet visible={visible} title={t('whoFor.title')} onClose={onClose}>
+      <View style={styles.sheetBody}>
+        <Text variant="body">{t('whoFor.body')}</Text>
+        <View style={styles.whoForLabel}>
+          <Text variant="label" color="textSecondary" style={styles.flex}>
+            {t('whoFor.label')}
+          </Text>
+          <Text variant="label" color="textSecondary" accessibilityLabel={t('whoFor.counterA11y', { count: value.length, max: WHO_FOR_MAX })}>
+            {`${value.length} / ${WHO_FOR_MAX}`}
+          </Text>
+        </View>
+        <TextInput
+          value={value}
+          // One line: a pasted line break becomes a space.
+          onChangeText={(v) => onChange(v.replace(/\s*\n\s*/g, ' ').slice(0, WHO_FOR_MAX))}
+          placeholder={t('whoFor.placeholder')}
+          placeholderTextColor={c.textSecondary}
+          autoFocus
+          maxLength={WHO_FOR_MAX}
+          accessibilityLabel={t('whoFor.title')}
+          returnKeyType="done"
+          onSubmitEditing={onClose}
+          style={[styles.input, { borderColor: c.border, backgroundColor: c.surfaceRaised, color: c.text }]}
+        />
+        <Text variant="bodySm" color="textSecondary">
+          {t('whoFor.examples')}
+        </Text>
+        <View style={[styles.note, { backgroundColor: c.surfaceRaised }]}>
+          <Icon name="info" color={c.text} size={20} />
+          <Text variant="bodySm" color="textSecondary" style={styles.flex}>
+            {t('whoFor.note')}
+          </Text>
+        </View>
+        <View style={styles.whoForButtons}>
+          <Button label={t('whoFor.clear')} variant="secondary" disabled={!value} onPress={() => onChange('')} style={styles.flex} />
+          <Button label={t('whoFor.done')} onPress={onClose} style={styles.flex} />
+        </View>
       </View>
     </Sheet>
   );
@@ -554,6 +616,8 @@ export function CoHostSheet({
 
 const styles = StyleSheet.create({
   flex: { flex: 1 },
+  whoForLabel: { flexDirection: 'row', alignItems: 'baseline' },
+  whoForButtons: { flexDirection: 'row', gap: space[2] },
   flexEnd: { flex: 1, textAlign: 'right' },
   pressed: { opacity: 0.75 },
   dim: { opacity: 0.4 },

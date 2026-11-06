@@ -28,6 +28,7 @@ import type { TFunction } from 'i18next';
 
 import type { Database } from './database.types';
 import { localNow } from './hours';
+import { pageKind } from './pages';
 import { fresh, keys } from './query';
 import { supabase } from './supabase';
 import { uuid } from './uuid';
@@ -42,6 +43,8 @@ export type MeetupPlace = Enums['meetup_place'];
 
 export const MEETUP_TITLE_MAX = 80;
 export const MEETUP_NOTE_MAX = 280;
+/** Who it's for: one line under the title (the database checks the same). */
+export const WHO_FOR_MAX = 60;
 export const MAX_CO_HOSTS = 10;
 export const COVER_BUCKET = 'meetup-covers';
 /** Pages: spots, a meetup over several days, and the ticket link (as the database checks them). */
@@ -53,7 +56,7 @@ export const MAX_TICKET_URL = 500;
 const MEETUP_SELECT = `
   id, series_id, park_id, starts_at, ends_at, disciplines, title, note, cover_path,
   status, cancel_reason, cancel_note, went_count, hidden_at,
-  place, capacity, ticket_url, adults_only, multi_day,
+  place, capacity, ticket_url, adults_only, multi_day, who_for,
   series:event_series!inner(id, host_id, host_page_id, visibility, weekdays, ended_at),
   park:parks(id, slug, display_name, latitude, longitude, metro:metro_areas(timezone)),
   meetup_host_page, meetup_place_info, meetup_timezone, meetup_official, spots_taken, meetup_days, i_run_meetup
@@ -105,6 +108,8 @@ export type Meetup = {
   ticket_url: string | null;
   adults_only: boolean;
   multi_day: boolean;
+  /** Who it's for: a line under the title (any host). Information, not a rule. */
+  who_for: string | null;
   series: {
     id: string;
     host_id: string | null;
@@ -140,16 +145,24 @@ export function meetupTz(m: Pick<Meetup, 'meetup_timezone' | 'park'>): string | 
 }
 
 /**
- * Where it is, in a word: the park's name, "8SET (the shop)", or the
- * address's first line.
+ * Where it is, in a word: the park's name, "8SET (the shop)", "Blading Camp
+ * base" (an organizer's base), or the address's first line.
  */
 export function meetupPlaceName(
-  m: { park?: { display_name: string } | null; meetup_place_info?: PlaceInfo | null; place?: MeetupPlace },
+  m: {
+    park?: { display_name: string } | null;
+    meetup_place_info?: PlaceInfo | null;
+    place?: MeetupPlace;
+    meetup_host_page?: Pick<HostPage, 'roles'> | null;
+  },
   t: TFunction,
 ): string {
   const info = m.meetup_place_info ?? null;
   const kind = info?.kind ?? m.place ?? 'park';
-  if (kind === 'page' && info?.page) return t('pageMeet.theShop', { name: info.page.display_name });
+  if (kind === 'page' && info?.page) {
+    const base = m.meetup_host_page && pageKind(m.meetup_host_page) === 'organizer';
+    return t(base ? 'pageMeet.theBase' : 'pageMeet.theShop', { name: info.page.display_name });
+  }
   if (kind === 'address' && info?.address) return info.address.split(/\n|,/)[0].trim();
   return m.park?.display_name ?? info?.park?.display_name ?? '';
 }
@@ -164,7 +177,10 @@ export function cancelReasonLabel(
   hostPage: Pick<HostPage, 'roles'> | null,
   t: TFunction,
 ): string {
-  if (reason === 'page_closed') return hostPage?.roles.includes('shop') === false ? t('pageMeet.brandClosed') : t('pageMeet.shopClosed');
+  if (reason === 'page_closed') {
+    const kind = hostPage ? pageKind(hostPage) : 'shop';
+    return t(kind === 'organizer' ? 'pageMeet.organizerClosed' : kind === 'brand' ? 'pageMeet.brandClosed' : 'pageMeet.shopClosed');
+  }
   if (reason === 'page_suspended') return t('pageMeet.noLongerHappening');
   const key = (['rained_out', 'park_closed', 'something_came_up'] as const).find((r) => r === reason) ?? 'other';
   return t(`meetup.reason.${key}`);
@@ -436,6 +452,8 @@ export type MeetupDraft = {
   endsAt: Date | null;
   note: string;
   title: string;
+  /** Who it's for (any host), up to WHO_FOR_MAX characters. */
+  whoFor: string;
   visibility: MeetupVisibility;
   disciplines: Discipline[];
   weekdays: number[];
@@ -468,6 +486,7 @@ export function useCreateMeetup(userId: string | undefined) {
         days: page && d.days ? (d.days.map((x) => ({ starts_at: x.startsAt.toISOString(), ends_at: x.endsAt.toISOString() })) as never) : undefined,
         note: d.note.trim() || undefined,
         title: d.title.trim() || undefined,
+        who_for: d.whoFor.trim() || undefined,
         visibility: d.visibility,
         disciplines: d.disciplines,
         cover_path: coverPath ?? undefined,
@@ -789,6 +808,8 @@ export type MeetupChanges = {
   ends_at?: string;
   title?: string;
   note?: string;
+  /** An empty string clears it. */
+  who_for?: string;
   disciplines?: Discipline[];
   visibility?: MeetupVisibility;
   /** An empty string removes the cover. */

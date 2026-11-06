@@ -13,7 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 export type { PageRow, PageTab } from "@/lib/page-tabs";
 export { inTab, PAGE_TABS } from "@/lib/page-tabs";
 
-export async function fetchAdminPages(q: string, kind: "brand" | "shop" | null): Promise<PageRow[]> {
+export async function fetchAdminPages(q: string, kind: "brand" | "shop" | "organizer" | null): Promise<PageRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("admin_pages", { q: q || undefined, kind: kind ?? undefined });
   if (error) {

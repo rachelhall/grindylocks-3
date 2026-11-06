@@ -187,7 +187,7 @@ function PageInviteScreen({ invite, onJoin }: { invite: PageInvitePreview; onJoi
   const tape = (claim ? t('pageInvite.runTape', { name }) : t('pageInvite.invitedTape', { name })).toUpperCase();
   const line = [t(`page.${kind}`), where, claim ? `@${page.handle}` : null].filter(Boolean).join(' · ').toUpperCase();
   const points = claim
-    ? [t(kind === 'shop' ? 'pageInvite.claimShop' : 'pageInvite.claimBrand', { name }), t('pageInvite.claimTeam'), t('pageInvite.claimChecked', { name })]
+    ? [t(kind === 'shop' ? 'pageInvite.claimShop' : kind === 'organizer' ? 'pageInvite.claimOrganizer' : 'pageInvite.claimBrand', { name }), t('pageInvite.claimTeam'), t('pageInvite.claimChecked', { name })]
     : [t(kind === 'shop' ? 'pageInvite.teamShop' : 'pageInvite.teamBrand', { name }), t('pageInvite.teamOwnAccount')];
 
   return (

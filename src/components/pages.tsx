@@ -198,7 +198,7 @@ export function PageMentionRows({
       {pages.map((p, i) => {
         const first = highlightFirst && i === 0;
         const ink = first ? c.onAccentSubtle : c.text;
-        const reason = p.following ? t(pageKind(p) === 'shop' ? 'page.mention.shopFollowing' : 'page.mention.brandFollowing') : t(`page.${pageKind(p)}`);
+        const reason = p.following ? t(pageKind(p) === 'shop' ? 'page.mention.shopFollowing' : pageKind(p) === 'organizer' ? 'page.mention.organizerFollowing' : 'page.mention.brandFollowing') : t(`page.${pageKind(p)}`);
         return (
           <Pressable
             key={p.id}
