@@ -70,6 +70,12 @@ export default function SitePage() {
           </a>
           <nav aria-label="Main" className="flex items-center gap-2">
             <a
+              href="/parks"
+              className="flex h-control items-center px-3 text-[15px] font-bold text-gl-paper no-underline"
+            >
+              Parks
+            </a>
+            <a
               href="#request"
               className="flex h-control items-center px-3 text-[15px] font-bold text-gl-paper underline decoration-gl-pink decoration-2 underline-offset-4"
             >

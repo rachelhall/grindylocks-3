@@ -14,6 +14,8 @@ The web admin for role holders (Rachel, city admins, park admins). It's its own 
 
 - **Two sites, one app (Nov 2):** `src/proxy.ts` serves the public marketing page (`src/app/site`) at `/` on grindylocks.com, sends www to the bare domain and any other path there to admin.grindylocks.com. Every other host is the admin, where `/site` stays public so previews can show it. Host rules live in `src/lib/hosts.ts`. Only grindylocks.com is indexable (`next.config.ts`).
 - **The queue** (`src/app/(admin)/queue`, Nov 2): the URL holds the state (`?tab=`, `?area=`, `?item=`), the list and detail pane share one page, and every action is a Server Function in `actions.ts` that calls a moderation function (`moderate_reports`, `review_park_info`, `review_obstacle`). Reads live in `src/lib/queue.ts`. Keyboard: j/k, Enter, Esc, ?, and per-pane d/h/e/a/x, each opening its confirmation.
+- **Public park pages (Nov 6):** `/parks` (every city), `/parks/<metro>` and `/park/<slug>` on grindylocks.com, built from `src/app/site/parks` and `src/app/site/park`. `SITE_SECTIONS` in `src/lib/hosts.ts` maps the public prefixes to those routes on every host (so previews work at the public paths too); `sitemap.xml` and `robots.txt` are served everywhere. Data comes only from the signed-out functions `public_metro_areas`, `public_metro`, `public_park` and `public_sitemap` through the cookie-less client (`src/lib/public-parks.ts`, cached with `cacheLife("hours")`). Nothing people-shaped goes on these pages. "Open now" runs in the browser (`src/components/public/open-now.tsx`). The share image is a route handler (`park/[slug]/share-image`) drawn with Archivo Black from `assets/`. The map is OpenStreetMap tiles with no library (`src/components/public/static-map.tsx`); swap its tile URL if traffic grows.
+- **Shared copies (Nov 6):** `src/lib/hours.ts` is a byte-for-byte copy of the app's, and `src/lib/obstacle-types.ts` holds the app's English obstacle names, so the web stream never edits `src/`. `npm run check:shared` fails if either is stale.
 - **The request form** calls `request_access()` through a cookie-less client (`src/lib/supabase/public.ts`), so it always asks as a signed-out visitor. Requests are readable only by the owner (table `access_requests`).
 - **Local builds without Google Fonts** (sandboxes): `NEXT_FONT_GOOGLE_MOCKED_RESPONSES=<mock.js> npx next build --webpack`. Vercel fetches the real fonts.
 
@@ -25,4 +27,4 @@ The web admin for role holders (Rachel, city admins, park admins). It's its own 
 - **Cookie reads sit behind `<Suspense>`** (Cache Components): see `src/app/(admin)/layout.tsx`.
 - **English only.** Copy follows the app's voice: plain, sentence case, no exclamation marks.
 
-Checks before a PR, from `web/`: `npm run typecheck`, `npm run lint`, `npm run build`.
+Checks before a PR, from `web/`: `npm run typecheck`, `npm run lint`, `npm run check:shared`, `npm run build`.

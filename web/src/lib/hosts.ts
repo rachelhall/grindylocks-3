@@ -22,9 +22,50 @@ export const SITE_PAGES: Record<string, string> = {
   "/privacy": `${SITE_PATH}/privacy`,
 };
 
+/**
+ * Public sections with pages under them (Nov 6): `/parks` (every city),
+ * `/parks/<metro>` (a city's parks) and `/park/<slug>` (one park). Each public
+ * prefix maps to its route prefix inside the app. Unlike SITE_PAGES, these
+ * paths are also served as they are on the admin hosts, so previews and links
+ * between the pages work there too.
+ */
+export const SITE_SECTIONS: Record<string, string> = {
+  "/parks": `${SITE_PATH}/parks`,
+  "/park": `${SITE_PATH}/park`,
+};
+
+/** Files every host serves to anyone: search engines read them on grindylocks.com. */
+export const PUBLIC_FILES = ["/sitemap.xml", "/robots.txt"];
+
+/** Public URL of the site, for canonical links, the sitemap and share images. */
+export const SITE_ORIGIN = `https://${MARKETING_HOST}`;
+
+function underPrefix(path: string, prefix: string) {
+  return path === prefix || path.startsWith(`${prefix}/`);
+}
+
+/** The in-app route for a public path, or null if it isn't a public page. */
+export function routeFor(pathname: string) {
+  if (SITE_PAGES[pathname]) return SITE_PAGES[pathname];
+  for (const [prefix, route] of Object.entries(SITE_SECTIONS)) {
+    if (underPrefix(pathname, prefix)) return route + pathname.slice(prefix.length);
+  }
+  return null;
+}
+
 /** The public path for an in-app `/site` route, or null if it isn't one. */
 export function publicPathFor(route: string) {
-  return Object.entries(SITE_PAGES).find(([, r]) => r === route)?.[0] ?? null;
+  const page = Object.entries(SITE_PAGES).find(([, r]) => r === route)?.[0];
+  if (page) return page;
+  for (const [prefix, sectionRoute] of Object.entries(SITE_SECTIONS)) {
+    if (underPrefix(route, sectionRoute)) return prefix + route.slice(sectionRoute.length);
+  }
+  return null;
+}
+
+/** Is this a public section path (`/parks…`, `/park/…`) as people type it? */
+export function isSectionPath(pathname: string) {
+  return Object.keys(SITE_SECTIONS).some((prefix) => underPrefix(pathname, prefix));
 }
 
 /** Hostname without a port, lowercased. */
