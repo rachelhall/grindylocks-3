@@ -41,13 +41,13 @@ insert into t_results select 'Alga Norte starts with no posts', private.public_p
   private.public_post_count((select id from t_park))::text;
 
 insert into posts (author_id, park_id, metro_area_id, status, published_at)
-select 'e8000000-0000-4000-8000-0000000000d1', id, metro_area_id, 'visible', now() from t_park
+select 'e8000000-0000-4000-8000-0000000000d1'::uuid, id, metro_area_id, 'visible'::post_status, now()::timestamptz from t_park
 union all
-select 'e8000000-0000-4000-8000-0000000000d2', id, metro_area_id, 'visible', now() from t_park
+select 'e8000000-0000-4000-8000-0000000000d2'::uuid, id, metro_area_id, 'visible'::post_status, now()::timestamptz from t_park
 union all
-select 'e8000000-0000-4000-8000-0000000000d1', id, metro_area_id, 'visible', null from t_park
+select 'e8000000-0000-4000-8000-0000000000d1'::uuid, id, metro_area_id, 'visible'::post_status, null::timestamptz from t_park
 union all
-select 'e8000000-0000-4000-8000-0000000000d1', id, metro_area_id, 'hidden', now() from t_park;
+select 'e8000000-0000-4000-8000-0000000000d1'::uuid, id, metro_area_id, 'hidden'::post_status, now()::timestamptz from t_park;
 
 /* As a signed-out visitor --------------------------------------------------------------------- */
 
