@@ -55,6 +55,10 @@ function languageName(code: string, inLanguage: string): string {
  * PR 7b adds Address and pin (managers and the owner; storefronts, and
  * by-appointment shops that show their pin) and Hours (everyone on the team;
  * storefronts), each on its own screen.
+ *
+ * Organizers (Org-Edit): no shop parts. Managers get an optional Base
+ * (Address and pin), only for a fixed place like a camp house or a school;
+ * the owner gets "Mark … as no longer active".
  */
 export default function PageEditScreen() {
   const { t } = useTranslation();
@@ -115,7 +119,9 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
   const closeForGood = useClosePageForGood(userId);
 
   const name = page.displayName;
-  const shop = pageKind(page) === 'shop';
+  const kind = pageKind(page);
+  const shop = kind === 'shop';
+  const organizer = kind === 'organizer';
   const original = useMemo(() => {
     const main = (PAGE_LANGUAGES as readonly string[]).includes(page.mainLanguage) ? (page.mainLanguage as PageLanguage) : 'en';
     const bodies: Partial<Record<PageLanguage, string>> = {};
@@ -241,15 +247,20 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
     setTab(main);
   };
 
+  // Close for good, in each kind's words: closed (a shop), retired (a brand), no longer active (an organizer).
+  const closeWords = shop
+    ? ({ label: 'pageEdit.closeShop', note: 'pageEdit.closeNote', confirm: 'pageEdit.closeConfirm', body: 'pageEdit.closeBody', button: 'pageEdit.closeButton' } as const)
+    : organizer
+      ? ({ label: 'pageEdit.inactiveOrganizer', note: 'pageEdit.inactiveNote', confirm: 'pageEdit.inactiveConfirm', body: 'pageEdit.inactiveBody', button: 'pageEdit.inactiveButton' } as const)
+      : ({ label: 'pageEdit.retireBrand', note: 'pageEdit.retireNote', confirm: 'pageEdit.retireConfirm', body: 'pageEdit.retireBody', button: 'pageEdit.retireButton' } as const);
   const confirmClose = () => {
-    const brandOnly = !shop;
     Alert.alert(
-      t(brandOnly ? 'pageEdit.retireConfirm' : 'pageEdit.closeConfirm', { name }),
-      t(brandOnly ? 'pageEdit.retireBody' : 'pageEdit.closeBody', { name }),
+      t(closeWords.confirm, { name }),
+      t(closeWords.body, { name }),
       [
         { text: t('common.cancel'), style: 'cancel' },
         {
-          text: t(brandOnly ? 'pageEdit.retireButton' : 'pageEdit.closeButton'),
+          text: t(closeWords.button),
           style: 'destructive',
           onPress: () =>
             closeForGood.mutate(page.id, {
@@ -556,6 +567,23 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
           </View>
         ) : null}
 
+        {organizer && manager ? (
+          <View style={styles.section}>
+            <Text variant="label" color="textSecondary">
+              {t('pageEdit.base')}
+            </Text>
+            <NavRow
+              first
+              title={t('pageAddress.title')}
+              value={page.address?.split(/[,\n]/)[0]?.trim() || t('pageEdit.notSet')}
+              onPress={() => router.push({ pathname: '/page-address/[handle]', params: { handle: page.handle } })}
+            />
+            <Text variant="bodySm" color="textSecondary">
+              {t('pageEdit.baseNote')}
+            </Text>
+          </View>
+        ) : null}
+
         {owner ? (
           <View style={styles.section}>
             <Text variant="label" color="textSecondary">
@@ -563,13 +591,13 @@ function EditForm({ page, manager, owner }: { page: Page; manager: boolean; owne
             </Text>
             <Button
               variant="secondary"
-              label={t(shop ? 'pageEdit.closeShop' : 'pageEdit.retireBrand', { name })}
+              label={t(closeWords.label, { name })}
               onPress={confirmClose}
               loading={closeForGood.isPending}
               palette={{ fill: 'transparent', text: c.danger, border: c.danger }}
             />
             <Text variant="bodySm" color="textSecondary">
-              {t(shop ? 'pageEdit.closeNote' : 'pageEdit.retireNote')}
+              {t(closeWords.note)}
             </Text>
           </View>
         ) : null}

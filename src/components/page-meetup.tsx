@@ -34,9 +34,15 @@ import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme
 
 /* Where a page's meetup can be -------------------------------------------------------- */
 
-/** Whether a page can meet at its own shop: a storefront, or a by-appointment shop that shows its pin. */
+/**
+ * Whether a page can meet at its own place: a shop's storefront (or a
+ * by-appointment shop that shows its pin), or an organizer's base when it
+ * has one.
+ */
 export function pageHasPlace(page: Pick<Page, 'roles' | 'locationType' | 'showPin' | 'latitude'>): boolean {
-  if (!page.roles.includes('shop') || page.latitude === null || !page.locationType) return false;
+  if (page.latitude === null) return false;
+  if (pageKind(page) === 'organizer') return true;
+  if (!page.roles.includes('shop') || !page.locationType) return false;
   return page.locationType === 'storefront' || (page.locationType === 'by_appointment' && page.showPin);
 }
 
@@ -144,6 +150,8 @@ export function PlaceSheet({
     staleTime: fresh.parks,
   });
   const shopRow = pageHasPlace(page);
+  // An organizer's own place is its base (Your base), a shop's is the shop.
+  const base = pageKind(page) === 'organizer';
   // An address needs the page's metro area (its clock and city admin).
   const canAddress = Boolean(page.metroAreaId);
   const name = page.displayName;
@@ -199,13 +207,13 @@ export function PlaceSheet({
             {shopRow ? (
               <>
                 <View style={styles.caption}>
-                  <Caption>{t('pageMeet.yourShop')}</Caption>
+                  <Caption>{t(base ? 'pageMeet.yourBase' : 'pageMeet.yourShop')}</Caption>
                 </View>
                 <View style={[styles.rows, { borderTopColor: c.borderSubtle }]}>
                   <Row
-                    icon="storefront"
+                    icon={base ? 'homePin' : 'storefront'}
                     iconStyle="ink"
-                    title={t('pageMeet.theShop', { name })}
+                    title={t(base ? 'pageMeet.theBase' : 'pageMeet.theShop', { name })}
                     line={[page.address, page.city].filter(Boolean).join(', ')}
                     picked={current?.place === 'page'}
                     onPress={() => pick({ place: 'page' })}

@@ -12,7 +12,7 @@ import { openSupportMail } from '@/components/settings';
 import { BackButton, Button, Icon } from '@/components/ui';
 import { useAuth } from '@/lib/auth';
 import { roleRank, useSetPageLocation } from '@/lib/page-team';
-import { type Page, usePage, usePageViewerState } from '@/lib/pages';
+import { type Page, pageKind, usePage, usePageViewerState } from '@/lib/pages';
 import { Sentry } from '@/lib/sentry';
 import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
@@ -24,7 +24,7 @@ const WORLD: Region = { latitude: 20, longitude: 0, latitudeDelta: 120, longitud
 
 /**
  * Edit page › Address and pin (part A PR 7b, Page-Address mockup), managers
- * and the owner of a shop. The address shows on the page as written. "Find
+ * and the owner of a shop, or of an organizer for its base (Org-Edit). The address shows on the page as written. "Find
  * this address on the map" asks the phone's own address lookup and moves the
  * map; the pin stays in the middle and the map moves under it. The city and
  * metro area stay with Rachel, since they decide Near you and the shop's
@@ -56,7 +56,7 @@ export default function PageAddressScreen() {
       </SafeAreaView>
     );
   }
-  if (roleRank(viewer.data.teamRole) < 2 || page.state !== 'managed' || !page.roles.includes('shop')) {
+  if (roleRank(viewer.data.teamRole) < 2 || page.state !== 'managed' || !(page.roles.includes('shop') || pageKind(page) === 'organizer')) {
     return (
       <SafeAreaView style={[styles.screen, { backgroundColor: c.surface }]}>
         <View style={styles.top}>
@@ -191,7 +191,7 @@ function AddressForm({ page }: { page: Page }) {
           <View
             style={[styles.map, { borderColor: c.border }]}
             accessible
-            accessibilityLabel={pin ? t('pageAddress.mapLabel') : t('pageAddress.mapLabelEmpty')}
+            accessibilityLabel={pin ? t(pageKind(page) === 'organizer' ? 'pageAddress.mapLabelBase' : 'pageAddress.mapLabel') : t('pageAddress.mapLabelEmpty')}
           >
             <MapView
               ref={mapRef}

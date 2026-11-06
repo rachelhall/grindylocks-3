@@ -28,7 +28,7 @@ export default async function PagesPage({ searchParams }: PageProps<"/pages">) {
   const params = await searchParams;
   const q = (one(params.q) ?? "").slice(0, 60);
   const typeParam = one(params.type);
-  const kind = typeParam === "brand" || typeParam === "shop" ? typeParam : null;
+  const kind = typeParam === "brand" || typeParam === "shop" || typeParam === "organizer" ? typeParam : null;
   const tabParam = one(params.tab) as PageTab | undefined;
   const tab: PageTab = tabParam && PAGE_TABS.includes(tabParam) ? tabParam : "all";
   const pageParam = one(params.page);

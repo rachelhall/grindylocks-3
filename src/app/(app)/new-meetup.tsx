@@ -13,6 +13,7 @@ import {
   type RepeatDraft,
   RepeatsSheet,
   TitleSheet,
+  WhoForSheet,
 } from '@/components/meetup-compose';
 import {
   CapacitySheet,
@@ -43,25 +44,39 @@ import {
   useParkTimeZone,
   useUpdateMeetup,
 } from '@/lib/meetups';
-import { usePage } from '@/lib/pages';
+import { pageKind, usePage } from '@/lib/pages';
 import { useMyProfile } from '@/lib/profiles';
 import { Sentry } from '@/lib/sentry';
 import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
 
-type SheetName = 'park' | 'place' | 'starts' | 'ends' | 'dates' | 'capacity' | 'tickets' | 'disciplines' | 'repeats' | 'coHosts' | 'title' | null;
+type SheetName =
+  | 'park'
+  | 'place'
+  | 'starts'
+  | 'ends'
+  | 'dates'
+  | 'capacity'
+  | 'tickets'
+  | 'whoFor'
+  | 'disciplines'
+  | 'repeats'
+  | 'coHosts'
+  | 'title'
+  | null;
 
 /**
  * New › Meetup (mockup "New meetup · fast path"): park, start and an
  * optional line are enough ("I'll be at Memo Saturday at 4"). The end time
  * is optional (2 hours after the start). Who can see it starts at Public,
- * or Followers only for private accounts. "More, if you want" holds
+ * or Followers only for private accounts. "More, if you want" holds Who
+ * it's for (WhoFor-Compose: one line under the title, for any host),
  * disciplines, Repeats (with seasons), co-hosts, a title and a cover.
  * Opened from a park page's Plan a meetup with `park` and `parkName`.
  * New meetups never notify anyone; they show on Home for followers.
  *
  * Pages (PR 9, Shop-Meetup-Compose): someone who can post as a page gets
  * Posting as at the top. As a page, Park becomes Place (a park, the shop
- * itself or an address), and FOR PAGES adds Dates (one day or several),
+ * itself, an organizer's base or an address), and FOR PAGES adds Dates (one day or several),
  * Capacity, Tickets and 18+ only. Opened with `asPage` (a page's id, from
  * "Plan a meetup as …" on its screen) it starts as that page.
  *
@@ -102,6 +117,7 @@ export default function NewMeetup() {
     endsAt: null,
     note: '',
     title: '',
+    whoFor: '',
     visibility: 'public',
     disciplines: (profile?.disciplines ?? []).filter((d) => MEETUP_DISCIPLINES.includes(d)),
     weekdays: [],
@@ -148,6 +164,7 @@ export default function NewMeetup() {
       endsAt: new Date(original.ends_at),
       note: original.note ?? '',
       title: original.title ?? '',
+      whoFor: original.who_for ?? '',
       visibility: original.series.visibility,
       disciplines: original.disciplines,
       weekdays: original.series.weekdays,
@@ -165,9 +182,10 @@ export default function NewMeetup() {
   const dayAndTime = (d: Date) =>
     `${new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: timeZone ?? undefined }).format(d)} · ${clock(d)}`;
 
+  const organizer = asPage ? pageKind(asPage) === 'organizer' : original?.meetup_host_page ? pageKind(original.meetup_host_page) === 'organizer' : false;
   const placeLabel =
     draft.place === 'page'
-      ? t('pageMeet.theShop', { name: pageName ?? '' })
+      ? t(organizer ? 'pageMeet.theBase' : 'pageMeet.theShop', { name: pageName ?? '' })
       : draft.place === 'address'
         ? (draft.address?.text ?? null)
         : (draft.park?.name ?? null);
@@ -255,6 +273,7 @@ export default function NewMeetup() {
     }
     if (draft.title.trim() !== (original.title ?? '')) changes.title = draft.title.trim();
     if (draft.note.trim() !== (original.note ?? '')) changes.note = draft.note.trim();
+    if (draft.whoFor.trim() !== (original.who_for ?? '')) changes.who_for = draft.whoFor.trim();
     if ([...draft.disciplines].sort().join() !== [...original.disciplines].sort().join()) changes.disciplines = draft.disciplines;
     if (visibility !== original.series.visibility) changes.visibility = visibility;
     setSaving(true);
@@ -420,7 +439,11 @@ export default function NewMeetup() {
             </View>
             {forPage ? (
               <Text variant="caption" color="textSecondary" style={[styles.pad, styles.hint]}>
-                {asPage && !asPage.roles.includes('shop') ? t('pageMeet.placeHintBrand') : t('pageMeet.placeHint')}
+                {asPage && pageKind(asPage) === 'organizer'
+                  ? t(asPage.latitude !== null ? 'pageMeet.placeHintBase' : 'pageMeet.placeHintBrand')
+                  : asPage && !asPage.roles.includes('shop')
+                    ? t('pageMeet.placeHintBrand')
+                    : t('pageMeet.placeHint')}
               </Text>
             ) : null}
           </View>
@@ -525,6 +548,7 @@ export default function NewMeetup() {
               <Caption>{t('meetupCompose.more')}</Caption>
             </View>
             <View style={[styles.rows, { borderTopColor: c.borderSubtle }]}>
+              {row('whoFor', t('whoFor.title'), draft.whoFor.trim() || t('whoFor.add'), Boolean(draft.whoFor.trim()), () => setSheet('whoFor'))}
               {row(
                 'skate',
                 t('meetupCompose.disciplines'),
@@ -672,6 +696,7 @@ export default function NewMeetup() {
         onClose={() => setSheet(null)}
       />
       <TitleSheet visible={sheet === 'title'} value={draft.title} onChange={(title) => set({ title })} onClose={() => setSheet(null)} />
+      <WhoForSheet visible={sheet === 'whoFor'} value={draft.whoFor} onChange={(whoFor) => set({ whoFor })} onClose={() => setSheet(null)} />
     </SafeAreaView>
   );
 }

@@ -42,7 +42,7 @@ export function years(founded: string | null, ended: string | null): string | nu
 function stateNote(p: PageRow): string | null {
   if (p.suspendedAt) return `Since ${day(p.suspendedAt)}`;
   if (p.frozen) return "Frozen: dispute open";
-  if (p.state === "out_of_business") return years(p.foundedLabel, p.endedLabel);
+  if (p.state === "out_of_business" || p.state === "inactive") return years(p.foundedLabel, p.endedLabel);
   if (p.state === "closed" && p.closedAt) return `Closed ${day(p.closedAt)}`;
   if (p.openClaims) return `${p.openClaims} open ${p.openClaims === 1 ? "claim" : "claims"}`;
   if (p.state === "managed" && !p.hasLogo) return "No logo yet";
@@ -65,7 +65,7 @@ export function PagesView({
 }: {
   pages: PageRow[];
   q: string;
-  kind: "brand" | "shop" | null;
+  kind: "brand" | "shop" | "organizer" | null;
   tab: PageTab;
   openId: string | null;
   detail: PageDetail | null;
@@ -168,9 +168,10 @@ export function PagesView({
             onChange={(e) => router.replace(href({ kind: e.target.value || null, page: null }), { scroll: false })}
             className="h-control min-w-44 border-2 border-gl-border bg-gl-surface-sunk px-2.5 type-body-sm text-gl-text focus-ring"
           >
-            <option value="">Brands and shops</option>
+            <option value="">All pages</option>
             <option value="brand">Brands</option>
             <option value="shop">Shops</option>
+            <option value="organizer">Organizers</option>
           </select>
         </div>
       </div>
@@ -336,7 +337,7 @@ function PagePane({
   onDone: (message: string, gone?: true | string) => void;
 }) {
   const [tool, setTool] = useState<Tool | null>(null);
-  const archived = d.state === "out_of_business" || d.state === "closed";
+  const archived = d.state === "out_of_business" || d.state === "closed" || d.state === "inactive";
   const kind = pageType(d.roles);
   const place = d.city ?? d.country;
   const owner = d.team.find((m) => m.role === "owner");
@@ -405,7 +406,7 @@ function PagePane({
           <div className="flex min-w-0 flex-col gap-1">
             <span className="type-body font-semibold">{d.name}</span>
             <span className="type-label text-gl-text-secondary">
-              {[kind, place, d.state === "out_of_business" ? years(d.foundedLabel, d.endedLabel) : null].filter(Boolean).join(" · ").toUpperCase()}
+              {[kind, place, d.state === "out_of_business" || d.state === "inactive" ? years(d.foundedLabel, d.endedLabel) : null].filter(Boolean).join(" · ").toUpperCase()}
             </span>
           </div>
           <span className="ml-auto">

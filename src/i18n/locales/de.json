@@ -1444,7 +1444,8 @@
       "official": "Offiziell",
       "unofficial": "Inoffiziell",
       "retired": "Eingestellt",
-      "closed": "Geschlossen"
+      "closed": "Geschlossen",
+      "inactive": "Nicht mehr aktiv"
     },
     "foundingPartner": "Gründungspartner",
     "officialPage": "Offizielle Seite",
@@ -1517,10 +1518,16 @@
       "people": "Personen",
       "brandFollowing": "Marke, der du folgst",
       "shopFollowing": "Shop, dem du folgst",
-      "inbox": "Wenn du eine Seite erwähnst, landet das in ihrem Posteingang."
+      "inbox": "Wenn du eine Seite erwähnst, landet das in ihrem Posteingang.",
+      "organizerFollowing": "Veranstalter, dem du folgst"
     },
     "closed": "Dieser Shop hat geschlossen. Die Seite bleibt mit ihren Posts als Archiv.",
-    "logo": "Logo von {{name}}"
+    "logo": "Logo von {{name}}",
+    "organizer": "Veranstalter",
+    "unofficialOrganizer": "Inoffiziell, nicht von diesem Veranstalter betreut",
+    "inactive": "{{name}} ist nicht mehr aktiv. Die Seite bleibt mit ihren Beiträgen und vergangenen Meetups als Archiv.",
+    "base": "Basis",
+    "baseA11y": "Basis: {{address}}"
   },
   "shop": {
     "type": {
@@ -1772,7 +1779,8 @@
       "staff": "Mitarbeiter",
       "manager": "Manager",
       "owner": "Inhaber"
-    }
+    },
+    "claimOrganizer": "Poste als {{name}} und plane seine Meetups."
   },
   "pageTeam": {
     "roleName": {
@@ -1933,7 +1941,14 @@
       "none": "Füg die Marken hinzu, die ihr führt. Sie erscheinen auf eurer Seite und verlinken auf ihre.",
       "remove": "{{name}} entfernen"
     },
-    "notSet": "Nicht angegeben"
+    "notSet": "Nicht angegeben",
+    "base": "Basis (optional)",
+    "baseNote": "Nur wenn du von einem festen Ort aus arbeitest, etwa einem Camphaus oder einer Schule. Er erscheint auf deiner Seite und als Ort für deine Meetups. Lass ihn leer, wenn du unterwegs bist.",
+    "inactiveOrganizer": "{{name}} als nicht mehr aktiv markieren",
+    "inactiveNote": "Die Seite bleibt mit ihren Beiträgen als Archiv. Anstehende Meetups werden abgesagt.",
+    "inactiveConfirm": "{{name}} als nicht mehr aktiv markieren?",
+    "inactiveBody": "Niemand kann ihr folgen, das Team kann nicht mehr als sie posten, und ihre anstehenden Meetups werden abgesagt. Beiträge, vergangene Meetups und Follower bleiben. Nur Rachel kann sie zurückholen.",
+    "inactiveButton": "Nicht mehr aktiv"
   },
   "pageInbox": {
     "caption": "{{username}} hat {{name}} in einem Beitrag erwähnt",
@@ -1980,7 +1995,8 @@
     "city": "Stadt",
     "noCity": "Nicht angegeben",
     "cityNote": "Eure Stadt bestimmt In der Nähe und euren lokalen Admin. Zieht ihr in eine andere Stadt? ",
-    "citySubject": "{{name}} in eine andere Stadt verlegen"
+    "citySubject": "{{name}} in eine andere Stadt verlegen",
+    "mapLabelBase": "Karte mit dem Pin deiner Basis in der Mitte. Verschiebt die Karte, um den Pin zu bewegen."
   },
   "pageHours": {
     "title": "Öffnungszeiten",
@@ -2202,6 +2218,22 @@
     "planAs": "Meetup als {{name}} planen",
     "noneYet": "Noch keine Meetups geplant. Follower sehen neue auf Home.",
     "cantHost": "{{name}} kann gerade keine Meetups veranstalten.",
-    "failedPage": "Prüf den Ort und die Zeiten und versuch es noch mal."
+    "failedPage": "Prüf den Ort und die Zeiten und versuch es noch mal.",
+    "theBase": "{{name}} (Basis)",
+    "yourBase": "Deine Basis",
+    "organizerClosed": "Der Veranstalter ist nicht mehr aktiv",
+    "placeHintBase": "Seiten können einen Park, deine Basis oder eine Adresse wählen."
+  },
+  "whoFor": {
+    "title": "Für wen",
+    "add": "Zeile hinzufügen",
+    "body": "Eine kurze Zeile unter dem Titel, damit Leute wissen, ob es für sie ist.",
+    "label": "Für wen",
+    "placeholder": "Anfänger willkommen",
+    "examples": "Zum Beispiel: Anfänger willkommen · Mädchen und Frauen · 40+ Session · Nur Quads",
+    "note": "Das ist eine Info für Leute, keine Regel. Wer das Meetup sehen kann, kann trotzdem zusagen.",
+    "clear": "Leeren",
+    "done": "Fertig",
+    "counterA11y": "{{count}} von {{max}} Zeichen"
   }
 }

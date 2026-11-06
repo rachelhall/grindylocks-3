@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { pageType } from "@/components/page-card";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
@@ -163,14 +164,14 @@ function whereCell(item: QueueItem): { main: React.ReactNode; sub: string | null
   if (item.kind === "page_suggestion") return { main: item.target === "shop" ? "New shop" : "New brand", sub: null };
   // A report on a page's post or comment: the park, with the page under it.
   if (item.kind === "report" && item.page) {
-    const type = item.page.roles.includes("shop") ? "Shop" : "Brand";
+    const type = pageType(item.page.roles);
     return {
       main: item.parkName ?? <span className="text-gl-text-secondary">No park</span>,
       sub: `${item.page.name} · ${type}`,
     };
   }
   if (item.page) {
-    const type = item.page.roles.includes("shop") ? "Shop" : "Brand";
+    const type = pageType(item.page.roles);
     return { main: item.page.name, sub: [type, item.page.place].filter(Boolean).join(" · ") };
   }
   return { main: item.parkName ?? <span className="text-gl-text-secondary">No park</span>, sub: item.metroName };

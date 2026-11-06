@@ -98,23 +98,29 @@ export type PageViewerState = {
 
 /* What a page shows ----------------------------------------------------------------------- */
 
-/** A page that's a shop shows as one (8SET is a shop that also makes gear). */
-export const pageKind = (p: { roles: PageRole[] }): PageRole => (p.roles.includes('shop') ? 'shop' : 'brand');
+/**
+ * What a page shows as: a shop first (8SET is a shop that also makes gear),
+ * then a brand, else an organizer (Blading Camp, L.O.W. academy).
+ */
+export const pageKind = (p: { roles: PageRole[] }): PageRole =>
+  p.roles.includes('shop') ? 'shop' : p.roles.includes('brand') ? 'brand' : 'organizer';
 
 /** The logo is the official signal: only a managed page with a logo is OFFICIAL. */
 export const isOfficial = (p: { state: PageState; logoPath: string | null }) => p.state === 'managed' && Boolean(p.logoPath);
 
-export type Stamp = 'official' | 'unofficial' | 'retired' | 'closed';
+export type Stamp = 'official' | 'unofficial' | 'retired' | 'closed' | 'inactive';
 
 /** The stamp after the name. OFFICIAL is the only pink one; the rest are paper outlines. */
 export function stampFor(p: { state: PageState; logoPath: string | null }): Stamp {
   if (p.state === 'out_of_business') return 'retired';
   if (p.state === 'closed') return 'closed';
+  if (p.state === 'inactive') return 'inactive';
   return isOfficial(p) ? 'official' : 'unofficial';
 }
 
-/** Retired brands and closed shops are read-only archives. */
-export const isArchive = (p: { state: PageState }) => p.state === 'out_of_business' || p.state === 'closed';
+/** Retired brands, closed shops and organizers no longer active are read-only archives. */
+export const isArchive = (p: { state: PageState }) =>
+  p.state === 'out_of_business' || p.state === 'closed' || p.state === 'inactive';
 
 /**
  * Where it's from, for the tape and result lines: the city, or the country's

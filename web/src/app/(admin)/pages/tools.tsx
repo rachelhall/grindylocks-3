@@ -842,6 +842,8 @@ const YEAR = /^[12][0-9]{3}$/;
 
 function CloseDialog({ page, onClose, onDone }: DialogProps) {
   const shop = page.roles.includes("shop");
+  // A page that's neither shop nor brand is an organizer: No longer active, with years like Retired.
+  const organizer = !shop && !page.roles.includes("brand");
   const [from, setFrom] = useState(page.foundedLabel?.replace(/^c\.\s*/i, "") ?? "");
   const [to, setTo] = useState(String(new Date().getUTCFullYear()));
   const [approx, setApprox] = useState(false);
@@ -850,12 +852,14 @@ function CloseDialog({ page, onClose, onDone }: DialogProps) {
   const fromLabel = page.foundedLabel && /^c\./i.test(page.foundedLabel) && from === page.foundedLabel.replace(/^c\.\s*/i, "") ? page.foundedLabel : from;
   const toLabel = to ? `${approx ? "c. " : ""}${to}` : "";
   const valid = shop || ((!from || YEAR.test(from)) && (!to || YEAR.test(to)));
-  const tape = ["BRAND", (page.city ?? page.country ?? "").toUpperCase(), [fromLabel, toLabel].filter(Boolean).join("–").toUpperCase()]
+  const tape = [organizer ? "ORGANIZER" : "BRAND", (page.city ?? page.country ?? "").toUpperCase(), [fromLabel, toLabel].filter(Boolean).join("–").toUpperCase()]
     .filter(Boolean)
     .join(" · ");
   const sentence = shop
     ? `This shop closed in ${new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })}.`
-    : to
+    : organizer
+      ? `${page.name} is no longer active.`
+      : to
       ? approx
         ? `${page.name} stopped making gear around ${to}.`
         : `${page.name} stopped making gear in ${to}.`
@@ -865,15 +869,16 @@ function CloseDialog({ page, onClose, onDone }: DialogProps) {
     start(async () => {
       const r = await closePage(page.id, shop ? "" : fromLabel, shop ? "" : toLabel);
       if (!r.ok) return setError(r.error);
-      onDone(`${page.name} is ${r.value === "closed" ? "Closed" : "Retired"} now. ${page.team.length ? "The team is told." : ""}`);
+      const now = r.value === "closed" ? "Closed" : r.value === "inactive" ? "No longer active" : "Retired";
+      onDone(`${page.name} is ${now} now. ${page.team.length ? "The team is told." : ""}`);
     });
 
   return (
     <Dialog
       open
       onOpenChange={(o) => !o && !pending && onClose()}
-      title={shop ? `${page.name} closed for good?` : `${page.name} stopped making gear?`}
-      description={`The page becomes a read-only archive labelled ${shop ? "CLOSED" : "RETIRED"}.`}
+      title={shop ? `${page.name} closed for good?` : organizer ? `${page.name} no longer active?` : `${page.name} stopped making gear?`}
+      description={`The page becomes a read-only archive labelled ${shop ? "CLOSED" : organizer ? "NO LONGER ACTIVE" : "RETIRED"}.`}
       className="w-[min(560px,calc(100vw-32px))]"
     >
       {!shop && (
@@ -911,11 +916,12 @@ function CloseDialog({ page, onClose, onDone }: DialogProps) {
         <h3 className={label}>What changes</h3>
         <ul className="flex list-disc flex-col gap-1 pl-5 type-body-sm">
           <li>No Follow button. Followers stay and aren&apos;t told.</li>
-          {!shop && <li>All its gear shows, with no Show past gear toggle.</li>}
+          {!shop && !organizer && <li>All its gear shows, with no Show past gear toggle.</li>}
           <li>No new posts, comments or meetups as the page; past posts stay.</li>
           <li>Its upcoming meetups are cancelled, and people going are told &ldquo;{page.name} has closed&rdquo;.</li>
           {page.state === "managed" && <li>A managed page loses its logo and OFFICIAL; its team stays, read-only, and is told.</li>}
           {shop && <li>The shop leaves the map, Near you and brands-carried lists.</li>}
+          {organizer && <li>It leaves Near you, if its base put it there.</li>}
           <li>You can reopen it from the page&apos;s pane.{shop ? " A shop can still be removed completely on request." : ""}</li>
         </ul>
       </section>
@@ -925,7 +931,7 @@ function CloseDialog({ page, onClose, onDone }: DialogProps) {
           Cancel
         </Button>
         <Button variant="danger-solid" disabled={pending || !valid} onClick={submit}>
-          {shop ? "Mark Closed" : "Mark Retired"}
+          {shop ? "Mark Closed" : organizer ? "Mark No longer active" : "Mark Retired"}
         </Button>
       </Footer>
     </Dialog>

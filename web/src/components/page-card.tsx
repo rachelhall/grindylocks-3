@@ -22,10 +22,12 @@ const stampLabel: Record<string, string> = {
   name_only: "UNOFFICIAL",
   out_of_business: "RETIRED",
   closed: "CLOSED",
+  inactive: "NO LONGER ACTIVE",
 };
 
 export function pageType(roles: string[]): string {
-  return roles.includes("shop") ? (roles.includes("brand") ? "Shop and brand" : "Shop") : "Brand";
+  if (roles.includes("shop")) return roles.includes("brand") ? "Shop and brand" : "Shop";
+  return roles.includes("brand") ? "Brand" : "Organizer";
 }
 
 /**

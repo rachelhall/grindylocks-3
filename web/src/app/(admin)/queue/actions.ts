@@ -218,10 +218,10 @@ export async function sendClaimInvite(form: FormData): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Approves a suggested brand or shop as a new Unofficial page. */
+/** Approves a suggested brand, shop or organizer as a new Unofficial page. */
 export async function approvePageSuggestion(input: {
   id: string;
-  role: "brand" | "shop";
+  role: "brand" | "shop" | "organizer";
   name: string;
   handle: string;
   line: string;

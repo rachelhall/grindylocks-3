@@ -1444,7 +1444,8 @@
       "official": "Oficial",
       "unofficial": "No oficial",
       "retired": "Retirada",
-      "closed": "Cerrada"
+      "closed": "Cerrada",
+      "inactive": "Ya no está activo"
     },
     "foundingPartner": "Socio fundador",
     "officialPage": "Página oficial",
@@ -1517,10 +1518,16 @@
       "people": "Personas",
       "brandFollowing": "Marca que sigues",
       "shopFollowing": "Tienda que sigues",
-      "inbox": "Mencionar una página la envía a su bandeja."
+      "inbox": "Mencionar una página la envía a su bandeja.",
+      "organizerFollowing": "Organizador que sigues"
     },
     "closed": "Esta tienda ha cerrado. Su página sigue como archivo, con sus publicaciones.",
-    "logo": "Logo de {{name}}"
+    "logo": "Logo de {{name}}",
+    "organizer": "Organizador",
+    "unofficialOrganizer": "No oficial, no la gestiona este organizador",
+    "inactive": "{{name}} ya no está activo. Esta página sigue como archivo, con sus publicaciones y quedadas pasadas.",
+    "base": "Base",
+    "baseA11y": "Base: {{address}}"
   },
   "shop": {
     "type": {
@@ -1772,7 +1779,8 @@
       "staff": "personal",
       "manager": "gerente",
       "owner": "propietario"
-    }
+    },
+    "claimOrganizer": "Publica como {{name}} y organiza sus quedadas."
   },
   "pageTeam": {
     "roleName": {
@@ -1933,7 +1941,14 @@
       "none": "Añade las marcas que vendes. Aparecen en tu página y enlazan a la suya.",
       "remove": "Quitar {{name}}"
     },
-    "notSet": "Sin definir"
+    "notSet": "Sin definir",
+    "base": "Base (opcional)",
+    "baseNote": "Solo si organizas las cosas desde un sitio fijo, como una casa de campamento o una escuela. Sale en tu página y como lugar para tus quedadas. Déjalo vacío si te mueves de un sitio a otro.",
+    "inactiveOrganizer": "Marcar que {{name}} ya no está activo",
+    "inactiveNote": "La página sigue como archivo, con sus publicaciones. Las próximas quedadas se cancelan.",
+    "inactiveConfirm": "¿Marcar que {{name}} ya no está activo?",
+    "inactiveBody": "Nadie puede seguirla, el equipo no puede publicar como ella y sus próximas quedadas se cancelan. Sus publicaciones, quedadas pasadas y seguidores se quedan. Solo Rachel puede reactivarla.",
+    "inactiveButton": "Ya no está activo"
   },
   "pageInbox": {
     "caption": "{{username}} mencionó a {{name}} en una publicación",
@@ -1980,7 +1995,8 @@
     "city": "Ciudad",
     "noCity": "Sin definir",
     "cityNote": "Tu ciudad decide Cerca de ti y quién modera tu zona. ¿Te mudas a otra ciudad? ",
-    "citySubject": "Mover {{name}} a otra ciudad"
+    "citySubject": "Mover {{name}} a otra ciudad",
+    "mapLabelBase": "Mapa con el pin de tu base en el centro. Mueve el mapa para mover el pin."
   },
   "pageHours": {
     "title": "Horario",
@@ -2202,6 +2218,22 @@
     "planAs": "Planear un meetup como {{name}}",
     "noneYet": "Aún no hay meetups. Los seguidores ven los nuevos en Inicio.",
     "cantHost": "{{name}} no puede organizar meetups ahora mismo.",
-    "failedPage": "Revisa el lugar y las horas, y vuelve a intentarlo."
+    "failedPage": "Revisa el lugar y las horas, y vuelve a intentarlo.",
+    "theBase": "Base de {{name}}",
+    "yourBase": "Tu base",
+    "organizerClosed": "El organizador ya no está activo",
+    "placeHintBase": "Las páginas pueden elegir un park, tu base o una dirección."
+  },
+  "whoFor": {
+    "title": "Para quién es",
+    "add": "Añadir una línea",
+    "body": "Una línea corta bajo el título, para que la gente sepa si es para ellos.",
+    "label": "Para quién es",
+    "placeholder": "Principiantes bienvenidos",
+    "examples": "Por ejemplo: Principiantes bienvenidos · Chicas y mujeres · Sesión 40+ · Solo quads",
+    "note": "Es información para la gente, no una norma. Cualquiera que vea la quedada puede decir que va.",
+    "clear": "Borrar",
+    "done": "Listo",
+    "counterA11y": "{{count}} de {{max}} caracteres"
   }
 }
