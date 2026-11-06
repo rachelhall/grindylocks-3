@@ -20,12 +20,17 @@ const DISCIPLINES = [
  * The request form, then "you're on the list". "Send another request"
  * remounts the form with a fresh key, which clears it.
  */
-export function RequestForm() {
+export function RequestForm({ defaultCity = "" }: { defaultCity?: string } = {}) {
   const [round, setRound] = useState(0);
-  return <RequestFormRound key={round} onAgain={() => setRound((n) => n + 1)} />;
+  return <RequestFormRound key={round} defaultCity={defaultCity} onAgain={() => setRound((n) => n + 1)} />;
 }
 
-function RequestFormRound({ onAgain }: { onAgain: () => void }) {
+/**
+ * `defaultCity` fills in Home city on the public park and metro area pages
+ * (Nov 6), so search visitors show up under that city in the Requests page's
+ * By city panel.
+ */
+function RequestFormRound({ defaultCity, onAgain }: { defaultCity: string; onAgain: () => void }) {
   const [state, action, pending] = useActionState(requestAccess, EMPTY);
 
   if (state.sent) {
@@ -70,7 +75,7 @@ function RequestFormRound({ onAgain }: { onAgain: () => void }) {
           autoComplete="address-level2"
           placeholder="San Diego"
           maxLength={100}
-          defaultValue={state.city}
+          defaultValue={state.city || defaultCity}
         />
       </div>
 

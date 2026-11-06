@@ -1,12 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-import { ADMIN_ORIGIN, isMarketingHost, isWwwHost, MARKETING_HOST, publicPathFor, SITE_PAGES } from "@/lib/hosts";
+import {
+  ADMIN_ORIGIN,
+  isMarketingHost,
+  isSectionPath,
+  isWwwHost,
+  MARKETING_HOST,
+  PUBLIC_FILES,
+  publicPathFor,
+  routeFor,
+} from "@/lib/hosts";
 import { updateSession } from "@/lib/supabase/proxy";
 
 /**
  * Two jobs:
  * - On grindylocks.com, serve the public pages (the homepage at `/`, the
- *   privacy policy at `/privacy`) and send anything else to the admin's own
+ *   privacy policy at `/privacy`, the park pages under `/parks` and `/park`,
+ *   the sitemap and robots.txt) and send anything else to the admin's own
  *   domain. No session is touched there.
  * - Everywhere else (the admin): keep the Supabase session fresh and send
  *   signed-out visitors to sign-in. Whether a signed-in person is an admin is
@@ -22,7 +32,8 @@ export async function proxy(request: NextRequest) {
     if (isWwwHost(host)) {
       return NextResponse.redirect(`https://${MARKETING_HOST}${pathname}${search}`, 308);
     }
-    const route = SITE_PAGES[pathname];
+    if (PUBLIC_FILES.includes(pathname)) return NextResponse.next();
+    const route = routeFor(pathname);
     if (route) {
       const url = request.nextUrl.clone();
       url.pathname = route;
@@ -37,8 +48,14 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(`${ADMIN_ORIGIN}${pathname}${search}`, 307);
   }
 
-  // The public pages stay public on admin hosts too, for previews.
-  if (publicPathFor(pathname)) return NextResponse.next();
+  // The public pages stay public on admin hosts too, for previews: at their
+  // `/site` routes, and the park sections at their public paths as well.
+  if (PUBLIC_FILES.includes(pathname) || publicPathFor(pathname)) return NextResponse.next();
+  if (isSectionPath(pathname)) {
+    const url = request.nextUrl.clone();
+    url.pathname = routeFor(pathname)!;
+    return NextResponse.rewrite(url);
+  }
 
   const { response, signedIn, withSession } = await updateSession(request);
   const onSignIn = pathname === "/sign-in";

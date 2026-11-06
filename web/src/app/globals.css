@@ -180,6 +180,22 @@
   -webkit-mask-image: linear-gradient(200deg, #000 0%, transparent 60%);
   mask-image: linear-gradient(200deg, #000 0%, transparent 60%);
 }
+/* Public park pages (Nov 6): the app's park header. The halftone fades in
+   from the bottom right over ink or a park photo, and photos get the
+   photocopy filter (black and white, high contrast, darkened). */
+@utility halftone-header {
+  background-image: radial-gradient(circle, var(--gl-brand-pink) 1.6px, transparent 1.9px);
+  background-size: 9px 9px;
+  -webkit-mask-image: linear-gradient(115deg, transparent 30%, #000 95%);
+  mask-image: linear-gradient(115deg, transparent 30%, #000 95%);
+}
+@utility halftone-tile {
+  background-image: radial-gradient(circle, var(--gl-brand-pink) 1.4px, transparent 1.7px);
+  background-size: 7px 7px;
+}
+@utility xerox {
+  filter: grayscale(1) contrast(1.6) brightness(0.48);
+}
 @utility grain {
   background-image: repeating-linear-gradient(0deg, rgb(242 239 230 / 0.035) 0 1px, transparent 1px 3px);
 }
