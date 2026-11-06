@@ -475,6 +475,7 @@ export type Database = {
           updated_at: string
           visibility: Database["public"]["Enums"]["meetup_visibility"]
           weekdays: number[]
+          who_for: string | null
         }
         Insert: {
           address?: string | null
@@ -503,6 +504,7 @@ export type Database = {
           updated_at?: string
           visibility: Database["public"]["Enums"]["meetup_visibility"]
           weekdays?: number[]
+          who_for?: string | null
         }
         Update: {
           address?: string | null
@@ -531,6 +533,7 @@ export type Database = {
           updated_at?: string
           visibility?: Database["public"]["Enums"]["meetup_visibility"]
           weekdays?: number[]
+          who_for?: string | null
         }
         Relationships: [
           {
@@ -652,6 +655,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
           feed_at: string | null
           going_faces: Json | null
           going_total: number | null
@@ -697,6 +701,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           went_count?: number | null
+          who_for?: string | null
         }
         Update: {
           address?: string | null
@@ -728,6 +733,7 @@ export type Database = {
           title?: string | null
           updated_at?: string
           went_count?: number | null
+          who_for?: string | null
         }
         Relationships: [
           {
@@ -3467,6 +3473,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -3814,6 +3821,7 @@ export type Database = {
           title?: string
           visibility?: Database["public"]["Enums"]["meetup_visibility"]
           weekdays?: number[]
+          who_for?: string
         }
         Returns: string
       }
@@ -3901,6 +3909,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4282,6 +4291,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4328,6 +4338,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4434,6 +4445,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4479,6 +4491,7 @@ export type Database = {
           title: string | null
           updated_at: string
           went_count: number | null
+          who_for: string | null
         }[]
         SetofOptions: {
           from: "*"
@@ -4818,7 +4831,7 @@ export type Database = {
         | "other"
       page_invite_kind: "team" | "ownership" | "claim"
       page_member_role: "staff" | "manager" | "owner"
-      page_role: "brand" | "shop"
+      page_role: "brand" | "shop" | "organizer"
       product_entry_type: "model" | "pro" | "collab" | "special_edition"
       product_status: "current" | "discontinued" | "unknown"
       product_suggestion_kind:
@@ -4834,6 +4847,7 @@ export type Database = {
         | "managed"
         | "out_of_business"
         | "closed"
+        | "inactive"
       park_field:
         | "hours"
         | "status"
@@ -5096,7 +5110,7 @@ export const Constants = {
       ],
       page_invite_kind: ["team", "ownership", "claim"],
       page_member_role: ["staff", "manager", "owner"],
-      page_role: ["brand", "shop"],
+      page_role: ["brand", "shop", "organizer"],
       product_entry_type: ["model", "pro", "collab", "special_edition"],
       product_status: ["current", "discontinued", "unknown"],
       product_suggestion_kind: [
@@ -5113,6 +5127,7 @@ export const Constants = {
         "managed",
         "out_of_business",
         "closed",
+        "inactive",
       ],
       park_field: [
         "hours",
