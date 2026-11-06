@@ -6,6 +6,7 @@ import { PageStamp, PageTile, pageType } from "@/components/page-card";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Icon } from "@/components/ui/icon";
+import { LOGO_TYPES, toLogoPng } from "@/lib/logo-png";
 import { cn } from "@/lib/utils";
 
 import { type ClaimablePageOption, findClaimablePages, sendClaimInvite } from "./actions";
@@ -13,26 +14,6 @@ import { ErrorLine, inputClass } from "./pane";
 import { useQueue } from "./queue-view";
 
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-/**
- * Logos are 512px PNGs with transparency kept, like the app's Add logo
- * (PR 5): the picked image is drawn centered on a square canvas.
- */
-async function toLogoPng(file: File): Promise<Blob> {
-  const bitmap = await createImageBitmap(file);
-  const canvas = document.createElement("canvas");
-  canvas.width = 512;
-  canvas.height = 512;
-  const ctx = canvas.getContext("2d")!;
-  const scale = Math.min(512 / bitmap.width, 512 / bitmap.height);
-  const w = bitmap.width * scale;
-  const h = bitmap.height * scale;
-  ctx.drawImage(bitmap, (512 - w) / 2, (512 - h) / 2, w, h);
-  bitmap.close();
-  return new Promise((resolve, reject) =>
-    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png"),
-  );
-}
 
 function expiryLabel(): string {
   const d = new Date(Date.now() + 7 * 86_400_000);
@@ -84,7 +65,7 @@ export function ClaimInviteButton() {
   async function pickLogo(file: File | undefined) {
     setError(null);
     if (!file) return;
-    if (!/^image\/(png|jpeg|webp)$/.test(file.type)) {
+    if (!LOGO_TYPES.test(file.type)) {
       setError("Use a PNG (best, keeps transparency), JPEG or WebP.");
       return;
     }

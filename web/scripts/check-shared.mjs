@@ -1,8 +1,9 @@
 // The web keeps its own copies of a little shared app code (Nov 6), so the
 // web stream never edits `src/`. This fails when a copy has gone stale:
-//   - src/lib/hours.ts must match the app's src/lib/hours.ts byte for byte;
+//   - src/lib/hours.ts and src/lib/page-hours.ts must match the app's byte
+//     for byte (page-hours.ts joined with the brand and shop web tools);
 //   - src/lib/obstacle-types.ts must hold the app's English obstacleTypes.
-// Fix: copy hours.ts over again, or update the names in obstacle-types.ts.
+// Fix: copy the file over again, or update the names in obstacle-types.ts.
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,8 +14,10 @@ const problems = [];
 
 const read = (path) => readFileSync(path, "utf8");
 
-if (read(join(web, "src/lib/hours.ts")) !== read(join(app, "src/lib/hours.ts"))) {
-  problems.push("web/src/lib/hours.ts differs from src/lib/hours.ts (copy it over again).");
+for (const file of ["src/lib/hours.ts", "src/lib/page-hours.ts"]) {
+  if (read(join(web, file)) !== read(join(app, file))) {
+    problems.push(`web/${file} differs from ${file} (copy it over again).`);
+  }
 }
 
 const names = JSON.parse(read(join(app, "src/i18n/locales/en.json"))).obstacleTypes;
