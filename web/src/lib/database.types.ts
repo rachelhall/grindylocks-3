@@ -965,6 +965,7 @@ export type Database = {
           id: string
           name: string
           region: string | null
+          slug: string
           timezone: string | null
         }
         Insert: {
@@ -973,6 +974,7 @@ export type Database = {
           id?: string
           name: string
           region?: string | null
+          slug?: string
           timezone?: string | null
         }
         Update: {
@@ -981,6 +983,7 @@ export type Database = {
           id?: string
           name?: string
           region?: string | null
+          slug?: string
           timezone?: string | null
         }
         Relationships: []
@@ -3570,6 +3573,27 @@ export type Database = {
         Returns: {
           reason: string
           suspended_at: string
+        }[]
+      }
+      public_metro: { Args: { metro_slug: string }; Returns: Json }
+      public_metro_areas: {
+        Args: never
+        Returns: {
+          country: string
+          name: string
+          park_count: number
+          region: string | null
+          slug: string
+        }[]
+      }
+      public_park: { Args: { park_slug: string }; Returns: Json }
+      public_sitemap: {
+        Args: never
+        Returns: {
+          kind: string
+          metro_slug: string
+          slug: string
+          updated_at: string
         }[]
       }
       redeem_my_page_invite: { Args: never; Returns: string | null }
