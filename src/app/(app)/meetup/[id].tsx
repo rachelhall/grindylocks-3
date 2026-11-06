@@ -45,6 +45,7 @@ import {
   useDeleteMeetup,
   useGoing,
   useHideMeetup,
+  useHideMeetupStop,
   useMeetup,
   useMeetupCard,
   useMyHostRow,
@@ -112,6 +113,7 @@ export default function MeetupScreen() {
   const canHide = useCanHideMeetup(id, (myProfile?.roles.length ?? 0) > 0);
   const remove = useDeleteMeetup(id);
   const hide = useHideMeetup(id);
+  const hideStop = useHideMeetupStop(id);
   const removeGoing = useRemoveFromGoing(id);
   const report = useReportSheet();
   const [replyTo, setReplyTo] = useState<MeetupReply | null>(null);
@@ -177,6 +179,8 @@ export default function MeetupScreen() {
   const repeats = repeatLabel(meetup.series.weekdays, t, locale);
   const place = meetup.meetup_place_info;
   const placeName = meetupPlaceName(meetup, t);
+  // More parks after the main place (PR 9b). Hosts and that park's admins also get hidden ones.
+  const stops = meetup.meetup_stops ?? [];
   // The clock's name: the park's, else the host page's.
   const clockName = meetup.park?.display_name ?? place?.page?.display_name ?? hostPage?.display_name ?? placeName;
   const days = meetup.multi_day ? (meetup.meetup_days ?? []) : [];
@@ -390,7 +394,7 @@ export default function MeetupScreen() {
                 </Text>
               </View>
             </View>
-            {meetup.place === 'park' && meetup.park ? (
+            {stops.length > 0 && meetup.place === 'park' ? null : meetup.place === 'park' && meetup.park ? (
               <Pressable
                 accessibilityRole="link"
                 onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: meetup.park!.slug } })}
@@ -469,6 +473,45 @@ export default function MeetupScreen() {
               ))}
             </View>
           </View>
+
+          {stops.length > 0 ? (
+            <View style={styles.block}>
+              <View style={styles.parksHead}>
+                <Text variant="title" accessibilityRole="header" style={styles.flex}>
+                  {t('hops.parks')}{' '}
+                  <Text variant="title" color="textSecondary">
+                    {stops.length + 1}
+                  </Text>
+                </Text>
+                <Text variant="bodySm" color="textSecondary">
+                  {t('hops.inOrder')}
+                </Text>
+              </View>
+              <View style={[styles.days, { borderTopColor: c.borderSubtle }]}>
+                <StopRow
+                  n={1}
+                  name={placeName}
+                  start
+                  onPress={
+                    meetup.place === 'park' && meetup.park
+                      ? () => router.push({ pathname: '/park/[slug]', params: { slug: meetup.park!.slug } })
+                      : meetup.place === 'page' && place?.page
+                        ? () => router.push({ pathname: '/page/[handle]', params: { handle: place.page!.handle } })
+                        : undefined
+                  }
+                />
+                {stops.map((s, i) => (
+                  <StopRow
+                    key={s.id}
+                    n={i + 2}
+                    name={s.display_name}
+                    hidden={s.hidden}
+                    onPress={() => router.push({ pathname: '/park/[slug]', params: { slug: s.slug } })}
+                  />
+                ))}
+              </View>
+            </View>
+          ) : null}
 
           {several ? (
             <View style={styles.block}>
@@ -691,6 +734,18 @@ export default function MeetupScreen() {
           })
         }
         onHide={setHidden}
+        stops={stops.filter((s) => s.can_hide && s.id !== meetup.park_id)}
+        onHideStop={(park, hide) =>
+          hideStop.mutate(
+            { park, hide },
+            {
+              onError: (err) => {
+                Sentry.captureException(err);
+                Alert.alert(t('errors.generic'));
+              },
+            },
+          )
+        }
       />
       <CancelMeetupSheet
         visible={cancelOpen}
@@ -717,6 +772,45 @@ export default function MeetupScreen() {
         onClose={() => setGoingOpen(false)}
       />
     </View>
+  );
+}
+
+/** One park on a park hop's list: its number, its name, START on the first (mockup Hop-Meetup). */
+function StopRow({ n, name, start, hidden, onPress }: { n: number; name: string; start?: boolean; hidden?: boolean; onPress?: () => void }) {
+  const { t } = useTranslation();
+  const c = useColors();
+  return (
+    <Pressable
+      accessibilityRole={onPress ? 'link' : undefined}
+      accessibilityLabel={[t('hops.stopA11y', { n, park: name }), start ? t('hops.start') : null, hidden ? t('hops.hiddenHere') : null]
+        .filter(Boolean)
+        .join(', ')}
+      disabled={!onPress}
+      onPress={onPress}
+      style={({ pressed }) => [styles.stopRow, { backgroundColor: c.surfaceRaised, borderBottomColor: c.borderSubtle }, pressed && styles.pressed]}
+    >
+      <View style={[styles.stopNumber, { backgroundColor: c.text }]}>
+        <Text variant="bodySm" style={{ color: c.surface, fontFamily: fontFamily.sansSemiBold }}>
+          {n}
+        </Text>
+      </View>
+      <View style={styles.flex}>
+        <Text variant="body" numberOfLines={1} style={{ fontFamily: fontFamily.sansSemiBold }}>
+          {name}
+        </Text>
+        {hidden ? (
+          <Text variant="caption" color="textSecondary">
+            {t('hops.hiddenHere')}
+          </Text>
+        ) : null}
+      </View>
+      {start ? (
+        <Text variant="label" color="textSecondary">
+          {t('hops.start')}
+        </Text>
+      ) : null}
+      {onPress ? <Icon name="chevron" color={c.textSecondary} size={20} /> : null}
+    </Pressable>
   );
 }
 
@@ -752,6 +846,9 @@ const styles = StyleSheet.create({
   days: { borderTopWidth: stroke.hairline },
   dayRow: { flexDirection: 'row', alignItems: 'baseline', gap: space[3], paddingHorizontal: space[3], paddingVertical: 10, borderBottomWidth: stroke.hairline },
   dayName: { width: 96 },
+  parksHead: { flexDirection: 'row', alignItems: 'baseline', gap: space[2] },
+  stopRow: { minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: space[3], paddingHorizontal: space[3], borderBottomWidth: stroke.hairline },
+  stopNumber: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
   headline: {
     color: brand.paper,
     textShadowColor: brand.pink,

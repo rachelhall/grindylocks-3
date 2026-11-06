@@ -55,7 +55,7 @@ export function ParkUpcomingMeetups({ parkId }: { parkId: string }) {
       </Text>
       <View style={styles.list}>
         {list.map((m) => (
-          <MeetupRow key={m.id} m={m} place="park" />
+          <MeetupRow key={m.id} m={m} place="park" atPark={parkId} />
         ))}
       </View>
       {!all && list.length >= FIRST ? (

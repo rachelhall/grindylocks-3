@@ -261,7 +261,10 @@ export default function Notifications() {
       case 'meetup_mention':
         return t('notifications.meetupMention', { a, meetup: meetupName(n) });
       case 'meetup_hidden':
-        return t('notifications.meetupHidden', { meetup: meetupName(n), date: meetupWhen(n, 'date') });
+        // Hidden at one stop of a park hop only (PR 9b): "stop:<park>".
+        return n.detail?.startsWith('stop:')
+          ? t('notifications.meetupHiddenAtStop', { meetup: meetupName(n), park: n.detail.slice(5), date: meetupWhen(n, 'date') })
+          : t('notifications.meetupHidden', { meetup: meetupName(n), date: meetupWhen(n, 'date') });
       case 'comment':
         if (n.peopleCount <= 1) return t('notifications.commentOne', { a });
         if (n.peopleCount === 2) return t('notifications.commentTwo', { a, b: name(1) });

@@ -94,6 +94,9 @@ const icons = {
   expand: { ios: 'arrow.up.left.and.arrow.down.right', android: 'open_in_full' },
   dragVertical: { ios: 'arrow.up.and.down', android: 'swap_vert' },
   dragHorizontal: { ios: 'arrow.left.and.right', android: 'swap_horiz' },
+  // More parks on a meetup (PR 9b).
+  route: { ios: 'point.topleft.down.to.point.bottomright.curvepath', android: 'route' },
+  dragHandle: { ios: 'line.3.horizontal', android: 'drag_indicator' },
   recenter: { ios: 'viewfinder', android: 'center_focus_strong' },
   filter: { ios: 'slider.horizontal.3', android: 'tune' },
   arrowUp: { ios: 'arrow.up', android: 'north' },
