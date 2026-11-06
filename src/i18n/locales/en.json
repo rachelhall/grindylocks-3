@@ -1322,6 +1322,7 @@
     "failedBody": "Check the time hasn't passed and try again.",
     "day": "Day",
     "today": "Today",
+    "tomorrow": "Tomorrow",
     "time": "Time",
     "parkClock": "On the park's clock.",
     "noEnd": "No end time (2 hours)",
@@ -1342,7 +1343,11 @@
     "coHostSearch": "Search by username",
     "coHostHint": "Co-hosts accept before they're listed. Up to 10.",
     "results": "Results",
-    "youFollow": "You follow"
+    "youFollow": "You follow",
+    "plusHours": "+{{h}} hr",
+    "lengthH": "{{h}} hr",
+    "lengthM": "{{m}} min",
+    "lengthHm": "{{h}} hr {{m}} min"
   },
   "meetupCard": {
     "goingCount_one": "{{count}} going",

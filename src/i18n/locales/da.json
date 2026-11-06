@@ -1322,6 +1322,7 @@
     "failedBody": "Tjek at tidspunktet ikke er overstået, og prøv igen.",
     "day": "Dag",
     "today": "I dag",
+    "tomorrow": "I morgen",
     "time": "Tid",
     "parkClock": "Efter parkens ur.",
     "noEnd": "Intet sluttidspunkt (2 timer)",
@@ -1342,7 +1343,11 @@
     "coHostSearch": "Søg efter brugernavn",
     "coHostHint": "Medværter skal sige ja, før de vises. Op til 10.",
     "results": "Resultater",
-    "youFollow": "Du følger"
+    "youFollow": "Du følger",
+    "plusHours": "+{{h}} t",
+    "lengthH": "{{h}} t",
+    "lengthM": "{{m}} min",
+    "lengthHm": "{{h}} t {{m}} min"
   },
   "meetupCard": {
     "goingCount_one": "{{count}} kommer",

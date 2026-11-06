@@ -1322,6 +1322,7 @@
     "failedBody": "Prüf, dass die Zeit noch nicht vorbei ist, und versuch es noch mal.",
     "day": "Tag",
     "today": "Heute",
+    "tomorrow": "Morgen",
     "time": "Uhrzeit",
     "parkClock": "Nach der Uhr im Park.",
     "noEnd": "Kein Ende (2 Stunden)",
@@ -1342,7 +1343,11 @@
     "coHostSearch": "Nach Username suchen",
     "coHostHint": "Co-Hosts sagen erst zu, bevor sie angezeigt werden. Bis zu 10.",
     "results": "Ergebnisse",
-    "youFollow": "Du folgst"
+    "youFollow": "Du folgst",
+    "plusHours": "+{{h}} Std.",
+    "lengthH": "{{h}} Std.",
+    "lengthM": "{{m}} Min.",
+    "lengthHm": "{{h}} Std. {{m}} Min."
   },
   "meetupCard": {
     "goingCount_one": "{{count}} kommt",

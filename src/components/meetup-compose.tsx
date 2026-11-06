@@ -7,7 +7,10 @@ import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { DateTimePicker as ComposeDateTimePicker, Host as ComposeHost } from '@expo/ui/jetpack-compose';
+import { DatePicker as SwiftDatePicker, Host as SwiftHost } from '@expo/ui/swift-ui';
+import { datePickerStyle, labelsHidden, tint } from '@expo/ui/swift-ui/modifiers';
+import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Avatar } from '@/components/profile';
 import { Caption, Chip, ParkPickerModal, type PickedPark, Sheet } from '@/components/tagging';
@@ -25,7 +28,7 @@ import {
 import { searchPeople } from '@/lib/people';
 import { fresh } from '@/lib/query';
 import { useFollowing } from '@/lib/social';
-import { fontFamily, size, space, stroke, Text, useColors } from '@/theme';
+import { fontFamily, size, space, stroke, Text, useColorSchemeName, useColors } from '@/theme';
 
 export const MEETUP_DISCIPLINES: Discipline[] = ['inline', 'quad', 'skateboard'];
 const WEEK = [1, 2, 3, 4, 5, 6, 7];
@@ -65,18 +68,42 @@ export function NewModeSwitch({ mode, park }: { mode: 'post' | 'meetup'; park?: 
 
 /* Date and time ------------------------------------------------------------------- */
 
-const STEP = 15;
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+const PICK_DAYS = 28;
+const END_SHORTCUTS = [1, 2, 3];
 
 /**
- * Picks a day (the next four weeks) and a time in 15-minute steps, on the
- * park's clock. `optional` adds "No end time" (the end defaults to 2 hours).
+ * The native pickers show the phone's clock, but meetup times are on the
+ * park's. These shift a time so the picker shows the park's wall clock, and back.
+ */
+function parkToPicker(at: Date, timeZone: string | null): Date {
+  const p = localNow(at, timeZone);
+  return new Date(p.year, p.month - 1, p.day, Math.floor(p.minutes / 60), p.minutes % 60);
+}
+function pickerToPark(at: Date, timeZone: string | null): Date {
+  return zonedToUtc(at.getFullYear(), at.getMonth() + 1, at.getDate(), at.getHours() * 60 + at.getMinutes(), timeZone);
+}
+/** An end picked as a clock time: on the start's day, or the next day if that's not after the start. */
+function endAfter(start: Date, picked: Date, timeZone: string | null): Date {
+  const s = localNow(start, timeZone);
+  const end = zonedToUtc(s.year, s.month, s.day, picked.getHours() * 60 + picked.getMinutes(), timeZone);
+  return end <= start ? new Date(end.getTime() + 24 * HOUR) : end;
+}
+const nextQuarterHour = (now: Date) => new Date(Math.ceil(now.getTime() / (15 * MINUTE)) * 15 * MINUTE);
+
+/**
+ * Starts: the native date and time picker (now through the next four weeks).
+ * Ends (`after` set): a time-only picker plus +1/+2/+3 hr; an end at or before
+ * the start lands on the next day. Times are always on the park's clock.
+ * `optional` adds "No end time".
  */
 export function DateTimeSheet({
   visible,
   title,
   value,
   timeZone,
-  onlyTime,
+  after,
   optional,
   onPick,
   onClose,
@@ -85,90 +112,114 @@ export function DateTimeSheet({
   title: string;
   value: Date | null;
   timeZone: string | null;
-  /** Ends: the day is the start's, only the time is picked. */
-  onlyTime?: { day: { year: number; month: number; day: number } };
+  /** Ends: the meetup's start. Only the time is picked. */
+  after?: Date | null;
   optional?: boolean;
   onPick: (next: Date | null) => void;
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
-  const [today, setToday] = useState(() => localNow(new Date(), timeZone));
+  const c = useColors();
+  const scheme = useColorSchemeName();
+  const fallback = () => (after ? new Date(after.getTime() + 2 * HOUR) : nextQuarterHour(new Date()));
+  const [picked, setPicked] = useState<Date>(() => value ?? fallback());
+  const [now, setNow] = useState(() => new Date());
   const [wasVisible, setWasVisible] = useState(visible);
-  const current = value ? localNow(value, timeZone) : null;
-  type Day = { year: number; month: number; day: number };
-  const [day, setDay] = useState<Day>(current ?? today);
-  const [minutes, setMinutes] = useState<number | null>(current?.minutes ?? null);
 
   // Each time it opens, start from the current value.
   if (visible !== wasVisible) {
     setWasVisible(visible);
     if (visible) {
-      const now = localNow(new Date(), timeZone);
-      setToday(now);
-      setDay(current ?? onlyTime?.day ?? now);
-      setMinutes(current?.minutes ?? null);
+      setNow(new Date());
+      setPicked(value ? (after ? endAfter(after, parkToPicker(value, timeZone), timeZone) : value) : fallback());
     }
   }
 
-  const days = useMemo(() => {
-    const out: { year: number; month: number; day: number; isoWeekday: number }[] = [];
-    const start = Date.UTC(today.year, today.month - 1, today.day);
-    for (let i = 0; i < 28; i++) {
-      const d = new Date(start + i * 86_400_000);
-      out.push({ year: d.getUTCFullYear(), month: d.getUTCMonth() + 1, day: d.getUTCDate(), isoWeekday: ((d.getUTCDay() + 6) % 7) + 1 });
-    }
-    return out;
-  }, [today]);
+  const choose = (d: Date) => setPicked(after ? endAfter(after, d, timeZone) : pickerToPark(d, timeZone));
 
-  const pickedDay = onlyTime?.day ?? day;
-  const isToday = pickedDay.year === today.year && pickedDay.month === today.month && pickedDay.day === today.day;
-  const times = Array.from({ length: (24 * 60) / STEP }, (_, i) => i * STEP).filter(
-    // Ends can run past the start's day; starts can't be in the past.
-    (m) => onlyTime || !isToday || m > today.minutes - STEP,
-  );
-  const dayLabel = (d: { year: number; month: number; day: number }) =>
-    new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(
-      new Date(Date.UTC(d.year, d.month - 1, d.day)),
-    );
-  const same = (a: { year: number; month: number; day: number }, b: { year: number; month: number; day: number }) =>
-    a.year === b.year && a.month === b.month && a.day === b.day;
+  const summary = () => {
+    const p = localNow(picked, timeZone);
+    const clock = formatClock(p.minutes, locale);
+    if (after) {
+      const mins = Math.round((picked.getTime() - after.getTime()) / MINUTE);
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      const length = h && m ? t('meetupCompose.lengthHm', { h, m }) : h ? t('meetupCompose.lengthH', { h }) : t('meetupCompose.lengthM', { m });
+      return `${clock} · ${length}`;
+    }
+    const today = localNow(now, timeZone);
+    const dayNumber = (y: number, mo: number, d: number) => Date.UTC(y, mo - 1, d) / (24 * HOUR);
+    const diff = dayNumber(p.year, p.month, p.day) - dayNumber(today.year, today.month, today.day);
+    const day =
+      diff === 0
+        ? t('meetupCompose.today')
+        : diff === 1
+          ? t('meetupCompose.tomorrow')
+          : new Intl.DateTimeFormat(locale, { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' }).format(
+              new Date(Date.UTC(p.year, p.month - 1, p.day)),
+            );
+    return `${day} · ${clock}`;
+  };
+
+  // Starts can't be in the past (an earlier saved start stays pickable).
+  const first = value && value < now ? value : now;
+  const range = after
+    ? undefined
+    : { start: parkToPicker(first, timeZone), end: parkToPicker(new Date(now.getTime() + PICK_DAYS * 24 * HOUR), timeZone) };
+  const shown = parkToPicker(picked, timeZone);
 
   const done = () => {
-    if (minutes === null) return onClose();
-    onPick(zonedToUtc(pickedDay.year, pickedDay.month, pickedDay.day, minutes, timeZone));
+    onPick(picked);
     onClose();
   };
 
   return (
     <Sheet visible={visible} title={title} onClose={done} done>
       <ScrollView contentContainerStyle={styles.sheetBody}>
-        {!onlyTime ? (
-          <>
-            <Caption>{t('meetupCompose.day')}</Caption>
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-              {days.map((d) => (
-                <Chip
-                  key={`${d.month}-${d.day}`}
-                  label={same(d, today) ? t('meetupCompose.today') : dayLabel(d)}
-                  picked={same(d, day)}
-                  onPress={() => setDay(d)}
-                />
-              ))}
-            </ScrollView>
-          </>
-        ) : null}
-        <Caption>{t('meetupCompose.time')}</Caption>
-        <View style={styles.timeGrid}>
-          {times.map((m) => (
-            <Chip key={m} label={formatClock(m, locale)} picked={minutes === m} onPress={() => setMinutes(m)} />
-          ))}
+        <View accessibilityLiveRegion="polite">
+          <Text variant="title">{summary()}</Text>
+          {timeZone ? (
+            <Text variant="caption" color="textSecondary">
+              {t('meetupCompose.parkClock')}
+            </Text>
+          ) : null}
         </View>
-        {timeZone ? (
-          <Text variant="caption" color="textSecondary">
-            {t('meetupCompose.parkClock')}
-          </Text>
+        {after ? (
+          <View style={styles.quick}>
+            {END_SHORTCUTS.map((h) => (
+              <Chip
+                key={h}
+                label={t('meetupCompose.plusHours', { h })}
+                picked={picked.getTime() - after.getTime() === h * HOUR}
+                onPress={() => setPicked(new Date(after.getTime() + h * HOUR))}
+              />
+            ))}
+          </View>
         ) : null}
+        {Platform.OS === 'ios' ? (
+          <SwiftHost matchContents colorScheme={scheme}>
+            <SwiftDatePicker
+              selection={shown}
+              range={range}
+              displayedComponents={after ? ['hourAndMinute'] : ['date', 'hourAndMinute']}
+              onDateChange={choose}
+              modifiers={[datePickerStyle('wheel'), labelsHidden(), tint(c.accent)]}
+            />
+          </SwiftHost>
+        ) : (
+          <ComposeHost matchContents colorScheme={scheme}>
+            <ComposeDateTimePicker
+              key={visible ? 'open' : 'closed'}
+              initialDate={shown.toISOString()}
+              displayedComponents={after ? 'hourAndMinute' : 'dateAndTime'}
+              selectableDates={range}
+              showVariantToggle={false}
+              color={c.accent}
+              onDateSelected={choose}
+            />
+          </ComposeHost>
+        )}
         {optional ? (
           <Button
             variant="secondary"
@@ -627,7 +678,7 @@ const styles = StyleSheet.create({
   chips: { gap: space[2], paddingVertical: 2 },
   inset: { paddingHorizontal: space[3] },
   wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
-  timeGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
+  quick: { flexDirection: 'row', flexWrap: 'wrap', gap: space[2] },
   input: { minHeight: 52, borderWidth: stroke.rule, paddingHorizontal: space[3], fontFamily: fontFamily.sans, fontSize: 16 },
   week: { flexDirection: 'row', gap: 4 },
   day: { flex: 1, height: size.tapMin, borderWidth: stroke.rule, alignItems: 'center', justifyContent: 'center' },

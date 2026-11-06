@@ -194,7 +194,6 @@ export default function NewMeetup() {
   const endDefault = draft.startsAt ? new Date(draft.startsAt.getTime() + 2 * 60 * 60 * 1000) : null;
   const ready = placed && timed && !create.isPending && !saving && (!params.edit || Boolean(original)) && (!forPage || !draft.ticketUrl || isTicketUrl(draft.ticketUrl));
   const repeats = repeatLabel(draft.weekdays, t, locale);
-  const startDay = draft.startsAt ? localNow(draft.startsAt, timeZone) : null;
   const firstStart = draft.days?.[0]?.startsAt ?? draft.startsAt;
 
   /** Posting as you again clears everything only pages have. */
@@ -648,7 +647,7 @@ export default function NewMeetup() {
         title={t('meetupCompose.ends')}
         value={draft.endsAt}
         timeZone={timeZone}
-        onlyTime={startDay ? { day: startDay } : undefined}
+        after={draft.startsAt}
         optional
         onPick={(endsAt) => set({ endsAt })}
         onClose={() => setSheet(null)}
