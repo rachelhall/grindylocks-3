@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { isOwner } from "@/lib/access-requests";
-import { getAdmin } from "@/lib/admin";
+import { getViewer } from "@/lib/admin";
+import { firstSection, managePath } from "@/lib/page-sections";
 import {
   fetchClaimDetail,
   fetchImpersonatedPages,
@@ -52,7 +54,14 @@ export default async function QueuePage({ searchParams }: PageProps<"/queue">) {
   const itemParam = one(params.item);
   const item = parseItemKey(itemParam);
 
-  const admin = (await getAdmin())!;
+  // The queue is home for role holders; people who only run pages land on
+  // their first page's first section they can use.
+  const viewer = (await getViewer())!;
+  const admin = viewer.admin;
+  if (!admin) {
+    const page = viewer.pages[0];
+    redirect(managePath(page.handle, firstSection(page.roles, page.role)));
+  }
   const owner = isOwner(admin);
 
   async function paneFor(): Promise<React.ReactNode> {

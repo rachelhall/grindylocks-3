@@ -3,32 +3,40 @@
 import { useSearchParams } from "next/navigation";
 import { useActionState, useEffect, useState } from "react";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { signIn, type SignInState, signOut } from "./actions";
+import { signIn, type SignInState } from "./actions";
 
 const RESEND_SECONDS = 60;
 
 /**
  * Email, then the code from the email, the same flow as the app. Every step
  * runs on the server (actions.ts), so the session cookies are set there and
- * only role holders get past the code.
+ * only role holders and page teams get past the code.
  */
 export function SignInForm() {
   const reason = useSearchParams().get("reason");
   const [state, action, pending] = useActionState(signIn, { step: "email", email: "" } satisfies SignInState);
 
-  // The queue sends signed-in members who aren't admins back here.
-  if (reason === "not-admin" && state.step === "email" && !state.email) {
+  // Signed in with nothing to run: from the code step, or sent here (already
+  // signed out) by the admin layout.
+  if (state.step === "no-access" || (reason === "no-access" && state.step === "email" && !state.email)) {
+    const who = state.username ? `@${state.username}` : "This account";
     return (
-      <Card title="Not an admin" body="This account isn't an admin here. Everything else happens in the app.">
-        <form action={signOut}>
-          <Button type="submit" variant="outline" className="w-full">
-            Sign out
-          </Button>
-        </form>
+      <Card
+        title="Nothing to run here"
+        body={`${who} isn't an admin and isn't on a brand or shop page's team, so there's nothing for this account on the web.`}
+      >
+        <p className="type-body-sm text-gl-text-secondary">
+          Work at a brand or shop? Ask the page&apos;s owner to invite you to its team, or claim the page in the app.
+          You&apos;ve been signed out.
+        </p>
+        {/* A full page load, so neither the form's state nor a ?reason= brings this card back. */}
+        <a href="/sign-in" className={buttonVariants({ variant: "outline", className: "w-full" })}>
+          Use a different email
+        </a>
       </Card>
     );
   }
@@ -41,7 +49,7 @@ export function SignInForm() {
   return (
     <Card
       title="Sign in"
-      body="For park admins and city admins. Use the email you sign in to the app with, and we'll send you a code."
+      body="For park and city admins, and for the teams that run brand and shop pages. Use the email you sign in to the app with, and we'll send you a code."
     >
       <form action={action} className="flex flex-col gap-4" noValidate>
         <div className="flex flex-col gap-1.5">
