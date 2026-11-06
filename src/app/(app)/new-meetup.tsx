@@ -10,6 +10,7 @@ import {
   DisciplinesSheet,
   MEETUP_DISCIPLINES,
   NewModeSwitch,
+  ParksSheet,
   type RepeatDraft,
   RepeatsSheet,
   TitleSheet,
@@ -58,6 +59,7 @@ type SheetName =
   | 'capacity'
   | 'tickets'
   | 'whoFor'
+  | 'parks'
   | 'disciplines'
   | 'repeats'
   | 'coHosts'
@@ -118,6 +120,7 @@ export default function NewMeetup() {
     note: '',
     title: '',
     whoFor: '',
+    moreParks: [],
     visibility: 'public',
     disciplines: (profile?.disciplines ?? []).filter((d) => MEETUP_DISCIPLINES.includes(d)),
     weekdays: [],
@@ -165,6 +168,8 @@ export default function NewMeetup() {
       note: original.note ?? '',
       title: original.title ?? '',
       whoFor: original.who_for ?? '',
+      // Hosts get their hidden stops too, so an edit keeps them (and their hiding).
+      moreParks: (original.meetup_stops ?? []).map((s) => ({ id: s.id, name: s.display_name })),
       visibility: original.series.visibility,
       disciplines: original.disciplines,
       weekdays: original.series.weekdays,
@@ -216,7 +221,14 @@ export default function NewMeetup() {
   };
 
   const pickPlace = (p: PickedPlace) => {
-    if (p.place === 'park') set({ place: 'park', park: { ...p.park, timeZone: null }, address: null, seasons: [] });
+    if (p.place === 'park')
+      set({
+        place: 'park',
+        park: { ...p.park, timeZone: null },
+        address: null,
+        seasons: [],
+        moreParks: draft.moreParks.filter((s) => s.id !== p.park.id),
+      });
     else if (p.place === 'page') set({ place: 'page', park: null, address: null, seasons: [] });
     else set({ place: 'address', park: null, address: p.address, seasons: [] });
   };
@@ -273,6 +285,8 @@ export default function NewMeetup() {
     if (draft.title.trim() !== (original.title ?? '')) changes.title = draft.title.trim();
     if (draft.note.trim() !== (original.note ?? '')) changes.note = draft.note.trim();
     if (draft.whoFor.trim() !== (original.who_for ?? '')) changes.who_for = draft.whoFor.trim();
+    const stops = draft.moreParks.map((p) => p.id);
+    if (stops.join() !== (original.meetup_stops ?? []).map((s) => s.id).join()) changes.parks = stops;
     if ([...draft.disciplines].sort().join() !== [...original.disciplines].sort().join()) changes.disciplines = draft.disciplines;
     if (visibility !== original.series.visibility) changes.visibility = visibility;
     setSaving(true);
@@ -410,6 +424,14 @@ export default function NewMeetup() {
               {forPage
                 ? row('pin', t('pageMeet.place'), placeLabel ?? t('pageMeet.pickPlace'), placed, () => (asPage ? setSheet('place') : undefined), true)
                 : row('pin', t('meetupCompose.park'), draft.park?.name ?? t('meetupCompose.pickPark'), Boolean(draft.park), () => setSheet('park'), true)}
+              {row(
+                'route',
+                t('hops.then'),
+                draft.moreParks.length ? draft.moreParks.map((p) => p.name).join(', ') : t('hops.addParks'),
+                draft.moreParks.length > 0,
+                () => setSheet('parks'),
+                true,
+              )}
               {/* Several days are set under FOR PAGES › Dates instead. */}
               {days
                 ? null
@@ -436,6 +458,11 @@ export default function NewMeetup() {
                     true,
                   )}
             </View>
+            {draft.moreParks.length > 0 ? (
+              <Text variant="caption" color="textSecondary" style={[styles.pad, styles.hint]}>
+                {t('hops.hint')}
+              </Text>
+            ) : null}
             {forPage ? (
               <Text variant="caption" color="textSecondary" style={[styles.pad, styles.hint]}>
                 {asPage && pageKind(asPage) === 'organizer'
@@ -615,7 +642,9 @@ export default function NewMeetup() {
         visible={sheet === 'park'}
         current={draft.park}
         onClose={() => setSheet(null)}
-        onPick={(park) => park && set({ park: { ...park, timeZone: null }, seasons: [] })}
+        onPick={(park) =>
+          park && set({ park: { ...park, timeZone: null }, seasons: [], moreParks: draft.moreParks.filter((s) => s.id !== park.id) })
+        }
       />
       {asPage ? (
         <PlaceSheet
@@ -634,6 +663,14 @@ export default function NewMeetup() {
           onClose={() => setSheet(null)}
         />
       ) : null}
+      <ParksSheet
+        visible={sheet === 'parks'}
+        start={placeLabel}
+        startParkId={draft.place === 'park' ? (draft.park?.id ?? null) : null}
+        value={draft.moreParks}
+        onChange={(moreParks) => set({ moreParks })}
+        onClose={() => setSheet(null)}
+      />
       <DateTimeSheet
         visible={sheet === 'starts'}
         title={t('meetupCompose.starts')}

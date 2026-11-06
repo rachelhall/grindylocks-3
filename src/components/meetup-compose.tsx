@@ -5,12 +5,12 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { DateTimePicker as ComposeDateTimePicker, Host as ComposeHost } from '@expo/ui/jetpack-compose';
 import { DatePicker as SwiftDatePicker, Host as SwiftHost } from '@expo/ui/swift-ui';
 import { datePickerStyle, labelsHidden, tint } from '@expo/ui/swift-ui/modifiers';
-import { Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Animated, PanResponder, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { Avatar } from '@/components/profile';
 import { Caption, Chip, ParkPickerModal, type PickedPark, Sheet } from '@/components/tagging';
@@ -20,6 +20,7 @@ import { formatClock, localNow } from '@/lib/hours';
 import {
   type Discipline,
   MAX_CO_HOSTS,
+  MAX_MORE_PARKS,
   MEETUP_TITLE_MAX,
   type Season,
   WHO_FOR_MAX,
@@ -567,6 +568,218 @@ export function RepeatsSheet({
   );
 }
 
+/* Parks, in order (PR 9b) ----------------------------------------------------------- */
+
+const STOP_HEIGHT = 60;
+
+/**
+ * Parks, in order (mockup Hop-Parks): the start (the Park or Place row) is
+ * stop 1; up to 9 more parks follow. Drag to reorder (or Move up and Move
+ * down for screen readers), ✕ to remove, Add a park.
+ */
+export function ParksSheet({
+  visible,
+  start,
+  startParkId,
+  value,
+  onChange,
+  onClose,
+}: {
+  visible: boolean;
+  /** Stop 1's name: the park, or a page's base, shop or address. Null before one is picked. */
+  start: string | null;
+  /** The start's park, which can't also be a stop. */
+  startParkId: string | null;
+  value: PickedPark[];
+  onChange: (next: PickedPark[]) => void;
+  onClose: () => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const [picking, setPicking] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const total = 1 + value.length;
+  const full = value.length >= MAX_MORE_PARKS;
+
+  const move = useCallback(
+    (from: number, to: number) => {
+      if (to < 0 || to >= value.length || from === to) return;
+      const next = [...value];
+      const [park] = next.splice(from, 1);
+      next.splice(to, 0, park);
+      onChange(next);
+    },
+    [value, onChange],
+  );
+
+  return (
+    <Sheet visible={visible} title={t('hops.sheetTitle')} onClose={onClose} done>
+      <ScrollView contentContainerStyle={styles.sheetBody} scrollEnabled={!dragging} keyboardShouldPersistTaps="handled">
+        <Text variant="label" color="textSecondary" accessibilityLabel={t('hops.countA11y', { count: total, max: MAX_MORE_PARKS + 1 })}>
+          {t('hops.count', { count: total, max: MAX_MORE_PARKS + 1 })}
+        </Text>
+        <View style={{ borderTopWidth: stroke.hairline, borderTopColor: c.borderSubtle }}>
+          <View style={[styles.stop, { backgroundColor: c.surfaceRaised, borderBottomColor: c.borderSubtle }]}>
+            <StopNumber n={1} />
+            <Text variant="body" numberOfLines={1} color={start ? 'text' : 'textSecondary'} style={[styles.flex, styles.semi]}>
+              {start ?? t('hops.startFirst')}
+            </Text>
+            <Text variant="label" color="textSecondary">
+              {t('hops.start')}
+            </Text>
+          </View>
+          {value.map((park, i) => (
+            <DraggableStop
+              key={park.id}
+              park={park}
+              index={i}
+              count={value.length}
+              onMove={move}
+              onRemove={() => onChange(value.filter((p) => p.id !== park.id))}
+              onDragState={setDragging}
+            />
+          ))}
+        </View>
+        {full ? (
+          <Text variant="bodySm" color="textSecondary">
+            {t('hops.full', { max: MAX_MORE_PARKS + 1 })}
+          </Text>
+        ) : (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => setPicking(true)}
+            style={({ pressed }) => [styles.addSeason, { borderColor: c.text }, pressed && styles.pressed]}
+          >
+            <Icon name="add" color={c.text} size={20} />
+            <Text variant="body" style={styles.semi}>
+              {t('hops.addPark')}
+            </Text>
+          </Pressable>
+        )}
+        <Text variant="bodySm" color="textSecondary">
+          {t('hops.sheetNote')}
+        </Text>
+      </ScrollView>
+
+      <ParkPickerModal
+        visible={picking}
+        current={null}
+        onClose={() => setPicking(false)}
+        onPick={(park: PickedPark | null) => {
+          if (!park) return;
+          if (park.id === startParkId || value.some((p) => p.id === park.id)) {
+            Alert.alert(t('hops.alreadyOn', { park: park.name }));
+            return;
+          }
+          if (!full) onChange([...value, park]);
+        }}
+      />
+    </Sheet>
+  );
+}
+
+function StopNumber({ n }: { n: number }) {
+  const c = useColors();
+  return (
+    <View style={[styles.stopNumber, { backgroundColor: c.text }]} accessibilityElementsHidden importantForAccessibility="no">
+      <Text variant="bodySm" style={[styles.semi, { color: c.surface }]}>
+        {n}
+      </Text>
+    </View>
+  );
+}
+
+/** A stop after the start: drag its handle up or down to move it. */
+function DraggableStop({
+  park,
+  index,
+  count,
+  onMove,
+  onRemove,
+  onDragState,
+}: {
+  park: PickedPark;
+  index: number;
+  count: number;
+  onMove: (from: number, to: number) => void;
+  onRemove: () => void;
+  onDragState: (dragging: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  const c = useColors();
+  const [dy] = useState(() => new Animated.Value(0));
+  const [lifted, setLifted] = useState(false);
+
+  // Made again only when the list changes, which never happens mid-drag
+  // (the move lands on release), so a drag keeps its responder.
+  const responder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderTerminationRequest: () => false,
+        onPanResponderGrant: () => {
+          setLifted(true);
+          onDragState(true);
+        },
+        onPanResponderMove: Animated.event([null, { dy }], { useNativeDriver: false }),
+        onPanResponderRelease: (_, g) => {
+          const to = Math.max(0, Math.min(count - 1, index + Math.round(g.dy / STOP_HEIGHT)));
+          dy.setValue(0);
+          setLifted(false);
+          onDragState(false);
+          onMove(index, to);
+        },
+        onPanResponderTerminate: () => {
+          dy.setValue(0);
+          setLifted(false);
+          onDragState(false);
+        },
+      }),
+    [dy, index, count, onMove, onDragState],
+  );
+
+  return (
+    <Animated.View
+      style={[
+        styles.stop,
+        { backgroundColor: c.surfaceRaised, borderBottomColor: c.borderSubtle, transform: [{ translateY: dy }] },
+        lifted && [styles.lifted, { borderColor: c.border }],
+      ]}
+    >
+      <StopNumber n={index + 2} />
+      <Text variant="body" numberOfLines={1} style={[styles.flex, styles.semi]}>
+        {park.name}
+      </Text>
+      <View
+        {...responder.panHandlers}
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel={t('hops.moveA11y', { park: park.name, n: index + 2 })}
+        accessibilityActions={[
+          { name: 'increment', label: t('hops.moveDown') },
+          { name: 'decrement', label: t('hops.moveUp') },
+        ]}
+        onAccessibilityAction={(e) => {
+          if (e.nativeEvent.actionName === 'increment') onMove(index, index + 1);
+          if (e.nativeEvent.actionName === 'decrement') onMove(index, index - 1);
+        }}
+        style={styles.stopButton}
+      >
+        <Icon name="dragHandle" color={c.textSecondary} size={22} />
+      </View>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={t('hops.removeA11y', { park: park.name })}
+        onPress={onRemove}
+        style={({ pressed }) => [styles.stopButton, pressed && styles.pressed]}
+      >
+        <Icon name="close" color={c.text} size={22} />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 /* Co-hosts ------------------------------------------------------------------------ */
 
 type Person = { id: string; username: string };
@@ -704,6 +917,18 @@ const styles = StyleSheet.create({
     gap: space[2],
   },
   note: { flexDirection: 'row', gap: space[2], padding: space[3] },
+  semi: { fontFamily: fontFamily.sansSemiBold },
+  stop: {
+    height: STOP_HEIGHT,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space[3],
+    paddingLeft: space[3],
+    borderBottomWidth: stroke.hairline,
+  },
+  lifted: { zIndex: 1, elevation: 4, borderWidth: stroke.rule },
+  stopNumber: { width: 28, height: 28, alignItems: 'center', justifyContent: 'center' },
+  stopButton: { width: size.tapMin, height: size.tapMin, alignItems: 'center', justifyContent: 'center' },
   personRow: {
     minHeight: 56,
     flexDirection: 'row',

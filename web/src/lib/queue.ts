@@ -212,6 +212,12 @@ export type ReportDetail = {
   page: { name: string; handle: string; isShop: boolean } | null;
   postPage: { name: string; handle: string } | null;
   madeBy: string | null;
+  /**
+   * PR 9b: a meetup report reaches every stop's park admins. Admins of a stop
+   * only (not the start) can only hide it at their park; the reports stay
+   * open for the start's admins.
+   */
+  stopOnly: boolean;
 };
 
 type RawReportDetail = {
@@ -267,6 +273,7 @@ type RawReportDetail = {
   page?: { display_name: string; handle: string; roles: string[] } | null;
   post_page?: { display_name: string; handle: string } | null;
   made_by?: string | null;
+  stop_only?: boolean;
 };
 
 function streamThumbnail(videoId: string | null): string | null {
@@ -365,6 +372,7 @@ export async function fetchReportDetail(target: ReportTarget, id: string): Promi
     page: raw.page ? { name: raw.page.display_name, handle: raw.page.handle, isShop: raw.page.roles.includes("shop") } : null,
     postPage: raw.post_page ? { name: raw.post_page.display_name, handle: raw.post_page.handle } : null,
     madeBy: raw.made_by ?? null,
+    stopOnly: Boolean(raw.stop_only),
   };
 }
 

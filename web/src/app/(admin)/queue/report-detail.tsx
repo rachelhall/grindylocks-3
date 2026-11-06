@@ -107,6 +107,7 @@ export function ReportDetailPane({
   const asPage = d.page;
 
   function start(decision: Decision) {
+    if (d.stopOnly && decision !== "keep_hidden") return;
     if (roleHolder && (decision === "warn" || decision === "suspend")) return;
     if (asPage && (decision === "warn" || decision === "suspend" || decision === "ban")) return;
     if (!hasContent && decision === "keep_hidden") return;
@@ -117,9 +118,9 @@ export function ReportDetailPane({
   }
 
   useShortcuts({
-    d: () => start("dismiss"),
+    d: d.stopOnly ? null : () => start("dismiss"),
     h: hasContent ? () => start("keep_hidden") : null,
-    e: d.canEscalate ? () => start("escalate") : null,
+    e: d.canEscalate && !d.stopOnly ? () => start("escalate") : null,
   });
 
   function submit() {
@@ -141,7 +142,13 @@ export function ReportDetailPane({
       setOpen(null);
       const words: Record<Decision, string> = {
         dismiss: "Reports dismissed.",
-        keep_hidden: isComment ? "Comment removed." : d.target === "meetup" ? "Meetup date hidden." : "Post kept hidden.",
+        keep_hidden: isComment
+          ? "Comment removed."
+          : d.stopOnly
+            ? "Hidden at your park. It still shows at the other parks."
+            : d.target === "meetup"
+              ? "Meetup date hidden."
+              : "Post kept hidden.",
         warn: `Warning sent to ${who}.`,
         suspend: `${who} suspended for ${plural(days, "day")}.`,
         escalate: "Sent to Rachel.",
@@ -162,9 +169,16 @@ export function ReportDetailPane({
       danger: false,
     },
     keep_hidden: {
-      title: isComment ? "Remove this comment?" : d.target === "meetup" ? "Hide this meetup date?" : "Keep this post hidden?",
-      description:
-        d.target === "meetup"
+      title: isComment
+        ? "Remove this comment?"
+        : d.stopOnly
+          ? "Hide this date at your park?"
+          : d.target === "meetup"
+            ? "Hide this meetup date?"
+            : "Keep this post hidden?",
+      description: d.stopOnly
+        ? "It leaves your park's Upcoming and still shows at its other parks. Its hosts are told which park hid it. The reports stay open for the start's admins."
+        : d.target === "meetup"
           ? "Only its hosts and this park's admins will see it. The hosts are told it was hidden, with your note if you write one."
           : `${who} is told their ${thing} was taken down, with your note if you write one.`,
       confirm: isComment ? "Remove comment" : d.target === "meetup" ? "Hide date" : "Keep hidden",
@@ -329,6 +343,19 @@ export function ReportDetailPane({
         </PaneSection>
       )}
 
+      {d.stopOnly ? (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="danger" onClick={() => start("keep_hidden")}>
+              Hide at your park
+            </Button>
+          </div>
+          <p className="type-caption text-gl-text-secondary">
+            This park hop stops at your park. You can hide it there; dismissing, warnings and suspensions are for the
+            admins of the park it starts at.
+          </p>
+        </div>
+      ) : (
       <div className="flex flex-col gap-3">
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" onClick={() => start("dismiss")}>
@@ -370,6 +397,7 @@ export function ReportDetailPane({
               }`}
         </p>
       </div>
+      )}
 
       <Dialog
         open={open !== null}

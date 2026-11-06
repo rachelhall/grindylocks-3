@@ -447,6 +447,52 @@ export type Database = {
           },
         ]
       }
+      event_parks: {
+        Row: {
+          event_id: string
+          hidden_at: string | null
+          hidden_by: string | null
+          park_id: string
+          position: number
+        }
+        Insert: {
+          event_id: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          park_id: string
+          position: number
+        }
+        Update: {
+          event_id?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          park_id?: string
+          position?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_parks_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_parks_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_parks_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_series: {
         Row: {
           address: string | null
@@ -548,6 +594,39 @@ export type Database = {
             columns: ["park_id"]
             isOneToOne: false
             referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_series_parks: {
+        Row: {
+          park_id: string
+          position: number
+          series_id: string
+        }
+        Insert: {
+          park_id: string
+          position: number
+          series_id: string
+        }
+        Update: {
+          park_id?: string
+          position?: number
+          series_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_series_parks_park_id_fkey"
+            columns: ["park_id"]
+            isOneToOne: false
+            referencedRelation: "parks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_series_parks_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "event_series"
             referencedColumns: ["id"]
           },
         ]
@@ -3314,6 +3393,10 @@ export type Database = {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: Json
       }
+      meetup_stops: {
+        Args: { "": Database["public"]["Tables"]["events"]["Row"] }
+        Returns: Json
+      }
       meetup_timezone: {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: string | null
@@ -3811,6 +3894,7 @@ export type Database = {
           ends_at?: string
           latitude?: number
           longitude?: number
+          more_parks?: string[]
           note?: string
           park?: string
           repeat_ends_on?: string
@@ -4005,7 +4089,10 @@ export type Database = {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: number
       }
-      hide_meetup: { Args: { event: string; hide?: boolean }; Returns: undefined }
+      hide_meetup: {
+        Args: { at_park?: string; event: string; hide?: boolean }
+        Returns: undefined
+      }
       host_list: {
         Args: { "": Database["public"]["Tables"]["events"]["Row"] }
         Returns: Json

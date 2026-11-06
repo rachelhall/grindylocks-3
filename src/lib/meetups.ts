@@ -59,8 +59,27 @@ const MEETUP_SELECT = `
   place, capacity, ticket_url, adults_only, multi_day, who_for,
   series:event_series!inner(id, host_id, host_page_id, visibility, weekdays, ended_at),
   park:parks(id, slug, display_name, latitude, longitude, metro:metro_areas(timezone)),
-  meetup_host_page, meetup_place_info, meetup_timezone, meetup_official, spots_taken, meetup_days, i_run_meetup
+  meetup_host_page, meetup_place_info, meetup_timezone, meetup_official, spots_taken, meetup_days, i_run_meetup,
+  meetup_stops
 `;
+
+/**
+ * A park after the main place (PR 9b, park hops): stops 2 to 10, in order.
+ * Hidden stops (park admins hid the date at that park) come back only to the
+ * meetup's hosts and that park's moderators; `can_hide` is true when you
+ * moderate that park.
+ */
+export type MeetupStop = {
+  id: string;
+  slug: string;
+  display_name: string;
+  position: number;
+  hidden: boolean;
+  can_hide?: boolean;
+};
+
+/** Up to 9 more parks after the main place, 10 in all (as the database checks). */
+export const MAX_MORE_PARKS = 9;
 
 /** The page hosting a meetup (PR 9). */
 export type HostPage = {
@@ -137,7 +156,40 @@ export type Meetup = {
   meetup_days: MeetupDay[] | null;
   /** You're on the host page's team (you manage it as the page). */
   i_run_meetup: boolean | null;
+  /** More parks after the main place, in order (PR 9b); empty for most meetups. */
+  meetup_stops: MeetupStop[] | null;
 };
+
+/** The stops everyone sees (hidden ones left out), in order. */
+export function visibleStops(m: Pick<Meetup, 'meetup_stops'>): MeetupStop[] {
+  return (m.meetup_stops ?? []).filter((s) => !s.hidden);
+}
+
+/**
+ * The route line on cards (PR 9b): on a park page "Stop 2 of 3 · Clairemont,
+ * Linda Vista, Memo"; elsewhere "+ 8 parks · Málaga Rock, San Pedro and 6
+ * more". Null for a meetup at one place.
+ */
+export function routeLine(
+  m: Parameters<typeof meetupPlaceName>[0] & Pick<Meetup, 'meetup_stops' | 'park_id'>,
+  t: TFunction,
+  locale: string,
+  atPark?: string,
+): string | null {
+  const stops = visibleStops(m);
+  if (stops.length === 0) return null;
+  const names = [meetupPlaceName(m, t), ...stops.map((s) => s.display_name)];
+  if (atPark) {
+    const at = m.park_id === atPark ? 0 : stops.findIndex((s) => s.id === atPark) + 1;
+    if (at >= 0) return t('hops.stopOf', { n: at + 1, count: names.length, parks: names.join(', ') });
+  }
+  const more = stops.map((s) => s.display_name);
+  const parks =
+    more.length <= 2
+      ? new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(more)
+      : t('hops.twoAndMore', { a: more[0], b: more[1], count: more.length - 2 });
+  return t('hops.moreParks', { count: more.length, parks });
+}
 
 /** The place's clock: the park's, else the host page's own. */
 export function meetupTz(m: Pick<Meetup, 'meetup_timezone' | 'park'>): string | null {
@@ -454,6 +506,8 @@ export type MeetupDraft = {
   title: string;
   /** Who it's for (any host), up to WHO_FOR_MAX characters. */
   whoFor: string;
+  /** More parks after the main place, in order (PR 9b), up to MAX_MORE_PARKS. */
+  moreParks: { id: string; name: string }[];
   visibility: MeetupVisibility;
   disciplines: Discipline[];
   weekdays: number[];
@@ -487,6 +541,7 @@ export function useCreateMeetup(userId: string | undefined) {
         note: d.note.trim() || undefined,
         title: d.title.trim() || undefined,
         who_for: d.whoFor.trim() || undefined,
+        more_parks: d.moreParks.length ? d.moreParks.map((p) => p.id) : undefined,
         visibility: d.visibility,
         disciplines: d.disciplines,
         cover_path: coverPath ?? undefined,
@@ -810,6 +865,8 @@ export type MeetupChanges = {
   note?: string;
   /** An empty string clears it. */
   who_for?: string;
+  /** More parks after the main place, in order (PR 9b); an empty list removes them. */
+  parks?: string[];
   disciplines?: Discipline[];
   visibility?: MeetupVisibility;
   /** An empty string removes the cover. */
@@ -964,6 +1021,18 @@ export function useHideMeetup(eventId: string | undefined) {
   return useMutation({
     mutationFn: async (hide: boolean) => {
       const { error } = await supabase.rpc('hide_meetup', { event: eventId!, hide });
+      if (error) throw error;
+    },
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),
+  });
+}
+
+/** Hides a date at one stop only, or shows it there again (that park's admins; PR 9b). */
+export function useHideMeetupStop(eventId: string | undefined) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ park, hide }: { park: string; hide: boolean }) => {
+      const { error } = await supabase.rpc('hide_meetup', { event: eventId!, hide, at_park: park });
       if (error) throw error;
     },
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['meetups'] }),

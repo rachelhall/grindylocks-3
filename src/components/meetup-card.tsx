@@ -40,6 +40,7 @@ import {
   meetupPlaceName,
   meetupTz,
   repeatLabel,
+  routeLine,
   spotsLeft,
 } from '@/lib/meetups';
 import { isOfficial, pageKind } from '@/lib/pages';
@@ -284,6 +285,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
   const times = [meetupTimes(m, t, locale), repeats].filter(Boolean).join(' · ');
   const iHost = Boolean(m.i_run_meetup) || (Boolean(viewerId) && m.host_list.some((h) => h.kind !== 'page' && h.id === viewerId));
   const place = meetupPlaceName(m, t);
+  const route = routeLine(m, t, locale);
   const full = spotsLeft(m) === 0;
 
   return (
@@ -320,7 +322,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
 
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), times, place, cancelled ? t('meetupCard.cancelledA11y') : null]
+        accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), times, place, route, cancelled ? t('meetupCard.cancelledA11y') : null]
           .filter(Boolean)
           .join(', ')}
         onPress={() => openMeetup(m.id)}
@@ -341,6 +343,7 @@ export function MeetupFeedCard({ m, now, viewerId }: { m: MeetupCard; now: numbe
               {place}
             </Text>
           </View>
+          <RouteText text={route} />
         </View>
       </Pressable>
 
@@ -437,13 +440,27 @@ export function WhoForLine({ text, color, size: textSize = 14 }: { text: string 
   );
 }
 
+/** The route line (PR 9b): "Stop 2 of 3 · …" or "+ 8 parks · …", with the route icon. */
+function RouteText({ text }: { text: string | null }) {
+  const c = useColors();
+  if (!text) return null;
+  return (
+    <View style={styles.whoFor}>
+      <Icon name="route" color={c.text} size={16} />
+      <Text variant="bodySm" numberOfLines={2} style={[styles.semi, styles.shrink]}>
+        {text}
+      </Text>
+    </View>
+  );
+}
+
 /* Park page and profile ---------------------------------------------------------------- */
 
 /**
  * An Upcoming row. On a park page the third line names the hosts; on a
  * profile it says where ("7:00 PM · Memo · Every Thursday").
  */
-export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profile' | 'page' }) {
+export function MeetupRow({ m, place, atPark }: { m: MeetupCard; place: 'park' | 'profile' | 'page'; atPark?: string }) {
   const { t, i18n } = useTranslation();
   const c = useColors();
   const locale = i18n.language;
@@ -454,6 +471,8 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
     m.host_list.map((h) => h.username).filter((n): n is string => Boolean(n)),
   );
   const where = meetupPlaceName(m, t);
+  // On a park page, which stop this park is (PR 9b); elsewhere, how many parks follow.
+  const route = routeLine(m, t, locale, place === 'park' ? atPark : undefined);
   const second =
     place === 'park'
       ? [meetupTimes(m, t, locale), repeats].filter(Boolean).join(' · ')
@@ -464,7 +483,7 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), second, cancelled ? t('meetupCard.cancelledA11y') : null]
+      accessibilityLabel={[headline, m.who_for, spokenDate(m, locale), second, route, cancelled ? t('meetupCard.cancelledA11y') : null]
         .filter(Boolean)
         .join(', ')}
       onPress={() => openMeetup(m.id)}
@@ -480,6 +499,7 @@ export function MeetupRow({ m, place }: { m: MeetupCard; place: 'park' | 'profil
           <Text variant="bodySm" color="textSecondary">
             {second}
           </Text>
+          <RouteText text={route} />
           {cancelled ? (
             <CancelledTag m={m} />
           ) : place === 'page' ? null : place === 'park' ? (

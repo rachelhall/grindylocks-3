@@ -52,6 +52,8 @@ export function MeetupMenu({
   onDelete,
   onReport,
   onHide,
+  stops = [],
+  onHideStop,
 }: {
   visible: boolean;
   onClose: () => void;
@@ -71,6 +73,9 @@ export function MeetupMenu({
   onDelete: () => void;
   onReport: () => void;
   onHide: (hide: boolean) => void;
+  /** Stops at parks you moderate (PR 9b): hide the date there only, or show it again. */
+  stops?: { id: string; display_name: string; hidden: boolean }[];
+  onHideStop?: (park: string, hide: boolean) => void;
 }) {
   const { t } = useTranslation();
   const c = useColors();
@@ -96,6 +101,11 @@ export function MeetupMenu({
             : { icon: 'eyeOff' as const, label: t('meetupMenu.hide'), detail: t('meetupMenu.hideDetail'), onPress: () => onHide(true) },
         ]
       : []),
+    ...stops.map((s) =>
+      s.hidden
+        ? { icon: 'eye' as const, label: t('hops.showAt', { park: s.display_name }), detail: t('hops.showAtDetail'), onPress: () => onHideStop?.(s.id, false) }
+        : { icon: 'eyeOff' as const, label: t('hops.hideAt', { park: s.display_name }), detail: t('hops.hideAtDetail'), onPress: () => onHideStop?.(s.id, true) },
+    ),
   ];
 
   const row = (item: MenuItem) => (
