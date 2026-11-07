@@ -21,7 +21,10 @@ export default function SignInPage() {
         <Suspense fallback={<CardFrame />}>
           <SignInForm />
         </Suspense>
-        <p className="type-body-sm text-gl-paper/75">Not an admin? Everything else happens in the app.</p>
+        <p className="type-body-sm text-gl-paper/75">
+          No account yet? Join from an invite in the app first. Everything apart from running a page happens in the
+          app.
+        </p>
       </main>
     </div>
   );

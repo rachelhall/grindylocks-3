@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { getAdmin } from "@/lib/admin";
+import { getViewer } from "@/lib/admin";
 
 import { Sidebar } from "./sidebar";
 
@@ -16,7 +16,7 @@ export default function AdminLayout({ children }: LayoutProps<"/">) {
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Suspense fallback={<PageFallback />}>
-          <RequireAdmin>{children}</RequireAdmin>
+          <RequireViewer>{children}</RequireViewer>
         </Suspense>
       </div>
     </div>
@@ -24,14 +24,16 @@ export default function AdminLayout({ children }: LayoutProps<"/">) {
 }
 
 /**
- * Only role holders see admin pages. The proxy already sent signed-out
- * visitors to sign-in, so anyone left without a role is a member: send them
- * back with a note. This guards rendering only; every read and write still
- * goes through the database's access rules with the admin's own session.
+ * Role holders and page teams get in (Nov 6). The proxy already sent
+ * signed-out visitors to sign-in, so anyone left is a member with neither:
+ * sign them out and explain. Admin pages check the role again themselves,
+ * and page sections check the person's place on that page's team. This
+ * guards rendering only; every read and write still goes through the
+ * database's access rules with the person's own session.
  */
-async function RequireAdmin({ children }: { children: React.ReactNode }) {
-  const admin = await getAdmin();
-  if (!admin) redirect("/sign-in?reason=not-admin");
+async function RequireViewer({ children }: { children: React.ReactNode }) {
+  const viewer = await getViewer();
+  if (!viewer) redirect("/sign-out?reason=no-access");
   return children;
 }
 

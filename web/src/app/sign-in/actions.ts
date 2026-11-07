@@ -3,17 +3,17 @@
 import { type AuthError, isAuthApiError } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
 
-import { fetchAdmin } from "@/lib/admin";
+import { fetchViewer } from "@/lib/admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type SignInState = {
-  step: "email" | "code";
+  step: "email" | "code" | "no-access";
   email: string;
   error?: string;
   notice?: string;
+  /** The account that got in with nothing to run (no-access step), for the card. */
+  username?: string | null;
 };
-
-const NOT_ADMIN = "This account isn't an admin here. Everything else happens in the app.";
 
 function isEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -55,8 +55,9 @@ async function sendCode(form: FormData): Promise<SignInState> {
 }
 
 /**
- * Step 2: check the code, then let only role holders in. Anyone else is
- * signed straight back out, so a member's session never lingers here.
+ * Step 2: check the code, then let in role holders and anyone on a page's
+ * team (Nov 6). Anyone else is signed straight back out, so a member's
+ * session never lingers here, and sees "Nothing to run here".
  */
 async function verifyCode(form: FormData): Promise<SignInState> {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
@@ -70,11 +71,18 @@ async function verifyCode(form: FormData): Promise<SignInState> {
     return { step: "code", email, error: message(error, "That code is wrong or has expired. Check the email, or send a new code.") };
   }
 
-  const admin = await fetchAdmin(supabase);
-  if (!admin) {
+  const viewer = await fetchViewer(supabase);
+  if (!viewer) {
+    const { data: auth } = await supabase.auth.getClaims();
+    const userId = auth?.claims?.sub;
+    const { data: profile } = userId
+      ? await supabase.from("profiles").select("username").eq("id", userId).maybeSingle()
+      : { data: null };
     await supabase.auth.signOut({ scope: "local" });
-    return { step: "email", email, error: NOT_ADMIN };
+    return { step: "no-access", email, username: profile?.username ?? null };
   }
+
+  // The queue sends people who only run pages on to their page.
 
   redirect("/queue");
 }

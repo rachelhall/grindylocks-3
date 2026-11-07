@@ -7,13 +7,13 @@
  * (shown) and light use. If traffic grows, swap TILE_URL for a hosted tile
  * or static-map service; nothing else changes.
  */
-const TILE_URL = (z: number, x: number, y: number) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
-const TILE = 256;
+export const TILE_URL = (z: number, x: number, y: number) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
+export const TILE = 256;
 
 type Point = { latitude: number; longitude: number; label?: string };
 
 /** World pixel position at a zoom level (Web Mercator). */
-function project(lat: number, lng: number, zoom: number) {
+export function project(lat: number, lng: number, zoom: number) {
   const scale = TILE * 2 ** zoom;
   const sin = Math.sin((lat * Math.PI) / 180);
   return {

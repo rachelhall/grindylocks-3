@@ -19,9 +19,9 @@ import { updateSession } from "@/lib/supabase/proxy";
  *   the sitemap and robots.txt) and send anything else to the admin's own
  *   domain. No session is touched there.
  * - Everywhere else (the admin): keep the Supabase session fresh and send
- *   signed-out visitors to sign-in. Whether a signed-in person is an admin is
- *   checked when the page renders (src/lib/admin.ts); Server Functions check
- *   again themselves.
+ *   signed-out visitors to sign-in. Whether a signed-in person may be here
+ *   (an admin role or a page team) is checked when the page renders
+ *   (src/lib/admin.ts); Server Functions check again themselves.
  */
 export async function proxy(request: NextRequest) {
   const host = request.headers.get("host");
