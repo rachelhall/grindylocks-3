@@ -178,6 +178,7 @@ type PageRow = Database['public']['Tables']['pages']['Row'] & {
   metro_areas: { timezone: string | null } | null;
   page_hours: HoursRow[];
   page_brands_carried: {
+    position: number;
     brand: { id: string; handle: string; display_name: string; state: PageState; logo_path: string | null } | null;
   }[];
 };
@@ -189,7 +190,7 @@ const PAGE_COLUMNS = `id, handle, display_name, roles, state, city, country, web
   location_type, address, latitude, longitude, show_pin, timezone, metro_area_id, metro_areas (timezone),
   page_hours (id, season_start_month, season_start_day, season_end_month, season_end_day, days,
               start_anchor, start_time, end_anchor, end_time, note),
-  page_brands_carried!page_brands_carried_shop_id_fkey (
+  page_brands_carried!page_brands_carried_shop_id_fkey (position,
     brand:pages!page_brands_carried_brand_id_fkey (id, handle, display_name, state, logo_path))`;
 
 function toPage(row: PageRow): Page {
@@ -230,12 +231,13 @@ function toPage(row: PageRow): Page {
     timeZone: row.metro_areas?.timezone ?? row.timezone ?? null,
     metroAreaId: row.metro_area_id ?? null,
     hours: row.page_hours ?? [],
-    // Name-only brands still link (gear depends on them); archives don't sell anything new.
-    brandsCarried: (row.page_brands_carried ?? [])
+    // In the team's own order (set on the web, #69). Name-only brands still link (gear depends on
+    // them); archives don't sell anything new.
+    brandsCarried: [...(row.page_brands_carried ?? [])]
+      .sort((a, b) => a.position - b.position)
       .map((b) => b.brand)
       .filter((b): b is NonNullable<typeof b> => Boolean(b) && b!.state !== 'out_of_business')
-      .map((b) => ({ id: b.id, handle: b.handle, displayName: b.display_name, state: b.state, logoPath: b.logo_path }))
-      .sort((a, b) => a.displayName.localeCompare(b.displayName)),
+      .map((b) => ({ id: b.id, handle: b.handle, displayName: b.display_name, state: b.state, logoPath: b.logo_path })),
   };
 }
 
