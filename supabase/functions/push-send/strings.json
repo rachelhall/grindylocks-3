@@ -26,6 +26,7 @@
     "reason_other": "Other",
     "reason_page_closed": "{{name}} has closed",
     "reason_page_suspended": "It's no longer happening",
+    "reason_page_inactive": "{{name}} is no longer active",
     "page_teamInvite": "{{name}} invited you to join its team as {{role}}",
     "page_ownership": "{{a}} wants to make you the owner of {{name}}",
     "page_claimApproved": "Your claim for {{name}} was approved. Add a logo to make the page official.",
@@ -50,7 +51,13 @@
     "role_staff": "staff",
     "role_manager": "manager",
     "roleA_staff": "staff",
-    "roleA_manager": "a manager"
+    "roleA_manager": "a manager",
+    "sponsorship_invite": "{{name}} invited you to ride for it as {{level}}",
+    "sponsorship_levelUp": "{{name}} moved you to {{level}}. Your badge is updated.",
+    "level_flow": "Flow",
+    "level_am": "Am",
+    "level_pro": "Pro",
+    "level_ambassador": "Ambassador"
   },
   "es": {
     "commentOne": "{{a}} comentó tu publicación",
@@ -79,6 +86,7 @@
     "reason_other": "Otro motivo",
     "reason_page_closed": "{{name}} cerró",
     "reason_page_suspended": "Ya no se hace",
+    "reason_page_inactive": "{{name}} ya no está activo",
     "page_teamInvite": "{{name}} te invitó a su equipo como {{role}}",
     "page_ownership": "{{a}} quiere hacerte propietario de {{name}}",
     "page_claimApproved": "Tu solicitud para {{name}} fue aprobada. Añade un logo para que la página sea oficial.",
@@ -103,7 +111,13 @@
     "role_staff": "personal",
     "role_manager": "gerente",
     "roleA_staff": "personal",
-    "roleA_manager": "gerente"
+    "roleA_manager": "gerente",
+    "sponsorship_invite": "{{name}} te invitó a patinar para su equipo como {{level}}",
+    "sponsorship_levelUp": "{{name}} te subió a {{level}}. Tu insignia está actualizada.",
+    "level_flow": "Flow",
+    "level_am": "Am",
+    "level_pro": "Pro",
+    "level_ambassador": "Embajador"
   },
   "da": {
     "commentOne": "{{a}} kommenterede dit opslag",
@@ -132,6 +146,7 @@
     "reason_other": "Andet",
     "reason_page_closed": "{{name}} er lukket",
     "reason_page_suspended": "Det bliver ikke til noget",
+    "reason_page_inactive": "{{name}} er ikke længere aktiv",
     "page_teamInvite": "{{name}} har inviteret dig med på sit team som {{role}}",
     "page_ownership": "{{a}} vil gøre dig til ejer af {{name}}",
     "page_claimApproved": "Din anmodning om {{name}} er godkendt. Tilføj et logo, så siden bliver officiel.",
@@ -156,7 +171,13 @@
     "role_staff": "medarbejder",
     "role_manager": "manager",
     "roleA_staff": "medarbejder",
-    "roleA_manager": "manager"
+    "roleA_manager": "manager",
+    "sponsorship_invite": "{{name}} har inviteret dig til at køre for dem som {{level}}",
+    "sponsorship_levelUp": "{{name}} har rykket dig op til {{level}}. Dit badge er opdateret.",
+    "level_flow": "Flow",
+    "level_am": "Am",
+    "level_pro": "Pro",
+    "level_ambassador": "Ambassadør"
   },
   "de": {
     "commentOne": "{{a}} hat deinen Post kommentiert",
@@ -185,6 +206,7 @@
     "reason_other": "Anderer Grund",
     "reason_page_closed": "{{name}} hat geschlossen",
     "reason_page_suspended": "Es findet nicht mehr statt",
+    "reason_page_inactive": "{{name}} ist nicht mehr aktiv",
     "page_teamInvite": "{{name}} hat dich ins Team eingeladen, als {{role}}",
     "page_ownership": "{{a}} möchte dich zum Inhaber von {{name}} machen",
     "page_claimApproved": "Deine Anfrage für {{name}} wurde angenommen. Füg ein Logo hinzu, damit die Seite offiziell wird.",
@@ -209,6 +231,12 @@
     "role_staff": "Mitarbeiter",
     "role_manager": "Manager",
     "roleA_staff": "Mitarbeiter",
-    "roleA_manager": "Manager"
+    "roleA_manager": "Manager",
+    "sponsorship_invite": "{{name}} hat dich eingeladen, als {{level}} für sie zu fahren",
+    "sponsorship_levelUp": "{{name}} hat dich auf {{level}} hochgestuft. Dein Badge ist aktualisiert.",
+    "level_flow": "Flow",
+    "level_am": "Am",
+    "level_pro": "Pro",
+    "level_ambassador": "Botschafter"
   }
 }

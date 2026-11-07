@@ -39,6 +39,9 @@ type Claimed = {
    * "suspension_lifted", "renamed:<old name>", "merged:<old name>", "closed",
    * "reopened") or what went live.
    * A page_comment: "post" (on the page's post) or "reply" (to its comment).
+   * A meetup cancelled because an organizer is no longer active: "page_inactive".
+   * Sponsorships: the level ("pro"), or "up:pro" for a level change, then a
+   * tab and the page's own name for that level when it has one ("Shop team").
    */
   detail: string | null;
   /** Page notifications: the page's handle and name. */
@@ -136,8 +139,9 @@ function compose(row: Claimed, language: string): { title?: string; body: string
     case 'meetup_cancelled': {
       if (!meetup) return null;
       const [reason, scope] = (row.detail ?? 'other').split(':');
-      // The page tools: "8SET has closed", or "It's no longer happening" for a suspension.
-      if (reason === 'page_closed' || reason === 'page_suspended') {
+      // The page tools: "8SET has closed", "Rolling School is no longer active"
+      // (an organizer), or "It's no longer happening" for a suspension.
+      if (reason === 'page_closed' || reason === 'page_inactive' || reason === 'page_suspended') {
         return scope === 'series'
           ? { body: say('meetupEndedPage', { meetup, reason: reasonOf(reason) }) }
           : { body: say('meetupCancelledPage', { meetup, date: meetupTime(row, lang, 'date'), reason: reasonOf(reason) }) };
@@ -201,6 +205,18 @@ function compose(row: Claimed, language: string): { title?: string; body: string
       };
     case 'suggestion_live':
       return page ? { title: say('page_suggestionLive', { name: page }), body: row.detail ?? '' } : null;
+    // Sponsorships (part B): an invite, and moving up. The level reads in
+    // capitals, as on badges: the page's own name for it, or the usual one.
+    case 'sponsorship_invite':
+    case 'sponsorship_level': {
+      if (!page) return null;
+      const [message = '', ownName = ''] = (row.detail ?? '').split('\t');
+      const levelKey = `level_${message.split(':').pop() ?? ''}` as keyof Sentences;
+      const level = (ownName || (levelKey in s ? s[levelKey] : '')).toLocaleUpperCase(LOCALES[lang] ?? 'en-US');
+      if (!level) return null;
+      if (row.kind === 'sponsorship_invite') return { body: say('sponsorship_invite', { name: page, level }) };
+      return message.startsWith('up:') ? { body: say('sponsorship_levelUp', { name: page, level }) } : null;
+    }
     default:
       return null;
   }
@@ -220,6 +236,8 @@ function destination(row: Claimed): Record<string, string> {
   // Team invites wait in the bell's Page invites box; the rest open the page
   // (an approved claim opens it to add the logo).
   if (row.kind === 'page_invite') return { open: 'notifications' };
+  // Sponsorship invites wait in Page invites too; a new level shows there first.
+  if (row.kind.startsWith('sponsorship')) return { open: 'notifications' };
   if (row.page_handle) return { open: 'page', handle: row.page_handle, ...(row.kind === 'page_claim_approved' ? { logo: '1' } : {}) };
   if (row.actor_username) return { open: 'profile', username: row.actor_username };
   return { open: 'notifications' };

@@ -29,7 +29,11 @@ const pageKeys = [
 /** Role words, from `pageInvite.role` (role_<key>) and `pageInvite.roleA` (roleA_<key>). */
 const roles = ['staff', 'manager'];
 /** Cancel reasons, from `meetup.reason`, as reason_<key>. */
-const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other', 'page_closed', 'page_suspended'];
+const reasons = ['rained_out', 'park_closed', 'something_came_up', 'other', 'page_closed', 'page_suspended', 'page_inactive'];
+/** Sponsorships (part B): the pushed rows, from `notifications.sponsorship`, as sponsorship_<key>. */
+const sponsorshipKeys = ['invite', 'levelUp'];
+/** The levels' usual names, from `sponsorship.level`, as level_<key>. */
+const levels = ['flow', 'am', 'pro', 'ambassador'];
 
 export function pushStrings() {
   const out = {};
@@ -41,6 +45,8 @@ export function pushStrings() {
       ...Object.fromEntries(pageKeys.map((k) => [`page_${k}`, file.notifications.page[k]])),
       ...Object.fromEntries(roles.map((r) => [`role_${r}`, file.pageInvite.role[r]])),
       ...Object.fromEntries(roles.map((r) => [`roleA_${r}`, file.pageInvite.roleA[r]])),
+      ...Object.fromEntries(sponsorshipKeys.map((k) => [`sponsorship_${k}`, file.notifications.sponsorship[k]])),
+      ...Object.fromEntries(levels.map((l) => [`level_${l}`, file.sponsorship.level[l]])),
     };
   }
   return JSON.stringify(out, null, 2) + '\n';

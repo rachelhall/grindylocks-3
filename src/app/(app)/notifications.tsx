@@ -234,9 +234,13 @@ export default function Notifications() {
         const [reason, scope] = (n.detail ?? 'other').split(':');
         // The page tools (PR 9): "8SET has closed", or "It's no longer happening" for a suspension.
         if (reason === 'page_closed' || reason === 'page_suspended') {
+          // An organizer that closed for good is No longer active (the only page state that reads so).
+          const closedPage = n.people[0]?.page;
           const why =
             reason === 'page_closed'
-              ? t('meetup.reason.page_closed', { name: n.people[0]?.page?.displayName ?? '' })
+              ? t(closedPage?.state === 'inactive' ? 'meetup.reason.page_inactive' : 'meetup.reason.page_closed', {
+                  name: closedPage?.displayName ?? '',
+                })
               : t('meetup.reason.page_suspended');
           return scope === 'series'
             ? t('notifications.meetupEndedPage', { meetup: meetupName(n), reason: why })

@@ -466,7 +466,16 @@
       "splitNote": "Den var før en del af {{old}}, som du følger."
     },
     "meetupCancelledPage": "{{meetup}} {{date}} er aflyst. {{reason}}.",
-    "meetupEndedPage": "{{meetup}} er aflyst. {{reason}}."
+    "meetupEndedPage": "{{meetup}} er aflyst. {{reason}}.",
+    "sponsorship": {
+      "invite": "{{name}} har inviteret dig til at køre for dem som {{level}}",
+      "accepted": "Du kører nu for {{name}} som {{level}}",
+      "levelUp": "{{name}} har rykket dig op til {{level}}. Dit badge er opdateret.",
+      "levelDown": "{{name}} har ændret dit niveau til {{level}}",
+      "ended": "Dit sponsorat med {{name}} er slut. Badget er fjernet fra din profil.",
+      "teamAccepted": "{{a}} har sagt ja. De er på holdet som {{level}}.",
+      "teamEnded": "{{a}} har stoppet sit sponsorat med {{name}}"
+    }
   },
   "feed": {
     "newPost": "Nyt opslag",
@@ -1274,7 +1283,8 @@
       "something_came_up": "Der kom noget i vejen",
       "other": "Andet",
       "page_closed": "{{name}} er lukket",
-      "page_suspended": "Det bliver ikke til noget"
+      "page_suspended": "Det bliver ikke til noget",
+      "page_inactive": "{{name}} er ikke længere aktiv"
     },
     "hiddenTitle": "SKJULT AF PARKENS ADMINS",
     "hiddenBody": "Kun værterne og parkens admins kan se denne dato.",
@@ -2272,5 +2282,13 @@
     "hideAtDetail": "Kun i denne park: det vises stadig i de andre parker",
     "showAt": "Vis i {{park}} igen",
     "showAtDetail": "Det vises igen under Kommende i denne park"
+  },
+  "sponsorship": {
+    "level": {
+      "flow": "Flow",
+      "am": "Am",
+      "pro": "Pro",
+      "ambassador": "Ambassadør"
+    }
   }
 }
