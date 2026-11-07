@@ -1985,6 +1985,38 @@ export type Database = {
           },
         ]
       }
+      page_sponsorship_levels: {
+        Row: {
+          enabled: boolean
+          level: Database["public"]["Enums"]["sponsorship_level"]
+          name: string | null
+          page_id: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          level: Database["public"]["Enums"]["sponsorship_level"]
+          name?: string | null
+          page_id: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          level?: Database["public"]["Enums"]["sponsorship_level"]
+          name?: string | null
+          page_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_sponsorship_levels_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_suggestions: {
         Row: {
           created_at: string
@@ -2826,6 +2858,42 @@ export type Database = {
           },
         ]
       }
+      product_riders: {
+        Row: {
+          confirmed_at: string
+          product_id: string
+          rider_id: string
+          sponsorship_id: string | null
+        }
+        Insert: {
+          confirmed_at?: string
+          product_id: string
+          rider_id: string
+          sponsorship_id?: string | null
+        }
+        Update: {
+          confirmed_at?: string
+          product_id?: string
+          rider_id?: string
+          sponsorship_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "product_riders_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_riders_sponsorship_id_fkey"
+            columns: ["sponsorship_id"]
+            isOneToOne: false
+            referencedRelation: "sponsorships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           age_confirmed_at: string | null
@@ -3219,6 +3287,86 @@ export type Database = {
           {
             foreignKeyName: "slide_people_tags_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsorships: {
+        Row: {
+          accepted_at: string | null
+          answered_at: string | null
+          closed_reason: string | null
+          created_at: string
+          ended_at: string | null
+          ended_by: string | null
+          expires_at: string
+          id: string
+          level: Database["public"]["Enums"]["sponsorship_level"]
+          level_changed_at: string | null
+          page_id: string
+          rider_id: string
+          sent_by: string | null
+          status: Database["public"]["Enums"]["sponsorship_status"]
+        }
+        Insert: {
+          accepted_at?: string | null
+          answered_at?: string | null
+          closed_reason?: string | null
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          expires_at?: string
+          id?: string
+          level: Database["public"]["Enums"]["sponsorship_level"]
+          level_changed_at?: string | null
+          page_id: string
+          rider_id: string
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["sponsorship_status"]
+        }
+        Update: {
+          accepted_at?: string | null
+          answered_at?: string | null
+          closed_reason?: string | null
+          created_at?: string
+          ended_at?: string | null
+          ended_by?: string | null
+          expires_at?: string
+          id?: string
+          level?: Database["public"]["Enums"]["sponsorship_level"]
+          level_changed_at?: string | null
+          page_id?: string
+          rider_id?: string
+          sent_by?: string | null
+          status?: Database["public"]["Enums"]["sponsorship_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsorships_ended_by_fkey"
+            columns: ["ended_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorships_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorships_rider_id_fkey"
+            columns: ["rider_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsorships_sent_by_fkey"
+            columns: ["sent_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -4296,6 +4444,7 @@ export type Database = {
           park_fixes: boolean
           someone_new: boolean
           tags: boolean
+          sponsorships: boolean
           teams_claims: boolean
         }[]
       }
@@ -4852,6 +5001,101 @@ export type Database = {
       }
       username_available: { Args: { name: string }; Returns: boolean }
       welcome_metro_areas: { Args: never; Returns: { name: string }[] }
+      send_sponsorship: {
+        Args: { level: Database["public"]["Enums"]["sponsorship_level"]; page: string; rider: string }
+        Returns: string
+      }
+      cancel_sponsorship_invite: { Args: { invite: string }; Returns: undefined }
+      answer_sponsorship: {
+        Args: { accept: boolean; invite: string; pro_models?: string[] }
+        Returns: string
+      }
+      set_sponsorship_level: {
+        Args: { level: Database["public"]["Enums"]["sponsorship_level"]; sponsorship: string }
+        Returns: undefined
+      }
+      end_sponsorship: { Args: { sponsorship: string }; Returns: undefined }
+      set_sponsorship_levels: { Args: { levels: Json; page: string }; Returns: undefined }
+      unlink_pro_model: { Args: { product: string }; Returns: undefined }
+      my_sponsorship_invites: {
+        Args: never
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          level: string
+          level_name: string | null
+          page_handle: string
+          page_id: string
+          page_logo_path: string | null
+          page_name: string
+          page_roles: string[]
+          pro_models: Json
+          sent_by_username: string | null
+        }[]
+      }
+      rider_sponsors: {
+        Args: { rider: string }
+        Returns: {
+          accepted_at: string
+          level: string
+          level_name: string | null
+          page_handle: string
+          page_id: string
+          page_logo_path: string | null
+          page_name: string
+          page_roles: string[]
+          page_state: string
+          sponsorship_id: string | null
+        }[]
+      }
+      page_team_riders: {
+        Args: { page: string }
+        Returns: {
+          accepted_at: string
+          avatar_path: string | null
+          disciplines: string[]
+          level: string
+          level_name: string | null
+          metro_name: string | null
+          user_id: string
+          username: string
+        }[]
+      }
+      page_sponsorships: {
+        Args: { page: string }
+        Returns: {
+          accepted_at: string | null
+          avatar_path: string | null
+          disciplines: string[]
+          ended_at: string | null
+          ended_by_rider: boolean | null
+          expires_at: string | null
+          level: string
+          level_name: string | null
+          metro_name: string | null
+          section: string
+          sent_at: string
+          sponsorship_id: string
+          user_id: string
+          username: string
+        }[]
+      }
+      page_sponsorship_levels: {
+        Args: { page: string }
+        Returns: { enabled: boolean; level: string; name: string | null; riders: number }[]
+      }
+      pro_model_riders: {
+        Args: { page?: string; rider?: string }
+        Returns: {
+          confirmed_at: string
+          page_id: string
+          product_id: string
+          product_name: string
+          user_id: string
+          username: string
+        }[]
+      }
     }
     Enums: {
       announcement_kind: "joined" | "visiting"
@@ -4899,6 +5143,10 @@ export type Database = {
         | "page_mention"
         | "page_comment"
         | "page_split"
+        | "sponsorship_invite"
+        | "sponsorship_accepted"
+        | "sponsorship_level"
+        | "sponsorship_ended"
       obstacle_status: "pending" | "active" | "archived"
       obstacle_type:
         | "rail"
@@ -4999,6 +5247,8 @@ export type Database = {
       review_status: "open" | "accepted" | "rejected"
       role_name: "owner" | "city_admin" | "park_admin" | "park_contributor"
       shop_location_type: "storefront" | "by_appointment" | "online_only"
+      sponsorship_level: "flow" | "am" | "pro" | "ambassador"
+      sponsorship_status: "pending" | "active" | "declined" | "cancelled" | "expired" | "ended"
       text_source: "author" | "machine"
       time_anchor: "clock" | "sunrise" | "sunset"
       upload_status: "uploading" | "processing" | "ready" | "failed"
@@ -5175,6 +5425,10 @@ export const Constants = {
         "page_mention",
         "page_comment",
         "page_split",
+        "sponsorship_invite",
+        "sponsorship_accepted",
+        "sponsorship_level",
+        "sponsorship_ended",
       ],
       obstacle_status: ["pending", "active", "archived"],
       obstacle_type: [
@@ -5284,6 +5538,8 @@ export const Constants = {
       review_status: ["open", "accepted", "rejected"],
       role_name: ["owner", "city_admin", "park_admin", "park_contributor"],
       shop_location_type: ["storefront", "by_appointment", "online_only"],
+      sponsorship_level: ["flow", "am", "pro", "ambassador"],
+      sponsorship_status: ["pending", "active", "declined", "cancelled", "expired", "ended"],
       text_source: ["author", "machine"],
       time_anchor: ["clock", "sunrise", "sunset"],
       upload_status: ["uploading", "processing", "ready", "failed"],

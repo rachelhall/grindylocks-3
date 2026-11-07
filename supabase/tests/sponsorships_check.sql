@@ -1,4 +1,4 @@
--- Rolled-back check for 20261107160100_sponsorships.sql (after
+-- Rolled-back check for 20261107155616_sponsorships.sql (after
 -- 20261107152646_sponsorships_enums is applied). Paste the migration where
 -- marked, then run: everything happens in one transaction that ends by
 -- raising CHECK <ok> of <total>: <failures>, so nothing is kept.
