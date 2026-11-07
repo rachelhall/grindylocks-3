@@ -37,11 +37,14 @@ import { brand, fontFamily, size, space, stroke, Text, useColors } from '@/theme
 /**
  * Whether a page can meet at its own place: a shop's storefront (or a
  * by-appointment shop that shows its pin), or an organizer's base when it
- * has one.
+ * has one. A base meetup runs on the organizer's metro area clock, so an
+ * organizer without a metro area can't meet there (the database refuses it).
  */
-export function pageHasPlace(page: Pick<Page, 'roles' | 'locationType' | 'showPin' | 'latitude'>): boolean {
+export function pageHasPlace(
+  page: Pick<Page, 'roles' | 'locationType' | 'showPin' | 'latitude' | 'metroAreaId'>,
+): boolean {
   if (page.latitude === null) return false;
-  if (pageKind(page) === 'organizer') return true;
+  if (pageKind(page) === 'organizer') return Boolean(page.metroAreaId);
   if (!page.roles.includes('shop') || !page.locationType) return false;
   return page.locationType === 'storefront' || (page.locationType === 'by_appointment' && page.showPin);
 }
