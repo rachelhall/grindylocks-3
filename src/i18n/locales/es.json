@@ -466,7 +466,16 @@
       "splitNote": "Antes era parte de {{old}}, que sigues."
     },
     "meetupCancelledPage": "{{meetup}} del {{date}} se canceló. {{reason}}.",
-    "meetupEndedPage": "{{meetup}} se canceló. {{reason}}."
+    "meetupEndedPage": "{{meetup}} se canceló. {{reason}}.",
+    "sponsorship": {
+      "invite": "{{name}} te invitó a patinar para su equipo como {{level}}",
+      "accepted": "Ahora patinas para {{name}} como {{level}}",
+      "levelUp": "{{name}} te subió a {{level}}. Tu insignia está actualizada.",
+      "levelDown": "{{name}} cambió tu nivel a {{level}}",
+      "ended": "Tu patrocinio con {{name}} terminó. La insignia ya no está en tu perfil.",
+      "teamAccepted": "{{a}} aceptó. Ya está en el equipo como {{level}}.",
+      "teamEnded": "{{a}} terminó su patrocinio con {{name}}"
+    }
   },
   "feed": {
     "newPost": "Nueva publicación",
@@ -1274,7 +1283,8 @@
       "something_came_up": "Surgió algo",
       "other": "Otro motivo",
       "page_closed": "{{name}} cerró",
-      "page_suspended": "Ya no se hace"
+      "page_suspended": "Ya no se hace",
+      "page_inactive": "{{name}} ya no está activo"
     },
     "hiddenTitle": "OCULTO POR LOS ADMINS DEL PARK",
     "hiddenBody": "Solo sus anfitriones y los admins de este park pueden ver esta fecha.",
@@ -2272,5 +2282,13 @@
     "hideAtDetail": "Solo en este park: sigue apareciendo en los demás",
     "showAt": "Volver a mostrar en {{park}}",
     "showAtDetail": "Vuelve a aparecer en Próximos de este park"
+  },
+  "sponsorship": {
+    "level": {
+      "flow": "Flow",
+      "am": "Am",
+      "pro": "Pro",
+      "ambassador": "Embajador"
+    }
   }
 }

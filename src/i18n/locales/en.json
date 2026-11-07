@@ -466,7 +466,16 @@
       "splitNote": "It used to be part of {{old}}, which you follow."
     },
     "meetupCancelledPage": "{{meetup}} on {{date}} is cancelled. {{reason}}.",
-    "meetupEndedPage": "{{meetup}} is cancelled. {{reason}}."
+    "meetupEndedPage": "{{meetup}} is cancelled. {{reason}}.",
+    "sponsorship": {
+      "invite": "{{name}} invited you to ride for it as {{level}}",
+      "accepted": "You now ride for {{name}} as {{level}}",
+      "levelUp": "{{name}} moved you to {{level}}. Your badge is updated.",
+      "levelDown": "{{name}} changed your level to {{level}}",
+      "ended": "Your sponsorship with {{name}} ended. The badge is off your profile.",
+      "teamAccepted": "{{a}} accepted. They're on Team riders as {{level}}.",
+      "teamEnded": "{{a}} ended their sponsorship with {{name}}"
+    }
   },
   "feed": {
     "newPost": "New post",
@@ -1274,7 +1283,8 @@
       "something_came_up": "Something came up",
       "other": "Other",
       "page_closed": "{{name}} has closed",
-      "page_suspended": "It's no longer happening"
+      "page_suspended": "It's no longer happening",
+      "page_inactive": "{{name}} is no longer active"
     },
     "hiddenTitle": "HIDDEN BY PARK ADMINS",
     "hiddenBody": "Only its hosts and this park's admins can see this date.",
@@ -2272,5 +2282,13 @@
     "hideAtDetail": "Only at this park: it still shows at the other parks",
     "showAt": "Show at {{park}} again",
     "showAtDetail": "It shows in this park's Upcoming again"
+  },
+  "sponsorship": {
+    "level": {
+      "flow": "Flow",
+      "am": "Am",
+      "pro": "Pro",
+      "ambassador": "Ambassador"
+    }
   }
 }

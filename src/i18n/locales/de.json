@@ -466,7 +466,16 @@
       "splitNote": "Sie gehörte früher zu {{old}}, der du folgst."
     },
     "meetupCancelledPage": "{{meetup}} am {{date}} ist abgesagt. {{reason}}.",
-    "meetupEndedPage": "{{meetup}} ist abgesagt. {{reason}}."
+    "meetupEndedPage": "{{meetup}} ist abgesagt. {{reason}}.",
+    "sponsorship": {
+      "invite": "{{name}} hat dich eingeladen, als {{level}} für sie zu fahren",
+      "accepted": "Du fährst jetzt für {{name}} als {{level}}",
+      "levelUp": "{{name}} hat dich auf {{level}} hochgestuft. Dein Badge ist aktualisiert.",
+      "levelDown": "{{name}} hat dein Level auf {{level}} geändert",
+      "ended": "Dein Sponsoring mit {{name}} ist beendet. Das Badge ist nicht mehr auf deinem Profil.",
+      "teamAccepted": "{{a}} hat angenommen und ist jetzt als {{level}} im Team.",
+      "teamEnded": "{{a}} hat das Sponsoring mit {{name}} beendet"
+    }
   },
   "feed": {
     "newPost": "Neuer Beitrag",
@@ -1274,7 +1283,8 @@
       "something_came_up": "Etwas ist dazwischengekommen",
       "other": "Anderer Grund",
       "page_closed": "{{name}} hat geschlossen",
-      "page_suspended": "Es findet nicht mehr statt"
+      "page_suspended": "Es findet nicht mehr statt",
+      "page_inactive": "{{name}} ist nicht mehr aktiv"
     },
     "hiddenTitle": "VON PARK-ADMINS AUSGEBLENDET",
     "hiddenBody": "Nur die Hosts und die Admins dieses Parks sehen diesen Termin.",
@@ -2272,5 +2282,13 @@
     "hideAtDetail": "Nur in diesem Park: bei den anderen Parks bleibt es sichtbar",
     "showAt": "In {{park}} wieder zeigen",
     "showAtDetail": "Es erscheint wieder unter Demnächst in diesem Park"
+  },
+  "sponsorship": {
+    "level": {
+      "flow": "Flow",
+      "am": "Am",
+      "pro": "Pro",
+      "ambassador": "Botschafter"
+    }
   }
 }
