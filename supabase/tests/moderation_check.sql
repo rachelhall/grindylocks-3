@@ -1,7 +1,7 @@
--- Rolled-back check for 20261102170000_moderation.sql.
+-- Rolled-back check for 20261102231905_moderation.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
--- Every row should have ok = true. Needs 20261102160000_moderation_enums
+-- Every row should have ok = true. Needs 20261102222618_moderation_enums
 -- applied first (a transaction can't use enum values it adds).
 -- Test people are made up (zz_mod_*) and vanish with the rollback.
 begin;

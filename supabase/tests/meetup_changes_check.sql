@@ -1,5 +1,5 @@
--- Rolled-back check for 20261103230100_meetup_changes.sql (apply
--- 20261103230000_meetup_changes_enums.sql first: new enum values can't be used
+-- Rolled-back check for 20261104003055_meetup_changes.sql (apply
+-- 20261103235540_meetup_changes_enums.sql first: new enum values can't be used
 -- in the transaction that adds them). Runs the migration and the checks in one
 -- transaction, then raises an exception carrying the results, so nothing is
 -- kept. Every row should have ok = true.

@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104170100_page_claims (the enums, 20261104170000_page_claims_enums,
+-- Rolled-back check for 20261104165047_page_claims (the enums, 20261104162127_page_claims_enums,
 -- are applied first). Runs the migration and the checks in one transaction, then
 -- raises CHECK <ok> of <total>: <failures>, so nothing is kept. Member checks run
 -- as throwaway members made in the transaction; Rachel's steps run with no API

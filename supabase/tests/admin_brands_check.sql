@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104190000_admin_brands_enums and 20261104190100_admin_brands.
+-- Rolled-back check for 20261104180728_admin_brands_enums and 20261104181700_admin_brands.
 -- Runs both migrations and the checks in one transaction, then raises
 -- CHECK <ok> of <total>: <failures>, so nothing is kept. Checks run as throwaway
 -- members, a throwaway owner and a throwaway city admin made in the transaction.

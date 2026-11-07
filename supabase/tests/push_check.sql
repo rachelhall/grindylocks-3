@@ -1,4 +1,4 @@
--- Rolled-back check for 20261102120000_push.sql.
+-- Rolled-back check for 20261102142209_push.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true. Members B, C and D are made up for the check.

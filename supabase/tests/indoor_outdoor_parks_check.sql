@@ -1,5 +1,5 @@
--- Rolled-back check for 20261103050100_indoor_outdoor_parks.sql (run after
--- 20261103050000_park_setting_enum is applied). Raises RESULTS [...] so
+-- Rolled-back check for 20261103061029_indoor_outdoor_parks.sql (run after
+-- 20261103053643_park_setting_enum is applied). Raises RESULTS [...] so
 -- nothing is kept. Every row should have ok = true. 4 of 4 on Nov 2.
 do $check$
 declare out jsonb := '[]'::jsonb; n int; s text;
