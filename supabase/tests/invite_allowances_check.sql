@@ -1,4 +1,4 @@
--- Rolled-back check for 20261103010000_invite_allowances.sql.
+-- Rolled-back check for 20261103003556_invite_allowances.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true. Test people are made up (zz_inv_*).

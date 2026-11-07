@@ -1,4 +1,4 @@
--- Rolled-back check for 20261105010100_page_tools (the enums, 20261105010000_page_tools_enums,
+-- Rolled-back check for 20261105024958_page_tools (the enums, 20261105022108_page_tools_enums,
 -- are applied first). Runs the migration and the checks in one transaction, then
 -- raises CHECK <ok> of <total>: <failures>, so nothing is kept. The checks run as
 -- throwaway members made in the transaction: a page's team, followers, a skater

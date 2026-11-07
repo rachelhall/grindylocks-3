@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104150000_catalog_enums and 20261104150100_catalog.
+-- Rolled-back check for 20261104152225_catalog_enums and 20261104152347_catalog.
 -- Runs both migrations, a few test products and the checks in one transaction,
 -- then raises CHECK <ok> of <total>: <failures>, so nothing is kept. Member
 -- checks run as a throwaway ordinary member made in the transaction.

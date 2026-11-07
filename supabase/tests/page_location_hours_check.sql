@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104220000_page_location_hours.sql.
+-- Rolled-back check for 20261104201357_page_location_hours.sql.
 -- Paste the migration where marked, then run: everything happens in one
 -- transaction that ends by raising RESULTS [...], so nothing is kept.
 -- Every row should have ok = true.

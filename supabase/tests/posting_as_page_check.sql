@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104230000_posting_as_page. Runs the migration and the checks in one
+-- Rolled-back check for 20261104222428_posting_as_page. Runs the migration and the checks in one
 -- transaction, then raises CHECK <ok> of <total>: <failures>, so nothing is kept. Member checks run
 -- as throwaway members made in the transaction.
 begin;

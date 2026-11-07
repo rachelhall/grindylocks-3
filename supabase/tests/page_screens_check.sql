@@ -1,5 +1,5 @@
--- Rolled-back check for 20261104010100_page_screens (run after
--- 20261104010000_page_screens_enums is applied, since the new report reasons
+-- Rolled-back check for 20261104072712_page_screens (run after
+-- 20261104072507_page_screens_enums is applied, since the new report reasons
 -- can't be used in the transaction that adds them). Runs the migration and the
 -- checks in one transaction, then raises an exception carrying the results
 -- (RESULTS [...]), so nothing is kept. Every row should have ok = true.

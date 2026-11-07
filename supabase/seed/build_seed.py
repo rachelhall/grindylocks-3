@@ -21,6 +21,7 @@ Options:
 For a load into the hosted project, write the output as a migration so it's in
 the migration history, e.g.
   supabase/migrations/<timestamp>_seed_<metro>.sql
+then rename it to the version it was applied under (see AGENTS.md, Migrations).
 """
 import argparse
 import csv

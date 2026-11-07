@@ -36,6 +36,13 @@ Run lint and typecheck before declaring any task done.
 - **Rachel reviews, tests and merges.** A PR is marked ready once its migrations are applied and it's been tried in the simulator. Merge with a merge commit, not squash, so the feature's commits stay separate. Delete the branch after merging.
 - Before pushing, fetch `main` and rebase the branch on it if `main` has moved.
 
+## Migrations
+
+- **A migration file is named by the version it was applied under.** The migration tool stamps its own time when it applies a migration, so a file written beforehand with a planned time ends up under a different version in production. After applying, look up the version (`list_migrations`, or `supabase migration list`) and rename the file to `<applied version>_<name>.sql` before the PR is marked ready. A file that doesn't match production breaks rebuilding the database from the repo (staging, branches, local).
+- **Never edit a migration that has been applied.** Fix things with a new migration. `supabase/migrations/` must replay to the same database as production, in order.
+- Rolled-back checks live in `supabase/tests/<name>_check.sql`; name the migration they cover by its applied version too.
+- Data loaded outside migrations: the first 50 parks (Oct 31, 2026, before the repo existed) are rebuilt from the seed CSVs with `supabase/seed/build_seed.py`, not from a migration.
+
 ## Design tokens
 
 - **`design/tokens.json` is a copy of the Grindylocks design system's `tokens.json`,** and the design system is the source of truth. Change a value there first, copy the file into `design/`, then run `npm run tokens`.

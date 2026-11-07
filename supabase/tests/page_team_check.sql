@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104210100_page_team (the enum, 20261104210000_page_team_enums,
+-- Rolled-back check for 20261104194451_page_team (the enum, 20261104185354_page_team_enums,
 -- is applied first). Runs the migration and the checks in one transaction, then
 -- raises CHECK <ok> of <total>: <failures>, so nothing is kept. Member checks run
 -- as throwaway members made in the transaction; Rachel's steps run with no API

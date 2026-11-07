@@ -1,4 +1,4 @@
--- Rolled-back check for 20261103060000_meetups.sql.
+-- Rolled-back check for 20261103200427_meetups.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true.

@@ -1,4 +1,4 @@
--- Rolled-back check for 20261103040000_slide_frames.sql.
+-- Rolled-back check for 20261103031847_slide_frames.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true.

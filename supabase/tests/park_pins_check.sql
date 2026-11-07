@@ -1,4 +1,4 @@
--- Rolled-back check for 20261102160000_park_pins.sql.
+-- Rolled-back check for 20261102221101_park_pins.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true.

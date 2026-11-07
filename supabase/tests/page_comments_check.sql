@@ -1,4 +1,4 @@
--- Rolled-back check for 20261105000100_page_comments (run after 20261105000000_page_comments_enums is
+-- Rolled-back check for 20261105014436_page_comments (run after 20261104232214_page_comments_enums is
 -- applied). Runs the migration and the checks in one transaction, then raises CHECK <ok> of <total>:
 -- <failures>, so nothing is kept. Member checks run as throwaway members made in the transaction.
 begin;

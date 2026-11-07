@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104120000_shops_map.sql.
+-- Rolled-back check for 20261104142601_shops_map.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true.

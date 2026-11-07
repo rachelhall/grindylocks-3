@@ -40,6 +40,9 @@ the web admin, or with a migration.
    ```
 
 4. Try it in a rolled-back transaction, then apply it with the migration tool.
+5. Rename the file to the version it was applied under (the tool stamps its own
+   time; check with `list_migrations`), so the repo matches production. See
+   "Migrations" in `AGENTS.md`.
 
 The first 50 parks (10 metro areas) were loaded on Oct 31, 2026 by an earlier,
 re-runnable version of this script, before the repo existed.

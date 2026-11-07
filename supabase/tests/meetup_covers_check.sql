@@ -1,4 +1,4 @@
--- Rolled-back check for 20261103070000_meetup_covers.sql.
+-- Rolled-back check for 20261103210734_meetup_covers.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results, so nothing is kept. Members are made up.
 begin;

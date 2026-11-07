@@ -1,4 +1,4 @@
--- Rolled-back check for 20261104140000_access_requests_dismiss.sql.
+-- Rolled-back check for 20261104144225_access_requests_dismiss.sql.
 -- Runs the migration and the checks in one transaction, then raises an
 -- exception carrying the results (RESULTS [...]), so nothing is kept.
 -- Every row should have ok = true.
