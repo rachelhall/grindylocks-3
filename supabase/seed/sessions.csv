@@ -24,7 +24,8 @@ islands-brygge-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not 
 prags-boulevard-cph,,,daily,,,"inline; quad; bmx; scooter; skateboard",Hours not listed
 clairemont-sd,,,mon-fri,13:00,sunset,"inline; quad; bmx; scooter; skateboard",2026 fall hours; paid 2-hour sessions
 clairemont-sd,,,sat-sun,11:00,sunset,"inline; quad; bmx; scooter; skateboard",2026 fall hours; paid 2-hour sessions
-venice-la,,,daily,08:00,19:00,"inline; quad; skateboard",No BMX or scooters
+venice-la,,,mon-fri,12:00,sunset,skateboard,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; skateboard only by city designation (2021), though bladers ride here (Rachel)"
+venice-la,,,sat-sun,09:00,sunset,skateboard,
 memo-sd,,,daily,10:00,22:00,"inline; skateboard; quad",No bikes or scooters; under 12 with a guardian
 mira-mesa-sd,,,daily,,,"inline; quad; skateboard; bmx; scooter",Hours not listed; inline assumed from all-wheels listing
 len-moore-cv,,,daily,07:00,sunset,"inline; quad; skateboard; scooter; bmx",City hours; Stray Rocket says 08:00
@@ -91,3 +92,62 @@ coin-mlg,,,daily,,,inline; quad; skateboard; bmx; scooter,Hours not listed; Blad
 cartama-mlg,,,daily,,,inline; quad; skateboard; bmx; scooter,Hours not listed; Blading Camp skates here
 pizarra-mlg,,,daily,,,inline; quad; skateboard; bmx; scooter,Hours not listed; Blading Camp skates here
 alhaurin-pump-mlg,,,daily,,,inline; quad; skateboard; bmx; scooter,"Hours not listed; built for bikes, open to other non-motorised wheels"
+stoner-la,,,mon-fri,12:00,sunset,skateboard,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; skateboard only by city designation (2021)"
+stoner-la,,,sat-sun,09:00,sunset,skateboard,
+westchester-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+westchester-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+charmette-bonpua-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+charmette-bonpua-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+harvard-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+harvard-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+gilbert-lindsay-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+gilbert-lindsay-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+trinity-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+trinity-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+monitor-ave-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+monitor-ave-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+watts-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+watts-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+lafayette-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+lafayette-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+lake-street-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+lake-street-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+echo-park-la,,,mon-fri,12:00,sunset,skateboard,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; skateboard only by city designation (2021)"
+echo-park-la,,,sat-sun,09:00,sunset,skateboard,
+lincoln-park-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+lincoln-park-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+el-sereno-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+el-sereno-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+hazard-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+hazard-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+hollenbeck-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+hollenbeck-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+garvanza-la,,,mon-fri,12:00,sunset,skateboard,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; skateboard only by city designation (2021)"
+garvanza-la,,,sat-sun,09:00,sunset,skateboard,
+peck-park-la,,,mon-fri,12:00,sunset,skateboard,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; skateboard only by city designation (2021)"
+peck-park-la,,,sat-sun,09:00,sunset,skateboard,
+channel-street-la,,,daily,,,inline; quad; skateboard; bmx; scooter,Hours not published; DIY run by the San Pedro Skatepark Association; city lists it as all-wheel
+ambassador-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+ambassador-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+harbor-city-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+harbor-city-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+normandale-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+normandale-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+chevy-chase-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+chevy-chase-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+pedlow-la,,,mon-fri,12:00,17:30,skateboard,"Staffed; winter hours from Nov 1, 2026 (city page; changes by season); skateboard only by city designation, though the park's page also allows rollerblades"
+pedlow-la,,,sat-sun,10:00,17:30,skateboard,Staffed; winter hours; open most holidays
+lanark-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+lanark-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+north-hollywood-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+north-hollywood-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+paul-rodriguez-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+paul-rodriguez-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+sheldon-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+sheldon-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+sunland-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+sunland-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+hansen-dam-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+hansen-dam-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
+cardenas-la,,,mon-fri,12:00,sunset,inline; quad; skateboard; bmx; scooter,"City skatepark hours (LAMC 63.44.N): also 9:00 to sunset on holidays; closed when wet; helmet, elbow and knee pads required; all-wheel by city designation (2021)"
+cardenas-la,,,sat-sun,09:00,sunset,inline; quad; skateboard; bmx; scooter,
